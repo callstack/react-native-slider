@@ -1,0 +1,30 @@
+{
+  "name": "@react-native-community/slider",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "yarn test:flow && yarn test:js",
+    "test:flow": "flow check",
+    "test:js": "echo 0",
+    "ci:test:flow": "yarn test:flow",
+    "ci:test:js": "yarn test:js"
+  },
+  "keywords": [
+    "react-native",
+    "react native",
+    "slider"
+  ],
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "babel-core": "^7.0.0-bridge.0",
+    "flow-bin": "^0.86.0",
+    "metro-react-native-babel-preset": "0.51.1",
+    "react": "16.6.3",
+    "react-native": "0.58.4"
+  }
+}
