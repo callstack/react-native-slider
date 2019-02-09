@@ -9,7 +9,7 @@
 
 #import <React/RCTComponent.h>
 
-@interface RCTSlider : UISlider
+@interface RNCSlider : UISlider
 
 @property (nonatomic, copy) RCTBubblingEventBlock onValueChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onSlidingComplete;

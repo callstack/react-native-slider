@@ -7,6 +7,6 @@
 
 #import <React/RCTViewManager.h>
 
-@interface RCTSliderManager : RCTViewManager
+@interface RNCSliderManager : RCTViewManager
 
 @end

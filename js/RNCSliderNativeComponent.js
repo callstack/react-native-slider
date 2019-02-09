@@ -47,6 +47,6 @@ type NativeProps = $ReadOnly<{|
   value?: ?number,
 |}>;
 
-type RCTSliderType = Class<NativeComponent<NativeProps>>;
+type RNCSliderType = Class<NativeComponent<NativeProps>>;
 
-module.exports = ((requireNativeComponent('RCTSlider'): any): RCTSliderType);
+module.exports = ((requireNativeComponent('RNCSlider'): any): RNCSliderType);

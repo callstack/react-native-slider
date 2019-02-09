@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#import "RCTSlider.h"
+#import "RNCSlider.h"
 
-@implementation RCTSlider
+@implementation RNCSlider
 {
   float _unclippedValue;
 }

@@ -5,20 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#import "RCTSliderManager.h"
+#import "RNCSliderManager.h"
 
-#import "RCTBridge.h"
-#import "RCTEventDispatcher.h"
-#import "RCTSlider.h"
-#import "UIView+React.h"
+#import <React/RCTBridge.h>
+#import <React/RCTEventDispatcher.h>
+#import "RNCSlider.h"
+#import <React/UIView+React.h>
 
-@implementation RCTSliderManager
+@implementation RNCSliderManager
 
 RCT_EXPORT_MODULE()
 
 - (UIView *)view
 {
-  RCTSlider *slider = [RCTSlider new];
+  RNCSlider *slider = [RNCSlider new];
   [slider addTarget:self action:@selector(sliderValueChanged:)
    forControlEvents:UIControlEventValueChanged];
   [slider addTarget:self action:@selector(sliderTouchEnd:)
@@ -28,7 +28,7 @@ RCT_EXPORT_MODULE()
   return slider;
 }
 
-static void RCTSendSliderEvent(RCTSlider *sender, BOOL continuous)
+static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous)
 {
   float value = sender.value;
 
@@ -62,14 +62,14 @@ static void RCTSendSliderEvent(RCTSlider *sender, BOOL continuous)
   sender.lastValue = value;
 }
 
-- (void)sliderValueChanged:(RCTSlider *)sender
+- (void)sliderValueChanged:(RNCSlider *)sender
 {
-  RCTSendSliderEvent(sender, YES);
+  RNCSendSliderEvent(sender, YES);
 }
 
-- (void)sliderTouchEnd:(RCTSlider *)sender
+- (void)sliderTouchEnd:(RNCSlider *)sender
 {
-  RCTSendSliderEvent(sender, NO);
+  RNCSendSliderEvent(sender, NO);
 }
 
 RCT_EXPORT_VIEW_PROPERTY(value, float);
@@ -85,7 +85,7 @@ RCT_EXPORT_VIEW_PROPERTY(onValueChange, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onSlidingComplete, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(thumbTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(thumbImage, UIImage);
-RCT_CUSTOM_VIEW_PROPERTY(disabled, BOOL, RCTSlider)
+RCT_CUSTOM_VIEW_PROPERTY(disabled, BOOL, RNCSlider)
 {
   if (json) {
     view.enabled = !([RCTConvert BOOL:json]);

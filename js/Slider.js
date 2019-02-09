@@ -11,7 +11,7 @@
 'use strict';
 
 const Platform = require('Platform');
-const RCTSliderNativeComponent = require('RCTSliderNativeComponent');
+const RCTSliderNativeComponent = require('./RNCSliderNativeComponent');
 const React = require('React');
 const ReactNative = require('ReactNative');
 const StyleSheet = require('StyleSheet');
