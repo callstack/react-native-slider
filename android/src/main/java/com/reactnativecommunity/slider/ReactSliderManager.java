@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.react.views.slider;
+package com.reactnativecommunity.slider;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
