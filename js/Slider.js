@@ -241,6 +241,12 @@ const Slider = (
   );
 };
 
+/* $FlowFixMe (<0.89.0)
+ * React 16.3 introduced a new forwardRef() API, 
+ * for which Flow does not currently have a definition.
+ * It should be fixed with flow v0.89
+ * (ref. https://github.com/facebook/flow/issues/6103)
+ */
 const SliderWithRef = React.forwardRef(Slider);
 
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error

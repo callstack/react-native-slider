@@ -8,9 +8,8 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
-
-const { examples } = require('react-native/RNTester/js/SliderExample');
+import {Platform, StyleSheet, Text, ScrollView, View} from 'react-native';
+import { examples } from './SliderExample';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -23,30 +22,36 @@ type Props = {};
 export default class App extends Component<Props> {
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-
-        {
-          examples.map((e) => e.render())
-        }
-      </View>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.container}
+      >
+        <Text style={styles.title}>{'<Slider />'}</Text>
+        {examples.map((e, i) => (
+          <View key={`slider${i}`}>
+            <Text>{e.title}</Text>
+            {e.render()}
+          </View>
+        ))}
+      </ScrollView>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  scrollView: {
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  title: {
     fontSize: 20,
     textAlign: 'center',
-    margin: 10,
+    width: '100%',
+    marginVertical: 20,
   },
   instructions: {
     textAlign: 'center',
