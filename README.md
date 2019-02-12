@@ -291,10 +291,5 @@ Assigns a single image for the track. Only static images are supported. The cent
 
 This module was extracted from `react-native` core. Please reffer to https://github.com/react-native-community/react-native-slider/graphs/contributors for the complete list of contributors.
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-| [<img src="https://avatars0.githubusercontent.com/u/7837457?v=4" width="100px;"/><br /><sub><b>Michał Chudziak</b></sub>](https://github.com/mike866)<br />[💻](https://github.com/callstack/react-native-opentok/commits?author=mike866 "Code") |
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
 ## License
 The library is released under the MIT licence. For more information see `LICENSE`.
