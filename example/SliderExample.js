@@ -12,7 +12,7 @@
 
 const React = require('react');
 const {Text, StyleSheet, View} = require('react-native');
-const Slider = require('@react-native-community/slider')
+const Slider = require('@react-native-community/slider');
 
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
   static defaultProps = {
