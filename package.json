@@ -1,7 +1,9 @@
 {
   "name": "@react-native-community/slider",
   "version": "1.0.0",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "yarn test:eslint && yarn test:flow && yarn test:jest",
