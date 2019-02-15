@@ -10,17 +10,16 @@
 
 'use strict';
 
-const Platform = require('Platform');
+const React = require('react');
+const {Platform, StyleSheet} = require('react-native');
 const RCTSliderNativeComponent = require('./RNCSliderNativeComponent');
-const React = require('React');
-const ReactNative = require('ReactNative');
-const StyleSheet = require('StyleSheet');
 
-import type {ImageSource} from 'ImageSource';
-import type {ViewStyleProp} from 'StyleSheet';
-import type {ColorValue} from 'StyleSheetTypes';
-import type {ViewProps} from 'ViewPropTypes';
-import type {SyntheticEvent} from 'CoreEventTypes';
+import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
+import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
+import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
+import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
+import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
 type Event = SyntheticEvent<
   $ReadOnly<{|
@@ -276,4 +275,4 @@ if (Platform.OS === 'ios') {
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
  * and run Flow. */
-module.exports = (SliderWithRef: Class<ReactNative.NativeComponent<Props>>);
+module.exports = (SliderWithRef: Class<NativeComponent<Props>>);
