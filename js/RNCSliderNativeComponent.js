@@ -10,13 +10,13 @@
 
 'use strict';
 
-const requireNativeComponent = require('requireNativeComponent');
+const {requireNativeComponent} = require('react-native');
 
-import type {ColorValue} from 'StyleSheetTypes';
-import type {ImageSource} from 'ImageSource';
-import type {NativeComponent} from 'ReactNative';
-import type {SyntheticEvent} from 'CoreEventTypes';
-import type {ViewProps} from 'ViewPropTypes';
+import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
+import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
+import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
+import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
 
 type Event = SyntheticEvent<
   $ReadOnly<{|
