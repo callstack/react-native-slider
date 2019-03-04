@@ -4,7 +4,8 @@ module.exports = {
   parser: "babel-eslint",
 
   env: {
-    es6: true
+    es6: true,
+    jest: true
   },
 
   plugins: [

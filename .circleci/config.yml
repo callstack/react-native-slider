@@ -73,9 +73,9 @@ aliases:
   name: Flow Checks
   command: yarn test:flow
 
-# - &jest
-#   name: Jest Unit Tests
-#   command: yarn test:jest
+- &jest
+  name: Jest Unit Tests
+  command: yarn test:jest
 
 # -------------------------
 #          JOBS
@@ -110,12 +110,12 @@ jobs:
         at: ~/react-native-slider
     - run: *flow
   
-  # jest:
-  #   <<: *linux_defaults
-  #   steps:
-  #   - attach_workspace:
-  #       at: ~/react-native-slider
-  #   - run: *jest
+  jest:
+    <<: *linux_defaults
+    steps:
+    - attach_workspace:
+        at: ~/react-native-slider
+    - run: *jest
   
   android-compile:
     <<: *android_defaults
@@ -172,9 +172,9 @@ workflows:
     - flow:
         requires:
         - linux-checkout
-    # - jest:
-    #     requires:
-    #     - linux-checkout
+    - jest:
+        requires:
+        - linux-checkout
     - android-compile:
         requires:
         - linux-checkout

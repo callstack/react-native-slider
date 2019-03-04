@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Slider /> renders a slider with custom props 1`] = `
+<RNCSlider
+  disabled={false}
+  enabled={true}
+  maximumTrackTintColor="red"
+  maximumValue={2}
+  minimumTrackTintColor="blue"
+  minimumValue={-1}
+  onChange={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onSlidingComplete={[Function]}
+  onStartShouldSetResponder={[Function]}
+  onValueChange={[Function]}
+  step={0.25}
+  style={
+    Object {
+      "height": 40,
+    }
+  }
+  thumbTintColor="green"
+  value={0.5}
+/>
+`;
+
+exports[`<Slider /> renders disabled slider 1`] = `
+<RNCSlider
+  disabled={true}
+  enabled={false}
+  maximumValue={1}
+  minimumValue={0}
+  onChange={null}
+  onResponderTerminationRequest={[Function]}
+  onSlidingComplete={null}
+  onStartShouldSetResponder={[Function]}
+  onValueChange={null}
+  step={0}
+  style={
+    Object {
+      "height": 40,
+    }
+  }
+  value={0}
+/>
+`;
+
+exports[`<Slider /> renders enabled slider 1`] = `
+<RNCSlider
+  disabled={false}
+  enabled={true}
+  maximumValue={1}
+  minimumValue={0}
+  onChange={null}
+  onResponderTerminationRequest={[Function]}
+  onSlidingComplete={null}
+  onStartShouldSetResponder={[Function]}
+  onValueChange={null}
+  step={0}
+  style={
+    Object {
+      "height": 40,
+    }
+  }
+  value={0}
+/>
+`;

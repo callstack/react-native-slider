@@ -9,7 +9,7 @@
     "test": "yarn test:eslint && yarn test:flow && yarn test:jest",
     "test:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
     "test:flow": "flow check",
-    "test:js": "echo 0",
+    "test:js": "jest",
     "ci:test:flow": "yarn test:flow",
     "ci:test:js": "yarn test:js"
   },
@@ -36,10 +36,15 @@
     "eslint-plugin-react-hooks": "^1.0.1",
     "eslint-plugin-react-native": "3.6.0",
     "flow-bin": "^0.86.0",
+    "jest": "^24.1.0",
     "metro-react-native-babel-preset": "0.51.1",
     "prettier": "^1.16.4",
     "react": "16.6.3",
-    "react-native": "0.58.4"
+    "react-native": "0.58.4",
+    "react-test-renderer": "16.6.3"
+  },
+  "jest": {
+    "preset": "react-native"
   },
   "repository": {
     "type": "git",
