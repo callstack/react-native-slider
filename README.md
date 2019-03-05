@@ -38,15 +38,15 @@ Click on your main project file (the one that represents the `.xcodeproj`) selec
    
 #### `android/settings.gradle`
 ```groovy
-include ':@react-native-community/slider'
-project(':@react-native-community/slider').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/slider/android')
+include ':react-native-community-slider'
+project(':react-native-community-slider').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/slider/android')
 ```
 
 #### `android/app/build.gradle`
 ```groovy
 dependencies {
    ...
-   implementation project(':@react-native-community/slider')
+   implementation project(':react-native-community-slider')
 }
 ```
 
