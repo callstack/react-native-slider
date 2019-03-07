@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "types": "typings/index.d.ts",
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "yarn test:eslint && yarn test:flow && yarn test:jest",
