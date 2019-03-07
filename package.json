@@ -10,9 +10,8 @@
     "test": "yarn test:eslint && yarn test:flow && yarn test:jest",
     "test:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
     "test:flow": "flow check",
-    "test:js": "jest",
-    "ci:test:flow": "yarn test:flow",
-    "ci:test:js": "yarn test:js"
+    "test:jest": "jest",
+    "test:js": "jest"
   },
   "keywords": [
     "react-native",
