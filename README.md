@@ -54,7 +54,7 @@ dependencies {
 On top, where imports are:
 
 ```java
-import com.reactnativecommunity.netinfo.ReactSliderPackage;
+import com.reactnativecommunity.slider.ReactSliderPackage;
 ```
 
 Add the `ReactSliderPackage` class to your list of exported packages.
