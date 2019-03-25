@@ -3,6 +3,9 @@
 
 React Native component used to select a single value from a range of values.
 
+![iOS Screenshot]|(https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)
+![Android Screenshot]|(https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)
+
 ## Getting started
 
 `yarn add @react-native-community/slider`
@@ -98,7 +101,6 @@ import Slider from '@react-native-community/slider';
     maximumValue={1}
     minimumTrackTintColor="#FFFFFF"
     maximumTrackTintColor="#000000"
-    thumbTouchSize={{width: 50, height: 40}}
   />
 ```
 
