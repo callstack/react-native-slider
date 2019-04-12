@@ -13,10 +13,9 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "yarn test:eslint && yarn test:flow && yarn test:jest",
-    "test:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
-    "test:flow": "flow check",
-    "test:jest": "jest",
-    "test:js": "jest"
+    "validate:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
+    "validate:flow": "flow check",
+    "test:jest": "jest"
   },
   "keywords": [
     "react-native",
