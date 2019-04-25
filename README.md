@@ -295,3 +295,5 @@ This module was extracted from `react-native` core. Please reffer to https://git
 
 ## License
 The library is released under the MIT licence. For more information see `LICENSE`.
+
+
