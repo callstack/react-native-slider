@@ -18,7 +18,7 @@ export default class App extends Component<Props> {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.container}>
-        <Text style={styles.title}>{'<Slider />'}</Text>
+        <Text testID="testTextId" style={styles.title}>{'<Slider />'}</Text>
         {examples.map((e, i) => (
           <View key={`slider${i}`}>
             <Text>{e.title}</Text>
