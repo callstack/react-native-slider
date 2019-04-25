@@ -5,7 +5,7 @@ module.exports = {
       'module-resolver',
       {
         alias: {
-          '@react-native-community/slider': './js/Slider.js',
+          '@react-native-community/slider': '../js/Slider.js',
         },
         cwd: 'babelrc',
       },

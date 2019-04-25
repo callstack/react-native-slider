@@ -4,6 +4,7 @@ import pack from '../../package.json';
 
 jest.setTimeout(120000);
 
+// eslint-disable-next-line no-undef
 jasmine.getEnv().addReporter(adapter);
 
 beforeAll(async () => {
