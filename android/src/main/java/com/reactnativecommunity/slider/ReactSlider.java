@@ -8,7 +8,7 @@ package com.reactnativecommunity.slider;
 
 import android.content.Context;
 import android.os.Build;
-import androidx.appcompat.app.AppCompatSeekBar;
+import androidx.appcompat.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import javax.annotation.Nullable;
 
