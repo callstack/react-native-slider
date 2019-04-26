@@ -37,6 +37,6 @@ repositories {
 
 dependencies {
   //noinspection GradleDynamicVersion
-  api "androidx.appcompat:appcompat:${rootProject.ext.supportLibVersion}"
+  api "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
   api 'com.facebook.react:react-native:+'
 }
