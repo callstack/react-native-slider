@@ -91,6 +91,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
         @Override
         public void onStartTrackingTouch(SeekBar seekbar) {
+          ReactContext reactContext = (ReactContext) seekbar.getContext();
+          reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
+              new ReactSlidingStartEvent(
+                  seekbar.getId(),
+                  ((ReactSlider) seekbar).toRealProgress(seekbar.getProgress())));
         }
 
         @Override
@@ -188,8 +193,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   public Map getExportedCustomDirectEventTypeConstants() {
-    return MapBuilder.of(
-        ReactSlidingCompleteEvent.EVENT_NAME,
-        MapBuilder.of("registrationName", "onSlidingComplete"));
+    return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onSlidingComplete"),
+        ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onSlidingStart"));
   }
 }
