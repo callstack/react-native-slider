@@ -38,6 +38,36 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
   }
 }
 
+class SlidingStartExample extends React.Component<
+  $FlowFixMeProps,
+  $FlowFixMeState,
+> {
+  state = {
+    slideStartingValue: 0,
+    slideStartingCount: 0,
+  };
+
+  render() {
+    return (
+      <View>
+        <SliderExample
+          {...this.props}
+          onSlidingStart={value =>
+            this.setState({
+              slideStartingValue: value,
+              slideStartingCount: this.state.slideStartingCount + 1,
+            })
+          }
+        />
+        <Text>
+          Starts: {this.state.slideStartingCount} Value:{' '}
+          {this.state.slideStartingValue}
+        </Text>
+      </View>
+    );
+  }
+}
+
 class SlidingCompleteExample extends React.Component<
   $FlowFixMeProps,
   $FlowFixMeState,
@@ -103,6 +133,12 @@ exports.examples = [
     title: 'step: 0.25',
     render(): React.Element<any> {
       return <SliderExample step={0.25} />;
+    },
+  },
+  {
+    title: 'onSlidingStart',
+    render(): React.Element<any> {
+      return <SlidingStartExample />;
     },
   },
   {

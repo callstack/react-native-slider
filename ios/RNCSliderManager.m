@@ -21,6 +21,8 @@ RCT_EXPORT_MODULE()
   RNCSlider *slider = [RNCSlider new];
   [slider addTarget:self action:@selector(sliderValueChanged:)
    forControlEvents:UIControlEventValueChanged];
+  [slider addTarget:self action:@selector(sliderTouchStart:)
+   forControlEvents:UIControlEventTouchDown];
   [slider addTarget:self action:@selector(sliderTouchEnd:)
    forControlEvents:(UIControlEventTouchUpInside |
                      UIControlEventTouchUpOutside |
@@ -28,7 +30,7 @@ RCT_EXPORT_MODULE()
   return slider;
 }
 
-static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous)
+static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidingStart)
 {
   float value = sender.value;
 
@@ -52,11 +54,16 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous)
       });
     }
   } else {
-    if (sender.onSlidingComplete) {
+    if (sender.onSlidingComplete && !isSlidingStart) {
       sender.onSlidingComplete(@{
         @"value": @(value),
       });
     }
+      if (sender.onSlidingStart && isSlidingStart) {
+        sender.onSlidingStart(@{
+          @"value": @(value),
+        });
+      }
   }
 
   sender.lastValue = value;
@@ -64,12 +71,17 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous)
 
 - (void)sliderValueChanged:(RNCSlider *)sender
 {
-  RNCSendSliderEvent(sender, YES);
+  RNCSendSliderEvent(sender, YES, NO);
+}
+
+- (void)sliderTouchStart:(RNCSlider *)sender
+{
+  RNCSendSliderEvent(sender, NO, YES);
 }
 
 - (void)sliderTouchEnd:(RNCSlider *)sender
 {
-  RNCSendSliderEvent(sender, NO);
+  RNCSendSliderEvent(sender, NO, NO);
 }
 
 RCT_EXPORT_VIEW_PROPERTY(value, float);
@@ -82,6 +94,7 @@ RCT_EXPORT_VIEW_PROPERTY(maximumValue, float);
 RCT_EXPORT_VIEW_PROPERTY(minimumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(maximumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(onValueChange, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onSlidingStart, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onSlidingComplete, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(thumbTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(thumbImage, UIImage);

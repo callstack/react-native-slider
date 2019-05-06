@@ -122,6 +122,14 @@ type Props = $ReadOnly<{|
   onValueChange?: ?(value: number) => void,
 
   /**
+   * Callback that is called when the user touches the slider,
+   * regardless if the value has changed. The current value is passed
+   * as an argument to the callback handler.
+   */
+
+  onSlidingStart?: ?(value: number) => void,
+
+  /**
    * Callback that is called when the user releases the slider,
    * regardless if the value has changed. The current value is passed
    * as an argument to the callback handler.
@@ -203,7 +211,12 @@ const Slider = (
     props.style,
   );
 
-  const {onValueChange, onSlidingComplete, ...localProps} = props;
+  const {
+    onValueChange,
+    onSlidingStart,
+    onSlidingComplete,
+    ...localProps
+  } = props;
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
@@ -219,6 +232,11 @@ const Slider = (
     : null;
 
   const onChangeEvent = onValueChangeEvent;
+  const onSlidingStartEvent = onSlidingStart
+    ? (event: Event) => {
+        onSlidingStart(event.nativeEvent.value);
+      }
+    : null;
   const onSlidingCompleteEvent = onSlidingComplete
     ? (event: Event) => {
         onSlidingComplete(event.nativeEvent.value);
@@ -231,6 +249,7 @@ const Slider = (
       ref={forwardedRef}
       style={style}
       onChange={onChangeEvent}
+      onSlidingStart={onSlidingStartEvent}
       onSlidingComplete={onSlidingCompleteEvent}
       onValueChange={onValueChangeEvent}
       enabled={!props.disabled}
