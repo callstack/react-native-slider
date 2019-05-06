@@ -115,6 +115,7 @@ Check out the [example project](example) for more examples.
 - [`maximumValue`](README.md#maximumvalue)
 - [`minimumTrackTintColor`](README.md#minimumtracktintcolor)
 - [`minimumValue`](README.md#minimumvalue)
+- [`onSlidingStart`](README.md#onslidingstart)
 - [`onSlidingComplete`](README.md#onslidingcomplete)
 - [`onValueChange`](README.md#onvaluechange)
 - [`step`](README.md#step)
@@ -176,6 +177,16 @@ Initial minimum value of the slider. Default value is 0.
 | Type   | Required |
 | ------ | -------- |
 | number | No       |
+
+---
+
+### `onSlidingStart`
+
+Callback that is called when the user picks up the slider. The initial value is passed as an argument to the callback handler.
+
+| Type     | Required |
+| -------- | -------- |
+| function | No       |
 
 ---
 
