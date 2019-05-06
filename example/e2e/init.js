@@ -1,21 +1,19 @@
-import detox from 'detox';
-import adapter from 'detox/runners/jest/adapter';
-import pack from '../../package.json';
+const detox = require('detox');
+const config = require('../../package.json').detox;
+const adapter = require('detox/runners/jest/adapter');
 
-jest.setTimeout(120000);
-
-// eslint-disable-next-line no-undef
+jest.setTimeout(300000);
 jasmine.getEnv().addReporter(adapter);
 
-beforeAll(async () => {
-  await detox.init(pack.detox);
+ beforeAll(async () => {
+  await detox.init(config);
 });
 
-beforeEach(async () => {
+ beforeEach(async () => {
   await adapter.beforeEach();
 });
 
-afterAll(async () => {
+ afterAll(async () => {
   await adapter.afterAll();
   await detox.cleanup();
 });

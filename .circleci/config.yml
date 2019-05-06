@@ -78,7 +78,6 @@ workflows:
           detox_loglevel: "trace"
           requires:
             - analyse
-
       # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
       # - publish:
       #     requires:
