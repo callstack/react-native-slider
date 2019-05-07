@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  rn: react-native-community/react-native@dev:0.1.0-rc12
+  rn: react-native-community/react-native@1.1.0
 
 jobs:
   checkout_code:
@@ -26,14 +26,12 @@ jobs:
       - run:
           name: Jest
           command: yarn run test:jest
-
-  # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/33
-  #     - run:
-  #         name: Build Android JavaScript Bundle
-  #         command: yarn run test:detox:android:bundle:release
-  #     - run:
-  #         name: Build iOS JavaScript Bundle
-  #         command: yarn run test:detox:ios:bundle:release
+      - run:
+          name: Build Android JavaScript Bundle
+          command: yarn run test:detox:android:bundle:release
+      - run:
+          name: Build iOS JavaScript Bundle
+          command: yarn run test:detox:ios:bundle:release
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
@@ -53,36 +51,33 @@ workflows:
       - analyse:
           requires:
             - checkout_code
-
-      # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/33
-      # - rn/android_build:
-      #     name: build_android_debug
-      #     project_path: "example/android"
-      #     build_type: debug
-      #     requires:
-      #       - analyse
-      # - rn/android_build:
-      #     name: build_android_release
-      #     project_path: "example/android"
-      #     build_type: release
-      #     requires:
-      #       - analyse
-      # - rn/android_test:
-      #     detox_configuration: "android.emu.release"
-      #     detox_loglevel: "trace"
-      #     requires:
-      #       - build_android_release
-      # - rn/ios_build_and_test:
-      #     project_path: "example/ios/NetInfoExample.xcodeproj"
-      #     derived_data_path: "example/ios/build"
-      #     device: "iPhone X"
-      #     build_configuration: "Release"
-      #     scheme: "NetInfoExample"
-      #     detox_configuration: "ios.sim.release"
-      #     detox_loglevel: "trace"
-      #     requires:
-      #       - analyse
-
+      - rn/android_build:
+          name: build_android_debug
+          project_path: "example/android"
+          build_type: debug
+          requires:
+            - analyse
+      - rn/android_build:
+          name: build_android_release
+          project_path: "example/android"
+          build_type: release
+          requires:
+            - analyse
+      - rn/android_test:
+          detox_configuration: "android.emu.release"
+          detox_loglevel: "trace"
+          requires:
+            - build_android_release
+      - rn/ios_build_and_test:
+          project_path: "example/ios/example.xcodeproj"
+          derived_data_path: "example/ios/build"
+          device: "iPhone X"
+          build_configuration: "Release"
+          scheme: "example"
+          detox_configuration: "ios.sim.release"
+          detox_loglevel: "trace"
+          requires:
+            - analyse
       # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
       # - publish:
       #     requires:
