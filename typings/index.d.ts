@@ -64,6 +64,12 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
   minimumValue?: number;
 
   /**
+   * Callback that is called when the user picks up the slider.
+   * The initial value is passed as an argument to the callback handler.
+   */
+  onSlidingStart?: (value: number) => void;
+
+  /**
    * Callback called when the user finishes changing the value (e.g. when the slider is released).
    */
   onSlidingComplete?: (value: number) => void;
