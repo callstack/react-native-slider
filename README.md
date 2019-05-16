@@ -49,7 +49,7 @@ project(':react-native-community-slider').projectDir = new File(rootProject.proj
 ```groovy
 dependencies {
    ...
-   implementation project(':react-native-community-slider')
+   implementation project(':@react-native-community_slider') 
 }
 ```
 
