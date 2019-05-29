@@ -108,25 +108,25 @@ Check out the [example project](example) for more examples.
 
 ### Props
 
-* [View props...](https://github.com/facebook/react-native-website/blob/master/docs/view.md#props)
+* [Inherited `View` props...](https://github.com/facebook/react-native-website/blob/master/docs/view.md#props)
 
-- [`style`](README.md#style)
-- [`disabled`](README.md#disabled)
-- [`maximumValue`](README.md#maximumvalue)
-- [`minimumTrackTintColor`](README.md#minimumtracktintcolor)
-- [`minimumValue`](README.md#minimumvalue)
-- [`onSlidingStart`](README.md#onslidingstart)
-- [`onSlidingComplete`](README.md#onslidingcomplete)
-- [`onValueChange`](README.md#onvaluechange)
-- [`step`](README.md#step)
-- [`maximumTrackTintColor`](README.md#maximumtracktintcolor)
-- [`testID`](README.md#testid)
-- [`value`](README.md#value)
-- [`thumbTintColor`](README.md#thumbtintcolor)
-- [`maximumTrackImage`](README.md#maximumtrackimage)
-- [`minimumTrackImage`](README.md#minimumtrackimage)
-- [`thumbImage`](README.md#thumbimage)
-- [`trackImage`](README.md#trackimage)
+- [`style`](#style)
+- [`disabled`](#disabled)
+- [`maximumValue`](#maximumvalue)
+- [`minimumTrackTintColor`](#minimumtracktintcolor)
+- [`minimumValue`](#minimumvalue)
+- [`onSlidingStart`](#onslidingstart)
+- [`onSlidingComplete`](#onslidingcomplete)
+- [`onValueChange`](#onvaluechange)
+- [`step`](#step)
+- [`maximumTrackTintColor`](#maximumtracktintcolor)
+- [`testID`](#testid)
+- [`value`](#value)
+- [`thumbTintColor`](#thumbtintcolor)
+- [`maximumTrackImage`](#maximumtrackimage)
+- [`minimumTrackImage`](#minimumtrackimage)
+- [`thumbImage`](#thumbimage)
+- [`trackImage`](#trackimage)
 
 ---
 
