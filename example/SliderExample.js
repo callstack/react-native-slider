@@ -11,7 +11,7 @@
 'use strict';
 
 const React = require('react');
-const {Text, StyleSheet, View} = require('react-native');
+const {Text, StyleSheet, View, Button} = require('react-native');
 const Slider = require('@react-native-community/slider');
 
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
@@ -98,6 +98,41 @@ class SlidingCompleteExample extends React.Component<
   }
 }
 
+class SlidingWithButtonExample extends React.Component<
+  $FlowFixMeProps,
+  $FlowFixMeState,
+> {
+  state = {
+    value: 0,
+    shouldShow: true,
+  };
+
+  render() {
+    return (
+      <View>
+        {this.state.shouldShow && (
+          <View>
+            <Slider
+              value={this.state.value}
+              minimumValue={-31.33}
+              maximumValue={5}
+              onValueChange={value => this.setState({value: value})}
+            />
+          </View>
+        )}
+        <Button
+          title="click"
+          onPress={() => {
+            this.setState((prevState, props) => ({
+              shouldShow: !prevState.shouldShow,
+            }));
+          }}
+        />
+      </View>
+    );
+  }
+}
+
 const styles = StyleSheet.create({
   text: {
     fontSize: 14,
@@ -111,6 +146,12 @@ exports.title = '<Slider>';
 exports.displayName = 'SliderExample';
 exports.description = 'Slider input for numeric values';
 exports.examples = [
+  {
+    title: 'SlidingWithButtonExample',
+    render(): React.Element<any> {
+      return <SlidingWithButtonExample />;
+    },
+  },
   {
     title: 'Default settings',
     render(): React.Element<any> {
