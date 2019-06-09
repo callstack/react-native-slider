@@ -256,9 +256,9 @@ _This is not a controlled component_, you don't need to update the value during 
 
 Color of the foreground switch grip.
 
-| Type               | Required | Platform |
-| ------------------ | -------- | -------- |
-| [color](colors.md) | No       | Android  |
+| Type               | Required |
+| ------------------ | -------- |
+| [color](colors.md) | No       |
 
 ---
 
