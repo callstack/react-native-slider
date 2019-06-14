@@ -8,7 +8,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "js/Slider.js",
+  "main": "js/Slider",
   "types": "typings/index.d.ts",
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
@@ -34,8 +34,8 @@
     "react native",
     "slider"
   ],
-  "dependencies": {},
   "peerDependencies": {
+    "prop-types": "*",
     "react": "*",
     "react-native": "*"
   },
