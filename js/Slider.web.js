@@ -61,16 +61,85 @@ class Slider extends React.PureComponent {
      */
     debugTouchArea: PropTypes.bool,
 
+    /**
+     * The color used to tint the default thumb images on iOS, or the
+     * color of the foreground switch grip on Android and web.
+     */
+    thumbTintColor: PropTypes.string,
+
+    /**
+     * If true the user won't be able to move the slider.
+     * Default value is false.
+     */
     disabled: PropTypes.bool,
-    maximumTrackTintColor: PropTypes.string,
-    maximumValue: PropTypes.number,
+
+    /**
+     * The color used for the track to the left of the button.
+     * Overrides the default blue gradient image on iOS.
+     */
     minimumTrackTintColor: PropTypes.string,
+
+    /**
+     * The color used for the track to the right of the button.
+     * Overrides the default blue gradient image on iOS.
+     */
+    maximumTrackTintColor: PropTypes.string,
+
+    /**
+     * Initial maximum value of the slider. Default value is 1.
+     */
+    maximumValue: PropTypes.number,
+
+    /**
+     * Initial minimum value of the slider. Default value is 0.
+     */
     minimumValue: PropTypes.number,
+
+    /**
+     * Callback that is called when the user releases the slider,
+     * regardless if the value has changed. The current value is passed
+     * as an argument to the callback handler.
+     */
     onSlidingComplete: PropTypes.func,
+
+    /**
+     * Callback that is called when the user touches the slider,
+     * regardless if the value has changed. The current value is passed
+     * as an argument to the callback handler.
+     */
+    onSlidingStart: PropTypes.func,
+
+    /**
+     * Callback continuously called while the user is dragging the slider.
+     */
     onValueChange: PropTypes.func,
+
+    /**
+     * Step value of the slider. The value should be
+     * between 0 and (maximumValue - minimumValue).
+     * Default value is 0.
+     */
     step: PropTypes.number,
+
+    /**
+     * Used to style and layout the `Slider`.  See `StyleSheet.js` and
+     * `DeprecatedViewStylePropTypes.js` for more info.
+     */
     style: ViewPropTypes.style,
+
+    /**
+     * Used to locate this view in UI automation tests.
+     */
     testID: PropTypes.string,
+
+    /**
+     * Initial value of the slider. The value should be between minimumValue
+     * and maximumValue, which default to 0 and 1 respectively.
+     * Default value is 0.
+     *
+     * *This is not a controlled component*, you don't need to update the
+     * value during dragging.
+     */
     value: PropTypes.number,
   };
 
@@ -90,8 +159,9 @@ class Slider extends React.PureComponent {
     trackSize: {width: 0, height: 0},
     thumbSize: {width: 0, height: 0},
     allMeasured: false,
-    value: new Animated.Value(this.props.value),
   };
+
+  _value = new Animated.Value(this.props.value);
 
   constructor(props) {
     super(props);
@@ -124,6 +194,7 @@ class Slider extends React.PureComponent {
       maximumValue,
       minimumTrackTintColor,
       maximumTrackTintColor,
+      thumbTintColor,
       style,
       debugTouchArea,
       /* eslint-disable */
@@ -131,8 +202,8 @@ class Slider extends React.PureComponent {
       /* eslint-enable */
       ...other
     } = this.props;
-    const {value, containerSize, thumbSize, allMeasured} = this.state;
-    const thumbLeft = value.interpolate({
+    const {containerSize, thumbSize, allMeasured} = this.state;
+    const thumbLeft = this._value.interpolate({
       inputRange: [minimumValue, maximumValue],
       outputRange: [0, containerSize.width - thumbSize.width],
     });
@@ -166,7 +237,7 @@ class Slider extends React.PureComponent {
         <Animated.View
           onLayout={this._measureThumb}
           style={[
-            {backgroundColor: minimumTrackTintColor},
+            {backgroundColor: thumbTintColor || minimumTrackTintColor},
             defaultStyles.thumb,
             {
               transform: [{translateX: thumbLeft}, {translateY: 0}],
@@ -200,10 +271,11 @@ class Slider extends React.PureComponent {
   }
 
   _handleStartShouldSetPanResponder = (
-    e: Object /*gestureState: Object*/,
+    e: Object,
+    gestureState: Object,
   ): boolean => {
     // Should we become active when the user presses down on the thumb?
-    return this._thumbHitTest(e);
+    return this._thumbHitTest(e, gestureState);
   };
 
   _handleMoveShouldSetPanResponder(/*e: Object, gestureState: Object*/): boolean {
@@ -213,6 +285,7 @@ class Slider extends React.PureComponent {
 
   _handlePanResponderGrant = (/*e: Object, gestureState: Object*/) => {
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
+    this._fireChangeEvent('onSlidingStart');
   };
 
   _handlePanResponderMove = (e: Object, gestureState: Object) => {
@@ -321,11 +394,11 @@ class Slider extends React.PureComponent {
   };
 
   _getCurrentValue = () => {
-    return this.state.value.__getValue();
+    return this._value.__getValue();
   };
 
   _setCurrentValue = (value: number) => {
-    this.state.value.setValue(value);
+    this._value.setValue(value);
   };
 
   _setCurrentValueAnimated = (value: number) => {
@@ -337,7 +410,7 @@ class Slider extends React.PureComponent {
       {toValue: value},
     );
 
-    Animated[animationType](this.state.value, animationConfig).start();
+    Animated[animationType](this._value, animationConfig).start();
   };
 
   _fireChangeEvent = event => {
@@ -380,12 +453,12 @@ class Slider extends React.PureComponent {
     return touchOverflowStyle;
   };
 
-  _thumbHitTest = (e: Object) => {
-    const nativeEvent = e.nativeEvent;
+  _thumbHitTest = ({nativeEvent}: Object) => {
     const thumbTouchRect = this._getThumbTouchRect();
+    const offset = getOffset();
     return thumbTouchRect.containsPoint(
-      nativeEvent.locationX,
-      nativeEvent.locationY,
+      nativeEvent.locationX - offset.x,
+      nativeEvent.locationY - offset.y,
     );
   };
 
@@ -475,4 +548,16 @@ class Rect {
       y <= this.y + this.height
     );
   }
+}
+
+function getOffset() {
+  if (document.documentElement && document.documentElement.scrollTop) {
+    // Explorer 6 Strict
+    return {
+      x: document.documentElement.scrollLeft,
+      y: document.documentElement.scrollTop,
+    };
+  }
+  // all other Explorers
+  return {x: document.body.scrollLeft, y: document.body.scrollTop};
 }
