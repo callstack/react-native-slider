@@ -104,7 +104,7 @@ import Slider from '@react-native-community/slider';
   />
 ```
 
-Check out the [example project](example) for more examples.
+Check out the [example project](example) for more examples. You can use the example in the browser with [React Native for web](https://github.com/necolas/react-native-web) and [Expo](https://expo.io) - [Try it here!](https://rnslider.netlify.com)
 
 ### Props
 
