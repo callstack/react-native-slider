@@ -14,6 +14,7 @@ import {
   StyleSheet,
   View,
   ViewPropTypes,
+  I18nManager,
 } from 'react-native';
 import applyNativeMethods from 'react-native-web/dist/modules/applyNativeMethods';
 
@@ -33,7 +34,7 @@ const DEFAULT_ANIMATION_CONFIGS = {
   },
 };
 
-class Slider extends React.PureComponent {
+class Slider extends React.Component {
   _panResponder: PanResponder;
   _previousLeft: number;
   _store: {
@@ -205,8 +206,18 @@ class Slider extends React.PureComponent {
     const {containerSize, thumbSize, allMeasured} = this.state;
     const thumbLeft = this._value.interpolate({
       inputRange: [minimumValue, maximumValue],
-      outputRange: [0, containerSize.width - thumbSize.width],
+      outputRange: I18nManager.isRTL
+        ? [0, -(containerSize.width - thumbSize.width)]
+        : [0, containerSize.width - thumbSize.width],
+      // extrapolate: 'clamp',
     });
+    const minimumTrackWidth = this._value.interpolate({
+      inputRange: [minimumValue, maximumValue],
+      outputRange: [0, containerSize.width - thumbSize.width],
+      //extrapolate: 'clamp',
+      // extrapolate: 'clamp',
+    });
+
     const valueVisibleStyle = {};
     if (!allMeasured) {
       valueVisibleStyle.opacity = 0;
@@ -214,7 +225,7 @@ class Slider extends React.PureComponent {
 
     const minimumTrackStyle = {
       position: 'absolute',
-      width: Animated.add(thumbLeft, thumbSize.width / 2),
+      width: Animated.add(minimumTrackWidth, thumbSize.width / 2),
       backgroundColor: minimumTrackTintColor,
       ...valueVisibleStyle,
     };
@@ -356,7 +367,8 @@ class Slider extends React.PureComponent {
   };
 
   _getThumbLeft = (value: number) => {
-    const ratio = this._getRatio(value);
+    const nonRtlRatio = this._getRatio(value);
+    const ratio = I18nManager.isRTL ? 1 - nonRtlRatio : nonRtlRatio;
     return (
       ratio * (this.state.containerSize.width - this.state.thumbSize.width)
     );
@@ -366,7 +378,8 @@ class Slider extends React.PureComponent {
     const length = this.state.containerSize.width - this.state.thumbSize.width;
     const thumbLeft = this._previousLeft + gestureState.dx;
 
-    const ratio = thumbLeft / length;
+    const nonRtlRatio = thumbLeft / length;
+    const ratio = I18nManager.isRTL ? 1 - nonRtlRatio : nonRtlRatio;
 
     if (this.props.step) {
       return Math.max(
@@ -381,21 +394,18 @@ class Slider extends React.PureComponent {
               this.props.step,
         ),
       );
-    } else {
-      return Math.max(
-        this.props.minimumValue,
-        Math.min(
-          this.props.maximumValue,
-          ratio * (this.props.maximumValue - this.props.minimumValue) +
-            this.props.minimumValue,
-        ),
-      );
     }
+    return Math.max(
+      this.props.minimumValue,
+      Math.min(
+        this.props.maximumValue,
+        ratio * (this.props.maximumValue - this.props.minimumValue) +
+          this.props.minimumValue,
+      ),
+    );
   };
 
-  _getCurrentValue = () => {
-    return this._value.__getValue();
-  };
+  _getCurrentValue = () => this._value.__getValue();
 
   _setCurrentValue = (value: number) => {
     this._value.setValue(value);
