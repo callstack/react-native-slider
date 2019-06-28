@@ -249,9 +249,9 @@ const Slider = (
       ref={forwardedRef}
       style={style}
       onChange={onChangeEvent}
-      onSlidingStart={onSlidingStartEvent}
-      onSlidingComplete={onSlidingCompleteEvent}
-      onValueChange={onValueChangeEvent}
+      onRNCSliderSlidingStart={onSlidingStartEvent}
+      onRNCSliderSlidingComplete={onSlidingCompleteEvent}
+      onRNCSliderValueChange={onValueChangeEvent}
       enabled={!props.disabled}
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
