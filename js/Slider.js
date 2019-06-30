@@ -220,7 +220,6 @@ const Slider = (
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
-        console.log(event);
         let userEvent = true;
         if (Platform.OS === 'android') {
           // On Android there's a special flag telling us the user is
@@ -249,7 +248,7 @@ const Slider = (
       {...localProps}
       ref={forwardedRef}
       style={style}
-      onRNCSliderChange={onChangeEvent}
+      onChange={onChangeEvent}
       onRNCSliderSlidingStart={onSlidingStartEvent}
       onRNCSliderSlidingComplete={onSlidingCompleteEvent}
       onRNCSliderValueChange={onValueChangeEvent}
@@ -260,12 +259,6 @@ const Slider = (
   );
 };
 
-/* $FlowFixMe (<0.89.0)
- * React 16.3 introduced a new forwardRef() API,
- * for which Flow does not currently have a definition.
- * It should be fixed with flow v0.89
- * (ref. https://github.com/facebook/flow/issues/6103)
- */
 const SliderWithRef = React.forwardRef(Slider);
 
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
