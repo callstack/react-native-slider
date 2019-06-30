@@ -34,7 +34,6 @@
     "react native",
     "slider"
   ],
-  "dependencies": {},
   "peerDependencies": {
     "react": "*",
     "react-native": "*"

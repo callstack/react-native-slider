@@ -220,6 +220,7 @@ const Slider = (
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
+        console.log(event);
         let userEvent = true;
         if (Platform.OS === 'android') {
           // On Android there's a special flag telling us the user is
@@ -248,10 +249,10 @@ const Slider = (
       {...localProps}
       ref={forwardedRef}
       style={style}
-      onChange={onChangeEvent}
-      onSlidingStart={onSlidingStartEvent}
-      onSlidingComplete={onSlidingCompleteEvent}
-      onValueChange={onValueChangeEvent}
+      onRNCSliderChange={onChangeEvent}
+      onRNCSliderSlidingStart={onSlidingStartEvent}
+      onRNCSliderSlidingComplete={onSlidingCompleteEvent}
+      onRNCSliderValueChange={onValueChangeEvent}
       enabled={!props.disabled}
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
