@@ -96,13 +96,13 @@
     "configurations": {
       "ios.sim.debug": {
         "binaryPath": "example/ios/build/Build/Products/Debug-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcodeproj -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
+        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example/ios/example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
         "type": "ios.simulator",
         "name": "iPhone X"
       },
       "ios.sim.release": {
         "binaryPath": "example/ios/build/Build/Products/Release-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcodeproj -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Release -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
+        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Release -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
         "type": "ios.simulator",
         "name": "iPhone X"
       },
