@@ -14,11 +14,14 @@ or
 
 `npm install @react-native-community/slider --save`
 
-### Mostly automatic installation
+### Linking the module (React Native <= 0.59.X)
+
+<details>
+<summary>Automatically link the library</summary>
+Run the following commannd in your terminal:
 
 `react-native link @react-native-community/slider`
-
-### Manual installation
+</details>
 
 <details>
 <summary>Manually link the library on iOS</summary>
