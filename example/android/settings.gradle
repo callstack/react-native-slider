@@ -1,10 +1,3 @@
 rootProject.name = 'example'
-
-include ':app',
-        ':react-native-slider'
-
-// This is an unique link, due to example architecture, in real life it should look like this:
-// project(':react-native-slider').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/slider/android')
-project(':react-native-slider').projectDir = new File(rootProject.projectDir, '../../android')
-include ':detox'
-project(':detox').projectDir = new File(rootProject.projectDir, '../../node_modules/detox/android/detox')
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+include ':app'

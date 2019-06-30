@@ -1,6 +1,0 @@
-{
-	"testRegex": "/testCases/.+\\.e2e\\.js",
-  "testMatch": null,
-	"setupFilesAfterEnv": ["./init.js"],
-  "testEnvironment": "node"
-}
