@@ -55,7 +55,8 @@
   },
   "resolutions": {
     "handlebars": "4.1.2",
-    "js-yaml": "3.13.1"
+    "js-yaml": "3.13.1",
+    "@react-native-community/cli": "^2.0.0-rc.5"
   },
   "jest": {
     "preset": "react-native",
