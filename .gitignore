@@ -56,4 +56,4 @@ buck-out/
 *.jsbundle
 .tmp/
 
-ios/Pods/
+*/ios/Pods

@@ -57,7 +57,7 @@ PODS:
     - React-cxxreact (= 0.60.0-rc.3)
     - React-jsi (= 0.60.0-rc.3)
   - React-jsinspector (0.60.0-rc.3)
-  - react-native-slider (1.1.4):
+  - react-native-slider (2.0.0-rc.0):
     - React
   - React-RCTActionSheet (0.60.0-rc.3):
     - React-Core (= 0.60.0-rc.3)
@@ -97,7 +97,7 @@ DEPENDENCIES:
   - React-jsi (from `../../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../../node_modules/react-native/ReactCommon/jsinspector`)
-  - react-native-slider (from `../..`)
+  - react-native-slider (from `/Users/thymikee/Projects/oss/react-native-slider`)
   - React-RCTActionSheet (from `../../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../../node_modules/react-native/Libraries/NativeAnimation`)
   - React-RCTBlob (from `../../node_modules/react-native/Libraries/Blob`)
@@ -138,7 +138,7 @@ EXTERNAL SOURCES:
   React-jsinspector:
     :path: "../../node_modules/react-native/ReactCommon/jsinspector"
   react-native-slider:
-    :path: "../.."
+    :path: "/Users/thymikee/Projects/oss/react-native-slider"
   React-RCTActionSheet:
     :path: "../../node_modules/react-native/Libraries/ActionSheetIOS"
   React-RCTAnimation:
@@ -175,7 +175,7 @@ SPEC CHECKSUMS:
   React-jsi: a484f23b7b2bdcb160616921743553fad0b9ca08
   React-jsiexecutor: a5faab71295cbff5ecbe062c42868584e9d91d75
   React-jsinspector: 08bd24ac1b577afc515dc8418748e1c5c092fed1
-  react-native-slider: 754abcdae695545c5875c2150cb2a502d24b7bed
+  react-native-slider: ad3cbc36a992a4546cc29e30e505503bd8ef56b2
   React-RCTActionSheet: 0ab6f27c285fb9f9a079474c291d5f1ed96ba299
   React-RCTAnimation: 2cbb0682a315ed2cd74dbbad4c2056e7cc8199ed
   React-RCTBlob: ab2ea24932e9e79da8c43307b932aaf3018123cd
@@ -188,6 +188,6 @@ SPEC CHECKSUMS:
   React-RCTWebSocket: 60bf0bda42593572fa713ec7331e6ddab1ef5c3e
   yoga: a5405b41017fb27727de7a5ceab8bf55f98bbe2f
 
-PODFILE CHECKSUM: 3a622938ea30e798849db9429692f60538f6eff7
+PODFILE CHECKSUM: 92ab70dc21e8af2d433d3b6fff96be6127e784e6
 
-COCOAPODS: 1.7.2
+COCOAPODS: 1.7.3
