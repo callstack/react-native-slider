@@ -6,13 +6,13 @@ React Native component used to select a single value from a range of values.
 ![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)
 ![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)
 
-## Getting started
+## Getting started (React Native >= 0.60)
 
-`yarn add @react-native-community/slider`
+`yarn add @react-native-community/slider@next`
 
 or
 
-`npm install @react-native-community/slider --save`
+`npm install @react-native-community/slider@next --save`
 
 ### Linking the module (React Native <= 0.59.X)
 
