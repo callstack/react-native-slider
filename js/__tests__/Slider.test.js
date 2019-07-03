@@ -6,21 +6,13 @@ import Slider from '../Slider';
 
 describe('<Slider />', () => {
   it('renders enabled slider', () => {
-    const tree = renderer
-      .create(
-        <Slider />
-      )
-      .toJSON();
+    const tree = renderer.create(<Slider />).toJSON();
 
     expect(tree).toMatchSnapshot();
   });
 
   it('renders disabled slider', () => {
-    const tree = renderer
-      .create(
-        <Slider disabled />
-      )
-      .toJSON();
+    const tree = renderer.create(<Slider disabled />).toJSON();
 
     expect(tree).toMatchSnapshot();
   });
@@ -38,7 +30,7 @@ describe('<Slider />', () => {
           thumbTintColor={'green'}
           onSlidingComplete={() => {}}
           onValueChange={() => {}}
-        />
+        />,
       )
       .toJSON();
 

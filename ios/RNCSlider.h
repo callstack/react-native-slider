@@ -11,9 +11,9 @@
 
 @interface RNCSlider : UISlider
 
-@property (nonatomic, copy) RCTBubblingEventBlock onValueChange;
-@property (nonatomic, copy) RCTBubblingEventBlock onSlidingStart;
-@property (nonatomic, copy) RCTBubblingEventBlock onSlidingComplete;
+@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderValueChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderSlidingStart;
+@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderSlidingComplete;
 
 @property (nonatomic, assign) float step;
 @property (nonatomic, assign) float lastValue;

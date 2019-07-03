@@ -1,10 +1,6 @@
 rootProject.name = 'example'
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
+// set custom root because we're in a monorepo
+applyNativeModulesSettingsGradle(settings, "../..")
+include ':app', ':react-native-slider'
 
-include ':app',
-        ':react-native-slider'
-
-// This is an unique link, due to example architecture, in real life it should look like this:
-// project(':react-native-slider').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/slider/android')
-project(':react-native-slider').projectDir = new File(rootProject.projectDir, '../../android')
-include ':detox'
-project(':detox').projectDir = new File(rootProject.projectDir, '../../node_modules/detox/android/detox')

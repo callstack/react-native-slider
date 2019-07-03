@@ -48,19 +48,19 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
   }
 
   if (continuous) {
-    if (sender.onValueChange && sender.lastValue != value) {
-      sender.onValueChange(@{
+    if (sender.onRNCSliderValueChange && sender.lastValue != value) {
+      sender.onRNCSliderValueChange(@{
         @"value": @(value),
       });
     }
   } else {
-    if (sender.onSlidingComplete && !isSlidingStart) {
-      sender.onSlidingComplete(@{
+    if (sender.onRNCSliderSlidingComplete && !isSlidingStart) {
+      sender.onRNCSliderSlidingComplete(@{
         @"value": @(value),
       });
     }
-      if (sender.onSlidingStart && isSlidingStart) {
-        sender.onSlidingStart(@{
+      if (sender.onRNCSliderSlidingStart && isSlidingStart) {
+        sender.onRNCSliderSlidingStart(@{
           @"value": @(value),
         });
       }
@@ -93,9 +93,9 @@ RCT_EXPORT_VIEW_PROPERTY(minimumValue, float);
 RCT_EXPORT_VIEW_PROPERTY(maximumValue, float);
 RCT_EXPORT_VIEW_PROPERTY(minimumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(maximumTrackTintColor, UIColor);
-RCT_EXPORT_VIEW_PROPERTY(onValueChange, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onSlidingStart, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onSlidingComplete, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRNCSliderValueChange, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRNCSliderSlidingStart, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onRNCSliderSlidingComplete, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(thumbTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(thumbImage, UIImage);
 RCT_CUSTOM_VIEW_PROPERTY(disabled, BOOL, RNCSlider)

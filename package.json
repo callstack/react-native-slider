@@ -1,6 +1,6 @@
 {
   "name": "@react-native-community/slider",
-  "version": "1.1.4",
+  "version": "2.0.0-rc.0",
   "license": "MIT",
   "author": "react-native-community",
   "homepage": "https://github.com/react-native-community/react-native-slider",
@@ -34,28 +34,29 @@
     "react native",
     "slider"
   ],
-  "dependencies": {},
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
-    "@react-native-community/eslint-config": "^0.0.4",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-eslint": "^10.0.1",
-    "babel-plugin-module-resolver": "^3.1.3",
-    "detox": "^12.4.1",
-    "eslint": "5.13.0",
-    "flow-bin": "^0.86.0",
-    "jest": "^24.1.0",
-    "metro-react-native-babel-preset": "0.51.1",
-    "react": "16.6.3",
-    "react-native": "0.58.4",
-    "react-test-renderer": "16.6.3"
+    "@babel/core": "7.4.5",
+    "@babel/runtime": "7.4.5",
+    "@react-native-community/eslint-config": "0.0.5",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-module-resolver": "3.1.3",
+    "detox": "12.4.1",
+    "eslint": "6.0.1",
+    "flow-bin": "0.98.0",
+    "jest": "24.1.0",
+    "metro-react-native-babel-preset": "0.54.1",
+    "react": "16.8.6",
+    "react-native": "0.60.0-rc.3",
+    "react-test-renderer": "16.8.6"
   },
   "resolutions": {
     "handlebars": "4.1.2",
-    "js-yaml": "3.13.1"
+    "js-yaml": "3.13.1",
+    "@react-native-community/cli": "^2.0.0-rc.5"
   },
   "jest": {
     "preset": "react-native",
@@ -96,13 +97,13 @@
     "configurations": {
       "ios.sim.debug": {
         "binaryPath": "example/ios/build/Build/Products/Debug-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcodeproj -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
+        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example/ios/example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
         "type": "ios.simulator",
         "name": "iPhone X"
       },
       "ios.sim.release": {
         "binaryPath": "example/ios/build/Build/Products/Release-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcodeproj -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Release -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
+        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Release -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
         "type": "ios.simulator",
         "name": "iPhone X"
       },

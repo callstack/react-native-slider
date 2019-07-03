@@ -193,7 +193,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   public Map getExportedCustomDirectEventTypeConstants() {
-    return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onSlidingComplete"),
-        ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onSlidingStart"));
+    return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingComplete"),
+        ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
   }
 }

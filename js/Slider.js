@@ -249,9 +249,9 @@ const Slider = (
       ref={forwardedRef}
       style={style}
       onChange={onChangeEvent}
-      onSlidingStart={onSlidingStartEvent}
-      onSlidingComplete={onSlidingCompleteEvent}
-      onValueChange={onValueChangeEvent}
+      onRNCSliderSlidingStart={onSlidingStartEvent}
+      onRNCSliderSlidingComplete={onSlidingCompleteEvent}
+      onRNCSliderValueChange={onValueChangeEvent}
       enabled={!props.disabled}
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
@@ -259,12 +259,6 @@ const Slider = (
   );
 };
 
-/* $FlowFixMe (<0.89.0)
- * React 16.3 introduced a new forwardRef() API,
- * for which Flow does not currently have a definition.
- * It should be fixed with flow v0.89
- * (ref. https://github.com/facebook/flow/issues/6103)
- */
 const SliderWithRef = React.forwardRef(Slider);
 
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
