@@ -4,6 +4,7 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
 <RNCSlider
   disabled={false}
   enabled={true}
+  inverted={false}
   maximumTrackTintColor="red"
   maximumValue={2}
   minimumTrackTintColor="blue"
@@ -29,6 +30,7 @@ exports[`<Slider /> renders disabled slider 1`] = `
 <RNCSlider
   disabled={true}
   enabled={false}
+  inverted={false}
   maximumValue={1}
   minimumValue={0}
   onChange={null}
@@ -51,6 +53,7 @@ exports[`<Slider /> renders enabled slider 1`] = `
 <RNCSlider
   disabled={false}
   enabled={true}
+  inverted={false}
   maximumValue={1}
   minimumValue={0}
   onChange={null}
