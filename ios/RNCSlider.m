@@ -84,4 +84,13 @@
   return [self thumbImageForState:UIControlStateNormal];
 }
 
+- (void)setInverted:(BOOL)inverted
+{
+  if (inverted) {
+    self.transform = CGAffineTransformMakeScale(-1, 1);
+  } else {
+    self.transform = CGAffineTransformMakeScale(1, 1);
+  }
+}
+
 @end

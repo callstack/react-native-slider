@@ -38,7 +38,7 @@ Click on your main project file (the one that represents the `.xcodeproj`) selec
 
 <details>
 <summary>Manually link the library on Android</summary>
-   
+
 #### `android/settings.gradle`
 ```groovy
 include ':react-native-community-slider'
@@ -127,6 +127,7 @@ Check out the [example project](example) for more examples.
 - [`minimumTrackImage`](#minimumtrackimage)
 - [`thumbImage`](#thumbimage)
 - [`trackImage`](#trackimage)
+- [`inverted`](#inverted)
 
 ---
 
@@ -299,6 +300,14 @@ Assigns a single image for the track. Only static images are supported. The cent
 | Type                   | Required | Platform |
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
+
+---
+
+### `inverted`
+Reverses the direction of the slider.
+| Type | Required | Platform |
+| ---- | -------- | -------- |
+| bool | No       | iOS      |
 
 ## Contributors
 

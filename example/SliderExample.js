@@ -191,4 +191,11 @@ exports.examples = [
       );
     },
   },
+  {
+    title: 'Inverted slider direction',
+    platform: 'ios',
+    render(): React.Element<any> {
+      return <SliderExample value={0.6} inverted />;
+    },
+  },
 ];
