@@ -304,7 +304,7 @@ Assigns a single image for the track. Only static images are supported. The cent
 ---
 
 ### `inverted`
-Reverses the direction of the slider.
+Reverses the direction of the slider. Default value is false.
 
 | Type | Required | Platform |
 | ---- | -------- | -------- |
