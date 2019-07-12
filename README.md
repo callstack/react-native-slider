@@ -305,6 +305,7 @@ Assigns a single image for the track. Only static images are supported. The cent
 
 ### `inverted`
 Reverses the direction of the slider.
+
 | Type | Required | Platform |
 | ---- | -------- | -------- |
 | bool | No       | iOS      |
