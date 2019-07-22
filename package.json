@@ -53,11 +53,6 @@
     "react-native": "0.60.4",
     "react-test-renderer": "16.8.6"
   },
-  "resolutions": {
-    "handlebars": "4.1.2",
-    "js-yaml": "3.13.1",
-    "lodash": "4.17.13"
-  },
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
