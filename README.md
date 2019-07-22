@@ -6,17 +6,8 @@ React Native component used to select a single value from a range of values.
 ![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)
 ![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)
 
+
 ## Getting started
-
-### React Native >= 0.60
-
-`yarn add @react-native-community/slider@next`
-
-or
-
-`npm install @react-native-community/slider@next --save`
-
-### React Native <= 0.59.X
 
 `yarn add @react-native-community/slider`
 
@@ -24,67 +15,14 @@ or
 
 `npm install @react-native-community/slider --save`
 
-### Linking the module (React Native <= 0.59.X)
+## React Native Compatibility
+To use this library you need to ensure you are using the correct version of React Native.
 
-<details>
-<summary>Automatically link the library</summary>
-Run the following commannd in your terminal:
+| `@react-native-community/slider` version | Required React Native Version |
+| ---------------------------------------- | ----------------------------- |
+| `2.x.x`                                  | `>= 0.60`                     |
+| [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0)  | `<= 0.59`                     |
 
-`react-native link @react-native-community/slider`
-</details>
-
-<details>
-<summary>Manually link the library on iOS</summary>
-
-### `Open project.xcodeproj in Xcode`
-
-Drag `RNCSlider.xcodeproj` to your project on Xcode (usually under the Libraries group on Xcode):
-
-![xcode-add](https://facebook.github.io/react-native/docs/assets/AddToLibraries.png)
-
-### Link `libRNCSlider.a` binary with libraries
-
-Click on your main project file (the one that represents the `.xcodeproj`) select `Build Phases` and drag the static library from the `Products` folder inside the Library you are importing to `Link Binary With Libraries` (or use the `+` sign and choose library from the list):
-
-![xcode-link](https://facebook.github.io/react-native/docs/assets/AddToBuildPhases.png)
-</details>
-
-<details>
-<summary>Manually link the library on Android</summary>
-   
-#### `android/settings.gradle`
-```groovy
-include ':react-native-community-slider'
-project(':react-native-community-slider').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/slider/android')
-```
-
-#### `android/app/build.gradle`
-```groovy
-dependencies {
-   ...
-   implementation project(':react-native-community-slider')
-}
-```
-
-#### `android/app/src/main/.../MainApplication.java`
-On top, where imports are:
-
-```java
-import com.reactnativecommunity.slider.ReactSliderPackage;
-```
-
-Add the `ReactSliderPackage` class to your list of exported packages.
-
-```java
-@Override
-protected List<ReactPackage> getPackages() {
-    return Arrays.asList(
-            new MainReactPackage(),
-            new ReactSliderPackage()
-    );
-}
-```
-</details>
 
 ## Migrating from the core `react-native` module
 This module was created when the Slider was split out from the core of React Native. To migrate to this module you need to follow the installation instructions above and then change you imports from:
@@ -312,6 +250,10 @@ Assigns a single image for the track. Only static images are supported. The cent
 | Type                   | Required | Platform |
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
+
+## Maintainers
+
+- [Michał Chudziak](https://github.com/michalchudziak) - [Callstack](https://callstack.com/)
 
 ## Contributors
 

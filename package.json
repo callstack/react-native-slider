@@ -50,13 +50,8 @@
     "jest": "24.1.0",
     "metro-react-native-babel-preset": "0.54.1",
     "react": "16.8.6",
-    "react-native": "0.60.0-rc.3",
+    "react-native": "0.60.4",
     "react-test-renderer": "16.8.6"
-  },
-  "resolutions": {
-    "handlebars": "4.1.2",
-    "js-yaml": "3.13.1",
-    "@react-native-community/cli": "^2.0.0-rc.5"
   },
   "jest": {
     "preset": "react-native",
