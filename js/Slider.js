@@ -54,6 +54,12 @@ type IOSProps = $ReadOnly<{|
    * Sets an image for the thumb. Only static images are supported.
    */
   thumbImage?: ?ImageSource,
+
+  /**
+   * If true the slider will be inverted.
+   * Default value is false.
+   */
+  inverted?: ?boolean,
 |}>;
 
 type Props = $ReadOnly<{|
@@ -270,6 +276,7 @@ SliderWithRef.defaultProps = {
   minimumValue: 0,
   maximumValue: 1,
   step: 0,
+  inverted: false,
 };
 
 let styles;

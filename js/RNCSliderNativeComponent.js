@@ -29,6 +29,7 @@ type NativeProps = $ReadOnly<{|
   ...ViewProps,
   disabled?: ?boolean,
   enabled?: ?boolean,
+  inverted?: ?boolean,
   maximumTrackImage?: ?ImageSource,
   maximumTrackTintColor?: ?ColorValue,
   maximumValue?: ?number,
