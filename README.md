@@ -72,13 +72,13 @@ Check out the [example project](example) for more examples.
 - [`step`](#step)
 - [`maximumTrackTintColor`](#maximumtracktintcolor)
 - [`testID`](#testid)
+- [`inverted`](#inverted)
 - [`value`](#value)
 - [`thumbTintColor`](#thumbtintcolor)
 - [`maximumTrackImage`](#maximumtrackimage)
 - [`minimumTrackImage`](#minimumtrackimage)
 - [`thumbImage`](#thumbimage)
 - [`trackImage`](#trackimage)
-- [`inverted`](#inverted)
 
 ---
 
@@ -192,6 +192,15 @@ Used to locate this view in UI automation tests.
 
 ---
 
+### `inverted`
+Reverses the direction of the slider. Default value is false.
+
+| Type | Required |
+| ---- | -------- |
+| bool | No       |
+
+---
+
 ### `value`
 
 Initial value of the slider. The value should be between minimumValue and maximumValue, which default to 0 and 1 respectively. Default value is 0.
@@ -222,8 +231,6 @@ Assigns a maximum track image. Only static images are supported. The leftmost pi
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
 
----
-
 ### `minimumTrackImage`
 
 Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track.
@@ -251,15 +258,6 @@ Assigns a single image for the track. Only static images are supported. The cent
 | Type                   | Required | Platform |
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
-
----
-
-### `inverted`
-Reverses the direction of the slider. Default value is false.
-
-| Type | Required | Platform |
-| ---- | -------- | -------- |
-| bool | No       | iOS      |
 
 ## Maintainers
 

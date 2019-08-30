@@ -54,12 +54,6 @@ type IOSProps = $ReadOnly<{|
    * Sets an image for the thumb. Only static images are supported.
    */
   thumbImage?: ?ImageSource,
-
-  /**
-   * If true the slider will be inverted.
-   * Default value is false.
-   */
-  inverted?: ?boolean,
 |}>;
 
 type Props = $ReadOnly<{|
@@ -146,6 +140,12 @@ type Props = $ReadOnly<{|
    * Used to locate this view in UI automation tests.
    */
   testID?: ?string,
+
+  /**
+   * If true the slider will be inverted.
+   * Default value is false.
+   */
+  inverted?: ?boolean,
 |}>;
 
 /**
