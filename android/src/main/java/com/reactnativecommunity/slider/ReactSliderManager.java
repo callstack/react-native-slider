@@ -130,8 +130,8 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     
     if (Build.VERSION.SDK_INT >= 21) {
       /** 
-       * Without this parameter the SeekBar progress line doesn't appear
-       * when it is rotated
+       * The "splitTrack" parameter should have "false" value,
+       * otherwise the SeekBar progress line doesn't appear when it is rotated.
        */
       slider.setSplitTrack(false);
     }
