@@ -72,8 +72,8 @@ Check out the [example project](example) for more examples.
 - [`step`](#step)
 - [`maximumTrackTintColor`](#maximumtracktintcolor)
 - [`testID`](#testid)
-- [`inverted`](#inverted)
 - [`value`](#value)
+- [`inverted`](#inverted)
 - [`thumbTintColor`](#thumbtintcolor)
 - [`maximumTrackImage`](#maximumtrackimage)
 - [`minimumTrackImage`](#minimumtrackimage)
@@ -192,15 +192,6 @@ Used to locate this view in UI automation tests.
 
 ---
 
-### `inverted`
-Reverses the direction of the slider. Default value is false.
-
-| Type | Required |
-| ---- | -------- |
-| bool | No       |
-
----
-
 ### `value`
 
 Initial value of the slider. The value should be between minimumValue and maximumValue, which default to 0 and 1 respectively. Default value is 0.
@@ -210,6 +201,15 @@ _This is not a controlled component_, you don't need to update the value during 
 | Type   | Required |
 | ------ | -------- |
 | number | No       |
+
+---
+
+### `inverted`
+Reverses the direction of the slider. Default value is false.
+
+| Type | Required |
+| ---- | -------- |
+| bool | No       |
 
 ---
 
