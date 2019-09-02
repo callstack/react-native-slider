@@ -199,11 +199,8 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   
   @ReactProp(name = "inverted", defaultBoolean = false)
   public void setInverted(ReactSlider view, boolean inverted) {
-    if (inverted) {
-      view.setRotation(180);
-    } else {
-      view.setRotation(0);
-    }
+    if (inverted) view.setScaleX(-1f);
+    else view.setScaleX(1f);
   }
 
   @Override
