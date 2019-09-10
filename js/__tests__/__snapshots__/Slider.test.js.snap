@@ -21,6 +21,7 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
       "height": 40,
     }
   }
+  thumbImage={null}
   thumbTintColor="green"
   value={0.5}
 />
@@ -45,6 +46,7 @@ exports[`<Slider /> renders disabled slider 1`] = `
       "height": 40,
     }
   }
+  thumbImage={null}
   value={0}
 />
 `;
@@ -68,6 +70,7 @@ exports[`<Slider /> renders enabled slider 1`] = `
       "height": 40,
     }
   }
+  thumbImage={null}
   value={0}
 />
 `;

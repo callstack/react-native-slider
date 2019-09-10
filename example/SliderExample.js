@@ -167,7 +167,6 @@ exports.examples = [
   },
   {
     title: 'Custom thumb image',
-    platform: 'ios',
     render(): React.Element<any> {
       return <SliderExample thumbImage={require('./uie_thumb_big.png')} />;
     },
