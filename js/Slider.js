@@ -49,12 +49,6 @@ type IOSProps = $ReadOnly<{|
    * leftmost pixel of the image will be stretched to fill the track.
    */
   maximumTrackImage?: ?ImageSource,
-
-  /**
-   * If true the slider will be inverted.
-   * Default value is false.
-   */
-  inverted?: ?boolean,
 |}>;
 
 type Props = $ReadOnly<{|
@@ -146,6 +140,12 @@ type Props = $ReadOnly<{|
    * Sets an image for the thumb. Only static images are supported.
    */
   thumbImage?: ?ImageSource,
+
+  /**
+   * If true the slider will be inverted.
+   * Default value is false.
+   */
+  inverted?: ?boolean,
 |}>;
 
 /**

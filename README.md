@@ -73,12 +73,12 @@ Check out the [example project](example) for more examples.
 - [`maximumTrackTintColor`](#maximumtracktintcolor)
 - [`testID`](#testid)
 - [`value`](#value)
+- [`inverted`](#inverted)
 - [`thumbTintColor`](#thumbtintcolor)
 - [`maximumTrackImage`](#maximumtrackimage)
 - [`minimumTrackImage`](#minimumtrackimage)
 - [`thumbImage`](#thumbimage)
 - [`trackImage`](#trackimage)
-- [`inverted`](#inverted)
 
 ---
 
@@ -204,6 +204,15 @@ _This is not a controlled component_, you don't need to update the value during 
 
 ---
 
+### `inverted`
+Reverses the direction of the slider. Default value is false.
+
+| Type | Required |
+| ---- | -------- |
+| bool | No       |
+
+---
+
 ### `thumbTintColor`
 
 Color of the foreground switch grip.
@@ -221,8 +230,6 @@ Assigns a maximum track image. Only static images are supported. The leftmost pi
 | Type                   | Required | Platform |
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
-
----
 
 ### `minimumTrackImage`
 
@@ -251,15 +258,6 @@ Assigns a single image for the track. Only static images are supported. The cent
 | Type                   | Required | Platform |
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
-
----
-
-### `inverted`
-Reverses the direction of the slider. Default value is false.
-
-| Type | Required | Platform |
-| ---- | -------- | -------- |
-| bool | No       | iOS      |
 
 ## Maintainers
 
