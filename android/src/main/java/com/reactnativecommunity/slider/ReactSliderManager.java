@@ -7,6 +7,7 @@
 
 package com.reactnativecommunity.slider;
 
+import android.os.Build;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -125,7 +126,17 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   protected ReactSlider createViewInstance(ThemedReactContext context) {
-    return new ReactSlider(context, null, STYLE);
+    ReactSlider slider = new ReactSlider(context, null, STYLE);
+    
+    if (Build.VERSION.SDK_INT >= 21) {
+      /** 
+       * The "splitTrack" parameter should have "false" value,
+       * otherwise the SeekBar progress line doesn't appear when it is rotated.
+       */
+      slider.setSplitTrack(false);
+    }
+    
+    return slider;
   }
 
   @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
@@ -184,6 +195,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     } else {
       background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
+  }
+  
+  @ReactProp(name = "inverted", defaultBoolean = false)
+  public void setInverted(ReactSlider view, boolean inverted) {
+    if (inverted) view.setScaleX(-1f);
+    else view.setScaleX(1f);
   }
 
   @Override
