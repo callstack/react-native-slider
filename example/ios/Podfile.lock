@@ -57,7 +57,7 @@ PODS:
     - React-cxxreact (= 0.60.4)
     - React-jsi (= 0.60.4)
   - React-jsinspector (0.60.4)
-  - react-native-slider (2.0.0-rc.1):
+  - react-native-slider (2.0.0):
     - React
   - React-RCTActionSheet (0.60.4):
     - React-Core (= 0.60.4)
@@ -175,7 +175,7 @@ SPEC CHECKSUMS:
   React-jsi: 21d3153b1153fbf6510a92b6b11e33e725cb7432
   React-jsiexecutor: 7549641e48bafae7bfee3f3ea19bf4901639c5de
   React-jsinspector: 73f24a02fa684ed6a2b828ba116874a2191ded88
-  react-native-slider: 884693dd50f84745baa511ecdcde4c16f32182fb
+  react-native-slider: 40bdbfc1af0393922ac331bc1d95a6c5d5174fb6
   React-RCTActionSheet: 9f71d7ae3e8fb10e08d162cbf14c621349dbfab3
   React-RCTAnimation: 981d8c95b0e30918a9832ccac32af83562a27fae
   React-RCTBlob: 21e73d1020a302a75fed30dbaee9f15287b80baa
@@ -190,4 +190,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 92ab70dc21e8af2d433d3b6fff96be6127e784e6
 
-COCOAPODS: 1.7.3
+COCOAPODS: 1.7.5
