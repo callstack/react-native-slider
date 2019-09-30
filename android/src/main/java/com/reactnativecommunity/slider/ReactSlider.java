@@ -7,9 +7,22 @@
 package com.reactnativecommunity.slider;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatSeekBar;
+
 import android.util.AttributeSet;
+
+import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import javax.annotation.Nullable;
 
 /**
@@ -111,5 +124,41 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double getStepValue() {
     return mStep > 0 ? mStep : mStepCalculated;
+  }
+
+  private BitmapDrawable getBitmapDrawable(final String uri) {
+    BitmapDrawable bitmapDrawable = null;
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    Future<BitmapDrawable> future = executorService.submit(new Callable<BitmapDrawable>() {
+      @Override
+      public BitmapDrawable call() {
+        BitmapDrawable bitmapDrawable = null;
+        try {
+          Bitmap bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
+          bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        return bitmapDrawable;
+      }
+    });
+    try {
+      bitmapDrawable = future.get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return bitmapDrawable;
+  }
+
+  public void setThumbImage(final String uri) {
+    if (uri != null) {
+      setThumb(getBitmapDrawable(uri));
+      // Enable alpha channel for the thumbImage
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        setSplitTrack(false);
+      }
+    } else {
+      setThumb(getThumb());
+    }
   }
 }

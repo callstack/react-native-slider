@@ -11,7 +11,7 @@
 'use strict';
 
 const React = require('react');
-const {Platform, StyleSheet} = require('react-native');
+const {Image, Platform, StyleSheet} = require('react-native');
 const RCTSliderNativeComponent = require('./RNCSliderNativeComponent');
 
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
@@ -49,11 +49,6 @@ type IOSProps = $ReadOnly<{|
    * leftmost pixel of the image will be stretched to fill the track.
    */
   maximumTrackImage?: ?ImageSource,
-
-  /**
-   * Sets an image for the thumb. Only static images are supported.
-   */
-  thumbImage?: ?ImageSource,
 |}>;
 
 type Props = $ReadOnly<{|
@@ -140,6 +135,11 @@ type Props = $ReadOnly<{|
    * Used to locate this view in UI automation tests.
    */
   testID?: ?string,
+
+  /**
+   * Sets an image for the thumb. Only static images are supported.
+   */
+  thumbImage?: ?ImageSource,
 
   /**
    * If true the slider will be inverted.
@@ -252,6 +252,7 @@ const Slider = (
   return (
     <RCTSliderNativeComponent
       {...localProps}
+      thumbImage={Image.resolveAssetSource(props.thumbImage)}
       ref={forwardedRef}
       style={style}
       onChange={onChangeEvent}
