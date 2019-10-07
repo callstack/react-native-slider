@@ -15,6 +15,10 @@ or
 
 `npm install @react-native-community/slider --save`
 
+and install cocoapods
+
+`pod install`
+
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
 
