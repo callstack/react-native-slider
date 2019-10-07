@@ -18,6 +18,12 @@
   super.value = value;
 }
 
+- (void)setValue:(float)value animated:(BOOL)animated
+{
+  _unclippedValue = value;
+  [super setValue:value animated:animated];
+}
+
 - (void)setMinimumValue:(float)minimumValue
 {
   super.minimumValue = minimumValue;

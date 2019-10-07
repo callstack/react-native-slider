@@ -44,7 +44,7 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
         )
       );
 
-    [sender setValue:value animated:YES];
+    [sender setValue:value animated:NO];
   }
 
   if (continuous) {
