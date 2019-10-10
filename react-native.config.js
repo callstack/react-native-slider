@@ -1,4 +1,4 @@
-const root = process.cwd();
+const root = __dirname;
 
 module.exports = {
   dependencies: {
