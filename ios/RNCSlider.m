@@ -99,4 +99,8 @@
   }
 }
 
+- (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
+    return YES;
+}
+
 @end
