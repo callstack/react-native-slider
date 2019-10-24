@@ -169,10 +169,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "thumbTintColor", customType = "Color")
   public void setThumbTintColor(ReactSlider view, Integer color) {
-    if (color == null) {
-      view.getThumb().clearColorFilter();
-    } else {
-      view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+    if(view.getThumb()!=null){
+      if (color == null) {
+        view.getThumb().clearColorFilter();
+      } else {
+        view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+      }
     }
   }
 
