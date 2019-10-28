@@ -1,7 +1,13 @@
 {
-	"private": true,
-	"workspaces": ["src", "example"],
-	"jest": {
+  "private": true,
+  "workspaces": ["src", "example"],
+  "scripts": {
+    "validate:eslint": "eslint src",
+    "validate:flow": "flow check src",
+    "test:jest": "jest src",
+    "test": "yarn validate:eslint && yarn validate:flow && yarn test:jest"
+  },
+  "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
       "/e2e/"
@@ -34,7 +40,7 @@
     "jsxBracketSameLine": true,
     "parser": "flow"
   },
-	"detox": {
+  "detox": {
     "test-runner": "jest",
     "runner-config": "example/e2e/config.json",
     "configurations": {
