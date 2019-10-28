@@ -266,6 +266,7 @@ Assigns a single image for the track. Only static images are supported. The cent
 ## Maintainers
 
 - [Michał Chudziak](https://github.com/michalchudziak) - [Callstack](https://callstack.com/)
+- [Wojciech Szafraniec](https://github.com/wojteg1337) - [Callstack](https://callstack.com/)
 
 ## Contributors
 
