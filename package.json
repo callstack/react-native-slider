@@ -1,57 +1,11 @@
 {
-  "name": "@react-native-community/slider",
-  "version": "2.0.2",
-  "license": "MIT",
-  "author": "react-native-community",
-  "homepage": "https://github.com/react-native-community/react-native-slider",
-  "description": "React Native component used to select a single value from a range of values.",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "js/Slider.js",
-  "types": "typings/index.d.ts",
+  "private": true,
+  "workspaces": ["src", "example"],
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "start:android": "react-native run-android --root example/",
-    "test": "yarn validate:eslint && yarn validate:flow && yarn test:jest",
-    "validate:eslint": "eslint 'js/**/*.js' 'example/**/*.js'",
-    "validate:flow": "flow check",
-    "test:jest": "jest",
-    "test:detox:android:test:debug": "detox test -c android.emu.debug",
-    "test:detox:android:test:release": "detox test -c android.emu.release",
-    "test:detox:android:build:debug": "detox build -c android.emu.debug",
-    "test:detox:android:build:release": "detox build -c android.emu.release",
-    "test:detox:android:bundle:release": "mkdir -p .tmp && react-native bundle --max-workers 4 --platform android --dev false --entry-file example/index.js --bundle-output .tmp/android-bundle.js",
-    "test:detox:ios:test:debug": "detox test -c ios.sim.debug",
-    "test:detox:ios:test:release": "detox test -c ios.sim.release",
-    "test:detox:ios:build:debug": "detox build -c ios.sim.debug",
-    "test:detox:ios:build:release": "detox build -c ios.sim.release",
-    "test:detox:ios:bundle:release": "mkdir -p .tmp && react-native bundle --max-workers 4 --platform ios --dev false --entry-file example/index.js --bundle-output .tmp/ios-bundle.js",
-    "test:detox:clean": "rimraf example/android/build && rimraf example/android/app/build && rimraf example/android/.gradle && rimraf example/ios/build"
-  },
-  "keywords": [
-    "react-native",
-    "react native",
-    "slider"
-  ],
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
-  },
-  "devDependencies": {
-    "@babel/core": "7.4.5",
-    "@babel/runtime": "7.4.5",
-    "@react-native-community/eslint-config": "0.0.5",
-    "babel-jest": "^24.8.0",
-    "babel-plugin-module-resolver": "3.1.3",
-    "detox": "12.4.1",
-    "eslint": "6.0.1",
-    "flow-bin": "0.98.0",
-    "jest": "24.1.0",
-    "metro-react-native-babel-preset": "0.54.1",
-    "react": "16.8.6",
-    "react-native": "0.60.4",
-    "react-test-renderer": "16.8.6"
+    "validate:eslint": "eslint src",
+    "validate:flow": "flow check src",
+    "test:jest": "jest src",
+    "test": "yarn validate:eslint && yarn validate:flow && yarn test:jest"
   },
   "jest": {
     "preset": "react-native",
@@ -115,9 +69,5 @@
         "name": "TestingAVD"
       }
     }
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/react-native-community/react-native-slider.git"
   }
 }

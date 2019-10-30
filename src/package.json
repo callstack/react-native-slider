@@ -1,0 +1,45 @@
+{
+  "name": "@react-native-community/slider",
+  "version": "2.0.2",
+  "license": "MIT",
+  "author": "react-native-community",
+  "homepage": "https://github.com/react-native-community/react-native-slider",
+  "description": "React Native component used to select a single value from a range of values.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "js/Slider.js",
+  "types": "typings/index.d.ts",
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "start:android": "react-native run-android --root example/"
+  },
+  "keywords": [
+    "react-native",
+    "react native",
+    "slider"
+  ],
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/runtime": "^7.6.2",
+    "@react-native-community/eslint-config": "0.0.5",
+    "babel-jest": "^24.9.0",
+    "babel-plugin-module-resolver": "3.1.3",
+    "detox": "12.4.1",
+    "eslint": "^6.5.1",
+    "flow-bin": "0.105.2",
+    "jest": "^24.9.0",
+    "metro-react-native-babel-preset": "^0.56.0",
+    "react": "16.9.0",
+    "react-native": "0.61.2",
+    "react-test-renderer": "16.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/react-native-community/react-native-slider.git"
+  }
+}
