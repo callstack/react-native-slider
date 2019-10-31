@@ -128,15 +128,15 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @Override
   protected ReactSlider createViewInstance(ThemedReactContext context) {
     ReactSlider slider = new ReactSlider(context, null, STYLE);
-    
+
     if (Build.VERSION.SDK_INT >= 21) {
-      /** 
+      /**
        * The "splitTrack" parameter should have "false" value,
        * otherwise the SeekBar progress line doesn't appear when it is rotated.
        */
       slider.setSplitTrack(false);
     }
-    
+
     return slider;
   }
 
@@ -169,10 +169,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "thumbTintColor", customType = "Color")
   public void setThumbTintColor(ReactSlider view, Integer color) {
-    if (color == null) {
-      view.getThumb().clearColorFilter();
-    } else {
-      view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+    if (view.getThumb() != null) {
+      if (color == null) {
+        view.getThumb().clearColorFilter();
+      } else {
+        view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+      }
     }
   }
 
@@ -206,7 +208,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
       background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
   }
-  
+
   @ReactProp(name = "inverted", defaultBoolean = false)
   public void setInverted(ReactSlider view, boolean inverted) {
     if (inverted) view.setScaleX(-1f);
