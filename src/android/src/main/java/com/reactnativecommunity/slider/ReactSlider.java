@@ -134,7 +134,17 @@ public class ReactSlider extends AppCompatSeekBar {
       public BitmapDrawable call() {
         BitmapDrawable bitmapDrawable = null;
         try {
-          Bitmap bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
+          Bitmap bitmap = null;
+          if (uri.startsWith("http://") || uri.startsWith("https://") ||
+              uri.startsWith("file://") || uri.startsWith("asset://") || uri.startsWith("data:")) {
+            bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
+          } else {
+            int drawableId = getResources()
+                .getIdentifier(uri, "drawable", getContext()
+                .getPackageName());
+            bitmap = BitmapFactory.decodeResource(getResources(), drawableId);
+          }
+
           bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
         } catch (Exception e) {
           e.printStackTrace();
