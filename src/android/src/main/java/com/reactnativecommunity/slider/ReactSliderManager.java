@@ -66,9 +66,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
         YogaMeasureMode heightMode) {
       if (!mMeasured) {
         SeekBar reactSlider = new ReactSlider(getThemedContext(), null, STYLE);
-        final int spec = View.MeasureSpec.makeMeasureSpec(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            View.MeasureSpec.UNSPECIFIED);
+        final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         reactSlider.measure(spec, spec);
         mWidth = reactSlider.getMeasuredWidth();
         mHeight = reactSlider.getMeasuredHeight();
