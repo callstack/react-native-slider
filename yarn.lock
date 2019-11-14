@@ -1076,7 +1076,7 @@
     prettier "1.16.4"
 
 "@react-native-community/slider@./src":
-  version "2.0.4"
+  version "2.0.5"
 
 "@types/babel__core@^7.1.0":
   version "7.1.2"
