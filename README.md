@@ -263,6 +263,32 @@ Assigns a single image for the track. Only static images are supported. The cent
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
 
+## Contributing
+
+While developing, you can run the [example app](/example/README.md) to test your changes.
+
+Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
+
+```sh
+yarn validate:flow
+yarn validate:eslint
+yarn test:jest
+```
+or 
+
+```sh
+yarn test
+```
+to run them all.
+
+To fix formatting errors, run the following:
+
+```sh
+yarn validate:eslint --fix
+```
+
+Remember to cover your changes with tests if possible.
+
 ## Maintainers
 
 - [Michał Chudziak](https://github.com/michalchudziak) - [Callstack](https://callstack.com/)

@@ -10,10 +10,6 @@
   },
   "main": "js/Slider.js",
   "types": "typings/index.d.ts",
-  "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "start:android": "react-native run-android --root example/"
-  },
   "keywords": [
     "react-native",
     "react native",
