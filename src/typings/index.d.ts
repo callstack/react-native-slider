@@ -102,6 +102,12 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
    * the value during dragging.
    */
   value?: number;
+
+  /**
+   * Reverses the direction of the slider.
+   */
+  inverted?: boolean;
+
 }
 
 /**
