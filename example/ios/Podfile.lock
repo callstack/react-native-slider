@@ -182,7 +182,7 @@ PODS:
     - React-cxxreact (= 0.61.2)
     - React-jsi (= 0.61.2)
   - React-jsinspector (0.61.2)
-  - react-native-slider (2.0.2):
+  - react-native-slider (2.0.5):
     - React
   - React-RCTActionSheet (0.61.2):
     - React-Core/RCTActionSheetHeaders (= 0.61.2)
@@ -252,7 +252,7 @@ DEPENDENCIES:
   - Yoga (from `../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - boost-for-react-native
 
 EXTERNAL SOURCES:
@@ -325,7 +325,7 @@ SPEC CHECKSUMS:
   React-jsi: 32285a21b1b24c36060493ed3057a34677d58d09
   React-jsiexecutor: 8909917ff7d8f21a57e443a866fd8d4560e50c65
   React-jsinspector: 111d7d342b07a904c400592e02a2b958f1098b60
-  react-native-slider: 5d61590f26a51cf0a858bfd1543f6d6ec8b78a6e
+  react-native-slider: 39208600e44f885e2d2c0510b5c6435a0f62d087
   React-RCTActionSheet: 89b037c0fb7d2671607cb645760164e7e0c013f6
   React-RCTAnimation: e3cefa93c38c004c318f7ec04b883eb14b8b8235
   React-RCTBlob: d26ac0e313fbf14e7203473fd593ccaaeee8329e
@@ -340,4 +340,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c57ebc9c17572d007c20bb8d19901226d73a2699
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.8.4
