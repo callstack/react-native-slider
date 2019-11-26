@@ -50,5 +50,7 @@ type NativeProps = $ReadOnly<{|
 
 type RNCSliderType = Class<NativeComponent<NativeProps>>;
 
-const RNCSlider = ((requireNativeComponent('RNCSlider'): any): RNCSliderType);
-export default RNCSlider;
+const RNCSliderNativeComponent = ((requireNativeComponent(
+  'RNCSlider',
+): any): RNCSliderType);
+export default RNCSliderNativeComponent;
