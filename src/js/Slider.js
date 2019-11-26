@@ -10,10 +10,11 @@
 
 'use strict';
 
-const React = require('react');
-const {Image, Platform, StyleSheet} = require('react-native');
-const RCTSliderNativeComponent = require('./RNCSliderNativeComponent');
+import React from 'react';
+import {Image, Platform, StyleSheet} from 'react-native';
+import RCTSliderNativeComponent from './RNCSliderNativeComponent';
 
+import type {Ref} from 'react';
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
@@ -208,9 +209,9 @@ type Props = $ReadOnly<{|
  *```
  *
  */
-const Slider = (
+const SliderComponent = (
   props: Props,
-  forwardedRef?: ?React.Ref<typeof RCTSliderNativeComponent>,
+  forwardedRef?: ?Ref<typeof RCTSliderNativeComponent>,
 ) => {
   const style = StyleSheet.compose(
     styles.slider,
@@ -266,7 +267,7 @@ const Slider = (
   );
 };
 
-const SliderWithRef = React.forwardRef(Slider);
+const SliderWithRef = React.forwardRef(SliderComponent);
 
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
@@ -296,4 +297,5 @@ if (Platform.OS === 'ios') {
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
  * and run Flow. */
-module.exports = (SliderWithRef: Class<NativeComponent<Props>>);
+const Slider = (SliderWithRef: Class<NativeComponent<Props>>);
+export default Slider;

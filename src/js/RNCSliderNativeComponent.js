@@ -10,7 +10,7 @@
 
 'use strict';
 
-const {requireNativeComponent} = require('react-native');
+import {requireNativeComponent} from 'react-native';
 
 import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
@@ -50,4 +50,7 @@ type NativeProps = $ReadOnly<{|
 
 type RNCSliderType = Class<NativeComponent<NativeProps>>;
 
-module.exports = ((requireNativeComponent('RNCSlider'): any): RNCSliderType);
+const RNCSliderNativeComponent = ((requireNativeComponent(
+  'RNCSlider',
+): any): RNCSliderType);
+export default RNCSliderNativeComponent;
