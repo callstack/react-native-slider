@@ -19,6 +19,10 @@ and install cocoapods
 
 `pod install`
 
+and link the native code for android
+
+`react-native link @react-native-community/slider`
+
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
 
