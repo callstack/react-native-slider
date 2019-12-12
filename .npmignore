@@ -1,3 +1,4 @@
 /.circleci
 /.github
 /example
+/src/android/build
