@@ -249,9 +249,9 @@ Assigns a minimum track image. Only static images are supported. The rightmost p
 
 Sets an image for the thumb. Only static images are supported.
 
-| Type                   | Required | Platform |
-| ---------------------- | -------- | -------- |
-| Image.propTypes.source | No       | iOS      |
+| Type                   | Required | 
+| ---------------------- | -------- | 
+| Image.propTypes.source | No       | 
 
 ---
 
