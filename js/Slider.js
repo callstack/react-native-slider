@@ -13,6 +13,7 @@
 const React = require('react');
 const {Platform, StyleSheet} = require('react-native');
 const RCTSliderNativeComponent = require('./RNCSliderNativeComponent');
+const {useViewProp} = require('./hooks');
 
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
@@ -221,6 +222,8 @@ const Slider = (
     onValueChange,
     onSlidingStart,
     onSlidingComplete,
+    track,
+    thumb,
     ...localProps
   } = props;
 
@@ -249,19 +252,28 @@ const Slider = (
       }
     : null;
 
+  const ref = React.useRef();
+  React.useImperativeHandle(forwardedRef, () => ref.current);
+  const trackView = useViewProp(track, 'trackViewTag', ref);
+  const thumbView = useViewProp(thumb, 'thumbViewTag', ref);
+
   return (
-    <RCTSliderNativeComponent
-      {...localProps}
-      ref={forwardedRef}
-      style={style}
-      onChange={onChangeEvent}
-      onRNCSliderSlidingStart={onSlidingStartEvent}
-      onRNCSliderSlidingComplete={onSlidingCompleteEvent}
-      onRNCSliderValueChange={onValueChangeEvent}
-      enabled={!props.disabled}
-      onStartShouldSetResponder={() => true}
-      onResponderTerminationRequest={() => false}
-    />
+    <>
+      {trackView}
+      {thumbView}
+      <RCTSliderNativeComponent
+        {...localProps}
+        ref={ref}
+        style={style}
+        onChange={onChangeEvent}
+        onRNCSliderSlidingStart={onSlidingStartEvent}
+        onRNCSliderSlidingComplete={onSlidingCompleteEvent}
+        onRNCSliderValueChange={onValueChangeEvent}
+        enabled={!props.disabled}
+        onStartShouldSetResponder={() => true}
+        onResponderTerminationRequest={() => false}
+      />
+    </>
   );
 };
 

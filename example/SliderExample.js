@@ -11,7 +11,7 @@
 'use strict';
 
 const React = require('react');
-const {Text, StyleSheet, View} = require('react-native');
+const {Text, StyleSheet, View, Image} = require('react-native');
 const Slider = require('@react-native-community/slider');
 
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
@@ -196,6 +196,28 @@ exports.examples = [
     platform: 'ios',
     render(): React.Element<any> {
       return <SliderExample value={0.6} inverted />;
+    },
+  },
+  {
+    title: 'Custom View',
+    platform: 'android',
+    render(): React.Element<any> {
+      return (
+        <SliderExample
+          value={0.6}
+          inverted
+          thumb={<View style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center' }} collapsable={false}>
+            <Image
+              source={require('./uie_thumb_big.png')}
+              style={{ padding: 20 }}
+            />
+          </View>}
+          track={() => <View style={{flex:1}}>
+            <View style={{ backgroundColor: 'red', flex: 1 }} />
+            <View style={{ backgroundColor: 'yellow', flex: 1 }} />
+          </View>}
+        />
+      );
     },
   },
 ];

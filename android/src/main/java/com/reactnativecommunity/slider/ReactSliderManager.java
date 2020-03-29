@@ -13,21 +13,25 @@ import android.graphics.drawable.LayerDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
+
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.LayoutShadowNode;
-import com.facebook.react.uimanager.ReactShadowNodeImpl;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.yoga.YogaMeasureFunction;
 import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
+
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 /**
  * Manages instances of {@code ReactSlider}.
@@ -128,6 +132,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     return new ReactSlider(context, null, STYLE);
   }
 
+  @Override
+  public void onDropViewInstance(@Nonnull ReactSlider view) {
+    view.tearDown();
+  }
+
   @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
   public void setEnabled(ReactSlider view, boolean enabled) {
     view.setEnabled(enabled);
@@ -184,6 +193,16 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     } else {
       background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
+  }
+
+  @ReactProp(name = "trackViewTag")
+  public void setTrackView(ReactSlider view, Integer tag) {
+    view.setProgressDrawable(tag == null ? -1 : tag);
+  }
+
+  @ReactProp(name = "thumbViewTag")
+  public void setThumbView(ReactSlider view, Integer tag) {
+    view.setThumbDrawable(tag == null ? -1 : tag);
   }
 
   @Override

@@ -1,11 +1,23 @@
 import * as React from "react";
 import * as ReactNative from "react-native";
 
+type ViewHolderProp = React.ReactElement | React.RefObject<any> | React.FunctionComponent | number;
+
 export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
    * Color of the foreground switch grip.
    */
   thumbTintColor?: string;
+
+  /**
+   * Sets a view for the thumb.
+   */
+  thumb?: ViewHolderProp;
+
+  /**
+   * Sets a view for the track.
+   */
+  track?: ViewHolderProp;
 }
 
 export interface SliderPropsIOS extends ReactNative.ViewProps {
