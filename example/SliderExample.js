@@ -206,15 +206,21 @@ exports.examples = [
         <SliderExample
           value={0.6}
           inverted
+          thumbTintColor={'yellow'}
+          //minimumTrackTintColor={'blue'}
+          //maximumTrackTintColor={'red'}
           thumb={<View style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center' }} collapsable={false}>
             <Image
               source={require('./uie_thumb_big.png')}
               style={{ padding: 20 }}
             />
           </View>}
-          track={() => <View style={{flex:1}}>
-            <View style={{ backgroundColor: 'red', flex: 1 }} />
+          maximumTrack={() => <View style={{flex:1,opacity:0.3}} collapsable={false}>
+            <View style={{ backgroundColor: 'blue', flex: 1 }} />
+          </View>}
+          minimumTrack={() => <View style={{ flex: 1 }} collapsable={false}>
             <View style={{ backgroundColor: 'yellow', flex: 1 }} />
+            <View style={{ backgroundColor: 'red', flex: 1 }} />
           </View>}
         />
       );

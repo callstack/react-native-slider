@@ -14,7 +14,8 @@ import android.view.MotionEvent;
 
 import androidx.appcompat.widget.AppCompatSeekBar;
 
-import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ProgressDrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawableHelper.BackgroundDrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ForegroundDrawableHandler;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ThumbDrawableHandler;
 
 import javax.annotation.Nullable;
@@ -54,14 +55,15 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
-  private final ProgressDrawableHandler mProgressDrawableHandler;
-
-  private final ThumbDrawableHandler mThumbDrawableHandler;
+  final ForegroundDrawableHandler mProgressDrawableHandler;
+  final BackgroundDrawableHandler mBackgroundDrawableHandler;
+  final ThumbDrawableHandler mThumbDrawableHandler;
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
     disableStateListAnimatorIfNeeded();
-    mProgressDrawableHandler = new ProgressDrawableHandler(this);
+    mProgressDrawableHandler = new ForegroundDrawableHandler(this);
+    mBackgroundDrawableHandler = new BackgroundDrawableHandler(this);
     mThumbDrawableHandler = new ThumbDrawableHandler(this);
   }
 
@@ -126,16 +128,9 @@ public class ReactSlider extends AppCompatSeekBar {
     return mStep > 0 ? mStep : mStepCalculated;
   }
 
-  void setProgressDrawable(int tag) {
-    mProgressDrawableHandler.setView(tag);
-  }
-
-  void setThumbDrawable(int tag) {
-    mThumbDrawableHandler.setView(tag);
-  }
-
   void tearDown() {
     mProgressDrawableHandler.tearDown();
+    mBackgroundDrawableHandler.tearDown();
     mThumbDrawableHandler.tearDown();
   }
 
@@ -143,14 +138,7 @@ public class ReactSlider extends AppCompatSeekBar {
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     boolean retVal = super.onTouchEvent(event);
-    int action = event.getActionMasked();
-    if (mThumbDrawableHandler.isCustomDrawable()) {
-      if (action == MotionEvent.ACTION_DOWN) {
-        mThumbDrawableHandler.start();
-      } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-        mThumbDrawableHandler.end();
-      }
-    }
+    mThumbDrawableHandler.onTouchEvent(event);
     return retVal;
   }
 

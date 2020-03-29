@@ -166,43 +166,32 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "thumbTintColor", customType = "Color")
   public void setThumbTintColor(ReactSlider view, Integer color) {
-    if (color == null) {
-      view.getThumb().clearColorFilter();
-    } else {
-      view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
-  }
-
-  @ReactProp(name = "minimumTrackTintColor", customType = "Color")
-  public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
-    LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
-    Drawable progress = drawable.findDrawableByLayerId(android.R.id.progress);
-    if (color == null) {
-      progress.clearColorFilter();
-    } else {
-      progress.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
-  }
-
-  @ReactProp(name = "maximumTrackTintColor", customType = "Color")
-  public void setMaximumTrackTintColor(ReactSlider view, Integer color) {
-    LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
-    Drawable background = drawable.findDrawableByLayerId(android.R.id.background);
-    if (color == null) {
-      background.clearColorFilter();
-    } else {
-      background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
-  }
-
-  @ReactProp(name = "trackViewTag")
-  public void setTrackView(ReactSlider view, Integer tag) {
-    view.setProgressDrawable(tag == null ? -1 : tag);
+    view.mThumbDrawableHandler.setTintColor(color);
   }
 
   @ReactProp(name = "thumbViewTag")
   public void setThumbView(ReactSlider view, Integer tag) {
-    view.setThumbDrawable(tag == null ? -1 : tag);
+    view.mThumbDrawableHandler.setView(tag == null ? -1 : tag);
+  }
+
+  @ReactProp(name = "minimumTrackTintColor", customType = "Color")
+  public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
+    view.mProgressDrawableHandler.setTintColor(color);
+  }
+
+  @ReactProp(name = "minimumTrackViewTag")
+  public void setMinimumTrackView(ReactSlider view, Integer tag) {
+    view.mProgressDrawableHandler.setView(tag == null ? -1 : tag);
+  }
+
+  @ReactProp(name = "maximumTrackTintColor", customType = "Color")
+  public void setMaximumTrackTintColor(ReactSlider view, Integer color) {
+    view.mBackgroundDrawableHandler.setTintColor(color);
+  }
+
+  @ReactProp(name = "maximumTrackViewTag")
+  public void setMaximumTrackView(ReactSlider view, Integer tag) {
+    view.mBackgroundDrawableHandler.setView(tag == null ? -1 : tag);
   }
 
   @Override
