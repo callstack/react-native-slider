@@ -11,8 +11,8 @@
 'use strict';
 
 const React = require('react');
-const {Text, StyleSheet, View, Image} = require('react-native');
-const Slider = require('@react-native-community/slider');
+const {Text, StyleSheet, View, Image, UIManager} = require('react-native');
+import Slider, { ANDROID_DEFAULT_COLOR } from '@react-native-community/slider';
 
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
   static defaultProps = {
@@ -193,9 +193,14 @@ exports.examples = [
   },
   {
     title: 'Inverted slider direction',
-    platform: 'ios',
     render(): React.Element<any> {
-      return <SliderExample value={0.6} inverted />;
+      return <SliderExample
+        value={0.6}
+        inverted
+        minimumTrack={() => <View style={{ flex: 1, opacity: 1 }} collapsable={false}>
+          <View style={{ backgroundColor: ANDROID_DEFAULT_COLOR, flex: 1 }} />
+        </View>}
+      />;
     },
   },
   {
@@ -207,6 +212,7 @@ exports.examples = [
           value={0.6}
           inverted
           thumbTintColor={'yellow'}
+          minimumValue={-1} maximumValue={2}
           //minimumTrackTintColor={'blue'}
           //maximumTrackTintColor={'red'}
           thumb={<View style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center' }} collapsable={false}>

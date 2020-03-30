@@ -310,4 +310,6 @@ if (Platform.OS === 'ios') {
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
  * and run Flow. */
-module.exports = (SliderWithRef: Class<NativeComponent<Props>>);
+export default (SliderWithRef: Class<NativeComponent<Props>>);
+
+export const ANDROID_DEFAULT_COLOR = '#009688';
