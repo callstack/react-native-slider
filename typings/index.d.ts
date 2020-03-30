@@ -17,7 +17,12 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
    * Sets a view for the track.
    */
-  track?: ViewHolderProp;
+  maximumtrack?: ViewHolderProp;
+
+  /**
+  * Sets a view for the track.
+  */
+  minimumtrack?: ViewHolderProp;
 }
 
 export interface SliderPropsIOS extends ReactNative.ViewProps {
