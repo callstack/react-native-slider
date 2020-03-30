@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.SeekBar;
 
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
@@ -26,7 +27,6 @@ import com.facebook.yoga.YogaNode;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -65,9 +65,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
         YogaMeasureMode heightMode) {
       if (!mMeasured) {
         SeekBar reactSlider = new ReactSlider(getThemedContext(), null, STYLE);
-        final int spec = View.MeasureSpec.makeMeasureSpec(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            View.MeasureSpec.UNSPECIFIED);
+        final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         reactSlider.measure(spec, spec);
         mWidth = reactSlider.getMeasuredWidth();
         mHeight = reactSlider.getMeasuredHeight();
@@ -126,7 +124,17 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   protected ReactSlider createViewInstance(ThemedReactContext context) {
-    return new ReactSlider(context, null, STYLE);
+    ReactSlider slider = new ReactSlider(context, null, STYLE);
+
+    if (Build.VERSION.SDK_INT >= 21) {
+      /**
+       * The "splitTrack" parameter should have "false" value,
+       * otherwise the SeekBar progress line doesn't appear when it is rotated.
+       */
+      slider.setSplitTrack(false);
+    }
+
+    return slider;
   }
 
   @Override
@@ -186,6 +194,15 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     view.mProgressDrawableHandler.setView(tag == null ? -1 : tag);
   }
 
+  @ReactProp(name = "thumbImage")
+  public void setThumbImage(ReactSlider view, @Nullable ReadableMap source) {
+    String uri = null;
+    if (source != null) {
+      uri = source.getString("uri");
+    }
+    view.setThumbImage(uri);
+  }
+
   @ReactProp(name = "maximumTrackTintColor", customType = "Color")
   public void setMaximumTrackTintColor(ReactSlider view, Integer color) {
     view.mBackgroundDrawableHandler.setTintColor(color);
@@ -194,6 +211,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "maximumTrackViewTag")
   public void setMaximumTrackView(ReactSlider view, Integer tag) {
     view.mBackgroundDrawableHandler.setView(tag == null ? -1 : tag);
+  }
+
+  @ReactProp(name = "inverted", defaultBoolean = false)
+  public void setInverted(ReactSlider view, boolean inverted) {
+    if (inverted) view.setScaleX(-1f);
+    else view.setScaleX(1f);
   }
 
   @Override

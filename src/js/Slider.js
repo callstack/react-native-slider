@@ -10,11 +10,12 @@
 
 'use strict';
 
-const React = require('react');
-const {Platform, StyleSheet} = require('react-native');
-const RCTSliderNativeComponent = require('./RNCSliderNativeComponent');
-const {useViewProp} = require('./hooks');
+import React from 'react';
+import {Image, Platform, StyleSheet} from 'react-native';
+import RCTSliderNativeComponent from './RNCSliderNativeComponent';
+const { useViewProp } = require('./hooks');
 
+import type {Ref} from 'react';
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
@@ -50,17 +51,6 @@ type IOSProps = $ReadOnly<{|
    * leftmost pixel of the image will be stretched to fill the track.
    */
   maximumTrackImage?: ?ImageSource,
-
-  /**
-   * Sets an image for the thumb. Only static images are supported.
-   */
-  thumbImage?: ?ImageSource,
-
-  /**
-   * If true the slider will be inverted.
-   * Default value is false.
-   */
-  inverted?: ?boolean,
 |}>;
 
 type Props = $ReadOnly<{|
@@ -147,6 +137,17 @@ type Props = $ReadOnly<{|
    * Used to locate this view in UI automation tests.
    */
   testID?: ?string,
+
+  /**
+   * Sets an image for the thumb. Only static images are supported.
+   */
+  thumbImage?: ?ImageSource,
+
+  /**
+   * If true the slider will be inverted.
+   * Default value is false.
+   */
+  inverted?: ?boolean,
 |}>;
 
 /**
@@ -209,9 +210,9 @@ type Props = $ReadOnly<{|
  *```
  *
  */
-const Slider = (
+const SliderComponent = (
   props: Props,
-  forwardedRef?: ?React.Ref<typeof RCTSliderNativeComponent>,
+  forwardedRef?: ?Ref<typeof RCTSliderNativeComponent>,
 ) => {
   const style = StyleSheet.compose(
     styles.slider,
@@ -267,6 +268,7 @@ const Slider = (
       <RCTSliderNativeComponent
         {...localProps}
         ref={ref}
+        thumbImage={Image.resolveAssetSource(props.thumbImage)}
         style={style}
         onChange={onChangeEvent}
         onRNCSliderSlidingStart={onSlidingStartEvent}
@@ -280,7 +282,9 @@ const Slider = (
   );
 };
 
-const SliderWithRef = React.forwardRef(Slider);
+const SliderWithRef = React.forwardRef(SliderComponent);
+
+export const ANDROID_DEFAULT_COLOR = '#009688';
 
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
@@ -310,6 +314,5 @@ if (Platform.OS === 'ios') {
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
  * and run Flow. */
-export default (SliderWithRef: Class<NativeComponent<Props>>);
-
-export const ANDROID_DEFAULT_COLOR = '#009688';
+const Slider = (SliderWithRef: Class<NativeComponent<Props>>);
+export default Slider;

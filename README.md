@@ -15,6 +15,10 @@ or
 
 `npm install @react-native-community/slider --save`
 
+and install cocoapods
+
+`pod install`
+
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
 
@@ -73,12 +77,12 @@ Check out the [example project](example) for more examples.
 - [`maximumTrackTintColor`](#maximumtracktintcolor)
 - [`testID`](#testid)
 - [`value`](#value)
+- [`inverted`](#inverted)
 - [`thumbTintColor`](#thumbtintcolor)
 - [`maximumTrackImage`](#maximumtrackimage)
 - [`minimumTrackImage`](#minimumtrackimage)
 - [`thumbImage`](#thumbimage)
 - [`trackImage`](#trackimage)
-- [`inverted`](#inverted)
 
 ---
 
@@ -204,6 +208,15 @@ _This is not a controlled component_, you don't need to update the value during 
 
 ---
 
+### `inverted`
+Reverses the direction of the slider. Default value is false.
+
+| Type | Required |
+| ---- | -------- |
+| bool | No       |
+
+---
+
 ### `thumbTintColor`
 
 Color of the foreground switch grip.
@@ -222,8 +235,6 @@ Assigns a maximum track image. Only static images are supported. The leftmost pi
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
 
----
-
 ### `minimumTrackImage`
 
 Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track.
@@ -238,9 +249,9 @@ Assigns a minimum track image. Only static images are supported. The rightmost p
 
 Sets an image for the thumb. Only static images are supported.
 
-| Type                   | Required | Platform |
-| ---------------------- | -------- | -------- |
-| Image.propTypes.source | No       | iOS      |
+| Type                   | Required | 
+| ---------------------- | -------- | 
+| Image.propTypes.source | No       | 
 
 ---
 
@@ -252,18 +263,36 @@ Assigns a single image for the track. Only static images are supported. The cent
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
 
----
+## Contributing
 
-### `inverted`
-Reverses the direction of the slider. Default value is false.
+While developing, you can run the [example app](/example/README.md) to test your changes.
 
-| Type | Required | Platform |
-| ---- | -------- | -------- |
-| bool | No       | iOS      |
+Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
+
+```sh
+yarn validate:flow
+yarn validate:eslint
+yarn test:jest
+```
+or 
+
+```sh
+yarn test
+```
+to run them all.
+
+To fix formatting errors, run the following:
+
+```sh
+yarn validate:eslint --fix
+```
+
+Remember to cover your changes with tests if possible.
 
 ## Maintainers
 
 - [Michał Chudziak](https://github.com/michalchudziak) - [Callstack](https://callstack.com/)
+- [Wojciech Szafraniec](https://github.com/wojteg1337) - [Callstack](https://callstack.com/)
 
 ## Contributors
 

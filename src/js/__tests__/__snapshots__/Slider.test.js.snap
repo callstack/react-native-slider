@@ -93,6 +93,7 @@ exports[`<Slider /> renders disabled slider 1`] = `
       "height": 40,
     }
   }
+  thumbImage={null}
   value={0}
 />
 `;
@@ -116,6 +117,7 @@ exports[`<Slider /> renders enabled slider 1`] = `
       "height": 40,
     }
   }
+  thumbImage={null}
   value={0}
 />
 `;

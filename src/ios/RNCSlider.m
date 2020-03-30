@@ -12,10 +12,21 @@
   float _unclippedValue;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    return [super initWithFrame:frame];
+}
+
 - (void)setValue:(float)value
 {
   _unclippedValue = value;
   super.value = value;
+}
+
+- (void)setValue:(float)value animated:(BOOL)animated
+{
+  _unclippedValue = value;
+  [super setValue:value animated:animated];
 }
 
 - (void)setMinimumValue:(float)minimumValue
@@ -91,6 +102,10 @@
   } else {
     self.transform = CGAffineTransformMakeScale(1, 1);
   }
+}
+
+- (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
+    return YES;
 }
 
 @end

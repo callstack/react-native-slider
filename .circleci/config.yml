@@ -26,12 +26,13 @@ jobs:
       - run:
           name: Jest
           command: yarn run test:jest
-      - run:
-          name: Build Android JavaScript Bundle
-          command: yarn run test:detox:android:bundle:release
-      - run:
-          name: Build iOS JavaScript Bundle
-          command: yarn run test:detox:ios:bundle:release
+      # TODO: Uncomment after fixing detox setup
+      # - run:
+      #     name: Build Android JavaScript Bundle
+      #     command: yarn run test:detox:android:bundle:release
+      # - run:
+      #     name: Build iOS JavaScript Bundle
+      #     command: yarn run test:detox:ios:bundle:release
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
