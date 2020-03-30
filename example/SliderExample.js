@@ -197,9 +197,6 @@ exports.examples = [
       return <SliderExample
         value={0.6}
         inverted
-        minimumTrack={() => <View style={{ flex: 1, opacity: 1 }} collapsable={false}>
-          <View style={{ backgroundColor: ANDROID_DEFAULT_COLOR, flex: 1 }} />
-        </View>}
       />;
     },
   },
@@ -225,11 +222,11 @@ exports.examples = [
               />
             </View>
           </View>}
-          maximumTrack={() => <View style={{flex:1,opacity:0.3}} collapsable={false}>
-            <View style={{ backgroundColor: 'blue', flex: 1 }} />
+          maximumTrack={() => <View style={{ opacity: 0.3, height: 5}} collapsable={false}>
+            <View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
           </View>}
-          minimumTrack={() => <View style={{ flex: 1, flexDirection:'row'}} collapsable={false}>
-            <View style={{ backgroundColor: 'yellow', flex: 1}} />
+          minimumTrack={() => <View style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3 }} collapsable={false}>
+            <View style={{ backgroundColor: 'yellow', flex: 1 }} />
             <View style={{ backgroundColor: 'orange', flex: 1 }} />
             <View style={{ backgroundColor: 'red', flex: 1 }} />
             <View style={{ backgroundColor: 'magenta', flex: 1 }} />

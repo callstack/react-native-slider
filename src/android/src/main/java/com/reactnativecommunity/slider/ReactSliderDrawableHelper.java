@@ -19,6 +19,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.Property;
+import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -113,7 +114,11 @@ public class ReactSliderDrawableHelper {
       return get().copyBounds();
     }
 
-    synchronized void draw() {
+    final void dispatchDraw() {
+      if (isCustomDrawable()) draw();
+    }
+
+    private synchronized void draw() {
       mIsDrawing = true;
       Rect bounds = getBounds();
       Bitmap bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
@@ -193,6 +198,9 @@ public class ReactSliderDrawableHelper {
       // remove existing ripple
       mSlider.setBackgroundResource(0);
       // set ripple
+      // // TODO: 30/03/2020
+      // when background color is applied it will probably run over the ripple
+      // maybe consider reapplying the ripple on top once background color is set
       if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
         RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
         mSlider.setBackground(rippleDrawable);
@@ -274,9 +282,7 @@ public class ReactSliderDrawableHelper {
     @SuppressWarnings("unused")
     public void setScale(float scale) {
       mScale = scale;
-      if (isCustomDrawable()) {
-        draw();
-      }
+      dispatchDraw();
     }
 
     void start() {
@@ -339,6 +345,7 @@ public class ReactSliderDrawableHelper {
     public void set(Drawable drawable) {
       LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
       outDrawable.setDrawableByLayerId(mLayerID, drawable);
+      outDrawable.setState(StateSet.WILD_CARD);
     }
 
     int getBarHeight() {
@@ -346,10 +353,15 @@ public class ReactSliderDrawableHelper {
     }
 
     @Override
+    Rect getBounds() {
+      return new Rect(0, 0, mSlider.getWidth(), mSlider.getHeight());
+    }
+
+    @Override
     public void draw(Canvas canvas, View view) {
       RectF bounds = new RectF(getBounds());
       RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
-      int barHeight = getBarHeight();
+      float barHeight = Math.max(Math.min(bounds.height(), src.height()), getBarHeight());
       PointF scale = new PointF(bounds.width() / src.width(),barHeight / src.height());
       canvas.translate(0, (bounds.height() - barHeight) / 2);
       canvas.scale(scale.x, scale.y);
