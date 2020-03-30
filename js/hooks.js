@@ -18,7 +18,6 @@ export function useViewProp(arg, key, refToUpdate) {
   const viewRef = useRef();
 
   const update = useCallback((viewTag) => {
-    console.log('Up',viewTag)
     refToUpdate.current && refToUpdate.current.setNativeProps({ [key]: viewTag });
   }, [refToUpdate, key]);
 
