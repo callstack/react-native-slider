@@ -1,6 +1,7 @@
 /* @flow */
 
 import * as React from 'react';
+import { View } from 'react-native';
 import renderer from 'react-test-renderer';
 import Slider from '../Slider';
 
@@ -29,7 +30,9 @@ describe('<Slider />', () => {
           maximumTrackTintColor={'red'}
           thumbTintColor={'green'}
           onSlidingComplete={() => {}}
-          onValueChange={() => {}}
+          onValueChange={() => { }}
+          thumb={<View style={{flex:1, backgroundColor:'red'}} />}
+          minimumTrack={() => <View style={{flex:1, backgroundColor:'blue'}} />}
         />,
       )
       .toJSON();

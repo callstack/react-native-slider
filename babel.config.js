@@ -6,6 +6,7 @@ module.exports = {
       {
         alias: {
           '@react-native-community/slider': './js/Slider.js',
+          'scheduler/tracing': 'scheduler/tracing-profiling'
         },
         cwd: 'babelrc',
       },
