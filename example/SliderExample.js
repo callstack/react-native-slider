@@ -212,12 +212,13 @@ exports.examples = [
           value={0.6}
           inverted
           thumbTintColor={'yellow'}
-          minimumValue={-1} maximumValue={2}
+          minimumValue={-1}
+          maximumValue={2}
           style={{width:300}}
           //minimumTrackTintColor={'blue'}
           //maximumTrackTintColor={'red'}
-          thumb={<View style={{ alignItems: 'center', justifyContent: 'center', width: 30, height: 30 }} collapsable={false}>
-            <View style={{ /*backgroundColor: 'blue',*/ borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30 }} collapsable={false}>
+          thumb={<View style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }} collapsable={false}>
+            <View style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30 }} collapsable={false}>
               <Image
                 source={require('./uie_thumb_big.png')}
                 style={{ width: 25, height: 25 }}
@@ -227,9 +228,11 @@ exports.examples = [
           maximumTrack={() => <View style={{flex:1,opacity:0.3}} collapsable={false}>
             <View style={{ backgroundColor: 'blue', flex: 1 }} />
           </View>}
-          minimumTrack={() => <View style={{ flex: 1 }} collapsable={false}>
-            <View style={{ backgroundColor: 'yellow', flex: 1 }} />
+          minimumTrack={() => <View style={{ flex: 1, flexDirection:'row'}} collapsable={false}>
+            <View style={{ backgroundColor: 'yellow', flex: 1}} />
+            <View style={{ backgroundColor: 'orange', flex: 1 }} />
             <View style={{ backgroundColor: 'red', flex: 1 }} />
+            <View style={{ backgroundColor: 'magenta', flex: 1 }} />
           </View>}
         />
       );
