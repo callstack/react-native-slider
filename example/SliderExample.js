@@ -213,13 +213,16 @@ exports.examples = [
           inverted
           thumbTintColor={'yellow'}
           minimumValue={-1} maximumValue={2}
+          style={{width:300}}
           //minimumTrackTintColor={'blue'}
           //maximumTrackTintColor={'red'}
-          thumb={<View style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center' }} collapsable={false}>
-            <Image
-              source={require('./uie_thumb_big.png')}
-              style={{ padding: 20 }}
-            />
+          thumb={<View style={{ alignItems: 'center', justifyContent: 'center', width: 30, height: 30 }} collapsable={false}>
+            <View style={{ /*backgroundColor: 'blue',*/ borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30 }} collapsable={false}>
+              <Image
+                source={require('./uie_thumb_big.png')}
+                style={{ width: 25, height: 25 }}
+              />
+            </View>
           </View>}
           maximumTrack={() => <View style={{flex:1,opacity:0.3}} collapsable={false}>
             <View style={{ backgroundColor: 'blue', flex: 1 }} />
