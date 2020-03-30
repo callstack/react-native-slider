@@ -7,14 +7,9 @@
 
 package com.reactnativecommunity.slider;
 
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
-
-import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.MapBuilder;
@@ -32,6 +27,7 @@ import com.facebook.yoga.YogaNode;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Manages instances of {@code ReactSlider}.
@@ -41,6 +37,7 @@ import javax.annotation.Nonnull;
 public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   private static final int STYLE = android.R.attr.seekBarStyle;
+  private static final String DEFAULT_COLOR = "#009688";
 
   public static final String REACT_CLASS = "RNCSlider";
 
@@ -133,6 +130,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   }
 
   @Override
+  protected void onAfterUpdateTransaction(@Nonnull ReactSlider view) {
+    super.onAfterUpdateTransaction(view);
+    view.enqueueInversion();
+  }
+
+  @Override
   public void onDropViewInstance(@Nonnull ReactSlider view) {
     view.tearDown();
   }
@@ -162,6 +165,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "step", defaultDouble = 0d)
   public void setStep(ReactSlider view, double value) {
     view.setStep(value);
+  }
+
+  @ReactProp(name = "inverted", defaultBoolean = false)
+  public void setInverted(ReactSlider view, boolean value) {
+    view.setInverted(value);
   }
 
   @ReactProp(name = "thumbTintColor", customType = "Color")
@@ -203,5 +211,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   public Map getExportedCustomDirectEventTypeConstants() {
     return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingComplete"),
         ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
+  }
+
+  @Nullable
+  @Override
+  public Map getConstants() {
+    return MapBuilder.of("style", MapBuilder.of("defaultColor", DEFAULT_COLOR));
   }
 }

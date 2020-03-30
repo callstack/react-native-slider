@@ -22,14 +22,16 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.LinearInterpolator;
 
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.NativeViewHierarchyManager;
 import com.facebook.react.uimanager.UIBlock;
 import com.facebook.react.uimanager.UIManagerModule;
 
-import javax.annotation.Nullable;
-
 public class ReactSliderDrawableHelper {
+
+  private static final int MAX_LEVEL = 10000;
 
   private abstract static class DrawableHandler implements ViewTreeObserver.OnDrawListener {
     private final ReactContext mContext;
@@ -281,7 +283,7 @@ public class ReactSliderDrawableHelper {
     }
   }
 
- private static class ProgressDrawableHandler extends DrawableHandler {
+  private static class ProgressDrawableHandler extends DrawableHandler {
     final ReactSlider mSlider;
     private final int mLayerID;
     private Integer mColor;
@@ -339,17 +341,15 @@ public class ReactSliderDrawableHelper {
 
       @Override
       public void draw(Canvas canvas) {
-        float levelScale = getLevel() * 1.f / 10000 * 1.f;
-        canvas.save();
-        //// TODO: 29/03/2020 configure inverted 
-        boolean inverted = false;
+        float levelScale = getLevel() * 1.f / MAX_LEVEL * 1.f;
+        boolean inverted = mSlider.isInverted();
+        Rect bounds = getBounds();
         if (inverted) {
-          Rect bounds = getBounds();
+          levelScale = 1 - levelScale;
           canvas.translate(bounds.width() * (1 - levelScale), 0);
         }
         canvas.scale(levelScale, 1);
         super.draw(canvas);
-        canvas.restore();
       }
     }
   }

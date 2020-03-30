@@ -8,6 +8,7 @@ package com.reactnativecommunity.slider;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -55,6 +56,9 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
+  private boolean mIsInverted = false;
+  private boolean mAwaitingInversion = false;
+
   final ForegroundDrawableHandler mProgressDrawableHandler;
   final BackgroundDrawableHandler mBackgroundDrawableHandler;
   final ThumbDrawableHandler mThumbDrawableHandler;
@@ -87,7 +91,7 @@ public class ReactSlider extends AppCompatSeekBar {
   }
 
   /* package */ void setValue(double value) {
-    mValue = value;
+    mValue = mIsInverted ? getMax() - value : value;
     updateValue();
   }
 
@@ -96,10 +100,30 @@ public class ReactSlider extends AppCompatSeekBar {
     updateAll();
   }
 
+  boolean isInverted() {
+    return mIsInverted;
+  }
+
+  void setInverted(boolean inverted) {
+    mAwaitingInversion = mAwaitingInversion || inverted != mIsInverted;
+    mIsInverted = inverted;
+  }
+
+  void enqueueInversion() {
+    if (mAwaitingInversion) {
+      double value = mValue;
+      updateAll();
+      mProgressDrawableHandler.get().invalidateSelf();
+      invalidate();
+      mAwaitingInversion = false;
+    }
+  }
+
   /**
    * Convert SeekBar's native progress value (e.g. 0..100) to a value passed to JS (e.g. -1.0..2.5).
    */
   public double toRealProgress(int seekBarProgress) {
+    seekBarProgress = mIsInverted ? getMax() - seekBarProgress : seekBarProgress;
     if (seekBarProgress == getMax()) {
       return mMaxValue;
     }
