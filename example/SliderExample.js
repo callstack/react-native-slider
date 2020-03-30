@@ -11,7 +11,7 @@
 'use strict';
 
 import React from 'react';
-import {Text, StyleSheet, View,Text, StyleSheet, View, Image} from 'react-native';
+import {Text, StyleSheet, View, Image} from 'react-native';
 import Slider, { ANDROID_DEFAULT_COLOR }  from '@react-native-community/slider';
 
 import type {Element} from 'react';
