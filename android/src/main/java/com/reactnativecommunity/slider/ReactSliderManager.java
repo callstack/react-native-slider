@@ -130,12 +130,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   }
 
   @Override
-  protected void onAfterUpdateTransaction(@Nonnull ReactSlider view) {
-    super.onAfterUpdateTransaction(view);
-    view.enqueueInversion();
-  }
-
-  @Override
   public void onDropViewInstance(@Nonnull ReactSlider view) {
     view.tearDown();
   }

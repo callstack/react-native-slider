@@ -8,7 +8,6 @@ package com.reactnativecommunity.slider;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -56,6 +55,8 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
+  private OnSeekBarChangeListener mListener;
+
   private boolean mIsInverted = false;
   private boolean mAwaitingInversion = false;
 
@@ -91,13 +92,19 @@ public class ReactSlider extends AppCompatSeekBar {
   }
 
   /* package */ void setValue(double value) {
-    mValue = mIsInverted ? getMax() - value : value;
+    mValue = value;
     updateValue();
   }
 
   /* package */ void setStep(double step) {
     mStep = step;
     updateAll();
+  }
+
+  @Override
+  public void setOnSeekBarChangeListener(OnSeekBarChangeListener l) {
+    super.setOnSeekBarChangeListener(l);
+    mListener = l;
   }
 
   boolean isInverted() {
@@ -107,27 +114,21 @@ public class ReactSlider extends AppCompatSeekBar {
   void setInverted(boolean inverted) {
     mAwaitingInversion = mAwaitingInversion || inverted != mIsInverted;
     mIsInverted = inverted;
-  }
-
-  void enqueueInversion() {
-    if (mAwaitingInversion) {
-      double value = mValue;
-      updateAll();
-      mProgressDrawableHandler.get().invalidateSelf();
-      invalidate();
-      mAwaitingInversion = false;
+    invalidate();
+    if (mListener != null) {
+      mListener.onProgressChanged(this, getProgress(), true);
     }
   }
 
   /**
-   * Convert SeekBar's native progress value (e.g. 0..100) to a value passed to JS (e.g. -1.0..2.5).
+   * Convert SeekBar's native progress value (e.g. 0..{@link ReactSlider#getMax()}) to a value passed to JS (e.g. -1.0..2.5).
    */
   public double toRealProgress(int seekBarProgress) {
-    seekBarProgress = mIsInverted ? getMax() - seekBarProgress : seekBarProgress;
-    if (seekBarProgress == getMax()) {
+    double progress = mIsInverted ? getMax() - seekBarProgress : seekBarProgress;
+    if (progress == getMax()) {
       return mMaxValue;
     }
-    return seekBarProgress * getStepValue() + mMinValue;
+    return progress * getStepValue() + mMinValue;
   }
 
   /** Update underlying native SeekBar's values. */
@@ -141,7 +142,14 @@ public class ReactSlider extends AppCompatSeekBar {
 
   /** Update value only (optimization in case only value is set). */
   private void updateValue() {
-    setProgress((int) Math.round((mValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
+    double progressVector = (mValue - mMinValue) / (mMaxValue - mMinValue);
+    double usableValue;
+    if (mIsInverted) {
+      usableValue = mMinValue + (1 - progressVector) * (mMaxValue - mMinValue);
+    } else {
+      usableValue = mValue;
+    }
+    setProgress((int) Math.round((usableValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
   }
 
   private int getTotalSteps() {
