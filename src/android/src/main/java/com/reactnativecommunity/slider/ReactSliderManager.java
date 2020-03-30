@@ -7,8 +7,8 @@
 
 package com.reactnativecommunity.slider;
 
+import android.os.Build;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.SeekBar;
 
 import com.facebook.react.bridge.ReactContext;
@@ -27,6 +27,7 @@ import com.facebook.yoga.YogaNode;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -169,11 +170,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     view.setStep(value);
   }
 
-  @ReactProp(name = "inverted", defaultBoolean = false)
-  public void setInverted(ReactSlider view, boolean value) {
-    view.setInverted(value);
-  }
-
   @ReactProp(name = "thumbTintColor", customType = "Color")
   public void setThumbTintColor(ReactSlider view, Integer color) {
     view.mThumbDrawableHandler.setTintColor(color);
@@ -215,8 +211,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "inverted", defaultBoolean = false)
   public void setInverted(ReactSlider view, boolean inverted) {
-    if (inverted) view.setScaleX(-1f);
-    else view.setScaleX(1f);
+    view.setInverted(inverted);
   }
 
   @Override

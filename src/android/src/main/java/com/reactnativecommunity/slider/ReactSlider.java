@@ -25,6 +25,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatSeekBar;
 
 import android.util.AttributeSet;
+import android.widget.SeekBar;
 
 import java.net.URL;
 import java.util.concurrent.Callable;
@@ -69,10 +70,7 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
-  private OnSeekBarChangeListener mListener;
-
   private boolean mIsInverted = false;
-  private boolean mAwaitingInversion = false;
 
   final ForegroundDrawableHandler mProgressDrawableHandler;
   final BackgroundDrawableHandler mBackgroundDrawableHandler;
@@ -115,30 +113,22 @@ public class ReactSlider extends AppCompatSeekBar {
     updateAll();
   }
 
-  @Override
-  public void setOnSeekBarChangeListener(OnSeekBarChangeListener l) {
-    super.setOnSeekBarChangeListener(l);
-    mListener = l;
-  }
-
   boolean isInverted() {
     return mIsInverted;
   }
 
   void setInverted(boolean inverted) {
-    mAwaitingInversion = mAwaitingInversion || inverted != mIsInverted;
     mIsInverted = inverted;
+    if (inverted) setScaleX(-1f);
+    else setScaleX(1f);
     invalidate();
-    if (mListener != null) {
-      mListener.onProgressChanged(this, getProgress(), true);
-    }
   }
 
   /**
    * Convert SeekBar's native progress value (e.g. 0..{@link ReactSlider#getMax()}) to a value passed to JS (e.g. -1.0..2.5).
    */
   public double toRealProgress(int seekBarProgress) {
-    double progress = mIsInverted ? getMax() - seekBarProgress : seekBarProgress;
+    double progress = seekBarProgress;
     if (progress == getMax()) {
       return mMaxValue;
     }
@@ -156,14 +146,7 @@ public class ReactSlider extends AppCompatSeekBar {
 
   /** Update value only (optimization in case only value is set). */
   private void updateValue() {
-    double progressVector = (mValue - mMinValue) / (mMaxValue - mMinValue);
-    double usableValue;
-    if (mIsInverted) {
-      usableValue = mMinValue + (1 - progressVector) * (mMaxValue - mMinValue);
-    } else {
-      usableValue = mValue;
-    }
-    setProgress((int) Math.round((usableValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
+    setProgress((int) Math.round((mValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
   }
 
   private int getTotalSteps() {
@@ -203,7 +186,7 @@ public class ReactSlider extends AppCompatSeekBar {
           } else {
             int drawableId = getResources()
                 .getIdentifier(uri, "drawable", getContext()
-                .getPackageName());
+                    .getPackageName());
             bitmap = BitmapFactory.decodeResource(getResources(), drawableId);
           }
 

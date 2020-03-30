@@ -70,9 +70,9 @@ public class ReactSliderDrawableHelper {
         UiThreadUtil.runOnUiThread(new Runnable() {
           @Override
           public void run() {
-              UIManagerModule uiManagerModule = mContext.getNativeModule(UIManagerModule.class);
-              View view = uiManagerModule.resolveView(tag);
-              setView(view);
+            UIManagerModule uiManagerModule = mContext.getNativeModule(UIManagerModule.class);
+            View view = uiManagerModule.resolveView(tag);
+            setView(view);
           }
         });
       }
@@ -207,6 +207,10 @@ public class ReactSliderDrawableHelper {
       RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
       PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
       float scaleOut = Math.min(scale.x, scale.y);
+      /*
+        reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
+       */
+      PointF scaler = new PointF(scaleOut * (mSlider.isInverted() ? -1 : 1), scaleOut);
       // clip circle
       Path clipper = new Path();
       clipper.addCircle(canvas.getWidth() / 2, canvas.getHeight() / 2,canvas.getWidth() / 2, Path.Direction.CW);
@@ -214,9 +218,9 @@ public class ReactSliderDrawableHelper {
       // transform
       canvas.scale(mScale, mScale, canvas.getWidth() / 2, canvas.getHeight() / 2);
       canvas.translate(
-              (bounds.width() - src.width() * scaleOut) / 2,
-              (bounds.height() - src.height() * scaleOut) / 2);
-      canvas.scale(scaleOut, scaleOut);
+          (bounds.width() - src.width() * scaler.x) / 2,
+          (bounds.height() - src.height() * scaler.y) / 2);
+      canvas.scale(scaler.x, scaler.y);
       // draw
       canvas.drawPaint(mPaint);
       view.draw(canvas);
@@ -260,9 +264,9 @@ public class ReactSliderDrawableHelper {
         mScaleAnimator.cancel();
       }
       final ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
-              this,
-              Property.of(ThumbDrawableHandler.class, Float.class, "scale"),
-              scale);
+          this,
+          Property.of(ThumbDrawableHandler.class, Float.class, "scale"),
+          scale);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
         scaleAnim.setAutoCancel(true);
       }
@@ -341,12 +345,17 @@ public class ReactSliderDrawableHelper {
       @Override
       public void draw(Canvas canvas) {
         float levelScale = getLevel() * 1.f / MAX_LEVEL * 1.f;
+        /*
+          @deprecated now handled by {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
+
         boolean inverted = mSlider.isInverted();
         Rect bounds = getBounds();
         if (inverted) {
           levelScale = 1 - levelScale;
           canvas.translate(bounds.width() * (1 - levelScale), 0);
         }
+
+         */
         canvas.scale(levelScale, 1);
         super.draw(canvas);
       }
