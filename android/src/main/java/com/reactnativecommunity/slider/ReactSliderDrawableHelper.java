@@ -25,8 +25,7 @@ import android.view.animation.LinearInterpolator;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.uimanager.NativeViewHierarchyManager;
-import com.facebook.react.uimanager.UIBlock;
+import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.UIManagerModule;
 
 public class ReactSliderDrawableHelper {
@@ -68,12 +67,12 @@ public class ReactSliderDrawableHelper {
       if (tag == View.NO_ID) {
         setView(null);
       } else {
-        UIManagerModule uiManagerModule = mContext.getNativeModule(UIManagerModule.class);
-        uiManagerModule.addUIBlock(new UIBlock() {
+        UiThreadUtil.runOnUiThread(new Runnable() {
           @Override
-          public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
-            View view = nativeViewHierarchyManager.resolveView(tag);
-            setView(view);
+          public void run() {
+              UIManagerModule uiManagerModule = mContext.getNativeModule(UIManagerModule.class);
+              View view = uiManagerModule.resolveView(tag);
+              setView(view);
           }
         });
       }
