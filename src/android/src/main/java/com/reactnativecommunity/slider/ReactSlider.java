@@ -21,12 +21,6 @@ import com.reactnativecommunity.slider.ReactSliderDrawableHelper.BackgroundDrawa
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ForegroundDrawableHandler;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ThumbDrawableHandler;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.widget.AppCompatSeekBar;
-
-import android.util.AttributeSet;
-import android.widget.SeekBar;
-
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;

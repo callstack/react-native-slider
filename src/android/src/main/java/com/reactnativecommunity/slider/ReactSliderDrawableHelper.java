@@ -2,6 +2,7 @@ package com.reactnativecommunity.slider;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,6 +16,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.Property;
 import android.view.MotionEvent;
@@ -54,6 +56,10 @@ public class ReactSliderDrawableHelper {
 
     boolean isCustomDrawable() {
       return mView != null;
+    }
+
+    final View getView() {
+      return mView;
     }
 
     @Override
@@ -103,9 +109,13 @@ public class ReactSliderDrawableHelper {
       }
     }
 
+    Rect getBounds() {
+      return get().copyBounds();
+    }
+
     synchronized void draw() {
       mIsDrawing = true;
-      Rect bounds = get().copyBounds();
+      Rect bounds = getBounds();
       Bitmap bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
       Canvas canvas = new Canvas(bitmap);
       draw(canvas, mView);
@@ -179,6 +189,14 @@ public class ReactSliderDrawableHelper {
       mScaleAnimator.setInterpolator(new LinearInterpolator());
       mScaleAnimator.setDuration(ANIM_DURATION);
       mScaleAnimator.setStartDelay(ANIM_DELAY);
+
+      // remove existing ripple
+      mSlider.setBackgroundResource(0);
+      // set ripple
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
+        mSlider.setBackground(rippleDrawable);
+      }
     }
 
     @Override
@@ -202,18 +220,32 @@ public class ReactSliderDrawableHelper {
     }
 
     @Override
+    Rect getBounds() {
+      if (getView() != null) {
+        return new Rect(0, 0, (int) (getView().getWidth() * mScale), (int) (getView().getHeight() * mScale));
+      } else {
+        return super.getBounds();
+      }
+    }
+
+    @Override
     public void draw(Canvas canvas, View view) {
-      RectF bounds = new RectF(get().copyBounds());
+      RectF bounds = new RectF(getBounds());
       RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
       PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
       float scaleOut = Math.min(scale.x, scale.y);
+
       /*
         reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
        */
       PointF scaler = new PointF(scaleOut * (mSlider.isInverted() ? -1 : 1), scaleOut);
       // clip circle
       Path clipper = new Path();
-      clipper.addCircle(canvas.getWidth() / 2, canvas.getHeight() / 2,canvas.getWidth() / 2, Path.Direction.CW);
+      clipper.addCircle(
+          canvas.getWidth() / 2,
+          canvas.getHeight() / 2,
+          Math.min(canvas.getWidth(), canvas.getHeight()) / 2,
+          Path.Direction.CW);
       canvas.clipPath(clipper);
       // transform
       canvas.scale(mScale, mScale, canvas.getWidth() / 2, canvas.getHeight() / 2);
@@ -249,7 +281,7 @@ public class ReactSliderDrawableHelper {
 
     void start() {
       if (isCustomDrawable()) {
-        animate(2);
+        animate(1.2f);
       }
     }
 
@@ -309,11 +341,15 @@ public class ReactSliderDrawableHelper {
       outDrawable.setDrawableByLayerId(mLayerID, drawable);
     }
 
+    int getBarHeight() {
+      return mSlider.getIndeterminateDrawable().getIntrinsicHeight();
+    }
+
     @Override
     public void draw(Canvas canvas, View view) {
-      RectF bounds = new RectF(get().copyBounds());
+      RectF bounds = new RectF(getBounds());
       RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
-      int barHeight = mSlider.getIndeterminateDrawable().getIntrinsicHeight();
+      int barHeight = getBarHeight();
       PointF scale = new PointF(bounds.width() / src.width(),barHeight / src.height());
       canvas.translate(0, (bounds.height() - barHeight) / 2);
       canvas.scale(scale.x, scale.y);
@@ -354,7 +390,6 @@ public class ReactSliderDrawableHelper {
           levelScale = 1 - levelScale;
           canvas.translate(bounds.width() * (1 - levelScale), 0);
         }
-
          */
         canvas.scale(levelScale, 1);
         super.draw(canvas);
