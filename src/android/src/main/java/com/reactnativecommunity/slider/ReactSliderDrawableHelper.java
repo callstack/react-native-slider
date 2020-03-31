@@ -17,14 +17,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.Property;
-import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.FloatRange;
-import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
@@ -133,6 +131,7 @@ public class ReactSliderDrawableHelper {
     }
 
     final void restore() {
+      mOriginal.setLevel(get().getLevel());
       set(mOriginal);
       invalidate();
     }
@@ -216,6 +215,7 @@ public class ReactSliderDrawableHelper {
     @Override
     public void set(Drawable drawable) {
       mSlider.setThumb(drawable);
+      get().jumpToCurrentState();
     }
 
     @Override
@@ -350,7 +350,10 @@ public class ReactSliderDrawableHelper {
     public void set(Drawable drawable) {
       LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
       outDrawable.setDrawableByLayerId(mLayerID, drawable);
-      outDrawable.setState(StateSet.WILD_CARD);
+      outDrawable.setState(new int[]{});
+      outDrawable.jumpToCurrentState();
+      outDrawable.setState(new int[]{android.R.attr.state_enabled});
+      outDrawable.jumpToCurrentState();
     }
 
     int getBarHeight() {
