@@ -169,6 +169,7 @@ const RCTSliderWebComponent = React.forwardRef(
         flexDirection: 'row',
         userSelect: 'none',
         alignItems: 'center',
+        cursor: 'pointer',
       },
       style,
     );
@@ -207,7 +208,6 @@ const RCTSliderWebComponent = React.forwardRef(
         borderRadius: thumbSize / 2,
         overflow: 'hidden',
         userSelect: 'none',
-        cursor: 'pointer',
       },
       thumbStyle,
     );
