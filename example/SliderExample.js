@@ -25,6 +25,16 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
     value: this.props.value,
   };
 
+  ref = React.createRef();
+
+  setNativeProps(props) {
+    this.getNode() && this.getNode().setNativeProps(props);
+  }
+
+  getNode() {
+    return this.ref.current && this.ref.current.getNode();
+  }
+
   render() {
     return (
       <View>
@@ -33,6 +43,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
         </Text>
         <AnimatedSlider
           {...this.props}
+          ref={this.ref}
           onValueChange={value => this.setState({value: value})}
         />
       </View>
@@ -249,7 +260,10 @@ exports.examples = [
           thumbTintColor={'yellow'}
           minimumValue={-1}
           maximumValue={2}
-          style={{ width: 300}}
+          style={{ width: 300 }}
+          ref={r => {
+            setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 5000)
+          }}
           //minimumTrackTintColor={'blue'}
           //maximumTrackTintColor={'red'}
           thumb={<View style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }} collapsable={false}>
