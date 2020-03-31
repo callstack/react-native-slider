@@ -216,7 +216,7 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
   }
 
   @Override
-  synchronized public void receiveFromInformant(int informantID, int recruiterID, ReactStylesDiffMap context) {
+  public void receiveFromInformant(int informantID, int recruiterID, ReactStylesDiffMap context) {
     DrawableHandler[] handlers = new DrawableHandler[]{mBackgroundDrawableHandler, mProgressDrawableHandler, mThumbDrawableHandler};
     for (DrawableHandler handler: handlers) {
       int id = handler.getView() != null ? handler.getView().getId() : View.NO_ID;
