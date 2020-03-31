@@ -13,8 +13,8 @@ module.exports = {
     blacklistRE: blacklist([
       path.resolve(__dirname, 'android'),
       path.resolve(__dirname, 'ios'),
-      path.resolve(__dirname, 'example', 'android'),
-      path.resolve(__dirname, 'example', 'ios'),
+      path.resolve(__dirname, '..', 'android'),
+      path.resolve(__dirname, '..', 'ios'),
     ])
   },
   transformer: {
