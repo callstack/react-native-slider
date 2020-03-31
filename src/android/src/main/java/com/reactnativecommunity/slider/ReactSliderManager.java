@@ -14,6 +14,7 @@ import android.widget.SeekBar;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -24,6 +25,9 @@ import com.facebook.yoga.YogaMeasureFunction;
 import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
+import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry;
+import com.reactnativecommunity.slider.ReactSlider.SliderDrawable;
+import com.reactnativecommunity.slider.ReactSliderDrawableHelper.DrawableHandler;
 
 import java.util.Map;
 
@@ -35,6 +39,7 @@ import javax.annotation.Nullable;
  *
  * Note that the slider is _not_ a controlled component.
  */
+@ReactModule(name = ReactSliderManager.REACT_CLASS)
 public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   private static final int STYLE = android.R.attr.seekBarStyle;
@@ -108,6 +113,25 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
         }
       };
 
+  private final InformantRegistry mInformantRegistry;
+
+  void handleRegistration(ReactSlider receiver, Integer informantTag, @SliderDrawable int type) {
+    if (informantTag != null) {
+      mInformantRegistry.add(receiver, informantTag, true);
+    } else {
+      DrawableHandler handler = receiver.getDrawableHandler(type);
+      View informant = handler.getView();
+      if (informant != null) {
+        mInformantRegistry.remove(informant.getId());
+      }
+    }
+  }
+
+  ReactSliderManager(InformantRegistry registry) {
+    super();
+    mInformantRegistry = registry;
+  }
+
   @Override
   public String getName() {
     return REACT_CLASS;
@@ -178,6 +202,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "thumbViewTag")
   public void setThumbView(ReactSlider view, Integer tag) {
     view.mThumbDrawableHandler.setView(tag == null ? -1 : tag);
+    handleRegistration(view, tag, SliderDrawable.THUMB);
   }
 
   @ReactProp(name = "minimumTrackTintColor", customType = "Color")
@@ -188,6 +213,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "minimumTrackViewTag")
   public void setMinimumTrackView(ReactSlider view, Integer tag) {
     view.mProgressDrawableHandler.setView(tag == null ? -1 : tag);
+    handleRegistration(view, tag, SliderDrawable.MINIMUM_TRACK);
   }
 
   @ReactProp(name = "thumbImage")
@@ -207,6 +233,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "maximumTrackViewTag")
   public void setMaximumTrackView(ReactSlider view, Integer tag) {
     view.mBackgroundDrawableHandler.setView(tag == null ? -1 : tag);
+    handleRegistration(view, tag, SliderDrawable.MAXIMUM_TRACK);
   }
 
   @ReactProp(name = "inverted", defaultBoolean = false)
@@ -230,4 +257,5 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   public Map getConstants() {
     return MapBuilder.of("style", MapBuilder.of("defaultColor", DEFAULT_COLOR));
   }
+
 }

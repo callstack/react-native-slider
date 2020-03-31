@@ -24,6 +24,10 @@ public class ReactSliderPackage implements ReactPackage {
     @Override
     @SuppressWarnings("rawtypes")
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Arrays.<ViewManager>asList(new ReactSliderManager());
+        final ReactInformantViewManager.InformantRegistry informantRegistry =
+            new ReactInformantViewManager.InformantRegistry(reactContext);
+        return Arrays.<ViewManager>asList(
+            new ReactSliderManager(informantRegistry),
+            new ReactInformantViewManager(informantRegistry));
     }
 }

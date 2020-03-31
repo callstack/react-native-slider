@@ -11,8 +11,9 @@
 'use strict';
 
 import React from 'react';
-import {Text, StyleSheet, View, Image} from 'react-native';
-import Slider, { ANDROID_DEFAULT_COLOR }  from '@react-native-community/slider';
+import {Text, StyleSheet, View, Image, Animated} from 'react-native';
+import Slider, { ANDROID_DEFAULT_COLOR } from '@react-native-community/slider';
+const AnimatedSlider = Animated.createAnimatedComponent(Slider);
 
 import type {Element} from 'react';
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
@@ -30,7 +31,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
         <Text style={styles.text}>
           {this.state.value && +this.state.value.toFixed(3)}
         </Text>
-        <Slider
+        <AnimatedSlider
           {...this.props}
           onValueChange={value => this.setState({value: value})}
         />
@@ -169,7 +170,16 @@ exports.examples = [
   {
     title: 'Custom thumb image',
     render(): Element<any> {
-      return <SliderExample thumbImage={require('./uie_thumb_big.png')} />;
+      const opacity = new Animated.Value(0);
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.spring(opacity, { toValue: 1, useNativeDriver: true }),
+          Animated.spring(opacity, { toValue: 0, useNativeDriver: true }),
+        ])
+      ).start();
+
+      return <SliderExample thumbImage={require('./uie_thumb_big.png')} /*style={{opacity}}*/ />;
     },
   },
   {
@@ -204,6 +214,34 @@ exports.examples = [
     title: 'Custom View',
     platform: 'android',
     render(): React.Element<any> {
+      const springer = new Animated.Value(0);
+      const rotate = Animated.multiply(springer, 45);
+      const timer = new Animated.Value(0);
+      const shrink = timer.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0.5]
+      });
+      const scale = timer.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.1, 2]
+      });
+      const gentleOpacity = springer.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.4, 0.9]
+      });
+      Animated.loop(
+        Animated.parallel([
+          Animated.sequence([
+            Animated.spring(springer, { toValue: 1, useNativeDriver: true }),
+            Animated.spring(springer, { toValue: 0, useNativeDriver: true }),
+          ]),
+          Animated.sequence([
+            Animated.timing(timer, { toValue: 1, useNativeDriver: true }),
+            Animated.timing(timer, { toValue: 0, useNativeDriver: true }),
+          ])
+        ])
+      ).start();
+      
       return (
         <SliderExample
           value={0.6}
@@ -211,26 +249,32 @@ exports.examples = [
           thumbTintColor={'yellow'}
           minimumValue={-1}
           maximumValue={2}
-          style={{width:300}}
+          style={{ width: 300}}
           //minimumTrackTintColor={'blue'}
           //maximumTrackTintColor={'red'}
           thumb={<View style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }} collapsable={false}>
-            <View style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30 }} collapsable={false}>
+            <Animated.View
+              style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
+              collapsable={false}
+            >
               <Image
                 source={require('./uie_thumb_big.png')}
                 style={{ width: 25, height: 25 }}
               />
+            </Animated.View>
+          </View>}
+          maximumTrack={() => <Animated.View style={{ height: 5, opacity: Animated.subtract(1, timer)}} collapsable={false}>
+            <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
+          </Animated.View>}
+          minimumTrack={() => <Animated.View
+            style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, opacity: gentleOpacity }} collapsable={false}>
+            <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: rotate }] }} />
+            <View style={{ backgroundColor: 'white', flex: 1 }}>
+              <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }] }} />
             </View>
-          </View>}
-          maximumTrack={() => <View style={{ opacity: 0.3, height: 5}} collapsable={false}>
-            <View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
-          </View>}
-          minimumTrack={() => <View style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3 }} collapsable={false}>
-            <View style={{ backgroundColor: 'yellow', flex: 1 }} />
-            <View style={{ backgroundColor: 'orange', flex: 1 }} />
-            <View style={{ backgroundColor: 'red', flex: 1 }} />
-            <View style={{ backgroundColor: 'magenta', flex: 1 }} />
-          </View>}
+            <Animated.View style={{ backgroundColor: 'red', flex: 1, transform: [{ rotateX: rotate }] }} />
+            <Animated.View style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink, rotate }], opacity: springer }} />
+          </Animated.View>}
         />
       );
     },

@@ -23,22 +23,25 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.LinearInterpolator;
 
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.UiThreadUtil;
+import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.UIManagerModule;
 
 public class ReactSliderDrawableHelper {
 
   private static final int MAX_LEVEL = 10000;
 
-  private abstract static class DrawableHandler implements ViewTreeObserver.OnDrawListener {
+  abstract static class DrawableHandler implements ViewTreeObserver.OnDrawListener {
     private final ReactContext mContext;
     private final Drawable mOriginal;
     private View mView;
     private boolean mIsDrawing = false;
-    private float mAlpha = 1;
+    private float mOpacity = 1;
 
     DrawableHandler(ReactContext context, Drawable original) {
       mContext = context;
@@ -94,10 +97,10 @@ public class ReactSliderDrawableHelper {
       }
       mView = view;
       if (mView != null) {
-        mAlpha = mView.getAlpha();
+        mOpacity = mView.getAlpha();
         draw();
       } else {
-        mAlpha = 1;
+        mOpacity = 1;
         restore();
       }
     }
@@ -123,7 +126,7 @@ public class ReactSliderDrawableHelper {
       Canvas canvas = new Canvas(bitmap);
       draw(canvas, mView);
       Drawable outDrawable = createDrawable(mContext.getResources(), bitmap);
-      outDrawable.setAlpha((int) (mAlpha * 255));
+      outDrawable.setAlpha((int) (mOpacity * 255));
       set(outDrawable);
       invalidate();
       mIsDrawing = false;
@@ -144,6 +147,17 @@ public class ReactSliderDrawableHelper {
       } else {
         get().setColorFilter(color, PorterDuff.Mode.SRC_IN);
       }
+    }
+
+    void updateFromProps(ReactStylesDiffMap props) {
+      if (props.hasKey("opacity")) {
+        setAlpha((float) props.getDouble("opacity", mOpacity));
+      }
+    }
+
+    void setAlpha(@FloatRange(from = 0, to = 1) float opacity) {
+      mOpacity = Math.max(Math.min(opacity, 1), 0);
+      get().setAlpha((int) (mOpacity * 255));
     }
   }
 
