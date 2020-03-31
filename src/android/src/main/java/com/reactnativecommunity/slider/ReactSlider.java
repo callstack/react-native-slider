@@ -8,9 +8,15 @@ package com.reactnativecommunity.slider;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -73,6 +79,7 @@ public class ReactSlider extends AppCompatSeekBar {
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
     disableStateListAnimatorIfNeeded();
+    setViewBackgroundDrawable();
     mProgressDrawableHandler = new ForegroundDrawableHandler(this);
     mBackgroundDrawableHandler = new BackgroundDrawableHandler(this);
     mThumbDrawableHandler = new ThumbDrawableHandler(this);
@@ -85,6 +92,30 @@ public class ReactSlider extends AppCompatSeekBar {
         && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       super.setStateListAnimator(null);
     }
+  }
+
+  /**
+   * this fixes the thumb's ripple drawable and preserves it even when a background color is applied
+   */
+  private void setViewBackgroundDrawable() {
+    int color = Color.TRANSPARENT;
+    if (getBackground() instanceof ColorDrawable) {
+      color = ((ColorDrawable) getBackground()).getColor();
+    }
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+      RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
+      LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{new ColorDrawable(color), rippleDrawable});
+      setBackground(layerDrawable);
+    }
+  }
+
+  /**
+   * {@link #setViewBackgroundDrawable()}
+   * @param color
+   */
+  @Override
+  public void setBackgroundColor(int color) {
+    ((ColorDrawable) ((LayerDrawable) getBackground()).getDrawable(0)).setColor(color);
   }
 
   /* package */ void setMaxValue(double max) {

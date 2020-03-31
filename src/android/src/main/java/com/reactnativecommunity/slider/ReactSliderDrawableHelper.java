@@ -2,7 +2,6 @@ package com.reactnativecommunity.slider;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -16,7 +15,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.Property;
 import android.util.StateSet;
@@ -194,17 +192,6 @@ public class ReactSliderDrawableHelper {
       mScaleAnimator.setInterpolator(new LinearInterpolator());
       mScaleAnimator.setDuration(ANIM_DURATION);
       mScaleAnimator.setStartDelay(ANIM_DELAY);
-
-      // remove existing ripple
-      mSlider.setBackgroundResource(0);
-      // set ripple
-      // // TODO: 30/03/2020
-      // when background color is applied it will probably run over the ripple
-      // maybe consider reapplying the ripple on top once background color is set
-      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-        RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
-        mSlider.setBackground(rippleDrawable);
-      }
     }
 
     @Override
