@@ -330,16 +330,20 @@ public class ReactSliderDrawableHelper {
     private final int mLayerID;
     private Integer mColor;
 
+    static Drawable getDrawable(ReactSlider slider, int layerID) {
+      LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
+      return drawable.findDrawableByLayerId(layerID);
+    }
+
     public ProgressDrawableHandler(ReactSlider slider, int layerID) {
-      super((ReactContext) slider.getContext(), slider.getProgressDrawable());
+      super((ReactContext) slider.getContext(), getDrawable(slider, layerID));
       mSlider = slider;
       mLayerID = layerID;
     }
 
     @Override
     public Drawable get() {
-      LayerDrawable drawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
-      return drawable.findDrawableByLayerId(mLayerID);
+      return getDrawable(mSlider, mLayerID);
     }
 
     @Override
