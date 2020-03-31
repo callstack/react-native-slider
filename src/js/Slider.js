@@ -253,7 +253,7 @@ const SliderComponent = (
   return (
     <RCTSliderNativeComponent
       {...localProps}
-      thumbImage={Image.resolveAssetSource(props.thumbImage)}
+      thumbImage={Platform.OS === 'web' ? props.thumbImage : Image.resolveAssetSource(props.thumbImage)}
       ref={forwardedRef}
       style={style}
       onChange={onChangeEvent}
