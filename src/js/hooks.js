@@ -10,9 +10,8 @@
 
 'use strict';
 
-const React = require('react');
-const { useCallback, useEffect, useMemo, useRef } = React;
-const { StyleSheet, findNodeHandle, View } = require('react-native');
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { StyleSheet, findNodeHandle, View } from 'react-native';
 
 export function useViewProp(arg, key, refToUpdate) {
   const viewRef = useRef();

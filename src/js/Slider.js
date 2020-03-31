@@ -13,7 +13,7 @@
 import React from 'react';
 import {Image, Platform, StyleSheet} from 'react-native';
 import RCTSliderNativeComponent from './RNCSliderNativeComponent';
-const { useViewProp } = require('./hooks');
+import { useViewProp } from './hooks';
 
 import type {Ref} from 'react';
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
