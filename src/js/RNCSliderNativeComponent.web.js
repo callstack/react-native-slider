@@ -4,12 +4,10 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @format
- * @flow
  */
 
-import React from 'react'
-import { View, StyleSheet } from 'react-native';
+import React from 'react';
+import {View, StyleSheet} from 'react-native';
 
 // import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
 // import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
@@ -133,112 +131,128 @@ import { View, StyleSheet } from 'react-native';
 //   inverted?: ?boolean,
 // |}>;
 
-const RCTSliderWebComponent = React.forwardRef(({
-  value: initialValue,
-  minimumValue = 0,
-  maximumValue = 0,
-  step = 1,
-  minimumTrackTintColor = '#009688',
-  maximumTrackTintColor = '#939393',
-  thumbTintColor = '#009688',
-  thumbStyle = {},
-  style = [],
-  inverted = false,
-  disabled = false,
-  trackHeight = 4,
-  thumbSize = 20,
-  onSlidingStart = () => {},
-  onSlidingComplete = () => {},
-  onValueChange = () => {},
-  ...others
-}, forwardedRef) => {
+const RCTSliderWebComponent = React.forwardRef(
+  (
+    {
+      value: initialValue,
+      minimumValue = 0,
+      maximumValue = 0,
+      step = 1,
+      minimumTrackTintColor = '#009688',
+      maximumTrackTintColor = '#939393',
+      thumbTintColor = '#009688',
+      thumbStyle = {},
+      style = [],
+      inverted = false,
+      disabled = false,
+      trackHeight = 4,
+      thumbSize = 20,
+      onSlidingStart = () => {},
+      onSlidingComplete = () => {},
+      onValueChange = () => {},
+      ...others
+    },
+    forwardedRef,
+  ) => {
+    const containerSize = React.useRef({width: 0, height: 0});
+    const containerRef = forwardedRef || React.createRef();
+    const [value, setValue] = React.useState(initialValue || minimumValue);
 
-  const containerSize = React.useRef({ width: 0, height: 0})
-  const containerRef = forwardedRef || React.createRef()
-  const [ value, setValue ] = React.useState(initialValue || minimumValue)
+    const percentageValue =
+      (value - minimumValue) / (maximumValue - minimumValue);
+    const minPercent = percentageValue;
+    const maxPercent = 1 - percentageValue;
 
-  const percentageValue = (value - minimumValue) / (maximumValue - minimumValue)
-  const minPercent = percentageValue
-  const maxPercent = (1 - percentageValue)
+    const containerStyle = StyleSheet.compose(
+      {
+        width: '100%',
+        flexDirection: 'row',
+        userSelect: 'none',
+        alignItems: 'center',
+      },
+      style,
+    );
 
-  const containerStyle = StyleSheet.compose({
-    width: '100%',
-    flexDirection: 'row',
-    userSelect: 'none',
-    alignItems: 'center'
-  }, style)
+    const trackStyle = {
+      height: trackHeight,
+      borderRadius: trackHeight / 2,
+      userSelect: 'none',
+      flexGrow: 1,
+    };
 
-  const trackStyle = {
-    height: trackHeight,
-    borderRadius: trackHeight / 2,
-    userSelect: 'none',
-    flexGrow: 1
-  }
+    const minimumTrackStyle = {
+      ...trackStyle,
+      backgroundColor: minimumTrackTintColor,
+      flexBasis: minPercent * 100 + '%',
+    };
 
-  const minimumTrackStyle = {
-    ...trackStyle,
-    backgroundColor: minimumTrackTintColor,
-    flexBasis: minPercent*100+'%',
-  }
+    const maximumTrackStyle = {
+      ...trackStyle,
+      backgroundColor: maximumTrackTintColor,
+      flexBasis: maxPercent * 100 + '%',
+    };
 
-  const maximumTrackStyle = {
-    ...trackStyle,
-    backgroundColor: maximumTrackTintColor,
-    flexBasis: maxPercent*100+'%',
-  }
+    // const width = (containerSize.current ? containerSize.current.width : 0)
+    // const valueOffset = (inverted ? (1 - percentageValue) : percentageValue) * width
 
-  // const width = (containerSize.current ? containerSize.current.width : 0)
-  // const valueOffset = (inverted ? (1 - percentageValue) : percentageValue) * width
+    const thumbViewStyle = StyleSheet.compose(
+      {
+        width: thumbSize,
+        height: thumbSize,
+        // left: valueOffset - thumbSize / 2,
+        // top: trackHeight / 2 - thumbSize / 2,
+        // position: absolute,
+        backgroundColor: thumbTintColor,
+        zIndex: 1,
+        borderRadius: thumbSize / 2,
+        overflow: 'hidden',
+        userSelect: 'none',
+        cursor: 'pointer',
+      },
+      thumbStyle,
+    );
 
-  const thumbViewStyle = StyleSheet.compose({
-    width: thumbSize,
-    height: thumbSize,
-    // left: valueOffset - thumbSize / 2,
-    // top: trackHeight / 2 - thumbSize / 2,
-    // position: absolute,
-    backgroundColor: thumbTintColor,
-    zIndex: 1,
-    borderRadius: thumbSize / 2,
-    overflow: 'hidden',
-    userSelect: 'none',
-    cursor: 'pointer'
-  }, thumbStyle)
+    const onTouchEnd = () => {
+      onSlidingComplete(value);
+    };
 
-  const onTouchEnd = () => {
-    onSlidingComplete(value)
-  }
+    const onMove = event => {
+      const {locationX: x} = event.nativeEvent;
+      const width = containerSize.current ? containerSize.current.width : 1;
+      const newValue = inverted
+        ? maximumValue - ((maximumValue - minimumValue) * x) / width
+        : minimumValue + ((maximumValue - minimumValue) * x) / width;
+      const roundedValue = Math.round(newValue / step) * step;
+      // Ensure that the new value is still between the bounds
+      const withinBounds = Math.max(
+        minimumValue,
+        Math.min(roundedValue, maximumValue),
+      );
+      setValue(withinBounds);
+      onValueChange(withinBounds);
+    };
 
-  const onMove = event => {
-    const { locationX: x } = event.nativeEvent
-    const width = (containerSize.current ? containerSize.current.width : 1)
-    const newValue = inverted
-      ? (maximumValue - (maximumValue - minimumValue) * x / width)
-      : (minimumValue + (maximumValue - minimumValue) * x / width)
-    const roundedValue = Math.round(newValue / step) * step
-    // Ensure that the new value is still between the bounds
-    const withinBounds = Math.max(minimumValue, Math.min(roundedValue, maximumValue))
-    setValue(withinBounds)
-    onValueChange(withinBounds)
-  }
+    return (
+      <View
+        ref={containerRef}
+        onLayout={({nativeEvent}) =>
+          (containerSize.current = nativeEvent.layout)
+        }
+        style={containerStyle}
+        onStartShouldSetResponder={() => !disabled}
+        onMoveShouldSetResponder={() => !disabled}
+        onResponderGrant={() => onSlidingStart(value)}
+        onResponderRelease={onTouchEnd}
+        onResponderMove={onMove}
+        {...others}>
+        <View pointerEvents="none" style={minimumTrackStyle} />
+        <View pointerEvents="none" style={thumbViewStyle} />
+        <View pointerEvents="none" style={maximumTrackStyle} />
+      </View>
+    );
+  },
+);
 
-  return (
-    <View
-      ref={containerRef}
-      onLayout={({ nativeEvent }) => (containerSize.current = nativeEvent.layout)}
-      style={containerStyle}
-      onStartShouldSetResponder={() => !disabled}
-      onMoveShouldSetResponder={() => !disabled}
-      onResponderGrant={() => onSlidingStart(value)}
-      onResponderRelease={onTouchEnd}
-      onResponderMove={onMove}
-      {...others}>
-      <View pointerEvents="none" style={minimumTrackStyle} />
-      <View pointerEvents="none" style={thumbViewStyle} />
-      <View pointerEvents="none" style={maximumTrackStyle} />
-    </View>
-  );
-})
+RCTSliderWebComponent.displayName = 'RTCSliderWebComponent';
 
-RCTSliderWebComponent.displayName = 'RTCSliderWebComponent'
-
-export default RCTSliderWebComponent
+export default RCTSliderWebComponent;
