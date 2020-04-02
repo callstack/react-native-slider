@@ -223,9 +223,10 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
       if (id != View.NO_ID) {
         if (id == informantID) {
           handler.updateFromProps(context);
+          break;
         }
         if (id == recruiterID) {
-          handler.dispatchDraw();
+          //handler.dispatchDraw();
           break;
         }
       }

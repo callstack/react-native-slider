@@ -11,11 +11,11 @@
 'use strict';
 
 import React from 'react';
-import {Text, StyleSheet, View, Image, Animated} from 'react-native';
+import { Text, StyleSheet, View, Image, Animated, I18nManager } from 'react-native';
 import Slider, { ANDROID_DEFAULT_COLOR } from '@react-native-community/slider';
 const AnimatedSlider = Animated.createAnimatedComponent(Slider);
+import type { Element } from 'react';
 
-import type {Element} from 'react';
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
   static defaultProps = {
     value: 0,
@@ -44,7 +44,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
         <AnimatedSlider
           {...this.props}
           ref={this.ref}
-          onValueChange={value => this.setState({value: value})}
+          onValueChange={value => this.setState({ value: value })}
         />
       </View>
     );
@@ -54,7 +54,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
 class SlidingStartExample extends React.Component<
   $FlowFixMeProps,
   $FlowFixMeState,
-> {
+  > {
   state = {
     slideStartingValue: 0,
     slideStartingCount: 0,
@@ -84,7 +84,7 @@ class SlidingStartExample extends React.Component<
 class SlidingCompleteExample extends React.Component<
   $FlowFixMeProps,
   $FlowFixMeState,
-> {
+  > {
   state = {
     slideCompletionValue: 0,
     slideCompletionCount: 0,
@@ -225,6 +225,7 @@ exports.examples = [
     title: 'Custom View',
     platform: 'android',
     render(): React.Element<any> {
+      const useNativeDriver = true;
       const springer = new Animated.Value(0);
       const rotate = Animated.multiply(springer, 45);
       const timer = new Animated.Value(0);
@@ -243,16 +244,16 @@ exports.examples = [
       Animated.loop(
         Animated.parallel([
           Animated.sequence([
-            Animated.spring(springer, { toValue: 1, useNativeDriver: true }),
-            Animated.spring(springer, { toValue: 0, useNativeDriver: true }),
+            Animated.spring(springer, { toValue: 1, useNativeDriver }),
+            Animated.spring(springer, { toValue: 0, useNativeDriver }),
           ]),
           Animated.sequence([
-            Animated.timing(timer, { toValue: 1, useNativeDriver: true }),
-            Animated.timing(timer, { toValue: 0, useNativeDriver: true }),
+            Animated.timing(timer, { toValue: 1, useNativeDriver }),
+            Animated.timing(timer, { toValue: 0, useNativeDriver }),
           ])
         ])
       ).start();
-      
+
       return (
         <SliderExample
           value={0.6}
@@ -262,7 +263,7 @@ exports.examples = [
           maximumValue={2}
           style={{ width: 300 }}
           ref={r => {
-            setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 5000)
+            //setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 5000)
           }}
           //minimumTrackTintColor={'blue'}
           //maximumTrackTintColor={'red'}
@@ -277,17 +278,27 @@ exports.examples = [
               />
             </Animated.View>
           </View>}
-          maximumTrack={() => <Animated.View style={{ height: 5, opacity: Animated.subtract(1, timer)}} collapsable={false}>
+          maximumTrack={() => <Animated.View
+            style={{ height: 5,/* opacity: Animated.subtract(1, timer),*/ transform: [{ rotateY: rotate }] }}
+            collapsable={false}
+          >
             <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
           </Animated.View>}
           minimumTrack={() => <Animated.View
-            style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, opacity: gentleOpacity }} collapsable={false}>
+            style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, opacity: gentleOpacity }}
+            collapsable={false}
+          >
             <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: rotate }] }} />
             <View style={{ backgroundColor: 'white', flex: 1 }}>
               <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }] }} />
             </View>
             <Animated.View style={{ backgroundColor: 'red', flex: 1, transform: [{ rotateX: rotate }] }} />
-            <Animated.View style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink, rotate }], opacity: springer }} />
+            <Animated.View
+              style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink }, { rotate }], opacity: springer }}
+              ref={r => {
+                setTimeout(() => r && r.setNativeProps({ backgroundColor: 'pink' }), 5000)
+              }}
+            />
           </Animated.View>}
         />
       );

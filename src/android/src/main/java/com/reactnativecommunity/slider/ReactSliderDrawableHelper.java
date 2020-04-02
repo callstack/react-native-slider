@@ -4,8 +4,10 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -19,22 +21,187 @@ import android.os.Build;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.FloatRange;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.UiThreadUtil;
+import com.facebook.react.uimanager.MatrixMathHelper;
+import com.facebook.react.uimanager.ReactTransformHelper;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.UIManagerModule;
+import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry.InformantTarget;
 
 public class ReactSliderDrawableHelper {
 
   private static final int MAX_LEVEL = 10000;
 
-  abstract static class DrawableHandler implements ViewTreeObserver.OnDrawListener {
+  static class ReactDrawable extends BitmapDrawable implements ReactTransformHelper.Transformable {
+    private float mScaleX = 1;
+    private float mScaleY = 1;
+    private float mTranslationX = 0;
+    private float mTranslationY = 0;
+    private float mRotationX = 0;
+    private float mRotationY = 0;
+    private float mRotation = 0;
+    private float mSkewX = 0;
+    private float mSkewY = 0;
+    private float mOpacity = 0;
+    private Camera mRotator = new Camera();
+    
+    ReactDrawable(Resources res, Bitmap bitmap) {
+      super(res, bitmap);
+    }
+
+    @Override
+    protected boolean onStateChange(int[] state) {
+      return true;
+    }
+
+    @Override
+    protected boolean onLevelChange(int level) {
+      return true;
+    }
+
+    void setTransform(ReadableArray transforms) {
+      ReactTransformHelper.setTransform(this, transforms);
+      invalidateSelf();
+    }
+
+    @Override
+    public void draw(@NonNull Canvas canvas) {
+      Rect bounds = getBounds();
+      PointF center = new PointF(bounds.centerX(), bounds.centerY());
+      // apply translation
+      canvas.translate(mTranslationX, mTranslationY);
+      // apply skew
+      canvas.skew(mSkewX, mSkewY);
+      // apply 3D rotation
+      mRotator.save();
+      mRotator.translate(center.x, -center.y, 0);
+      mRotator.rotate(mRotationX, mRotationY, mRotation);
+      mRotator.translate(-center.x, center.y, 0);
+      mRotator.applyToCanvas(canvas);
+      mRotator.restore();
+      // apply scale
+      canvas.scale(mScaleX, mScaleY, center.x, center.y);
+      super.draw(canvas);
+    }
+
+    public float getScaleX() {
+      return mScaleX;
+    }
+
+    @Override
+    public void setScaleX(float scaleX) {
+      mScaleX = scaleX;
+    }
+
+    public float getScaleY() {
+      return mScaleY;
+    }
+
+    @Override
+    public void setScaleY(float scaleY) {
+      mScaleY = scaleY;
+    }
+    
+    public float getRotation() {
+      return mRotation;
+    }
+
+    @Override
+    public void setRotation(float rotation) {
+      mRotation = rotation;
+    }
+
+    public float getRotationX() {
+      return mRotationX;
+    }
+
+    @Override
+    public void setRotationX(float rotationX) {
+      mRotationX = rotationX;
+    }
+
+    public float getRotationY() {
+      return mRotationY;
+    }
+
+    @Override
+    public void setRotationY(float rotationY) {
+      mRotationY = rotationY;
+    }
+
+    public float getReactOpacity() {
+      return mOpacity;
+    }
+
+    public void setReactOpacity(float opacity) {
+      mOpacity = Math.max(Math.min(opacity, 1), 0);
+      setAlpha((int) (mOpacity * 255));
+    }
+
+    public float getTranslationX() {
+      return mTranslationX;
+    }
+
+    @Override
+    public void setTranslationX(float translationX) {
+      mTranslationX = translationX;
+    }
+
+    public float getTranslationY() {
+      return mTranslationY;
+    }
+
+    @Override
+    public void setTranslationY(float translationY) {
+      mTranslationY = translationY;
+    }
+
+    @Override
+    public void setCameraDistance(float distance) {
+      
+    }
+
+    public float getSkewX() {
+      return mSkewX;
+    }
+
+    @Override
+    public void setSkewX(float skewX) {
+      this.mSkewX = skewX;
+    }
+
+    public float getSkewY() {
+      return mSkewY;
+    }
+
+    @Override
+    public void setSkewY(float skewY) {
+      this.mSkewY = skewY;
+    }
+  }
+  /*
+  static class ReactDrawableGroup extends LayerDrawable {
+    ReactDrawableGroup(View view) {
+      if (view instanceof ViewGroup) {
+
+      }
+      super();
+    }
+  }
+
+   */
+
+  abstract static class DrawableHandler implements ViewTreeObserver.OnDrawListener, InformantTarget<ReactStylesDiffMap> {
     private final ReactContext mContext;
     private final Drawable mOriginal;
     private View mView;
@@ -47,7 +214,7 @@ public class ReactSliderDrawableHelper {
     }
 
     Drawable createDrawable(Resources res, Bitmap bitmap) {
-      return new BitmapDrawable(res, bitmap);
+      return new ReactDrawable(res, bitmap);
     }
 
     abstract Drawable get();
@@ -66,6 +233,18 @@ public class ReactSliderDrawableHelper {
     public void onDraw() {
       if (mView != null && !mIsDrawing && mView.isDirty()) {
         draw();
+      }
+    }
+
+    @Override
+    public void receiveFromInformant(int informantID, int recruiterID, ReactStylesDiffMap context) {
+      if (getView() != null && recruiterID == getView().getId()) {
+        if (context.hasKey("opacity")) {
+          setAlpha((float) context.getDouble("opacity", mOpacity));
+        }
+        if (context.hasKey("transform") && get() instanceof ReactDrawable) {
+          ((ReactDrawable) get()).setTransform(context.getArray("transform"));
+        }
       }
     }
 
@@ -151,6 +330,9 @@ public class ReactSliderDrawableHelper {
     void updateFromProps(ReactStylesDiffMap props) {
       if (props.hasKey("opacity")) {
         setAlpha((float) props.getDouble("opacity", mOpacity));
+      }
+      if (props.hasKey("transform") && get() instanceof ReactDrawable) {
+        ((ReactDrawable) get()).setTransform(props.getArray("transform"));
       }
     }
 
@@ -298,19 +480,27 @@ public class ReactSliderDrawableHelper {
       }
     }
 
-    private void animate(float scale) {
+    private void animate(float scaler) {
       if (mScaleAnimator.isRunning()) {
         mScaleAnimator.cancel();
       }
-      final ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
-          this,
-          Property.of(ThumbDrawableHandler.class, Float.class, "scale"),
-          scale);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-        scaleAnim.setAutoCancel(true);
+      if (get() instanceof ReactDrawable) {
+        ReactDrawable drawable = (ReactDrawable) get();
+        ObjectAnimator scaleXAnim = ObjectAnimator.ofFloat(
+            drawable,
+            Property.of(ReactDrawable.class, Float.class, "scaleX"),
+            scaler * drawable.mScaleX);
+        ObjectAnimator scaleYAnim = ObjectAnimator.ofFloat(
+            drawable,
+            Property.of(ReactDrawable.class, Float.class, "scaleY"),
+            scaler * drawable.mScaleY);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+          scaleXAnim.setAutoCancel(true);
+          scaleYAnim.setAutoCancel(true);
+        }
+        mScaleAnimator.playTogether(scaleXAnim, scaleYAnim);
+        mScaleAnimator.start();
       }
-      mScaleAnimator.play(scaleAnim);
-      mScaleAnimator.start();
     }
 
     void onTouchEvent(MotionEvent event) {
@@ -387,7 +577,7 @@ public class ReactSliderDrawableHelper {
       return new UpdatingBitmapDrawable(res, bitmap, get().getLevel());
     }
 
-    private class UpdatingBitmapDrawable extends BitmapDrawable {
+    private class UpdatingBitmapDrawable extends ReactDrawable {
       UpdatingBitmapDrawable(Resources res, Bitmap bitmap, int level) {
         super(res, bitmap);
         setLevel(level);

@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.UiThreadUtil;
-import com.facebook.react.common.ReactConstants;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.views.slider.ReactSliderManager;
@@ -42,9 +41,11 @@ public class ReactInformantViewManager extends ReactViewManager {
     };
 
     private final ReactContext mContext;
+    private boolean mInformDeep;
 
-    InformantRegistry(ReactContext context) {
+    InformantRegistry(ReactContext context, boolean informDeep) {
       mContext = context;
+      mInformDeep = informDeep;
     }
 
     void add(final View receiver, final int informantID, final boolean informDeep) {
@@ -72,16 +73,27 @@ public class ReactInformantViewManager extends ReactViewManager {
     }
 
     synchronized void add(View receiver, View informant, boolean informDeep) {
-      traverseRegistration(receiver, informant, informant, informDeep);
+      traverseRegistration(receiver, informant, informant.getId(), informDeep);
     }
 
-    private void traverseRegistration(View receiver, View informant, View recruiter, boolean informDeep) {
+    synchronized void addSubInformant(View informant, View child, boolean informDeep) {
+      View receiver = mInformantToReceiverRegistry.get(informant.getId());
+      if (receiver != null) {
+        traverseRegistration(
+            receiver,
+            child,
+            mInformantToRecruiterRegistry.get(informant.getId()),
+            informDeep);
+      }
+    }
+
+    private void traverseRegistration(View receiver, View informant, int recruiterID, boolean informDeep) {
       mInformantToReceiverRegistry.put(informant.getId(), receiver);
-      mInformantToRecruiterRegistry.put(informant.getId(), recruiter.getId());
+      mInformantToRecruiterRegistry.put(informant.getId(), recruiterID);
       if (informant instanceof ViewGroup && informDeep) {
         ViewGroup viewGroup = (ViewGroup) informant;
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
-          traverseRegistration(receiver, viewGroup.getChildAt(i), recruiter, true);
+          traverseRegistration(receiver, viewGroup.getChildAt(i), recruiterID, true);
         }
       }
     }
@@ -111,6 +123,12 @@ public class ReactInformantViewManager extends ReactViewManager {
   ReactInformantViewManager(InformantRegistry registry) {
     super();
     mInformantRegistry = registry;
+  }
+
+  @Override
+  public void addView(ReactViewGroup parent, View child, int index) {
+    super.addView(parent, child, index);
+    mInformantRegistry.addSubInformant(parent, child, true);
   }
 
   @Override
