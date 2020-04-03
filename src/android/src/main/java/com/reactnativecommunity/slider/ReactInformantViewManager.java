@@ -18,13 +18,13 @@ import com.facebook.react.views.view.ReactViewManager;
 
 public class ReactInformantViewManager extends ReactViewManager {
 
-  static class InformantRegistry {
+  public static class InformantRegistry {
 
-    interface InformAction<T> {
+    public interface InformAction<T> {
       void run(View target, int informantID, int recruiterID, T context);
     }
 
-    interface InformantTarget<T> {
+    public interface InformantTarget<T> {
       void receiveFromInformant(int informantID, int recruiterID, T context);
     }
 

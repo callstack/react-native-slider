@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -19,7 +20,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -28,10 +28,10 @@ import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry.InformantTarget;
-import com.reactnativecommunity.slider.ReactSliderDrawableHelper.BackgroundDrawableHandler;
-import com.reactnativecommunity.slider.ReactSliderDrawableHelper.DrawableHandler;
-import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ForegroundDrawableHandler;
-import com.reactnativecommunity.slider.ReactSliderDrawableHelper.ThumbDrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawable.BackgroundDrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawable.DrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawable.ForegroundDrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawable.ThumbDrawableHandler;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -158,7 +158,7 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
     updateAll();
   }
 
-  boolean isInverted() {
+  public boolean isInverted() {
     return mIsInverted;
   }
 
@@ -231,6 +231,11 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
         }
       }
     }
+  }
+
+  @Override
+  public void draw(Canvas canvas) {
+    super.draw(canvas);
   }
 
   void tearDown() {
