@@ -143,6 +143,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
   }
 
   void updateFromProps(ReactStylesDiffMap props) {
+    if (props == null) return;
     if (get() instanceof ReactDrawable) {
       ((ReactDrawable) get()).updateFromProps(props);
     } else if (props.hasKey("opacity")) {

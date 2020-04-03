@@ -116,10 +116,10 @@ public class ReactSliderDrawableHelper {
       if (id != View.NO_ID) {
         if (id == informantID) {
           handler.updateFromProps(context);
-          break;
+          //break;
         }
         if (id == recruiterID) {
-          //handler.dispatchDraw();
+          handler.dispatchDraw();
           break;
         }
       }
