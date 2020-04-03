@@ -26,8 +26,9 @@ import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry;
-import com.reactnativecommunity.slider.ReactSlider.SliderDrawable;
+import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper.SliderDrawable;
 import com.reactnativecommunity.slider.ReactSliderDrawable.DrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper;
 
 import java.util.Map;
 
@@ -115,11 +116,20 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   private final InformantRegistry mInformantRegistry;
 
-  void handleRegistration(ReactSlider receiver, Integer informantTag, @SliderDrawable int type) {
+  ReactSliderManager(InformantRegistry registry) {
+    super();
+    mInformantRegistry = registry;
+  }
+
+  private DrawableHandler getDrawableHandler(ReactSlider view, @SliderDrawable int type) {
+    return view.drawableHelper.getDrawableHandler(type);
+  }
+
+  private void handleRegistration(ReactSlider receiver, Integer informantTag, @SliderDrawable int type) {
     if (informantTag != null) {
       mInformantRegistry.add(receiver, informantTag, true);
     } else {
-      DrawableHandler handler = receiver.getDrawableHandler(type);
+      DrawableHandler handler = getDrawableHandler(receiver, type);
       View informant = handler.getView();
       if (informant != null) {
         mInformantRegistry.remove(informant.getId());
@@ -127,9 +137,13 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     }
   }
 
-  ReactSliderManager(InformantRegistry registry) {
-    super();
-    mInformantRegistry = registry;
+  private void registerView(ReactSlider view, Integer tag, @SliderDrawable int type) {
+    getDrawableHandler(view, type).setView(tag == null ? -1 : tag);
+    handleRegistration(view, tag, type);
+  }
+
+  private void setTintColor(ReactSlider view, Integer color, @SliderDrawable int type) {
+    getDrawableHandler(view, type).setTintColor(color);
   }
 
   @Override
@@ -196,24 +210,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "thumbTintColor", customType = "Color")
   public void setThumbTintColor(ReactSlider view, Integer color) {
-    view.mThumbDrawableHandler.setTintColor(color);
+    setTintColor(view, color, SliderDrawable.THUMB);
   }
 
   @ReactProp(name = "thumbViewTag")
   public void setThumbView(ReactSlider view, Integer tag) {
-    view.mThumbDrawableHandler.setView(tag == null ? -1 : tag);
-    handleRegistration(view, tag, SliderDrawable.THUMB);
-  }
-
-  @ReactProp(name = "minimumTrackTintColor", customType = "Color")
-  public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
-    view.mProgressDrawableHandler.setTintColor(color);
-  }
-
-  @ReactProp(name = "minimumTrackViewTag")
-  public void setMinimumTrackView(ReactSlider view, Integer tag) {
-    view.mProgressDrawableHandler.setView(tag == null ? -1 : tag);
-    handleRegistration(view, tag, SliderDrawable.MINIMUM_TRACK);
+    registerView(view, tag, SliderDrawable.THUMB);
   }
 
   @ReactProp(name = "thumbImage")
@@ -225,15 +227,24 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     view.setThumbImage(uri);
   }
 
+  @ReactProp(name = "minimumTrackTintColor", customType = "Color")
+  public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
+    setTintColor(view, color, SliderDrawable.MINIMUM_TRACK);
+  }
+
+  @ReactProp(name = "minimumTrackViewTag")
+  public void setMinimumTrackView(ReactSlider view, Integer tag) {
+    registerView(view, tag, SliderDrawable.MINIMUM_TRACK);
+  }
+
   @ReactProp(name = "maximumTrackTintColor", customType = "Color")
   public void setMaximumTrackTintColor(ReactSlider view, Integer color) {
-    view.mBackgroundDrawableHandler.setTintColor(color);
+    setTintColor(view, color, SliderDrawable.MAXIMUM_TRACK);
   }
 
   @ReactProp(name = "maximumTrackViewTag")
   public void setMaximumTrackView(ReactSlider view, Integer tag) {
-    view.mBackgroundDrawableHandler.setView(tag == null ? -1 : tag);
-    handleRegistration(view, tag, SliderDrawable.MAXIMUM_TRACK);
+    registerView(view, tag, SliderDrawable.MAXIMUM_TRACK);
   }
 
   @ReactProp(name = "inverted", defaultBoolean = false)

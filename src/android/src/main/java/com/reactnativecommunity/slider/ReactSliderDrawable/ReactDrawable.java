@@ -9,6 +9,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
@@ -56,12 +57,6 @@ public class ReactDrawable extends Drawable implements ReactTransformHelper.Tran
   }
 
   @Override
-  public void setBounds(int left, int top, int right, int bottom) {
-    super.setBounds(left, top, right, bottom);
-    mDrawable.setBounds(left, top, right, bottom);
-  }
-
-  @Override
   protected boolean onStateChange(int[] state) {
     return mDrawable.setState(state);
   }
@@ -73,9 +68,8 @@ public class ReactDrawable extends Drawable implements ReactTransformHelper.Tran
 
   public void setDrawable(Drawable drawable) {
     mDrawable = drawable;
-    mDrawable.setBounds(getBounds());
-    mDrawable.setLevel(getLevel());
     mDrawable.setState(getState());
+    mDrawable.setLevel(getLevel());
     invalidateSelf();
   }
 

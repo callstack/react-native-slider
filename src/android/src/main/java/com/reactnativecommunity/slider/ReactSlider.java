@@ -23,18 +23,14 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.IntDef;
 import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry.InformantTarget;
-import com.reactnativecommunity.slider.ReactSliderDrawable.BackgroundDrawableHandler;
 import com.reactnativecommunity.slider.ReactSliderDrawable.DrawableHandler;
-import com.reactnativecommunity.slider.ReactSliderDrawable.ForegroundDrawableHandler;
+import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper;
 import com.reactnativecommunity.slider.ReactSliderDrawable.ThumbDrawableHandler;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -52,18 +48,6 @@ import javax.annotation.Nullable;
  * <p>Note that the slider is _not_ a controlled component (setValue isn't called during dragging).
  */
 public class ReactSlider extends AppCompatSeekBar implements InformantTarget<ReactStylesDiffMap> {
-
-  @IntDef({
-      SliderDrawable.MAXIMUM_TRACK,
-      SliderDrawable.MINIMUM_TRACK,
-      SliderDrawable.THUMB
-  })
-  @Retention(RetentionPolicy.SOURCE)
-  @interface SliderDrawable {
-    int MAXIMUM_TRACK = 0;
-    int MINIMUM_TRACK = 1;
-    int THUMB = 2;
-  }
 
   /**
    * If step is 0 (unset) we default to this total number of steps. Don't use 100 which leads to
@@ -92,17 +76,13 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
 
   private boolean mIsInverted = false;
 
-  final ForegroundDrawableHandler mProgressDrawableHandler;
-  final BackgroundDrawableHandler mBackgroundDrawableHandler;
-  final ThumbDrawableHandler mThumbDrawableHandler;
+  final ReactSliderDrawableHelper drawableHelper;
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
     disableStateListAnimatorIfNeeded();
     setViewBackgroundDrawable();
-    mProgressDrawableHandler = new ForegroundDrawableHandler(this);
-    mBackgroundDrawableHandler = new BackgroundDrawableHandler(this);
-    mThumbDrawableHandler = new ThumbDrawableHandler(this);
+    drawableHelper = new ReactSliderDrawableHelper(this);
   }
 
   private void disableStateListAnimatorIfNeeded() {
@@ -202,35 +182,9 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
     return mStep > 0 ? mStep : mStepCalculated;
   }
 
-  DrawableHandler getDrawableHandler(@SliderDrawable int type) {
-    switch (type) {
-      case SliderDrawable.MAXIMUM_TRACK:
-        return mBackgroundDrawableHandler;
-      case SliderDrawable.MINIMUM_TRACK:
-        return mProgressDrawableHandler;
-      case SliderDrawable.THUMB:
-        return mThumbDrawableHandler;
-      default:
-        throw new Error("bad drawable type");
-    }
-  }
-
   @Override
   public void receiveFromInformant(int informantID, int recruiterID, ReactStylesDiffMap context) {
-    DrawableHandler[] handlers = new DrawableHandler[]{mBackgroundDrawableHandler, mProgressDrawableHandler, mThumbDrawableHandler};
-    for (DrawableHandler handler: handlers) {
-      int id = handler.getView() != null ? handler.getView().getId() : View.NO_ID;
-      if (id != View.NO_ID) {
-        if (id == informantID) {
-          handler.updateFromProps(context);
-          break;
-        }
-        if (id == recruiterID) {
-          //handler.dispatchDraw();
-          break;
-        }
-      }
-    }
+    drawableHelper.receiveFromInformant(informantID, recruiterID, context);
   }
 
   @Override
@@ -238,18 +192,16 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
     super.draw(canvas);
   }
 
-  void tearDown() {
-    mProgressDrawableHandler.tearDown();
-    mBackgroundDrawableHandler.tearDown();
-    mThumbDrawableHandler.tearDown();
-  }
-
   @SuppressLint("ClickableViewAccessibility")
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     boolean retVal = super.onTouchEvent(event);
-    mThumbDrawableHandler.onTouchEvent(event);
+    drawableHelper.onTouchEvent(event);
     return retVal;
+  }
+
+  void tearDown() {
+    drawableHelper.tearDown();
   }
 
   private BitmapDrawable getBitmapDrawable(final String uri) {

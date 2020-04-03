@@ -14,12 +14,11 @@ import android.view.View;
 import com.facebook.react.bridge.ReactContext;
 import com.reactnativecommunity.slider.ReactSlider;
 
-class ProgressDrawableHandler extends DrawableHandler {
+abstract class ProgressDrawableHandler extends DrawableHandler {
   final ReactSlider mSlider;
   private final int mLayerID;
-  private Integer mColor;
-  private ReactDrawable mDrawableWrapper;
-  private Drawable mDrawable;
+  protected ReactDrawable mDrawableWrapper;
+  protected Drawable mDrawable;
 
   static Drawable getDrawable(ReactSlider slider, int layerID) {
     LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
@@ -32,27 +31,34 @@ class ProgressDrawableHandler extends DrawableHandler {
     mLayerID = layerID;
   }
 
-  Drawable wrapDrawable(Drawable drawable, Class<? extends ReactDrawable> factory) {
-    factory.newInstance()
+  Drawable createDrawable(Drawable drawable) {
     mDrawable = drawable;
     if (mDrawableWrapper == null) {
       mDrawableWrapper = new ReactDrawable(mDrawable) {
         @Override
         protected void onBoundsChange(Rect bounds) {
-          //mDrawable.setBounds(bounds);
+          mDrawable.setBounds(bounds);
+        }
+
+        @Override
+        PointF getCenter() {
+          if (mDrawable instanceof ProgressBitmapDrawable) {
+            return ((ProgressBitmapDrawable) mDrawable).getCenter();
+          } else {
+            return super.getCenter();
+          }
         }
       };
     } else {
-      //mDrawable.setBounds(mDrawableWrapper.getBounds());
+      mDrawable.setBounds(mDrawableWrapper.getBounds());
       mDrawableWrapper.setDrawable(mDrawable);
-      //mDrawableWrapper.setLevel(mDrawable.getLevel());
     }
     return mDrawableWrapper;
   }
 
   @Override
   Drawable createDrawable(Resources res, Bitmap bitmap) {
-    return wrapDrawable(new BitmapDrawable(res, bitmap));
+    return createDrawable(new BitmapDrawable(res, bitmap));
   }
 
   @Override
@@ -88,5 +94,44 @@ class ProgressDrawableHandler extends DrawableHandler {
     canvas.translate(0, (bounds.height() - barHeight) / 2);
     canvas.scale(scale.x, scale.y);
     view.draw(canvas);
+  }
+
+  static class ProgressBitmapDrawable extends BitmapDrawable {
+
+    private float mLevelScale = 1;
+    private final boolean mInverted;
+
+    ProgressBitmapDrawable(Resources res, Bitmap bitmap) {
+      this(res, bitmap, false);
+    }
+
+    ProgressBitmapDrawable(Resources res, Bitmap bitmap, boolean inverted) {
+      super(res, bitmap);
+      mInverted = inverted;
+    }
+
+    @Override
+    protected boolean onLevelChange(int level) {
+      mLevelScale = getLevel() * 1.f / ReactSliderDrawableHelper.MAX_LEVEL * 1.f;
+      if (mInverted) mLevelScale = 1 - mLevelScale;
+      return true;
+    }
+
+    PointF getCenter() {
+      Rect bounds = getBounds();
+      float x = bounds.centerX() * mLevelScale;
+      if (mInverted) x = bounds.width() - x;
+      return new PointF(x, bounds.centerY());
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+      if (mInverted) {
+        Rect bounds = getBounds();
+        canvas.translate(bounds.width() * (1 - mLevelScale), 0);
+      }
+      canvas.scale(mLevelScale, 1);
+      super.draw(canvas);
+    }
   }
 }
