@@ -8,34 +8,15 @@ package com.reactnativecommunity.slider;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 
 import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry.InformantTarget;
-import com.reactnativecommunity.slider.ReactSliderDrawable.DrawableHandler;
 import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper;
-import com.reactnativecommunity.slider.ReactSliderDrawable.ThumbDrawableHandler;
-
-import java.net.URL;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
@@ -81,7 +62,6 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
     disableStateListAnimatorIfNeeded();
-    setViewBackgroundDrawable();
     drawableHelper = new ReactSliderDrawableHelper(this);
   }
 
@@ -95,27 +75,12 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
   }
 
   /**
-   * this fixes the thumb's ripple drawable and preserves it even when a background color is applied
-   */
-  private void setViewBackgroundDrawable() {
-    int color = Color.TRANSPARENT;
-    if (getBackground() instanceof ColorDrawable) {
-      color = ((ColorDrawable) getBackground()).getColor();
-    }
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-      RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
-      LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{new ColorDrawable(color), rippleDrawable});
-      setBackground(layerDrawable);
-    }
-  }
-
-  /**
-   * {@link #setViewBackgroundDrawable()}
+   * see {@link ReactSliderDrawableHelper#setViewBackgroundDrawable()}, {@link ReactSliderDrawableHelper#handleSetBackgroundColor(int)}
    * @param color
    */
   @Override
   public void setBackgroundColor(int color) {
-    ((ColorDrawable) ((LayerDrawable) getBackground()).getDrawable(0)).setColor(color);
+    drawableHelper.handleSetBackgroundColor(color);
   }
 
   /* package */ void setMaxValue(double max) {
@@ -187,11 +152,6 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
     drawableHelper.receiveFromInformant(informantID, recruiterID, context);
   }
 
-  @Override
-  public void draw(Canvas canvas) {
-    super.draw(canvas);
-  }
-
   @SuppressLint("ClickableViewAccessibility")
   @Override
   public boolean onTouchEvent(MotionEvent event) {
@@ -199,55 +159,4 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
     drawableHelper.onTouchEvent(event);
     return retVal;
   }
-
-  void tearDown() {
-    drawableHelper.tearDown();
-  }
-
-  private BitmapDrawable getBitmapDrawable(final String uri) {
-    BitmapDrawable bitmapDrawable = null;
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    Future<BitmapDrawable> future = executorService.submit(new Callable<BitmapDrawable>() {
-      @Override
-      public BitmapDrawable call() {
-        BitmapDrawable bitmapDrawable = null;
-        try {
-          Bitmap bitmap = null;
-          if (uri.startsWith("http://") || uri.startsWith("https://") ||
-              uri.startsWith("file://") || uri.startsWith("asset://") || uri.startsWith("data:")) {
-            bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
-          } else {
-            int drawableId = getResources()
-                .getIdentifier(uri, "drawable", getContext()
-                    .getPackageName());
-            bitmap = BitmapFactory.decodeResource(getResources(), drawableId);
-          }
-
-          bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        return bitmapDrawable;
-      }
-    });
-    try {
-      bitmapDrawable = future.get();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return bitmapDrawable;
-  }
-
-  public void setThumbImage(final String uri) {
-    if (uri != null) {
-      setThumb(getBitmapDrawable(uri));
-      // Enable alpha channel for the thumbImage
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        setSplitTrack(false);
-      }
-    } else {
-      setThumb(getThumb());
-    }
-  }
-
 }

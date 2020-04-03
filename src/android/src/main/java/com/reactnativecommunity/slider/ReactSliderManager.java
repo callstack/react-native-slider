@@ -28,7 +28,6 @@ import com.facebook.yoga.YogaNode;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry;
 import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper.SliderDrawable;
 import com.reactnativecommunity.slider.ReactSliderDrawable.DrawableHandler;
-import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper;
 
 import java.util.Map;
 
@@ -178,7 +177,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   public void onDropViewInstance(@Nonnull ReactSlider view) {
-    view.tearDown();
+    view.drawableHelper.tearDown();
   }
 
   @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
@@ -224,7 +223,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     if (source != null) {
       uri = source.getString("uri");
     }
-    view.setThumbImage(uri);
+    view.drawableHelper.setThumbImage(uri);
   }
 
   @ReactProp(name = "minimumTrackTintColor", customType = "Color")
