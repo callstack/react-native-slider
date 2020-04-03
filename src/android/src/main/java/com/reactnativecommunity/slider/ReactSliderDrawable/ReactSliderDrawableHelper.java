@@ -13,7 +13,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AbsSeekBar;
 
 import androidx.annotation.IntDef;
 
@@ -83,7 +82,7 @@ public class ReactSliderDrawableHelper {
 
   public void setThumbImage(final String uri) {
     if (uri != null) {
-      mSlider.setThumb(getBitmapDrawable(mSlider, uri));
+      mSlider.setThumb(new ReactDrawable(getBitmapDrawable(mSlider, uri)));
       // Enable alpha channel for the thumbImage
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         mSlider.setSplitTrack(false);
@@ -152,7 +151,7 @@ public class ReactSliderDrawableHelper {
             bitmap = BitmapFactory.decodeResource(view.getResources(), drawableId);
           }
 
-          bitmapDrawable = new BitmapDrawable(view.getResources(), bitmap);
+          bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(view.getResources(), bitmap);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -186,8 +185,8 @@ public class ReactSliderDrawableHelper {
     }
   }
 
-  public static class ProgressXDrawableHandler extends ProgressDrawableHandler {
-    public ProgressXDrawableHandler(ReactSlider slider) {
+  public static class ForegroundMirrorDrawableHandler extends ProgressDrawableHandler {
+    public ForegroundMirrorDrawableHandler(ReactSlider slider) {
       super(slider, android.R.id.custom);
       LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
       outDrawable.setDrawableByLayerId(android.R.id.custom, get());

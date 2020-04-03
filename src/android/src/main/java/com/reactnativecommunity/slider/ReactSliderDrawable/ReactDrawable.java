@@ -4,22 +4,22 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Camera;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
+import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.ReactTransformHelper;
 
-public class ReactDrawable extends Drawable implements ReactTransformHelper.Transformable {
+public class ReactDrawable extends LayerDrawable implements ReactTransformHelper.Transformable {
   private float mScaleX = 1;
   private float mScaleY = 1;
   private float mTranslationX = 0;
@@ -31,46 +31,39 @@ public class ReactDrawable extends Drawable implements ReactTransformHelper.Tran
   private float mSkewY = 0;
   private float mOpacity = 0;
   private Camera mRotator = new Camera();
-  private Drawable mDrawable;
+
+  interface DrawableChild {
+    PointF getCenter();
+  }
 
   public ReactDrawable(Resources res, Bitmap bitmap) {
     this(new BitmapDrawable(res, bitmap));
   }
 
   ReactDrawable(Drawable drawable) {
-    mDrawable = drawable;
+    super(new Drawable[]{drawable});
+    onBoundsChange(copyBounds());
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
-  public void setAlpha(int alpha) {
-    mDrawable.setAlpha(alpha);
+  public void setDrawable(int index, Drawable drawable) {
+    drawable.setLevel(getDrawable(index).getLevel());
+    super.setDrawable(index, drawable);
+    onBoundsChange(copyBounds());
   }
-
-  @Override
-  public void setColorFilter(@Nullable ColorFilter colorFilter) {
-    mDrawable.setColorFilter(colorFilter);
-  }
-
-  @Override
-  public int getOpacity() {
-    return mDrawable.getOpacity();
-  }
-
-  @Override
-  protected boolean onStateChange(int[] state) {
-    return mDrawable.setState(state);
-  }
-
-  @Override
-  protected boolean onLevelChange(int level) {
-    return mDrawable.setLevel(level);
-  }
-
-  public void setDrawable(Drawable drawable) {
-    mDrawable = drawable;
-    mDrawable.setState(getState());
-    mDrawable.setLevel(getLevel());
-    invalidateSelf();
+  
+  void applyTransformations(ReactDrawable drawable) {
+    drawable.mScaleX = mScaleX;
+    drawable.mScaleY = mScaleY;
+    drawable.mTranslationX = mTranslationX;
+    drawable.mTranslationY = mTranslationY;
+    drawable.mRotationX = mRotationX;
+    drawable.mRotationY = mRotationY;
+    drawable.mRotation = mRotation;
+    drawable.mSkewX = mSkewX;
+    drawable.mSkewY = mSkewY;
+    drawable.setReactOpacity(mOpacity);
   }
 
   public void updateFromProps(ReactStylesDiffMap props) {
@@ -92,9 +85,21 @@ public class ReactDrawable extends Drawable implements ReactTransformHelper.Tran
     ReactTransformHelper.setTransform(this, transforms);
   }
 
-  PointF getCenter() {
-    Rect bounds = getBounds();
-    return new PointF(bounds.centerX(), bounds.centerY());
+  public PointF getCenter() {
+    Drawable drawable = getDrawable(0);
+    if (drawable instanceof DrawableChild) {
+      return ((DrawableChild) drawable).getCenter();
+    } else {
+      Rect bounds = getBounds();
+      return new PointF(bounds.centerX(), bounds.centerY());
+    }
+  }
+
+  @Override
+  protected void onBoundsChange(Rect bounds) {
+    for (int i = 0; i < getNumberOfLayers(); i++) {
+      getDrawable(i).setBounds(bounds);
+    }
   }
 
   @Override
@@ -113,7 +118,7 @@ public class ReactDrawable extends Drawable implements ReactTransformHelper.Tran
     mRotator.restore();
     // apply scale
     canvas.scale(mScaleX, mScaleY, center.x, center.y);
-    mDrawable.draw(canvas);
+    super.draw(canvas);
   }
 
   public float getScaleX() {
@@ -209,5 +214,24 @@ public class ReactDrawable extends Drawable implements ReactTransformHelper.Tran
   @Override
   public void setSkewY(float skewY) {
     this.mSkewY = skewY;
+  }
+
+  static class ReactDrawableHelper {
+    ReactDrawable mDrawableWrapper;
+
+    ReactDrawable newInstance(Drawable drawable) {
+      return new ReactDrawable(drawable);
+    }
+
+    ReactDrawable createDrawable(Drawable drawable) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mDrawableWrapper != null) {
+        mDrawableWrapper.setDrawable(0, drawable);
+      } else {
+        ReactDrawable next = newInstance(drawable);
+        if (mDrawableWrapper != null) mDrawableWrapper.applyTransformations(next);
+        mDrawableWrapper = next;
+      }
+      return mDrawableWrapper;
+    }
   }
 }

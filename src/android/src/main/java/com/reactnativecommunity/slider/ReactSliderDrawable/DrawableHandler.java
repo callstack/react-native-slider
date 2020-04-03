@@ -38,10 +38,6 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
   abstract void set(Drawable drawable);
   abstract void draw(Canvas canvas, View view);
 
-  boolean isCustomDrawable() {
-    return mView != null;
-  }
-
   public final View getView() {
     return mView;
   }
@@ -110,7 +106,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
   }
 
   final void dispatchDraw() {
-    if (isCustomDrawable()) draw();
+    if (mView != null) draw();
   }
 
   private synchronized void draw() {
@@ -128,7 +124,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     mIsDrawing = false;
   }
 
-  final void restore() {
+  private void restore() {
     mOriginal.setLevel(get().getLevel());
     set(mOriginal);
     invalidate();
@@ -146,7 +142,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     }
   }
 
-  public void updateFromProps(ReactStylesDiffMap props) {
+  void updateFromProps(ReactStylesDiffMap props) {
     if (get() instanceof ReactDrawable) {
       ((ReactDrawable) get()).updateFromProps(props);
     } else if (props.hasKey("opacity")) {

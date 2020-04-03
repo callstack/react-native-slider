@@ -13,56 +13,38 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.os.Build;
 import android.util.Property;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
-
-import androidx.annotation.NonNull;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.facebook.react.bridge.ReactContext;
 import com.reactnativecommunity.slider.ReactSlider;
 
 public class ThumbDrawableHandler extends DrawableHandler {
+
+  private static final long ANIM_DURATION = 400;
+  private static final long ANIM_DELAY = 200;
+  private static final float MAX_SCALE = 1.2f;
+
   private ReactSlider mSlider;
   private final AnimatorSet mScaleAnimator;
-  private float mScale = 1;
   private Paint mPaint = new Paint();
-  private static final long ANIM_DURATION = 500;
-  private static final long ANIM_DELAY = 200;
-  private ReactDrawable mDrawableWrapper;
+  private final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
 
-  public ThumbDrawableHandler(ReactSlider slider) {
+  ThumbDrawableHandler(ReactSlider slider) {
     super((ReactContext) slider.getContext(), slider.getThumb());
     mSlider = slider;
     mScaleAnimator = new AnimatorSet();
-    mScaleAnimator.setInterpolator(new LinearInterpolator());
+    mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
     mScaleAnimator.setDuration(ANIM_DURATION);
     mScaleAnimator.setStartDelay(ANIM_DELAY);
   }
 
   @Override
   Drawable createDrawable(Resources res, Bitmap bitmap) {
-    if (mDrawableWrapper == null) {
-      mDrawableWrapper = new ReactDrawable(res, bitmap);
-      mDrawableWrapper.setBounds(getBounds());
-    } else {
-      mDrawableWrapper = new ReactDrawable(res, bitmap) {
-        @Override
-        public void draw(@NonNull Canvas canvas) {
-          //canvas.drawPaint(mPaint);
-          canvas.translate(canvas.getWidth() / 2, canvas.getHeight() / 2);
-          super.draw(canvas);
-        }
-
-
-      };
-      mDrawableWrapper.setBounds(getBounds());
-    }
-    return mDrawableWrapper;
+    return mHelper.createDrawable(new ThumbDrawable(res, bitmap));
   }
 
   @Override
@@ -73,6 +55,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
   @Override
   public void set(Drawable drawable) {
     mSlider.setThumb(drawable);
+    mSlider.setProgress(mSlider.getProgress());
     get().jumpToCurrentState();
   }
 
@@ -89,7 +72,9 @@ public class ThumbDrawableHandler extends DrawableHandler {
   @Override
   Rect getBounds() {
     if (getView() != null) {
-      return new Rect(0, 0, (int) (getView().getWidth() * mScale), (int) (getView().getHeight() * mScale));
+      Rect out = new Rect(0, 0, (int) (getView().getWidth()), (int) (getView().getHeight()));
+      out.offset(0, super.getBounds().centerY() - out.centerY());
+      return out;
     } else {
       return super.getBounds();
     }
@@ -101,10 +86,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
     RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
     PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
     float scaleOut = Math.min(scale.x, scale.y);
-
-    /*
-      reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
-     */
+    // reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
     PointF scaler = new PointF(scaleOut * (mSlider.isInverted() ? -1 : 1), scaleOut);
     // clip circle
     Path clipper = new Path();
@@ -115,7 +97,6 @@ public class ThumbDrawableHandler extends DrawableHandler {
         Path.Direction.CW);
     canvas.clipPath(clipper);
     // transform
-    canvas.scale(mScale, mScale, canvas.getWidth() / 2, canvas.getHeight() / 2);
     canvas.translate(
         (bounds.width() - src.width() * scaler.x) / 2,
         (bounds.height() - src.height() * scaler.y) / 2);
@@ -125,105 +106,70 @@ public class ThumbDrawableHandler extends DrawableHandler {
     view.draw(canvas);
   }
 
-  class ThumbDrawable extends ReactDrawable {
-
-    public ThumbDrawable(Resources res, Bitmap bitmap) {
-      super(res, bitmap);
-    }
-
-    @Override
-    public void draw(@NonNull Canvas canvas) {
-      RectF bounds = new RectF(getBounds());
-      RectF src = new RectF(0, 0, getView().getWidth(), getView().getHeight());
-      PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
-      float scaleOut = Math.min(scale.x, scale.y);
-
-    /*
-      reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
-     */
-      PointF scaler = new PointF(scaleOut * (mSlider.isInverted() ? -1 : 1), scaleOut);
-      // clip circle
-      Path clipper = new Path();
-      clipper.addCircle(
-          bounds.width() / 2,
-          bounds.height() / 2,
-          Math.min(bounds.width(), bounds.height()) / 2,
-          Path.Direction.CW);
-      canvas.clipPath(clipper);
-      // transform
-      canvas.scale(mScale, mScale, bounds.width() / 2, bounds.height() / 2);
-      canvas.translate(
-          (bounds.width() - src.width() * scaler.x) / 2,
-          (bounds.height() - src.height() * scaler.y) / 2);
-      canvas.scale(scaler.x, scaler.y);
-      // draw
-      canvas.drawPaint(mPaint);
-      super.draw(canvas);
-    }
-  }
-
-  /**
-   * used by {@link ThumbDrawableHandler#mScaleAnimator}
-   * @return
-   */
-  @SuppressWarnings("unused")
-  public float getScale() {
-    return mScale;
-  }
-
-  /**
-   * used by {@link ThumbDrawableHandler#mScaleAnimator}
-   * @param scale
-   */
-  @SuppressWarnings("unused")
-  public void setScale(float scale) {
-    mScale = scale;
-    dispatchDraw();
-  }
-
-  void start() {
-    if (isCustomDrawable()) {
-      animate(1.2f);
-    }
-  }
-
-  void end() {
-    if (isCustomDrawable()) {
-      animate(1);
-    }
-  }
-
-  private void animate(float scaler) {
+  private void animate(float scale) {
     if (mScaleAnimator.isRunning()) {
       mScaleAnimator.cancel();
     }
-    if (get() instanceof ReactDrawable) {
-      ReactDrawable drawable = (ReactDrawable) get();
-      ObjectAnimator scaleXAnim = ObjectAnimator.ofFloat(
+    if (get() instanceof ReactDrawable && ((ReactDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
+      ThumbDrawable drawable = ((ThumbDrawable) ((ReactDrawable) get()).getDrawable(0));
+      ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
           drawable,
-          Property.of(ReactDrawable.class, Float.class, "scaleX"),
-          scaler);
-      ObjectAnimator scaleYAnim = ObjectAnimator.ofFloat(
-          drawable,
-          Property.of(ReactDrawable.class, Float.class, "scaleY"),
-          scaler);
+          Property.of(ThumbDrawable.class, Float.class, "scale"),
+          scale);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-        scaleXAnim.setAutoCancel(true);
-        scaleYAnim.setAutoCancel(true);
+        scaleAnim.setAutoCancel(true);
       }
-      mScaleAnimator.playTogether(scaleXAnim, scaleYAnim);
+      mScaleAnimator.play(scaleAnim);
       mScaleAnimator.start();
     }
   }
 
-  public void onTouchEvent(MotionEvent event) {
+  void onTouchEvent(MotionEvent event) {
     int action = event.getActionMasked();
-    if (isCustomDrawable()) {
-      if (action == MotionEvent.ACTION_DOWN) {
-        start();
-      } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-        end();
-      }
+    if (action == MotionEvent.ACTION_DOWN) {
+      animate(MAX_SCALE);
+    } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+      animate(1);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  static class ThumbDrawable extends BitmapDrawable implements ReactDrawable.DrawableChild {
+
+    private float mScale = 1;
+
+    ThumbDrawable(Resources res, Bitmap bitmap) {
+      super(res, bitmap);
+    }
+
+    /**
+     * used by {@link ThumbDrawableHandler#mScaleAnimator}
+     * @return scale
+     */
+    public float getScale() {
+      return mScale;
+    }
+
+    /**
+     * used by {@link ThumbDrawableHandler#mScaleAnimator}
+     * @param scale
+     */
+    public void setScale(float scale) {
+      mScale = scale;
+      invalidateSelf();
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+      Rect bounds = copyBounds();
+      canvas.scale(mScale, mScale, bounds.centerX(), bounds.centerY());
+      super.draw(canvas);
+    }
+
+    @Override
+    public PointF getCenter() {
+      Rect bounds = copyBounds();
+      return new PointF(bounds.centerX(), bounds.centerY());
     }
   }
 }

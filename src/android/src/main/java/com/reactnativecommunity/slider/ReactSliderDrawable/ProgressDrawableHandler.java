@@ -17,43 +17,21 @@ import com.reactnativecommunity.slider.ReactSlider;
 abstract class ProgressDrawableHandler extends DrawableHandler {
   final ReactSlider mSlider;
   private final int mLayerID;
-  protected ReactDrawable mDrawableWrapper;
-  protected Drawable mDrawable;
+  private final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
 
   static Drawable getDrawable(ReactSlider slider, int layerID) {
     LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
     return drawable.findDrawableByLayerId(layerID);
   }
 
-  public ProgressDrawableHandler(ReactSlider slider, int layerID) {
+  ProgressDrawableHandler(ReactSlider slider, int layerID) {
     super((ReactContext) slider.getContext(), getDrawable(slider, layerID));
     mSlider = slider;
     mLayerID = layerID;
   }
 
   Drawable createDrawable(Drawable drawable) {
-    mDrawable = drawable;
-    if (mDrawableWrapper == null) {
-      mDrawableWrapper = new ReactDrawable(mDrawable) {
-        @Override
-        protected void onBoundsChange(Rect bounds) {
-          mDrawable.setBounds(bounds);
-        }
-
-        @Override
-        PointF getCenter() {
-          if (mDrawable instanceof ProgressBitmapDrawable) {
-            return ((ProgressBitmapDrawable) mDrawable).getCenter();
-          } else {
-            return super.getCenter();
-          }
-        }
-      };
-    } else {
-      mDrawable.setBounds(mDrawableWrapper.getBounds());
-      mDrawableWrapper.setDrawable(mDrawable);
-    }
-    return mDrawableWrapper;
+    return mHelper.createDrawable(drawable);
   }
 
   @Override
@@ -76,7 +54,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     outDrawable.jumpToCurrentState();
   }
 
-  int getBarHeight() {
+  private int getBarHeight() {
     return mSlider.getIndeterminateDrawable().getIntrinsicHeight();
   }
 
@@ -96,7 +74,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     view.draw(canvas);
   }
 
-  static class ProgressBitmapDrawable extends BitmapDrawable {
+  static class ProgressBitmapDrawable extends BitmapDrawable implements ReactDrawable.DrawableChild {
 
     private float mLevelScale = 1;
     private final boolean mInverted;
@@ -117,7 +95,8 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
       return true;
     }
 
-    PointF getCenter() {
+    @Override
+    public PointF getCenter() {
       Rect bounds = getBounds();
       float x = bounds.centerX() * mLevelScale;
       if (mInverted) x = bounds.width() - x;
