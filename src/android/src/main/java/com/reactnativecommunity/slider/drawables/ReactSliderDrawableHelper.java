@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -86,7 +85,7 @@ public class ReactSliderDrawableHelper {
 
   public void setThumbImage(final String uri) {
     if (uri != null) {
-      Drawable bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(mSlider, getBitmapDrawable(mSlider, uri));
+      Drawable bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(mSlider, getBitmap(mSlider, uri));
       mSlider.setThumb(new ReactDrawable(bitmapDrawable));
       // Enable alpha channel for the thumbImage
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -137,7 +136,7 @@ public class ReactSliderDrawableHelper {
     mThumbDrawableHandler.tearDown();
   }
 
-  private static Bitmap getBitmapDrawable(final View view, final String uri) {
+  private static Bitmap getBitmap(final View view, final String uri) {
     Bitmap bitmap = null;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     Future<Bitmap> future = executorService.submit(new Callable<Bitmap>() {
