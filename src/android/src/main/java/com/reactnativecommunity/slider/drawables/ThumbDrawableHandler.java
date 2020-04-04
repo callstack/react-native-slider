@@ -1,4 +1,4 @@
-package com.reactnativecommunity.slider.ReactSliderDrawable;
+package com.reactnativecommunity.slider.drawables;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;

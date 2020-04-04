@@ -1,4 +1,4 @@
-package com.reactnativecommunity.slider.ReactSliderDrawable;
+package com.reactnativecommunity.slider.drawables;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -43,6 +43,10 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
   ReactDrawable(Drawable drawable) {
     super(new Drawable[]{drawable});
     onBoundsChange(copyBounds());
+  }
+
+  ReactDrawable(Drawable[] drawables) {
+    super(drawables);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
