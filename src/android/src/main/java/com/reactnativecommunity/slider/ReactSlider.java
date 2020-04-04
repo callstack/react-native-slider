@@ -111,6 +111,7 @@ public class ReactSlider extends AppCompatSeekBar implements InformantTarget<Rea
     mIsInverted = inverted;
     if (inverted) setScaleX(-1f);
     else setScaleX(1f);
+    drawableHelper.setInverted(mIsInverted);
     invalidate();
   }
 

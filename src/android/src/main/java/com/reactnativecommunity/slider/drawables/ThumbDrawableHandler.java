@@ -21,6 +21,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.facebook.react.bridge.ReactContext;
 import com.reactnativecommunity.slider.ReactSlider;
+import com.reactnativecommunity.slider.ReactSliderManager;
 
 public class ThumbDrawableHandler extends DrawableHandler {
 
@@ -44,7 +45,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
 
   @Override
   Drawable createDrawable(Resources res, Bitmap bitmap) {
-    return mHelper.createDrawable(new ThumbDrawable(res, bitmap));
+    return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap));
   }
 
   @Override
@@ -86,8 +87,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
     RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
     PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
     float scaleOut = Math.min(scale.x, scale.y);
-    // reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
-    PointF scaler = new PointF(scaleOut * (mSlider.isInverted() ? -1 : 1), scaleOut);
+    PointF scaler = new PointF(scaleOut, scaleOut);
     // clip circle
     Path clipper = new Path();
     clipper.addCircle(
@@ -104,6 +104,12 @@ public class ThumbDrawableHandler extends DrawableHandler {
     // draw
     canvas.drawPaint(mPaint);
     view.draw(canvas);
+  }
+
+  void setInverted(boolean inverted) {
+    if (get() instanceof ReactDrawable && ((ReactDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
+      ((ThumbDrawable) ((ReactDrawable) get()).getDrawable(0)).setInverted(inverted);
+    }
   }
 
   private void animate(float scale) {
@@ -137,9 +143,26 @@ public class ThumbDrawableHandler extends DrawableHandler {
   static class ThumbDrawable extends BitmapDrawable implements ReactDrawable.DrawableChild {
 
     private float mScale = 1;
+    private boolean mInverted;
+
+    ThumbDrawable(ReactSlider slider, Bitmap bitmap) {
+      this(slider.getResources(), bitmap, slider.isInverted());
+    }
 
     ThumbDrawable(Resources res, Bitmap bitmap) {
+      this(res, bitmap, false);
+    }
+
+    ThumbDrawable(Resources res, Bitmap bitmap, boolean inverted) {
       super(res, bitmap);
+      mInverted = inverted;
+    }
+    
+    void setInverted(boolean inverted) {
+      if (mInverted != inverted) {
+        mInverted = inverted;
+        invalidateSelf();
+      }
     }
 
     /**
@@ -159,10 +182,15 @@ public class ThumbDrawableHandler extends DrawableHandler {
       invalidateSelf();
     }
 
+    /**
+     * reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
+     * so that the thumb remains the same
+     * @param canvas
+     */
     @Override
     public void draw(Canvas canvas) {
       Rect bounds = copyBounds();
-      canvas.scale(mScale, mScale, bounds.centerX(), bounds.centerY());
+      canvas.scale(mScale * (mInverted ? -1 : 1), mScale, bounds.centerX(), bounds.centerY());
       super.draw(canvas);
     }
 

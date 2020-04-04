@@ -80,9 +80,14 @@ public class ReactSliderDrawableHelper {
     ((ColorDrawable) ((LayerDrawable) mSlider.getBackground()).getDrawable(0)).setColor(color);
   }
 
+  public void setInverted(boolean inverted) {
+    mThumbDrawableHandler.setInverted(inverted);
+  }
+
   public void setThumbImage(final String uri) {
     if (uri != null) {
-      mSlider.setThumb(new ReactDrawable(getBitmapDrawable(mSlider, uri)));
+      Drawable bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(mSlider, getBitmapDrawable(mSlider, uri));
+      mSlider.setThumb(new ReactDrawable(bitmapDrawable));
       // Enable alpha channel for the thumbImage
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         mSlider.setSplitTrack(false);
@@ -132,15 +137,14 @@ public class ReactSliderDrawableHelper {
     mThumbDrawableHandler.tearDown();
   }
 
-  private static BitmapDrawable getBitmapDrawable(final View view, final String uri) {
-    BitmapDrawable bitmapDrawable = null;
+  private static Bitmap getBitmapDrawable(final View view, final String uri) {
+    Bitmap bitmap = null;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
-    Future<BitmapDrawable> future = executorService.submit(new Callable<BitmapDrawable>() {
+    Future<Bitmap> future = executorService.submit(new Callable<Bitmap>() {
       @Override
-      public BitmapDrawable call() {
-        BitmapDrawable bitmapDrawable = null;
+      public Bitmap call() {
+        Bitmap bitmap = null;
         try {
-          Bitmap bitmap = null;
           if (uri.startsWith("http://") || uri.startsWith("https://") ||
               uri.startsWith("file://") || uri.startsWith("asset://") || uri.startsWith("data:")) {
             bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
@@ -150,20 +154,18 @@ public class ReactSliderDrawableHelper {
                     .getPackageName());
             bitmap = BitmapFactory.decodeResource(view.getResources(), drawableId);
           }
-
-          bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(view.getResources(), bitmap);
         } catch (Exception e) {
           e.printStackTrace();
         }
-        return bitmapDrawable;
+        return bitmap;
       }
     });
     try {
-      bitmapDrawable = future.get();
+      bitmap = future.get();
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return bitmapDrawable;
+    return bitmap;
   }
 
   public static class ForegroundDrawableHandler extends ProgressDrawableHandler {
