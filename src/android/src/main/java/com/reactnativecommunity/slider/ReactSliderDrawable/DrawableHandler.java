@@ -16,9 +16,8 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.UIManagerModule;
-import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry.InformantTarget;
 
-public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener, InformantTarget<ReactStylesDiffMap> {
+public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener {
   private final ReactContext mContext;
   private final Drawable mOriginal;
   private View mView;
@@ -46,18 +45,6 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
   public void onDraw() {
     if (mView != null && !mIsDrawing && mView.isDirty()) {
       draw();
-    }
-  }
-
-  @Override
-  public void receiveFromInformant(int informantID, int recruiterID, ReactStylesDiffMap context) {
-    if (getView() != null && recruiterID == getView().getId()) {
-      if (context.hasKey("opacity")) {
-        setOpacity((float) context.getDouble("opacity", mOpacity));
-      }
-      if (context.hasKey("transform") && get() instanceof ReactDrawable) {
-        ((ReactDrawable) get()).setTransform(context.getArray("transform"));
-      }
     }
   }
 
@@ -146,13 +133,14 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     if (props == null) return;
     if (get() instanceof ReactDrawable) {
       ((ReactDrawable) get()).updateFromProps(props);
-    } else if (props.hasKey("opacity")) {
+    }
+    if (props.hasKey("opacity")) {
       setOpacity((float) props.getDouble("opacity", mOpacity));
       invalidate();
     }
   }
 
-  void setOpacity(@FloatRange(from = 0, to = 1) float opacity) {
+  private void setOpacity(@FloatRange(from = 0, to = 1) float opacity) {
     mOpacity = Math.max(Math.min(opacity, 1), 0);
     get().setAlpha((int) (mOpacity * 255));
   }
