@@ -16,7 +16,7 @@ import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry.InformantTarget;
-import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper;
+import com.reactnativecommunity.slider.drawables.ReactSliderDrawableHelper;
 
 import javax.annotation.Nullable;
 

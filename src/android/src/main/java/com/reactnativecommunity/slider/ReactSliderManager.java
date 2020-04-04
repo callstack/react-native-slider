@@ -26,8 +26,8 @@ import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
 import com.reactnativecommunity.slider.ReactInformantViewManager.InformantRegistry;
-import com.reactnativecommunity.slider.ReactSliderDrawable.ReactSliderDrawableHelper.SliderDrawable;
-import com.reactnativecommunity.slider.ReactSliderDrawable.DrawableHandler;
+import com.reactnativecommunity.slider.drawables.ReactSliderDrawableHelper.SliderDrawable;
+import com.reactnativecommunity.slider.drawables.DrawableHandler;
 
 import java.util.Map;
 
