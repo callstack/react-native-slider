@@ -1,7 +1,6 @@
 package com.reactnativecommunity.slider.drawables;
 
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -31,27 +30,32 @@ public class ReactSliderDrawableHelper {
   static final int MAX_LEVEL = 10000;
 
   @IntDef({
+      SliderDrawable.BACKGROUND,
       SliderDrawable.MAXIMUM_TRACK,
       SliderDrawable.MINIMUM_TRACK,
       SliderDrawable.THUMB
   })
   @Retention(RetentionPolicy.SOURCE)
   public @interface SliderDrawable {
+    int BACKGROUND = -1;
     int MAXIMUM_TRACK = 0;
     int MINIMUM_TRACK = 1;
     int THUMB = 2;
   }
 
   private final ReactSlider mSlider;
-  private final ForegroundDrawableHandler mProgressDrawableHandler;
-  private final BackgroundDrawableHandler mBackgroundDrawableHandler;
+  private final ProgressDrawableHandler.ForegroundDrawableHandler mMinimumTrackDrawableHandler;
+  private final ProgressDrawableHandler.ForegroundDrawableHandler mMaximumTrackDrawableHandler;
+  private final ProgressDrawableHandler.BackgroundDrawableHandler mBackgroundDrawableHandler;
   private final ThumbDrawableHandler mThumbDrawableHandler;
 
   public ReactSliderDrawableHelper(ReactSlider slider) {
     mSlider = slider;
     setViewBackgroundDrawable();
-    mProgressDrawableHandler = new ForegroundDrawableHandler(mSlider);
-    mBackgroundDrawableHandler = new BackgroundDrawableHandler(mSlider);
+    ProgressDrawableHandler.init(slider);
+    mMinimumTrackDrawableHandler = new ProgressDrawableHandler.MinimumTrackHandler(mSlider);
+    mMaximumTrackDrawableHandler = new ProgressDrawableHandler.MaximumTrackHandler(mSlider);
+    mBackgroundDrawableHandler = new ProgressDrawableHandler.BackgroundDrawableHandler(mSlider);
     mThumbDrawableHandler = new ThumbDrawableHandler(mSlider);
   }
 
@@ -98,10 +102,12 @@ public class ReactSliderDrawableHelper {
 
   public DrawableHandler getDrawableHandler(@SliderDrawable int type) {
     switch (type) {
-      case SliderDrawable.MAXIMUM_TRACK:
+      case SliderDrawable.BACKGROUND:
         return mBackgroundDrawableHandler;
+      case SliderDrawable.MAXIMUM_TRACK:
+        return mMaximumTrackDrawableHandler;
       case SliderDrawable.MINIMUM_TRACK:
-        return mProgressDrawableHandler;
+        return mMinimumTrackDrawableHandler;
       case SliderDrawable.THUMB:
         return mThumbDrawableHandler;
       default:
@@ -114,7 +120,11 @@ public class ReactSliderDrawableHelper {
   }
 
   public void receiveFromInformant(int informantID, int recruiterID, ReactStylesDiffMap context) {
-    DrawableHandler[] handlers = new DrawableHandler[]{mBackgroundDrawableHandler, mProgressDrawableHandler, mThumbDrawableHandler};
+    DrawableHandler[] handlers = new DrawableHandler[]{
+        mBackgroundDrawableHandler,
+        mMinimumTrackDrawableHandler,
+        mMaximumTrackDrawableHandler,
+        mThumbDrawableHandler};
     for (DrawableHandler handler: handlers) {
       int id = handler.getView() != null ? handler.getView().getId() : View.NO_ID;
       if (id != View.NO_ID) {
@@ -123,7 +133,7 @@ public class ReactSliderDrawableHelper {
           //break;
         }
         if (id == recruiterID) {
-          handler.dispatchDraw();
+          //handler.dispatchDraw();
           break;
         }
       }
@@ -131,7 +141,8 @@ public class ReactSliderDrawableHelper {
   }
 
   public void tearDown() {
-    mProgressDrawableHandler.tearDown();
+    mMinimumTrackDrawableHandler.tearDown();
+    mMaximumTrackDrawableHandler.tearDown();
     mBackgroundDrawableHandler.tearDown();
     mThumbDrawableHandler.tearDown();
   }
@@ -167,46 +178,4 @@ public class ReactSliderDrawableHelper {
     return bitmap;
   }
 
-  public static class ForegroundDrawableHandler extends ProgressDrawableHandler {
-    public ForegroundDrawableHandler(ReactSlider slider) {
-      super(slider, android.R.id.progress);
-    }
-
-    @Override
-    Drawable createDrawable(Resources res, Bitmap bitmap) {
-      return createDrawable(new ProgressBitmapDrawable(res, bitmap) {
-        @Override
-        protected boolean onLevelChange(int level) {
-          LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
-          Drawable drawable = outDrawable.findDrawableByLayerId(android.R.id.custom);
-          if (drawable != null) drawable.setLevel(level);
-          return super.onLevelChange(level);
-        }
-      });
-    }
-  }
-
-  public static class ForegroundMirrorDrawableHandler extends ProgressDrawableHandler {
-    public ForegroundMirrorDrawableHandler(ReactSlider slider) {
-      super(slider, android.R.id.custom);
-      LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
-      outDrawable.setDrawableByLayerId(android.R.id.custom, get());
-    }
-
-    @Override
-    public Drawable get() {
-      return getDrawable(mSlider, android.R.id.progress);
-    }
-
-    @Override
-    Drawable createDrawable(Resources res, Bitmap bitmap) {
-      return createDrawable(new ProgressBitmapDrawable(res, bitmap, true));
-    }
-  }
-
-  public static class BackgroundDrawableHandler extends ProgressDrawableHandler {
-    public BackgroundDrawableHandler(ReactSlider slider) {
-      super(slider, android.R.id.background);
-    }
-  }
 }

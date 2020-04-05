@@ -3,31 +3,58 @@ package com.reactnativecommunity.slider.drawables;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.View;
 
 import com.facebook.react.bridge.ReactContext;
+import com.reactnativecommunity.slider.R;
 import com.reactnativecommunity.slider.ReactSlider;
 
 abstract class ProgressDrawableHandler extends DrawableHandler {
+
+  /**
+   * IMPORTANT
+   * This method prepares the slider's drawables for usage by this class
+   * Call this method before using this class
+   * @param slider
+   */
+  static void init(ReactSlider slider) {
+    LayerDrawable outDrawable = (LayerDrawable) slider.getProgressDrawable().getCurrent().mutate();
+    LayerDrawable progressDrawable = ((LayerDrawable) slider.getResources().getDrawable(R.drawable.progress_layer).mutate());
+    progressDrawable.setDrawableByLayerId(ForegroundDrawableHandler.DRAWABLE_ID1, outDrawable.findDrawableByLayerId(ForegroundDrawableHandler.DRAWABLE_ID).mutate());
+    progressDrawable.setDrawableByLayerId(ForegroundDrawableHandler.DRAWABLE_ID2, outDrawable.findDrawableByLayerId(BackgroundDrawableHandler.DRAWABLE_ID).mutate());
+    outDrawable.setDrawableByLayerId(ForegroundDrawableHandler.DRAWABLE_ID, progressDrawable);
+    outDrawable.setDrawableByLayerId(BackgroundDrawableHandler.DRAWABLE_ID, new ColorDrawable(Color.TRANSPARENT));
+    slider.setProgressDrawable(outDrawable);
+  }
+
   final ReactSlider mSlider;
-  private final int mLayerID;
   private final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
 
-  static Drawable getDrawable(ReactSlider slider, int layerID) {
+  static Drawable getDrawableByID(ReactSlider slider, int layerID) {
     LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
     return drawable.findDrawableByLayerId(layerID);
   }
 
-  ProgressDrawableHandler(ReactSlider slider, int layerID) {
-    super((ReactContext) slider.getContext(), getDrawable(slider, layerID));
+  static Drawable getDrawableByIndex(ReactSlider slider, int index) {
+    LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
+    if (index >= 0 && index < drawable.getNumberOfLayers()) {
+      return drawable.getDrawable(index);
+    } else {
+      return null;
+    }
+  }
+
+  ProgressDrawableHandler(ReactSlider slider, Drawable original) {
+    super((ReactContext) slider.getContext(), original);
     mSlider = slider;
-    mLayerID = layerID;
   }
 
   Drawable createDrawable(Drawable drawable) {
@@ -39,19 +66,11 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     return createDrawable(new BitmapDrawable(res, bitmap));
   }
 
-  @Override
-  public Drawable get() {
-    return getDrawable(mSlider, mLayerID);
-  }
-
-  @Override
-  public void set(Drawable drawable) {
-    LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
-    outDrawable.setDrawableByLayerId(mLayerID, drawable);
-    outDrawable.setState(new int[]{});
-    outDrawable.jumpToCurrentState();
-    outDrawable.setState(new int[]{android.R.attr.state_enabled});
-    outDrawable.jumpToCurrentState();
+  private static void refresh(Drawable drawable) {
+    drawable.setState(new int[]{});
+    drawable.jumpToCurrentState();
+    drawable.setState(new int[]{android.R.attr.state_enabled});
+    drawable.jumpToCurrentState();
   }
 
   private int getBarHeight() {
@@ -103,14 +122,80 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
       return new PointF(x, bounds.centerY());
     }
 
-    @Override
     public void draw(Canvas canvas) {
+      canvas.save();
       if (mInverted) {
         Rect bounds = getBounds();
         canvas.translate(bounds.width() * (1 - mLevelScale), 0);
       }
       canvas.scale(mLevelScale, 1);
       super.draw(canvas);
+      canvas.restore();
+    }
+  }
+
+  static class ForegroundDrawableHandler extends ProgressDrawableHandler {
+
+    static int DRAWABLE_ID = android.R.id.progress;
+    static int DRAWABLE_ID1 = android.R.id.progress;
+    static int DRAWABLE_ID2 = android.R.id.secondaryProgress;
+
+    private final int mLayerID;
+
+    public ForegroundDrawableHandler(ReactSlider slider, int layerID) {
+      super(slider, ((LayerDrawable) getDrawableByID(slider, DRAWABLE_ID)).findDrawableByLayerId(layerID));
+      mLayerID = layerID;
+    }
+
+    @Override
+    public Drawable get() {
+      LayerDrawable progressDrawable = (LayerDrawable) getDrawableByID(mSlider, DRAWABLE_ID);
+      return progressDrawable.findDrawableByLayerId(mLayerID);
+    }
+
+    @Override
+    public void set(Drawable drawable) {
+      LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
+      LayerDrawable progress = ((LayerDrawable) getDrawableByID(mSlider, DRAWABLE_ID));
+      progress.setDrawableByLayerId(mLayerID, drawable);
+      refresh(progress);
+      refresh(outDrawable);
+    }
+
+    @Override
+    Drawable createDrawable(Resources res, Bitmap bitmap) {
+      return createDrawable(new ProgressBitmapDrawable(res, bitmap, mLayerID == DRAWABLE_ID2));
+    }
+  }
+
+  static class MinimumTrackHandler extends ForegroundDrawableHandler {
+    MinimumTrackHandler(ReactSlider slider) {
+      super(slider, DRAWABLE_ID1);
+    }
+  }
+
+  static class MaximumTrackHandler extends ForegroundDrawableHandler {
+    MaximumTrackHandler(ReactSlider slider) {
+      super(slider, DRAWABLE_ID2);
+    }
+  }
+
+  static class BackgroundDrawableHandler extends ProgressDrawableHandler {
+    static int DRAWABLE_ID = android.R.id.background;
+    BackgroundDrawableHandler(ReactSlider slider) {
+      super(slider, getDrawableByID(slider, DRAWABLE_ID));
+    }
+
+    @Override
+    public Drawable get() {
+      return getDrawableByID(mSlider, DRAWABLE_ID);
+    }
+
+    @Override
+    public void set(Drawable drawable) {
+      LayerDrawable outDrawable = (LayerDrawable) mSlider.getProgressDrawable().getCurrent();
+      outDrawable.setDrawableByLayerId(DRAWABLE_ID, drawable);
+      refresh(outDrawable);
     }
   }
 }

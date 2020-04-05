@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/progress_layer">
+    <item android:id="@android:id/secondaryProgress">
+        <color android:color="@android:color/transparent" />
+    </item>
+    <item android:id="@android:id/progress">
+        <color android:color="@android:color/transparent" />
+    </item>
+</layer-list>

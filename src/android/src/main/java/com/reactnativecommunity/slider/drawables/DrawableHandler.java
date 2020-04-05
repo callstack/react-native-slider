@@ -103,7 +103,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     Canvas canvas = new Canvas(bitmap);
     draw(canvas, mView);
     Drawable outDrawable = createDrawable(mContext.getResources(), bitmap);
-    outDrawable.setAlpha((int) (mOpacity * 255));
+    //outDrawable.setAlpha((int) (mOpacity * 255));
     outDrawable.setState(get().getState());
     outDrawable.setLevel(get().getLevel());
     set(outDrawable);
@@ -135,7 +135,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
       ((ReactDrawable) get()).updateFromProps(props);
     }
     if (props.hasKey("opacity")) {
-      setOpacity((float) props.getDouble("opacity", mOpacity));
+      //setOpacity((float) props.getDouble("opacity", mOpacity));
       invalidate();
     }
   }
