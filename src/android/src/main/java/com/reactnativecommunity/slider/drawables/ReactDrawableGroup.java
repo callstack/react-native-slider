@@ -3,9 +3,7 @@ package com.reactnativecommunity.slider.drawables;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -24,6 +22,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class ReactDrawableGroup extends ReactDrawable {
+
+  static ReactDrawableGroup obtain(DrawableHandler handler) {
+    return Builder.obtain(handler);
+  }
 
   static class ReactRootDrawableGroup extends ReactDrawableGroup implements PropsUpdater {
 
@@ -66,15 +68,7 @@ public class ReactDrawableGroup extends ReactDrawable {
 
   @Override
   protected void onBoundsChange(Rect bounds) {
-    /*
-    View view = mDrawables.get;
-    Rect src = new Rect();
-    view.getDrawingRect(src);
-    PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
-
-     */
-    traverseLayout(mID, null, new PointF(1,1));
-    //super.onBoundsChange(bounds);
+    traverseLayout(mID, null);
   }
 
   @Override
@@ -98,22 +92,7 @@ public class ReactDrawableGroup extends ReactDrawable {
     canvas.restore();
   }
 
-  private Rect scaleBounds(View view, PointF scale) {
-    Rect bounds = new Rect();
-    view.getDrawingRect(bounds);
-    return scaleBounds(bounds, scale);
-  }
-
-  private Rect scaleBounds(Rect rawBounds, PointF scale) {
-    RectF rectF = new RectF(0, 0, rawBounds.width() * scale.x, rawBounds.height() * scale.y);
-    rectF.offset(rawBounds.width() * 0.5f * (1 - scale.x), rawBounds.height() * 0.5f * (1 - scale.y));
-    rectF.offset(rawBounds.left * scale.x, rawBounds.top * scale.y);
-    Rect out = new Rect();
-    rectF.round(out);
-    return out;
-  }
-
-  private void traverseLayout(View view, ViewGroup parent, PointF scale) {
+  private void traverseLayout(View view, ViewGroup parent) {
     Drawable drawable = getDrawable(view);
     if (drawable == null) return;
     //Rect bounds = scaleBounds(view, scale);
@@ -128,7 +107,7 @@ public class ReactDrawableGroup extends ReactDrawable {
     if (view instanceof ViewGroup) {
       ViewGroup viewGroup = ((ViewGroup) view);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
-        traverseLayout(viewGroup.getChildAt(i), viewGroup, scale);
+        traverseLayout(viewGroup.getChildAt(i), viewGroup);
       }
     }
   }
