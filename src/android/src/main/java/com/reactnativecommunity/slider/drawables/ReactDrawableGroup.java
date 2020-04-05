@@ -6,12 +6,16 @@ import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+
+import com.facebook.react.uimanager.ReactStylesDiffMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,13 +25,43 @@ import java.util.Set;
 
 public class ReactDrawableGroup extends ReactDrawable {
 
-  private HashMap<View, Drawable> mDrawables;
-  private View mID;
+  static class ReactRootDrawableGroup extends ReactDrawableGroup {
 
-  private ReactDrawableGroup(View id, HashMap<View, Drawable> map, Drawable[] drawables) {
+    private final SparseArray<ReactDrawableGroup> mRegistry;
+
+    ReactRootDrawableGroup(View id, Drawable base, HashMap<View, ReactDrawableGroup> map, Drawable[] drawables) {
+      super(id, base, map, drawables);
+      mRegistry = new SparseArray<>();
+      traverseRegistration(this);
+    }
+
+    void traverseRegistration(ReactDrawableGroup reactDrawable) {
+      mRegistry.put(reactDrawable.mID.getId(), reactDrawable);
+      for (Map.Entry<View, ReactDrawableGroup> next : reactDrawable.mDrawables.entrySet()) {
+        traverseRegistration(next.getValue());
+      }
+    }
+
+    @Override
+    public void updateFromProps(int tag, ReactStylesDiffMap props) {
+      ReactDrawableGroup d = mRegistry.get(tag);
+      if (d != null) d.updateFromProps(tag, props);
+    }
+  }
+
+  private HashMap<View, ReactDrawableGroup> mDrawables;
+  private View mID;
+  private Drawable mBaseDrawable;
+
+  ReactDrawableGroup(View id, Drawable base, HashMap<View, ReactDrawableGroup> map, Drawable[] drawables) {
     super(drawables);
-    mID =id;
+    mID = id;
+    mBaseDrawable = base;
     mDrawables = map;
+  }
+
+  private Drawable getDrawable(View view) {
+    return view == mID ? mBaseDrawable : mDrawables.get(view);
   }
 
   @Override
@@ -47,7 +81,7 @@ public class ReactDrawableGroup extends ReactDrawable {
   public void draw(@NonNull Canvas canvas) {
     canvas.save();
     onPreDraw(canvas);
-    mDrawables.get(mID).draw(canvas);
+    mBaseDrawable.draw(canvas);
     if (mID instanceof ViewGroup) {
       ViewGroup viewGroup = ((ViewGroup) mID);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
@@ -80,7 +114,7 @@ public class ReactDrawableGroup extends ReactDrawable {
   }
 
   private void traverseLayout(View view, ViewGroup parent, PointF scale) {
-    Drawable drawable = mDrawables.get(view);
+    Drawable drawable = getDrawable(view);
     if (drawable == null) return;
     //Rect bounds = scaleBounds(view, scale);
     Rect out = new Rect();
@@ -99,15 +133,20 @@ public class ReactDrawableGroup extends ReactDrawable {
     }
   }
 
-  private static ReactDrawableGroup obtain(View id, HashMap<View, Drawable> drawables) {
-    Set<Map.Entry<View, Drawable>> entries = drawables.entrySet();
-    Iterator<Map.Entry<View, Drawable>> iterator = entries.iterator();
-    Drawable[] out = new Drawable[entries.size()];
+  private static ReactDrawableGroup obtain(View id, Drawable bare, HashMap<View, ReactDrawableGroup> drawables, boolean isRoot) {
+    Set<Map.Entry<View, ReactDrawableGroup>> entries = drawables.entrySet();
+    Iterator<Map.Entry<View, ReactDrawableGroup>> iterator = entries.iterator();
+    Drawable[] out = new Drawable[entries.size() + 1];
     int i = 0;
-    while (iterator.hasNext()) {
-      out[i++] = iterator.next().getValue();
+    out[i++] = bare;
+    for (Map.Entry<View, ReactDrawableGroup> next : drawables.entrySet()) {
+      out[i++] = next.getValue();
     }
-    return new ReactDrawableGroup(id, drawables, out);
+    if (isRoot) {
+      return new ReactRootDrawableGroup(id, bare, drawables, out);
+    } else {
+      return new ReactDrawableGroup(id, bare, drawables, out);
+    }
   }
 
   private static void drawBareView(Canvas canvas, View view) {
@@ -115,7 +154,6 @@ public class ReactDrawableGroup extends ReactDrawable {
       Rect r = new Rect();
       view.getDrawingRect(r);
       ((ViewGroup) view.getParent()).offsetDescendantRectToMyCoords(view, r);
-      Log.d("Sliderr", "drawBareView: "+r);
     }
     if (view instanceof ViewGroup) {
       ArrayList<Integer> visibility = new ArrayList<>();
@@ -136,8 +174,8 @@ public class ReactDrawableGroup extends ReactDrawable {
     }
   }
 
-  private static ReactDrawableGroup traverse(Resources res, View view) {
-    HashMap<View, Drawable> drawables = new HashMap<>();
+  private static ReactDrawableGroup traverse(Resources res, View view, boolean isRoot) {
+    HashMap<View, ReactDrawableGroup> drawables = new HashMap<>();
     Rect out = new Rect();
     Rect src = new Rect();
    // bounds.round(out);
@@ -149,22 +187,20 @@ public class ReactDrawableGroup extends ReactDrawable {
     //canvas.translate(bounds.left, bounds.top);
     //canvas.translate(view.getPaddingLeft(), view.getPaddingTop());
     drawBareView(canvas, view);
-    drawables.put(view, new ReactDrawable(res, bitmap));
+    BitmapDrawable bare = new BitmapDrawable(res, bitmap);
     if (view instanceof ViewGroup) {
       ViewGroup viewGroup = (ViewGroup) view;
       View child;
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
         child = viewGroup.getChildAt(i);
-        drawables.put(child, traverse(res, viewGroup.getChildAt(i)));
+        drawables.put(child, traverse(res, viewGroup.getChildAt(i), false));
       }
     }
-    ReactDrawableGroup drawableGroup = obtain(view, drawables);
-    //drawableGroup.setBounds(out);
-    return drawableGroup;
+    return obtain(view, bare, drawables, isRoot);
   }
 
   static ReactDrawableGroup traverse(Resources res, View view, Rect bounds) {
-    ReactDrawableGroup drawableGroup = traverse(res, view);
+    ReactDrawableGroup drawableGroup = traverse(res, view, true);
     drawableGroup.setBounds(bounds);
     return drawableGroup;
   }
