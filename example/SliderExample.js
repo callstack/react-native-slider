@@ -181,16 +181,7 @@ exports.examples = [
   {
     title: 'Custom thumb image',
     render(): Element<any> {
-      const opacity = new Animated.Value(0);
-
-      Animated.loop(
-        Animated.sequence([
-          Animated.spring(opacity, { toValue: 1, useNativeDriver: true }),
-          Animated.spring(opacity, { toValue: 0, useNativeDriver: true }),
-        ])
-      ).start();
-
-      return <SliderExample thumbImage={require('./uie_thumb_big.png')} /*style={{opacity}}*/ />;
+      return <SliderExample inverted thumbImage={require('./uie_thumb_big.png')} value={0.8} />;
     },
   },
   {
@@ -222,13 +213,25 @@ exports.examples = [
     },
   },
   {
-    title: 'Custom View',
+    title: 'Custom slider',
+    render(): React.Element<any> {
+      return <SliderExample
+        style={{ width: '100%', marginVertical: 20 }}
+        minimumTrack={() => <View style={{ opacity: 0.3, transform: [{ rotate: '15deg' }], height: 5, backgroundColor: 'red' }} />}
+        maximumTrack={() => <View style={{ flex: 1, opacity: 0.3, transform: [{ rotate: '-15deg' }], height: 5, backgroundColor: 'blue' }} />}
+      />;
+    },
+  },
+  {
+    title: 'Custom Thumb & Tracks + ANIMATIONS',
     platform: 'android',
     render(): React.Element<any> {
       const useNativeDriver = true;
       const springer = new Animated.Value(0);
-      const rotate = Animated.multiply(springer, 45);
       const timer = new Animated.Value(0);
+      const rads = 6 * Math.PI;
+      const rotate = Animated.multiply(springer, rads);
+
       const shrink = timer.interpolate({
         inputRange: [0, 1],
         outputRange: [1, 0.5]
@@ -237,11 +240,16 @@ exports.examples = [
         inputRange: [0, 1],
         outputRange: [0.1, 2]
       });
+      const scale1 = timer.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 2]
+      });
       const gentleOpacity = springer.interpolate({
         inputRange: [0, 1],
         outputRange: [0.4, 0.9]
       });
-      Animated.loop(
+
+      const animator = Animated.loop(
         Animated.parallel([
           Animated.sequence([
             Animated.spring(springer, { toValue: 1, useNativeDriver }),
@@ -254,6 +262,7 @@ exports.examples = [
         ])
       ).start();
 
+
       return (
         <SliderExample
           value={0.6}
@@ -263,11 +272,17 @@ exports.examples = [
           maximumValue={2}
           style={{ width: 300 }}
           ref={r => {
-            //setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 5000)
+            setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 15000)
           }}
-          //minimumTrackTintColor={'blue'}
-          //maximumTrackTintColor={'red'}
-          thumb={<View style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }} collapsable={false}>
+          minimumTrackTintColor={'magenta'}
+          maximumTrackTintColor={'red'}
+          thumb={<Animated.View
+            style={{
+              alignItems: 'center', justifyContent: 'center', width: 40, height: 40,
+              transform: [{ rotateX: rotate, rotateY: rotate, rotateZ: rotate, scale: scale1 }]
+            }}
+            collapsable={false}
+          >
             <Animated.View
               style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
               collapsable={false}
@@ -277,18 +292,18 @@ exports.examples = [
                 style={{ width: 25, height: 25 }}
               />
             </Animated.View>
-          </View>}
+          </Animated.View>}
           maximumTrack={() => <Animated.View
-            style={{ height: 5,/* opacity: Animated.subtract(1, timer),*/ transform: [{ rotateY: rotate }] }}
+            style={{ height: 5, opacity: Animated.subtract(1, timer), transform: [{ rotateY: rotate }] }}
             collapsable={false}
           >
             <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
           </Animated.View>}
           minimumTrack={() => <Animated.View
-            style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, opacity: gentleOpacity }}
+            style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: rotate }, { scaleY: scale1 }] }}
             collapsable={false}
           >
-            <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: rotate }] }} />
+            <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />
             <View style={{ backgroundColor: 'white', flex: 1 }}>
               <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }] }} />
             </View>
