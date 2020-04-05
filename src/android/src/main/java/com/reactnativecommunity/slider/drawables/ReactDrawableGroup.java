@@ -3,6 +3,7 @@ package com.reactnativecommunity.slider.drawables;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -71,6 +72,29 @@ public class ReactDrawableGroup extends ReactDrawable {
     traverseLayout(mID, null);
   }
 
+  private void traverseLayout(View view, ViewGroup parent) {
+    Drawable drawable = getDrawable(view);
+    if (drawable == null) return;
+    Rect out = new Rect();
+    view.getDrawingRect(out);
+    if (parent != null) {
+      parent.offsetDescendantRectToMyCoords(view, out);
+    }
+    drawable.setBounds(out);
+    if (view instanceof ViewGroup) {
+      ViewGroup viewGroup = ((ViewGroup) view);
+      for (int i = 0; i < viewGroup.getChildCount(); i++) {
+        traverseLayout(viewGroup.getChildAt(i), viewGroup);
+      }
+    }
+  }
+
+  @Override
+  public PointF getCenter() {
+    Rect bounds = getBounds();
+    return new PointF(bounds.width() / 2, bounds.height() / 2);
+  }
+
   @Override
   public void draw(@NonNull Canvas canvas) {
     canvas.save();
@@ -90,26 +114,6 @@ public class ReactDrawableGroup extends ReactDrawable {
       }
     }
     canvas.restore();
-  }
-
-  private void traverseLayout(View view, ViewGroup parent) {
-    Drawable drawable = getDrawable(view);
-    if (drawable == null) return;
-    //Rect bounds = scaleBounds(view, scale);
-    Rect out = new Rect();
-    view.getDrawingRect(out);
-    if (parent != null) {
-      parent.offsetDescendantRectToMyCoords(view, out);
-    }
-    Log.d("Sliderr", "traverseLayout: " + out);
-    //bounds.offset(parentBounds.left, parentBounds.top);
-    drawable.setBounds(out);
-    if (view instanceof ViewGroup) {
-      ViewGroup viewGroup = ((ViewGroup) view);
-      for (int i = 0; i < viewGroup.getChildCount(); i++) {
-        traverseLayout(viewGroup.getChildAt(i), viewGroup);
-      }
-    }
   }
 
   static class Builder {
