@@ -25,7 +25,11 @@ import java.util.Set;
 
 public class ReactDrawableGroup extends ReactDrawable {
 
-  static class ReactRootDrawableGroup extends ReactDrawableGroup {
+  static ReactDrawableGroup obtain(DrawableHandler handler) {
+    return traverse(handler.getView().getResources(), handler.getView(), handler.getBounds());
+  }
+
+  static class ReactRootDrawableGroup extends ReactDrawableGroup implements PropsUpdater {
 
     private final SparseArray<ReactDrawableGroup> mRegistry;
 
@@ -45,7 +49,7 @@ public class ReactDrawableGroup extends ReactDrawable {
     @Override
     public void updateFromProps(int tag, ReactStylesDiffMap props) {
       ReactDrawableGroup d = mRegistry.get(tag);
-      if (d != null) d.updateFromProps(tag, props);
+      if (d != null) d.updateFromProps(props);
     }
   }
 
@@ -54,7 +58,7 @@ public class ReactDrawableGroup extends ReactDrawable {
   private Drawable mBaseDrawable;
 
   ReactDrawableGroup(View id, Drawable base, HashMap<View, ReactDrawableGroup> map, Drawable[] drawables) {
-    super(drawables);
+    super(drawables, id);
     mID = id;
     mBaseDrawable = base;
     mDrawables = map;
@@ -174,20 +178,17 @@ public class ReactDrawableGroup extends ReactDrawable {
     }
   }
 
-  private static ReactDrawableGroup traverse(Resources res, View view, boolean isRoot) {
-    HashMap<View, ReactDrawableGroup> drawables = new HashMap<>();
-    Rect out = new Rect();
+  private static Drawable createBareDrawable(Resources res, View view) {
     Rect src = new Rect();
-   // bounds.round(out);
     view.getDrawingRect(src);
     Bitmap bitmap = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
     Canvas canvas = new Canvas(bitmap);
-    //PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
-    //canvas.scale(scale.x, scale.y);
-    //canvas.translate(bounds.left, bounds.top);
-    //canvas.translate(view.getPaddingLeft(), view.getPaddingTop());
     drawBareView(canvas, view);
-    BitmapDrawable bare = new BitmapDrawable(res, bitmap);
+    return new BitmapDrawable(res, bitmap);
+  }
+
+  private static ReactDrawableGroup traverse(Resources res, View view, boolean isRoot) {
+    HashMap<View, ReactDrawableGroup> drawables = new HashMap<>();
     if (view instanceof ViewGroup) {
       ViewGroup viewGroup = (ViewGroup) view;
       View child;
@@ -196,10 +197,10 @@ public class ReactDrawableGroup extends ReactDrawable {
         drawables.put(child, traverse(res, viewGroup.getChildAt(i), false));
       }
     }
-    return obtain(view, bare, drawables, isRoot);
+    return obtain(view, createBareDrawable(res, view), drawables, isRoot);
   }
 
-  static ReactDrawableGroup traverse(Resources res, View view, Rect bounds) {
+  private static ReactDrawableGroup traverse(Resources res, View view, Rect bounds) {
     ReactDrawableGroup drawableGroup = traverse(res, view, true);
     drawableGroup.setBounds(bounds);
     return drawableGroup;

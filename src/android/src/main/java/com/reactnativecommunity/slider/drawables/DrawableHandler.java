@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
@@ -17,25 +16,29 @@ import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.UIManagerModule;
 
-public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener {
+public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener, PropsUpdater {
   private final ReactContext mContext;
   private final Drawable mOriginal;
   private View mView;
   private boolean mIsDrawing = false;
-  private float mOpacity = 1;
 
   DrawableHandler(ReactContext context, Drawable original) {
     mContext = context;
     mOriginal = original;
   }
 
-  ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
-    return new ReactDrawable(res, bitmap);
+  Drawable createDrawable(Resources res, Bitmap bitmap) {
+    return new ReactDrawable(res, bitmap, getView());
   }
 
   abstract Drawable get();
   abstract void set(Drawable drawable);
   abstract void draw(Canvas canvas, View view);
+
+  @Nullable
+  ReactDrawable getReactDrawable() {
+    return null;
+  }
 
   public final View getView() {
     return mView;
@@ -74,10 +77,8 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     }
     mView = view;
     if (mView != null) {
-      mOpacity = mView.getAlpha();
       draw();
     } else {
-      mOpacity = 1;
       restore();
     }
   }
@@ -102,10 +103,9 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     Bitmap bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
     Canvas canvas = new Canvas(bitmap);
     draw(canvas, mView);
-    ReactDrawable outDrawable = createDrawable(mContext.getResources(), bitmap);
+    Drawable outDrawable = createDrawable(mContext.getResources(), bitmap);
     outDrawable.setState(get().getState());
     outDrawable.setLevel(get().getLevel());
-    ReactDrawable.applyTransformations(mView, outDrawable);
     set(outDrawable);
     invalidate();
     mIsDrawing = false;
@@ -129,10 +129,15 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     }
   }
 
-  void updateFromProps(ReactStylesDiffMap props) {
+  @Override
+  public void updateFromProps(int tag, ReactStylesDiffMap props) {
     if (props == null) return;
-    if (get() instanceof ReactDrawable) {
-      ((ReactDrawable) get()).updateFromProps(props);
+    ReactDrawable drawable = getReactDrawable();
+    if (drawable == null) return;
+    if (drawable instanceof ReactDrawableGroup.ReactRootDrawableGroup) {
+      ((ReactDrawableGroup.ReactRootDrawableGroup) drawable).updateFromProps(tag, props);
+    } else if (tag == getView().getId()) {
+      drawable.updateFromProps(props);
     }
   }
 }

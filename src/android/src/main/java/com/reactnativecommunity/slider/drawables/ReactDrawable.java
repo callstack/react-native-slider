@@ -37,17 +37,22 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     PointF getCenter();
   }
 
-  public ReactDrawable(Resources res, Bitmap bitmap) {
-    this(new BitmapDrawable(res, bitmap));
+  ReactDrawable(Resources res, Bitmap bitmap, View view) {
+    this(new BitmapDrawable(res, bitmap), view);
   }
 
-  ReactDrawable(Drawable drawable) {
-    super(new Drawable[]{drawable});
-    onBoundsChange(copyBounds());
+  ReactDrawable(Drawable drawable, View view) {
+    this(new Drawable[]{drawable}, view);
+  }
+
+  ReactDrawable(Drawable[] drawables, View view) {
+    this(drawables);
+    applyTransformations(view, this);
   }
 
   ReactDrawable(Drawable[] drawables) {
     super(drawables);
+    onBoundsChange(copyBounds());
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -58,7 +63,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     onBoundsChange(copyBounds());
   }
 
-  static void applyTransformations(ReactDrawable from, ReactDrawable to) {
+  private static void applyTransformations(ReactDrawable from, ReactDrawable to) {
     to.mScaleX = from.mScaleX;
     to.mScaleY = from.mScaleY;
     to.mTranslationX = from.mTranslationX;
@@ -71,7 +76,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     to.setReactOpacity(from.mOpacity);
   }
 
-  static void applyTransformations(View from, ReactDrawable to) {
+  private static void applyTransformations(View from, ReactDrawable to) {
     to.mScaleX = from.getScaleX();
     to.mScaleY = from.getScaleY();
     to.mTranslationX = from.getTranslationX();
@@ -79,6 +84,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     to.mRotationX = from.getRotationX();
     to.mRotationY = from.getRotationY();
     to.mRotation = from.getRotation();
+    //// TODO: 05/04/2020 skew
     //to.mSkewX = from.sk;
     //to.mSkewY = from.;
     to.setReactOpacity(from.getAlpha());
@@ -120,7 +126,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     }
   }
 
-  private void onPreDraw(Canvas canvas) {
+  void onPreDraw(Canvas canvas) {
     PointF center = getCenter();
     // apply translation
     canvas.translate(mTranslationX, mTranslationY);
@@ -243,17 +249,15 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
   static class ReactDrawableHelper {
     ReactDrawable mDrawableWrapper;
 
-    ReactDrawable newInstance(Drawable drawable) {
-      return new ReactDrawable(drawable);
+    ReactDrawable newInstance(Drawable drawable, View view) {
+      return new ReactDrawable(drawable, view);
     }
 
-    ReactDrawable createDrawable(Drawable drawable) {
+    ReactDrawable createDrawable(Drawable drawable, View view) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mDrawableWrapper != null) {
         mDrawableWrapper.setDrawable(0, drawable);
       } else {
-        ReactDrawable next = newInstance(drawable);
-        if (mDrawableWrapper != null) applyTransformations(mDrawableWrapper, next);
-        mDrawableWrapper = next;
+        mDrawableWrapper = newInstance(drawable, view);
       }
       return mDrawableWrapper;
     }

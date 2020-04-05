@@ -90,7 +90,7 @@ public class ReactSliderDrawableHelper {
   public void setThumbImage(final String uri) {
     if (uri != null) {
       Drawable bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(mSlider, getBitmap(mSlider, uri));
-      mSlider.setThumb(new ReactDrawable(bitmapDrawable));
+      mSlider.setThumb(bitmapDrawable);
       // Enable alpha channel for the thumbImage
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         mSlider.setSplitTrack(false);
@@ -129,11 +129,12 @@ public class ReactSliderDrawableHelper {
       int id = handler.getView() != null ? handler.getView().getId() : View.NO_ID;
       if (id != View.NO_ID) {
         if (id == informantID) {
-          handler.updateFromProps(context);
+          handler.updateFromProps(0, context);
           //break;
         }
         if (id == recruiterID) {
-          handler.dispatchDraw();
+          handler.updateFromProps(informantID, context);
+          //handler.dispatchDraw();
           break;
         }
       }

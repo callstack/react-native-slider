@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.Property;
 import android.view.MotionEvent;
@@ -46,8 +47,8 @@ public class ThumbDrawableHandler extends DrawableHandler {
   }
 
   @Override
-  ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
-    return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap));
+  Drawable createDrawable(Resources res, Bitmap bitmap) {
+    return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap), getView());
   }
 
   @Override
@@ -110,8 +111,10 @@ public class ThumbDrawableHandler extends DrawableHandler {
 
   @Nullable
   private ThumbDrawable getThumbDrawable() {
-    if (get() instanceof ReactDrawable && ((ReactDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
-      return ((ThumbDrawable) ((ReactDrawable) get()).getDrawable(0));
+    if (get() instanceof LayerDrawable && ((LayerDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
+      return ((ThumbDrawable) ((LayerDrawable) get()).getDrawable(0));
+    } else if (get() instanceof ThumbDrawable) {
+      return (ThumbDrawable) get();
     } else {
       return null;
     }
