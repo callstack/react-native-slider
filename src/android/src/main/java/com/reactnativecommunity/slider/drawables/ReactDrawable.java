@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.view.View;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
@@ -56,18 +57,31 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     super.setDrawable(index, drawable);
     onBoundsChange(copyBounds());
   }
-  
-  void applyTransformations(ReactDrawable drawable) {
-    drawable.mScaleX = mScaleX;
-    drawable.mScaleY = mScaleY;
-    drawable.mTranslationX = mTranslationX;
-    drawable.mTranslationY = mTranslationY;
-    drawable.mRotationX = mRotationX;
-    drawable.mRotationY = mRotationY;
-    drawable.mRotation = mRotation;
-    drawable.mSkewX = mSkewX;
-    drawable.mSkewY = mSkewY;
-    drawable.setReactOpacity(mOpacity);
+
+  static void applyTransformations(ReactDrawable from, ReactDrawable to) {
+    to.mScaleX = from.mScaleX;
+    to.mScaleY = from.mScaleY;
+    to.mTranslationX = from.mTranslationX;
+    to.mTranslationY = from.mTranslationY;
+    to.mRotationX = from.mRotationX;
+    to.mRotationY = from.mRotationY;
+    to.mRotation = from.mRotation;
+    to.mSkewX = from.mSkewX;
+    to.mSkewY = from.mSkewY;
+    to.setReactOpacity(from.mOpacity);
+  }
+
+  static void applyTransformations(View from, ReactDrawable to) {
+    to.mScaleX = from.getScaleX();
+    to.mScaleY = from.getScaleY();
+    to.mTranslationX = from.getTranslationX();
+    to.mTranslationY = from.getTranslationY();
+    to.mRotationX = from.getRotationX();
+    to.mRotationY = from.getRotationY();
+    to.mRotation = from.getRotation();
+    //to.mSkewX = from.sk;
+    //to.mSkewY = from.;
+    to.setReactOpacity(from.getAlpha());
   }
 
   public void updateFromProps(ReactStylesDiffMap props) {
@@ -238,7 +252,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
         mDrawableWrapper.setDrawable(0, drawable);
       } else {
         ReactDrawable next = newInstance(drawable);
-        if (mDrawableWrapper != null) mDrawableWrapper.applyTransformations(next);
+        if (mDrawableWrapper != null) applyTransformations(mDrawableWrapper, next);
         mDrawableWrapper = next;
       }
       return mDrawableWrapper;

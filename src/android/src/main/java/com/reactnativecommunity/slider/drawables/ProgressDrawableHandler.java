@@ -36,7 +36,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
   }
 
   final ReactSlider mSlider;
-  private final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
+  final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
 
   static Drawable getDrawableByID(ReactSlider slider, int layerID) {
     LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
@@ -57,13 +57,9 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     mSlider = slider;
   }
 
-  Drawable createDrawable(Drawable drawable) {
-    return mHelper.createDrawable(drawable);
-  }
-
   @Override
-  Drawable createDrawable(Resources res, Bitmap bitmap) {
-    return createDrawable(new BitmapDrawable(res, bitmap));
+  ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
+    return mHelper.createDrawable(new BitmapDrawable(res, bitmap));
   }
 
   private static void refresh(Drawable drawable) {
@@ -95,7 +91,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
 
   static class ProgressBitmapDrawable extends BitmapDrawable implements ReactDrawable.DrawableChild {
 
-    private float mLevelScale = 1;
+    private float mLevelScale;
     private final boolean mInverted;
 
     ProgressBitmapDrawable(Resources res, Bitmap bitmap) {
@@ -105,6 +101,8 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     ProgressBitmapDrawable(Resources res, Bitmap bitmap, boolean inverted) {
       super(res, bitmap);
       mInverted = inverted;
+      onLevelChange(getLevel());
+      invalidateSelf();
     }
 
     @Override
@@ -163,8 +161,8 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     }
 
     @Override
-    Drawable createDrawable(Resources res, Bitmap bitmap) {
-      return createDrawable(new ProgressBitmapDrawable(res, bitmap, mLayerID == DRAWABLE_ID2));
+    ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
+      return mHelper.createDrawable(new ProgressBitmapDrawable(res, bitmap, mLayerID == DRAWABLE_ID2));
     }
   }
 

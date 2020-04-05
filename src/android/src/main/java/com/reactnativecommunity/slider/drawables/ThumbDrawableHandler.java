@@ -46,7 +46,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
   }
 
   @Override
-  Drawable createDrawable(Resources res, Bitmap bitmap) {
+  ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
     return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap));
   }
 

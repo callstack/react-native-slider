@@ -29,7 +29,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     mOriginal = original;
   }
 
-  Drawable createDrawable(Resources res, Bitmap bitmap) {
+  ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
     return new ReactDrawable(res, bitmap);
   }
 
@@ -102,10 +102,10 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     Bitmap bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
     Canvas canvas = new Canvas(bitmap);
     draw(canvas, mView);
-    Drawable outDrawable = createDrawable(mContext.getResources(), bitmap);
-    //outDrawable.setAlpha((int) (mOpacity * 255));
+    ReactDrawable outDrawable = createDrawable(mContext.getResources(), bitmap);
     outDrawable.setState(get().getState());
     outDrawable.setLevel(get().getLevel());
+    ReactDrawable.applyTransformations(mView, outDrawable);
     set(outDrawable);
     invalidate();
     mIsDrawing = false;
@@ -134,14 +134,5 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     if (get() instanceof ReactDrawable) {
       ((ReactDrawable) get()).updateFromProps(props);
     }
-    if (props.hasKey("opacity")) {
-      //setOpacity((float) props.getDouble("opacity", mOpacity));
-      invalidate();
-    }
-  }
-
-  private void setOpacity(@FloatRange(from = 0, to = 1) float opacity) {
-    mOpacity = Math.max(Math.min(opacity, 1), 0);
-    get().setAlpha((int) (mOpacity * 255));
   }
 }
