@@ -27,6 +27,10 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     mOriginal = original;
   }
 
+  Resources getResources() {
+    return mContext.getResources();
+  }
+
   Drawable createDrawable(Resources res, Bitmap bitmap) {
     return new ReactDrawable(res, bitmap, getView());
   }
