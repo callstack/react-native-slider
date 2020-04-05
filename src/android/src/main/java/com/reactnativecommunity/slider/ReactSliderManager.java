@@ -246,6 +246,16 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     registerView(view, tag, SliderDrawable.MAXIMUM_TRACK);
   }
 
+  @ReactProp(name = "backgroundTrackTintColor", customType = "Color")
+  public void setBackgroundTrackTintColor(ReactSlider view, Integer color) {
+    setTintColor(view, color, SliderDrawable.BACKGROUND);
+  }
+
+  @ReactProp(name = "backgroundTrackViewTag")
+  public void setBackgroundTrackView(ReactSlider view, Integer tag) {
+    registerView(view, tag, SliderDrawable.BACKGROUND);
+  }
+
   @ReactProp(name = "inverted", defaultBoolean = false)
   public void setInverted(ReactSlider view, boolean inverted) {
     view.setInverted(inverted);
