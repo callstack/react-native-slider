@@ -106,8 +106,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     }
   }
 
-  @Override
-  public void draw(@NonNull Canvas canvas) {
+  private void onPreDraw(Canvas canvas) {
     PointF center = getCenter();
     // apply translation
     canvas.translate(mTranslationX, mTranslationY);
@@ -122,7 +121,14 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     mRotator.restore();
     // apply scale
     canvas.scale(mScaleX, mScaleY, center.x, center.y);
+  }
+
+  @Override
+  public void draw(@NonNull Canvas canvas) {
+    canvas.save();
+    onPreDraw(canvas);
     super.draw(canvas);
+    canvas.restore();
   }
 
   public float getScaleX() {
