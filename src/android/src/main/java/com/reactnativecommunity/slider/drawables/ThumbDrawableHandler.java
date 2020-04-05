@@ -19,6 +19,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.ReactContext;
 import com.reactnativecommunity.slider.ReactSlider;
 import com.reactnativecommunity.slider.ReactSliderManager;
@@ -106,9 +108,19 @@ public class ThumbDrawableHandler extends DrawableHandler {
     view.draw(canvas);
   }
 
-  void setInverted(boolean inverted) {
+  @Nullable
+  private ThumbDrawable getThumbDrawable() {
     if (get() instanceof ReactDrawable && ((ReactDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
-      ((ThumbDrawable) ((ReactDrawable) get()).getDrawable(0)).setInverted(inverted);
+      return ((ThumbDrawable) ((ReactDrawable) get()).getDrawable(0));
+    } else {
+      return null;
+    }
+  }
+
+  void setInverted(boolean inverted) {
+    ThumbDrawable drawable = getThumbDrawable();
+    if (drawable != null) {
+      drawable.setInverted(inverted);
     }
   }
 
@@ -116,8 +128,8 @@ public class ThumbDrawableHandler extends DrawableHandler {
     if (mScaleAnimator.isRunning()) {
       mScaleAnimator.cancel();
     }
-    if (get() instanceof ReactDrawable && ((ReactDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
-      ThumbDrawable drawable = ((ThumbDrawable) ((ReactDrawable) get()).getDrawable(0));
+    ThumbDrawable drawable = getThumbDrawable();
+    if (drawable != null) {
       ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
           drawable,
           Property.of(ThumbDrawable.class, Float.class, "scale"),
