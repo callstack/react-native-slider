@@ -133,7 +133,7 @@ public class ReactSliderDrawableHelper {
           //break;
         }
         if (id == recruiterID) {
-          //handler.dispatchDraw();
+          handler.dispatchDraw();
           break;
         }
       }
