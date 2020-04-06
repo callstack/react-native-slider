@@ -306,7 +306,7 @@ exports.examples = [
               collapsable={false}
             >
               <Animated.View
-                style={{ backgroundColor: 'blue', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
+                style={{ backgroundColor: a%2===0?'blue':'black', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
                 collapsable={false}
               >
                 <Image
