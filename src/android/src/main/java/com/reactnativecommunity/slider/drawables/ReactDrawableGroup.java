@@ -23,7 +23,7 @@ import java.util.Set;
 public class ReactDrawableGroup extends ReactDrawable {
 
   static ReactDrawableGroup obtain(DrawableHandler handler) {
-    return Builder.obtain(handler);
+    return new Builder(handler).get(true);
   }
 
   static class ReactRootDrawableGroup extends ReactDrawableGroup implements PropsUpdater {
@@ -55,7 +55,7 @@ public class ReactDrawableGroup extends ReactDrawable {
   private Drawable mBaseDrawable;
 
   ReactDrawableGroup(Builder builder) {
-    super(builder.toLayers(), builder.view);
+    super(builder.getLayers(), builder.view);
     mID = builder.view;
     mBaseDrawable = builder.bare;
     mDrawables = builder.children;
@@ -97,7 +97,16 @@ public class ReactDrawableGroup extends ReactDrawable {
   public void draw(@NonNull Canvas canvas) {
     canvas.save();
     onPreDraw(canvas);
+    drawBackground(canvas);
+    drawChildren(canvas);
+    canvas.restore();
+  }
+
+  void drawBackground(Canvas canvas) {
     mBaseDrawable.draw(canvas);
+  }
+
+  void drawChildren(Canvas canvas) {
     if (mID instanceof ViewGroup) {
       ViewGroup viewGroup = ((ViewGroup) mID);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
@@ -111,7 +120,6 @@ public class ReactDrawableGroup extends ReactDrawable {
         canvas.restore();
       }
     }
-    canvas.restore();
   }
 
   static class Builder {
@@ -130,7 +138,7 @@ public class ReactDrawableGroup extends ReactDrawable {
       children = traverseChildren(res, view);
     }
 
-    private Drawable[] toLayers() {
+    Drawable[] getLayers() {
       return toLayers(bare, children);
     }
 
@@ -142,12 +150,6 @@ public class ReactDrawableGroup extends ReactDrawable {
       }
     }
 
-    static ReactDrawableGroup obtain(DrawableHandler handler) {
-      ReactDrawableGroup drawableGroup = new Builder(handler).get(true);
-      drawableGroup.setBounds(handler.getBounds());
-      return drawableGroup;
-    }
-    
     private static HashMap<View, ReactDrawableGroup> traverseChildren(Resources res, View view) {
       HashMap<View, ReactDrawableGroup> drawables = new HashMap<>();
       if (view instanceof ViewGroup) {
@@ -155,7 +157,7 @@ public class ReactDrawableGroup extends ReactDrawable {
         View child;
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
           child = viewGroup.getChildAt(i);
-          drawables.put(child, new Builder(res, viewGroup.getChildAt(i)).get(false));
+          drawables.put(child, new Builder(res, child).get(false));
         }
       }
       return drawables;
@@ -182,11 +184,6 @@ public class ReactDrawableGroup extends ReactDrawable {
     }
 
     private static void drawBareView(Canvas canvas, View view) {
-      if (view.getParent() != null) {
-        Rect r = new Rect();
-        view.getDrawingRect(r);
-        ((ViewGroup) view.getParent()).offsetDescendantRectToMyCoords(view, r);
-      }
       if (view instanceof ViewGroup) {
         ArrayList<Integer> visibility = new ArrayList<>();
         View child;
