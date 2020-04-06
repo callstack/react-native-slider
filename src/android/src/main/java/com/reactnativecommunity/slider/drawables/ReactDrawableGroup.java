@@ -3,10 +3,14 @@ package com.reactnativecommunity.slider.drawables;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +22,6 @@ import com.facebook.react.uimanager.ReactStylesDiffMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class ReactDrawableGroup extends ReactDrawable {
 
@@ -48,16 +51,52 @@ public class ReactDrawableGroup extends ReactDrawable {
       ReactDrawableGroup d = mRegistry.get(tag);
       if (d != null) d.updateFromProps(props);
     }
+
+    @Override
+    protected void onBoundsChange(Rect bounds) {
+      Rect v = new Rect();
+      mID.getDrawingRect(v);
+      PointF scale = new PointF(bounds.width() * 1f / v.width(), bounds.height() * 1f / v.height());
+      traverseLayout(mID, scale);
+    }
+
+    void traverseLayout(View view, PointF scale) {
+      boolean firstTraversal = view == mID;
+      Drawable drawable = mRegistry.get(view.getId());
+      if (drawable == null) return;
+
+      Rect out = new Rect();
+      view.getDrawingRect(out);
+      RectF local = new RectF(0, 0, out.width() * scale.x, out.height() * scale.y);
+      if (mID instanceof ViewGroup && !firstTraversal) {
+        ((ViewGroup) mID).offsetDescendantRectToMyCoords(view, out);
+      }
+      local.offsetTo(out.left * scale.x, out.top * scale.y);
+      local.round(out);
+
+      if (firstTraversal) {
+        super.onBoundsChange(out);
+      } else {
+        drawable.setBounds(out);
+      }
+
+      if (view instanceof ViewGroup) {
+        ViewGroup viewGroup = ((ViewGroup) view);
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+          traverseLayout(viewGroup.getChildAt(i), scale);
+        }
+      }
+    }
   }
 
   private HashMap<View, ReactDrawableGroup> mDrawables;
-  private View mID;
+  View mID;
   private Drawable mBaseDrawable;
 
   ReactDrawableGroup(Builder builder) {
     super(builder.getLayers(), builder.view);
     mID = builder.view;
-    mBaseDrawable = builder.bare;
+    mBaseDrawable = builder.base;
     mDrawables = builder.children;
   }
 
@@ -67,31 +106,17 @@ public class ReactDrawableGroup extends ReactDrawable {
 
   @Override
   protected void onBoundsChange(Rect bounds) {
-    traverseLayout(mID, null);
+    mBaseDrawable.setBounds(bounds);
   }
 
-  private void traverseLayout(View view, ViewGroup parent) {
-    Drawable drawable = getDrawable(view);
-    if (drawable == null) return;
-    Rect out = new Rect();
-    view.getDrawingRect(out);
-    if (parent != null) {
-      parent.offsetDescendantRectToMyCoords(view, out);
-    }
-    drawable.setBounds(out);
-    if (view instanceof ViewGroup) {
-      ViewGroup viewGroup = ((ViewGroup) view);
-      for (int i = 0; i < viewGroup.getChildCount(); i++) {
-        traverseLayout(viewGroup.getChildAt(i), viewGroup);
-      }
-    }
-  }
-
+/*
   @Override
   public PointF getCenter() {
     Rect bounds = getBounds();
     return new PointF(bounds.width() / 2, bounds.height() / 2);
   }
+
+ */
 
   @Override
   public void draw(@NonNull Canvas canvas) {
@@ -102,11 +127,13 @@ public class ReactDrawableGroup extends ReactDrawable {
     canvas.restore();
   }
 
-  void drawBackground(Canvas canvas) {
+  private void drawBackground(Canvas canvas) {
+    canvas.save();
     mBaseDrawable.draw(canvas);
+    canvas.restore();
   }
 
-  void drawChildren(Canvas canvas) {
+  private void drawChildren(Canvas canvas) {
     if (mID instanceof ViewGroup) {
       ViewGroup viewGroup = ((ViewGroup) mID);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
@@ -115,7 +142,7 @@ public class ReactDrawableGroup extends ReactDrawable {
         c.getDrawingRect(out);
         viewGroup.offsetDescendantRectToMyCoords(c, out);
         canvas.save();
-        canvas.translate(out.left, out.top);
+        //canvas.translate(out.left, out.top);
         mDrawables.get(c).draw(canvas);
         canvas.restore();
       }
@@ -125,7 +152,7 @@ public class ReactDrawableGroup extends ReactDrawable {
   static class Builder {
 
     View view;
-    Drawable bare;
+    Drawable base;
     HashMap<View, ReactDrawableGroup> children;
 
     Builder(DrawableHandler handler) {
@@ -134,12 +161,17 @@ public class ReactDrawableGroup extends ReactDrawable {
 
     Builder(Resources res, View view) {
       this.view = view;
-      bare = createBareDrawable(res, view);
+      base = createBaseDrawable(res, view);
       children = traverseChildren(res, view);
     }
 
     Drawable[] getLayers() {
-      return toLayers(bare, children);
+      ArrayList<Drawable> layers = new ArrayList<>();
+      layers.add(base);
+      for (Map.Entry<View, ReactDrawableGroup> next : children.entrySet()) {
+        layers.add(next.getValue());
+      }
+      return layers.toArray(new Drawable[0]);
     }
 
     private ReactDrawableGroup get(boolean isRoot) {
@@ -163,18 +195,7 @@ public class ReactDrawableGroup extends ReactDrawable {
       return drawables;
     }
 
-    private static Drawable[] toLayers(Drawable bare, HashMap<View, ReactDrawableGroup> drawables) {
-      Set<Map.Entry<View, ReactDrawableGroup>> entries = drawables.entrySet();
-      Drawable[] out = new Drawable[entries.size() + 1];
-      int i = 0;
-      out[i++] = bare;
-      for (Map.Entry<View, ReactDrawableGroup> next : drawables.entrySet()) {
-        out[i++] = next.getValue();
-      }
-      return out;
-    }
-
-    private static Drawable createBareDrawable(Resources res, View view) {
+    private static Drawable createBaseDrawable(Resources res, View view) {
       Rect src = new Rect();
       view.getDrawingRect(src);
       Bitmap bitmap = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
