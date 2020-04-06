@@ -13,6 +13,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.ReactContext;
 import com.reactnativecommunity.slider.R;
 import com.reactnativecommunity.slider.ReactSlider;
@@ -59,7 +61,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
   }
 
   @Override
-  ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
+  Drawable createDrawable(Resources res, Bitmap bitmap) {
     return mHelper.createDrawable(new BitmapDrawable(res, bitmap));
   }
 
@@ -70,8 +72,14 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     drawable.jumpToCurrentState();
   }
 
-  private int getBarHeight() {
+  private int getIntrinsicBarHeight() {
     return mSlider.getIndeterminateDrawable().getIntrinsicHeight();
+  }
+
+  int getBarHeight(Rect bounds) {
+    View view = getView();
+    RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
+    return (int) Math.max(Math.min(bounds.height(), src.height()), getIntrinsicBarHeight());
   }
 
   @Override
@@ -79,55 +87,89 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     return new Rect(0, 0, mSlider.getWidth(), mSlider.getHeight());
   }
 
-  @Override
-  public void draw(Canvas canvas, View view) {
+  void onPreDraw(Canvas canvas) {
+    View view = getView();
     RectF bounds = new RectF(getBounds());
     RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
-    float barHeight = Math.max(Math.min(bounds.height(), src.height()), getBarHeight());
+    float barHeight = Math.max(Math.min(bounds.height(), src.height()), getIntrinsicBarHeight());
     PointF scale = new PointF(bounds.width() / src.width(),barHeight / src.height());
     canvas.translate(0, (bounds.height() - barHeight) / 2);
     canvas.scale(scale.x, scale.y);
+  }
+
+  @Override
+  public void draw(Canvas canvas, View view) {
+    onPreDraw(canvas);
     view.draw(canvas);
   }
 
-  static class ProgressBitmapDrawable extends BitmapDrawable implements ReactDrawable.DrawableChild {
-
-    private float mLevelScale;
+  static abstract class ProgressDrawableHelper implements ReactDrawable.DrawableChild {
     private final boolean mInverted;
+
+    ProgressDrawableHelper(boolean inverted) {
+      mInverted = inverted;
+    }
+
+    abstract Drawable get();
+
+    private float getScale() {
+      float mLevelScale = get().getLevel() * 1.f / ReactSliderDrawableHelper.MAX_LEVEL * 1.f;
+      if (mInverted) mLevelScale = 1 - mLevelScale;
+      return mLevelScale;
+    }
+
+    @Override
+    public PointF getCenter() {
+      Rect bounds = get().getBounds();
+      float x = bounds.centerX() * getScale();
+      if (mInverted) x = bounds.width() - x;
+      return new PointF(x, bounds.centerY());
+    }
+
+    void prepare(Canvas canvas) {
+      float scale = getScale();
+      if (mInverted) {
+        Rect bounds = get().getBounds();
+        canvas.translate(bounds.width() * (1 - scale), 0);
+      }
+      canvas.scale(scale, 1);
+    }
+  }
+
+  static class ProgressBitmapDrawable extends LayerDrawable implements ReactDrawable.DrawableChild {
+
+    private final ProgressDrawableHelper mHelper;
 
     ProgressBitmapDrawable(Resources res, Bitmap bitmap) {
       this(res, bitmap, false);
     }
 
     ProgressBitmapDrawable(Resources res, Bitmap bitmap, boolean inverted) {
-      super(res, bitmap);
-      mInverted = inverted;
-      onLevelChange(getLevel());
-      invalidateSelf();
+      this(new BitmapDrawable(res, bitmap), inverted);
     }
 
-    @Override
-    protected boolean onLevelChange(int level) {
-      mLevelScale = getLevel() * 1.f / ReactSliderDrawableHelper.MAX_LEVEL * 1.f;
-      if (mInverted) mLevelScale = 1 - mLevelScale;
-      return true;
+    ProgressBitmapDrawable(Drawable drawable, boolean inverted) {
+      this(new Drawable[]{drawable}, inverted);
+    }
+
+    ProgressBitmapDrawable(Drawable[] layers, boolean inverted) {
+      super(layers);
+      mHelper = new ProgressDrawableHelper(inverted) {
+        @Override
+        Drawable get() {
+          return ProgressBitmapDrawable.this;
+        }
+      };
     }
 
     @Override
     public PointF getCenter() {
-      Rect bounds = getBounds();
-      float x = bounds.centerX() * mLevelScale;
-      if (mInverted) x = bounds.width() - x;
-      return new PointF(x, bounds.centerY());
+      return mHelper.getCenter();
     }
 
     public void draw(Canvas canvas) {
       canvas.save();
-      if (mInverted) {
-        Rect bounds = getBounds();
-        canvas.translate(bounds.width() * (1 - mLevelScale), 0);
-      }
-      canvas.scale(mLevelScale, 1);
+      mHelper.prepare(canvas);
       super.draw(canvas);
       canvas.restore();
     }
@@ -140,16 +182,30 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     static int DRAWABLE_ID2 = android.R.id.secondaryProgress;
 
     private final int mLayerID;
+    private final ProgressDrawableHelper mDrawableHelper;
 
-    public ForegroundDrawableHandler(ReactSlider slider, int layerID) {
+    ForegroundDrawableHandler(ReactSlider slider, int layerID) {
       super(slider, ((LayerDrawable) getDrawableByID(slider, DRAWABLE_ID)).findDrawableByLayerId(layerID));
       mLayerID = layerID;
+      mDrawableHelper = new ProgressDrawableHelper(mLayerID == DRAWABLE_ID2) {
+        @Override
+        Drawable get() {
+          return ForegroundDrawableHandler.this.get();
+        }
+      };
     }
 
     @Override
     public Drawable get() {
       LayerDrawable progressDrawable = (LayerDrawable) getDrawableByID(mSlider, DRAWABLE_ID);
       return progressDrawable.findDrawableByLayerId(mLayerID);
+    }
+
+    @Nullable
+    @Override
+    ReactDrawable getReactDrawable() {
+      return (ReactDrawable) get();
+      //return (ReactDrawable) ((LayerDrawable) get()).getDrawable(0);
     }
 
     @Override
@@ -162,8 +218,29 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     }
 
     @Override
-    ReactDrawable createDrawable(Resources res, Bitmap bitmap) {
-      return mHelper.createDrawable(new ProgressBitmapDrawable(res, bitmap, mLayerID == DRAWABLE_ID2));
+    Drawable createDrawable(Resources res, Bitmap bitmap) {
+      return mHelper.createDrawable(new ProgressBitmapDrawable(new BitmapDrawable(res, bitmap), mLayerID == DRAWABLE_ID2));
+/*
+      ReactDrawableGroup.Builder builder = new ReactDrawableGroup.Builder(this);
+      return new ReactDrawableGroup.ReactRootDrawableGroup(builder) {
+        @Override
+        public PointF getCenter() {
+          return ForegroundDrawableHandler.this.mDrawableHelper.getCenter();
+        }
+
+        @Override
+        public void transformBounds(Rect bounds) {
+          bounds.set(0, 0, bounds.width(), ForegroundDrawableHandler.this.getBarHeight(bounds));
+        }
+
+        @Override
+        void onPreDraw(Canvas canvas) {
+          ForegroundDrawableHandler.this.onPreDraw(canvas);
+          super.onPreDraw(canvas);
+          ForegroundDrawableHandler.this.mDrawableHelper.prepare(canvas);
+        }
+      };
+      */
     }
   }
 
