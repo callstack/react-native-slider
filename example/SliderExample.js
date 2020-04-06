@@ -126,43 +126,43 @@ exports.description = 'Slider input for numeric values';
 exports.examples = [
   {
     title: 'Default settings',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample />;
     },
   },
   {
     title: 'Initial value: 0.5',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample value={0.5} />;
     },
   },
   {
     title: 'minimumValue: -1, maximumValue: 2',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample minimumValue={-1} maximumValue={2} />;
     },
   },
   {
     title: 'step: 0.25',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample step={0.25} />;
     },
   },
   {
     title: 'onSlidingStart',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SlidingStartExample />;
     },
   },
   {
     title: 'onSlidingComplete',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SlidingCompleteExample />;
     },
   },
   {
     title: 'Custom min/max track tint color',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return (
         <SliderExample
           minimumTrackTintColor={'blue'}
@@ -174,27 +174,27 @@ exports.examples = [
   },
   {
     title: 'Custom thumb tint color',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample thumbTintColor={'blue'} />;
     },
   },
   {
     title: 'Custom thumb image',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample inverted thumbImage={require('./uie_thumb_big.png')} value={0.8} />;
     },
   },
   {
     title: 'Custom track image',
     platform: 'ios',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample trackImage={require('./slider.png')} />;
     },
   },
   {
     title: 'Custom min/max track image',
     platform: 'ios',
-    render(): Element<any> {
+    Element: (): React.Element<any> => {
       return (
         <SliderExample
           minimumTrackImage={require('./slider-left.png')}
@@ -205,20 +205,21 @@ exports.examples = [
   },
   {
     title: 'Inverted slider direction',
-    render(): React.Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample
         value={0.6}
         inverted
+        style={{transform:[{scale:1}]}}
       />;
     },
   },
   {
     title: 'Custom slider',
-    render(): React.Element<any> {
+    Element: (): React.Element<any> => {
       return <SliderExample
         style={{ width: '100%', marginVertical: 20 }}
         minimumTrack={() => <View style={{ opacity: 0.6, transform: [{ rotate: '15deg' }], height: 5, backgroundColor: 'red' }} />}
-        maximumTrack={() => <View style={{ flex: 1, opacity: 0.3, transform: [{ rotate: '-15deg' }], height: 5, backgroundColor: 'blue' }} />}
+        maximumTrack={() => <View style={{ opacity: 0.3, transform: [{ rotate: '-15deg' }], height: 5, backgroundColor: 'blue' }} />}
         backgroundTrack={() => <Animated.View style={{ height: 5, opacity: 0.1, backgroundColor: 'magenta' }} />}
       />;
     },
@@ -226,7 +227,7 @@ exports.examples = [
   {
     title: 'Custom Thumb & Tracks + ANIMATIONS',
     platform: 'android',
-    render(): React.Element<any> {
+    Element: (): React.Element<any> => {
       const useNativeDriver = true;
       const springer = new Animated.Value(0);
       const timer = new Animated.Value(0);
@@ -261,7 +262,8 @@ exports.examples = [
             Animated.timing(timer, { toValue: 0, useNativeDriver }),
           ])
         ])
-      ).start();
+      );
+      animator.start();
 
       const thumb = React.createRef();
       const timeout = React.createRef();
@@ -299,7 +301,7 @@ exports.examples = [
             ref={r => {
               clearTimeout(timeout.current);
               if (r) {
-                timeout.current = setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 15000);
+                //timeout.current = setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 15000);
               }             
             }}
             minimumTrackTintColor={'magenta'}
@@ -323,7 +325,7 @@ exports.examples = [
               </View>
               <Animated.View style={{ backgroundColor: 'red', flex: 1, transform: [{ rotateX: rotate }] }} />
               <Animated.View
-                style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink }, { rotate }], opacity: springer }}
+                style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink }, { rotate }], opacity: gentleOpacity }}
                 ref={r => {
                   setTimeout(() => r && r.setNativeProps({ backgroundColor: 'pink' }), 5000)
                 }}
