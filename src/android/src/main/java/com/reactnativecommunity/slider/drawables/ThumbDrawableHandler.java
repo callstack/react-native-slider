@@ -57,6 +57,16 @@ public class ThumbDrawableHandler extends DrawableHandler {
     return mSlider.getThumb();
   }
 
+  @Nullable
+  @Override
+  ReactDrawable getReactDrawable() {
+    if (get() instanceof ReactDrawable) {
+      return ((ReactDrawable) get());
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public void set(Drawable drawable) {
     mSlider.setThumb(drawable);
