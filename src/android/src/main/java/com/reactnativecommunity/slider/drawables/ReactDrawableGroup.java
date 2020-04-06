@@ -3,14 +3,11 @@ package com.reactnativecommunity.slider.drawables;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ReactDrawableGroup extends ReactDrawable {
-
-  static ReactDrawableGroup obtain(DrawableHandler handler) {
-    return new Builder(handler).get(true);
-  }
 
   static class ReactRootDrawableGroup extends ReactDrawableGroup implements PropsUpdater {
 
@@ -52,10 +45,13 @@ public class ReactDrawableGroup extends ReactDrawable {
       if (d != null) d.updateFromProps(props);
     }
 
+    public void transformBounds(Rect bounds) {}
+
     @Override
     protected void onBoundsChange(Rect bounds) {
       Rect v = new Rect();
       mID.getDrawingRect(v);
+      transformBounds(bounds);
       PointF scale = new PointF(bounds.width() * 1f / v.width(), bounds.height() * 1f / v.height());
       traverseLayout(mID, scale);
     }
@@ -100,23 +96,10 @@ public class ReactDrawableGroup extends ReactDrawable {
     mDrawables = builder.children;
   }
 
-  private Drawable getDrawable(View view) {
-    return view == mID ? mBaseDrawable : mDrawables.get(view);
-  }
-
   @Override
   protected void onBoundsChange(Rect bounds) {
     mBaseDrawable.setBounds(bounds);
   }
-
-/*
-  @Override
-  public PointF getCenter() {
-    Rect bounds = getBounds();
-    return new PointF(bounds.width() / 2, bounds.height() / 2);
-  }
-
- */
 
   @Override
   public void draw(@NonNull Canvas canvas) {
@@ -137,13 +120,8 @@ public class ReactDrawableGroup extends ReactDrawable {
     if (mID instanceof ViewGroup) {
       ViewGroup viewGroup = ((ViewGroup) mID);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
-        Rect out = new Rect();
-        View c = viewGroup.getChildAt(i);
-        c.getDrawingRect(out);
-        viewGroup.offsetDescendantRectToMyCoords(c, out);
         canvas.save();
-        //canvas.translate(out.left, out.top);
-        mDrawables.get(c).draw(canvas);
+        mDrawables.get(viewGroup.getChildAt(i)).draw(canvas);
         canvas.restore();
       }
     }
@@ -154,9 +132,11 @@ public class ReactDrawableGroup extends ReactDrawable {
     View view;
     Drawable base;
     HashMap<View, ReactDrawableGroup> children;
+    DrawableHandler handler;
 
     Builder(DrawableHandler handler) {
       this(handler.getResources(), handler.getView());
+      this.handler = handler;
     }
 
     Builder(Resources res, View view) {

@@ -52,7 +52,6 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
 
   private ReactDrawable(Drawable[] drawables) {
     super(drawables);
-    onBoundsChange(copyBounds());
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
