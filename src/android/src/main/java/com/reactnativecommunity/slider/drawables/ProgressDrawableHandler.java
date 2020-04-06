@@ -36,7 +36,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
   }
 
   final ReactSlider mSlider;
-  final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
+  final ReactDrawable.ReactDrawableHelper mHelper;
 
   static Drawable getDrawableByID(ReactSlider slider, int layerID) {
     LayerDrawable drawable = (LayerDrawable) slider.getProgressDrawable().getCurrent();
@@ -55,6 +55,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
   ProgressDrawableHandler(ReactSlider slider, Drawable original) {
     super((ReactContext) slider.getContext(), original);
     mSlider = slider;
+    mHelper = new ReactDrawable.ReactDrawableHelper(this);
   }
 
   @Override

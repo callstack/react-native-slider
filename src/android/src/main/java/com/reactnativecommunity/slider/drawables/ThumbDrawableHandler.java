@@ -35,11 +35,12 @@ public class ThumbDrawableHandler extends DrawableHandler {
   private ReactSlider mSlider;
   private final AnimatorSet mScaleAnimator;
   private Paint mPaint = new Paint();
-  private final ReactDrawable.ReactDrawableHelper mHelper = new ReactDrawable.ReactDrawableHelper();
+  private final ReactDrawable.ReactDrawableHelper mHelper;
 
   ThumbDrawableHandler(ReactSlider slider) {
     super((ReactContext) slider.getContext(), slider.getThumb());
     mSlider = slider;
+    mHelper = new ReactDrawable.ReactDrawableHelper(this);
     mScaleAnimator = new AnimatorSet();
     mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
     mScaleAnimator.setDuration(ANIM_DURATION);
@@ -48,7 +49,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
 
   @Override
   Drawable createDrawable(Resources res, Bitmap bitmap) {
-    return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap), getView());
+    return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap));
   }
 
   @Override

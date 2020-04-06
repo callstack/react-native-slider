@@ -248,16 +248,21 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
 
   static class ReactDrawableHelper {
     ReactDrawable mDrawableWrapper;
+    private final DrawableHandler mHandler;
 
-    ReactDrawable newInstance(Drawable drawable, View view) {
-      return new ReactDrawable(drawable, view);
+    ReactDrawableHelper(DrawableHandler handler) {
+      mHandler = handler;
     }
 
-    ReactDrawable createDrawable(Drawable drawable, View view) {
+    ReactDrawable newInstance(Drawable drawable) {
+      return new ReactDrawable(drawable, mHandler.getView());
+    }
+
+    ReactDrawable createDrawable(Drawable drawable) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mDrawableWrapper != null) {
         mDrawableWrapper.setDrawable(0, drawable);
       } else {
-        mDrawableWrapper = newInstance(drawable, view);
+        mDrawableWrapper = newInstance(drawable);
       }
       return mDrawableWrapper;
     }
