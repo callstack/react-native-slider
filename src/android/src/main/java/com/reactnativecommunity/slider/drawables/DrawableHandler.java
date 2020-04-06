@@ -90,6 +90,12 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     }
   }
 
+  public final void tearDown() {
+    if (mView != null) {
+      DrawListenerRegistry.unregisterListener(mView, this);
+    }
+  }
+
   /**
    * restore to previous drawable if exists
    */
@@ -97,11 +103,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     setView(mView);
   }
 
-  public final void tearDown() {
-    if (mView != null) {
-      DrawListenerRegistry.unregisterListener(mView, this);
-    }
-  }
+  void setInverted(boolean inverted) {}
 
   Rect getBounds() {
     return get().copyBounds();

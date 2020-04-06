@@ -83,7 +83,14 @@ public class ReactSliderDrawableHelper {
   }
 
   public void setInverted(boolean inverted) {
-    mThumbDrawableHandler.setInverted(inverted);
+    DrawableHandler[] handlers = new DrawableHandler[]{
+        mBackgroundDrawableHandler,
+        mMinimumTrackDrawableHandler,
+        mMaximumTrackDrawableHandler,
+        mThumbDrawableHandler};
+    for (DrawableHandler handler: handlers) {
+      handler.setInverted(inverted);
+    }
   }
 
   public void setThumbImage(final String uri) {

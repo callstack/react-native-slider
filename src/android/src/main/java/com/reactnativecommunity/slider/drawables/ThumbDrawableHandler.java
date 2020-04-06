@@ -170,6 +170,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
     view.draw(canvas);
   }
 
+  @Override
   void setInverted(boolean inverted) {
     mDrawableHelper.setInverted(inverted);
   }
@@ -183,7 +184,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
     }
   }
 
-  BitmapDrawable createFromBitmap(Bitmap bitmap) {
+  private BitmapDrawable createFromBitmap(Bitmap bitmap) {
     return new BitmapDrawable(mSlider.getResources(), bitmap) {
       @Override
       public void draw(Canvas canvas) {
