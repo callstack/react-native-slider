@@ -261,8 +261,7 @@ exports.examples = [
             Animated.timing(timer, { toValue: 0, useNativeDriver }),
           ])
         ])
-      );
-      animator.start();
+      ).start();
 
       const thumb = React.createRef();
       const timeout = React.createRef();

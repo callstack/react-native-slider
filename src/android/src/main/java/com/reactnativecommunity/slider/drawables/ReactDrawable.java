@@ -50,7 +50,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
     applyTransformations(view, this);
   }
 
-  private ReactDrawable(Drawable[] drawables) {
+  ReactDrawable(Drawable[] drawables) {
     super(drawables);
     onBoundsChange(copyBounds());
   }

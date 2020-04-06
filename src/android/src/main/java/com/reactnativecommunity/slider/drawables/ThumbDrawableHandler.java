@@ -56,16 +56,6 @@ public class ThumbDrawableHandler extends DrawableHandler {
     return mSlider.getThumb();
   }
 
-  @Nullable
-  @Override
-  ReactDrawable getReactDrawable() {
-    if (get() instanceof ReactDrawable) {
-      return ((ReactDrawable) get());
-    } else {
-      return null;
-    }
-  }
-
   @Override
   public void set(Drawable drawable) {
     mSlider.setThumb(drawable);
@@ -98,16 +88,21 @@ public class ThumbDrawableHandler extends DrawableHandler {
   void draw(Canvas canvas, View view) {
     RectF bounds = new RectF(getBounds());
     RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
-    PointF scale = new PointF(bounds.width() / src.width(), bounds.height() / src.height());
+    PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
     float scaleOut = Math.min(scale.x, scale.y);
     PointF scaler = new PointF(scaleOut, scaleOut);
     // clip circle
     Path clipper = new Path();
-    clipper.addCircle(canvas.getWidth() / 2, canvas.getHeight() / 2,
-        Math.min(canvas.getWidth(), canvas.getHeight()) / 2, Path.Direction.CW);
+    clipper.addCircle(
+        canvas.getWidth() / 2,
+        canvas.getHeight() / 2,
+        Math.min(canvas.getWidth(), canvas.getHeight()) / 2,
+        Path.Direction.CW);
     canvas.clipPath(clipper);
     // transform
-    canvas.translate((bounds.width() - src.width() * scaler.x) / 2, (bounds.height() - src.height() * scaler.y) / 2);
+    canvas.translate(
+        (bounds.width() - src.width() * scaler.x) / 2,
+        (bounds.height() - src.height() * scaler.y) / 2);
     canvas.scale(scaler.x, scaler.y);
     // draw
     canvas.drawPaint(mPaint);
@@ -138,8 +133,10 @@ public class ThumbDrawableHandler extends DrawableHandler {
     }
     ThumbDrawable drawable = getThumbDrawable();
     if (drawable != null) {
-      ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(drawable,
-          Property.of(ThumbDrawable.class, Float.class, "scale"), scale);
+      ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
+          drawable,
+          Property.of(ThumbDrawable.class, Float.class, "scale"),
+          scale);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
         scaleAnim.setAutoCancel(true);
       }
@@ -185,7 +182,6 @@ public class ThumbDrawableHandler extends DrawableHandler {
 
     /**
      * used by {@link ThumbDrawableHandler#mScaleAnimator}
-     * 
      * @return scale
      */
     public float getScale() {
@@ -194,7 +190,6 @@ public class ThumbDrawableHandler extends DrawableHandler {
 
     /**
      * used by {@link ThumbDrawableHandler#mScaleAnimator}
-     * 
      * @param scale
      */
     public void setScale(float scale) {
@@ -203,10 +198,8 @@ public class ThumbDrawableHandler extends DrawableHandler {
     }
 
     /**
-     * reverse scaleX due to
-     * {@link ReactSliderManager#setInverted(ReactSlider, boolean)} so that the
-     * thumb remains the same
-     * 
+     * reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
+     * so that the thumb remains the same
      * @param canvas
      */
     @Override
