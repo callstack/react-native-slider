@@ -44,7 +44,7 @@ public class ThumbDrawableHandler extends DrawableHandler {
     mHelper = new ReactDrawable.ReactDrawableHelper(this);
     mDrawableHelper = new ThumbDrawableHelper(mSlider.isInverted()) {
       @Override
-      Drawable get() {
+      public Drawable get() {
         return ThumbDrawableHandler.this.get();
       }
     };
@@ -195,27 +195,18 @@ public class ThumbDrawableHandler extends DrawableHandler {
   }
 
   @SuppressWarnings("unused")
-  static abstract class ThumbDrawableHelper {
+  static abstract class ThumbDrawableHelper extends InvertableDrawableHelper {
     private float mScale = 1;
     private boolean mInverted;
     private final AnimatorSet mScaleAnimator;
 
     ThumbDrawableHelper(boolean inverted) {
-      mInverted = inverted;
+      super(inverted);
       mScaleAnimator = new AnimatorSet();
       mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
       mScaleAnimator.setDuration(ANIM_DURATION);
       mScaleAnimator.setStartDelay(ANIM_DELAY);
     }
-
-    void setInverted(boolean inverted) {
-      if (mInverted != inverted) {
-        mInverted = inverted;
-        get().invalidateSelf();
-      }
-    }
-
-    abstract Drawable get();
 
     private void animate(float scale) {
       if (mScaleAnimator.isRunning()) {
@@ -243,14 +234,11 @@ public class ThumbDrawableHandler extends DrawableHandler {
       get().invalidateSelf();
     }
 
-    /**
-     * reverse scaleX due to {@link ReactSliderManager#setInverted(ReactSlider, boolean)}
-     * so that the thumb remains the same
-     * @param canvas
-     */
+    @Override
     public void onPreDraw(Canvas canvas) {
-      Rect bounds = get().getBounds();
-      canvas.scale(mScale * (mInverted ? -1 : 1), mScale, bounds.centerX(), bounds.centerY());
+      super.onPreDraw(canvas);
+      PointF center = getCenter();
+      canvas.scale(mScale * (mInverted ? -1 : 1), mScale, center.x, center.y);
     }
   }
 

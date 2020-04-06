@@ -33,7 +33,7 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
   private float mOpacity = 0;
   private Camera mRotator = new Camera();
 
-  interface DrawableChild {
+  interface DrawableCenter {
     PointF getCenter();
   }
 
@@ -110,8 +110,8 @@ public class ReactDrawable extends LayerDrawable implements ReactTransformHelper
 
   public PointF getCenter() {
     Drawable drawable = getDrawable(0);
-    if (drawable instanceof DrawableChild) {
-      return ((DrawableChild) drawable).getCenter();
+    if (drawable instanceof DrawableCenter) {
+      return ((DrawableCenter) drawable).getCenter();
     } else {
       Rect bounds = getBounds();
       return new PointF(bounds.centerX(), bounds.centerY());

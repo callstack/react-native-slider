@@ -103,18 +103,16 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     view.draw(canvas);
   }
 
-  static abstract class ProgressDrawableHelper implements ReactDrawable.DrawableChild {
-    private final boolean mInverted;
+  static abstract class ProgressDrawableHelper implements DrawableHelper {
+    private final boolean mIsSecondary;
 
-    ProgressDrawableHelper(boolean inverted) {
-      mInverted = inverted;
+    ProgressDrawableHelper(boolean isSecondary) {
+      mIsSecondary = isSecondary;
     }
-
-    abstract Drawable get();
 
     private float getScale() {
       float mLevelScale = get().getLevel() * 1.f / ReactSliderDrawableHelper.MAX_LEVEL * 1.f;
-      if (mInverted) mLevelScale = 1 - mLevelScale;
+      if (mIsSecondary) mLevelScale = 1 - mLevelScale;
       return mLevelScale;
     }
 
@@ -122,13 +120,14 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     public PointF getCenter() {
       Rect bounds = get().getBounds();
       float x = bounds.centerX() * getScale();
-      if (mInverted) x = bounds.width() - x;
+      if (mIsSecondary) x = bounds.width() - x;
       return new PointF(x, bounds.centerY());
     }
 
-    void onPreDraw(Canvas canvas) {
+    @Override
+    public void onPreDraw(Canvas canvas) {
       float scale = getScale();
-      if (mInverted) {
+      if (mIsSecondary) {
         Rect bounds = get().getBounds();
         canvas.translate(bounds.width() * (1 - scale), 0);
       }
@@ -136,7 +135,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
     }
   }
 
-  static class ProgressBitmapDrawable extends LayerDrawable implements ReactDrawable.DrawableChild {
+  static class ProgressBitmapDrawable extends LayerDrawable implements ReactDrawable.DrawableCenter {
 
     private final ProgressDrawableHelper mHelper;
 
@@ -156,7 +155,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
       super(layers);
       mHelper = new ProgressDrawableHelper(inverted) {
         @Override
-        Drawable get() {
+        public Drawable get() {
           return ProgressBitmapDrawable.this;
         }
       };
@@ -189,7 +188,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
       mLayerID = layerID;
       mDrawableHelper = new ProgressDrawableHelper(mLayerID == DRAWABLE_ID2) {
         @Override
-        Drawable get() {
+        public Drawable get() {
           return ForegroundDrawableHandler.this.get();
         }
       };
