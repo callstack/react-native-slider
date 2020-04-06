@@ -227,6 +227,7 @@ const SliderComponent = (
     minimumTrack,
     maximumTrack,
     thumb,
+    debug,
     ...localProps
   } = props;
 
@@ -257,10 +258,10 @@ const SliderComponent = (
 
   const ref = React.useRef();
   React.useImperativeHandle(forwardedRef, () => ref.current);
-  const backTrackView = useViewProp(backgroundTrack, 'backgroundTrackViewTag', ref);
-  const minTrackView = useViewProp(minimumTrack, 'minimumTrackViewTag', ref);
-  const maxTrackView = useViewProp(maximumTrack, 'maximumTrackViewTag', ref);
-  const thumbView = useViewProp(thumb, 'thumbViewTag', ref);
+  const backTrackView = useViewProp(backgroundTrack, 'backgroundTrackViewTag', ref, debug);
+  const minTrackView = useViewProp(minimumTrack, 'minimumTrackViewTag', ref, debug);
+  const maxTrackView = useViewProp(maximumTrack, 'maximumTrackViewTag', ref, debug);
+  const thumbView = useViewProp(thumb, 'thumbViewTag', ref, debug);
 
   return (
     <>

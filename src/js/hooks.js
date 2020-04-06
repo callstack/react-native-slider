@@ -13,7 +13,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, findNodeHandle, View } from 'react-native';
 
-export function useViewProp(arg, key, refToUpdate) {
+export function useViewProp(arg, key, refToUpdate, debug = false) {
   const viewRef = useRef();
 
   const update = useCallback((viewTag) => {
@@ -57,7 +57,7 @@ export function useViewProp(arg, key, refToUpdate) {
       return (
         <View
           pointerEvents='none'
-          style={styles.container}
+          style={[styles.container, debug && __DEV__ && styles.debug]}
         >
           {React.cloneElement(element, {
             ref: refHandler,
@@ -73,5 +73,8 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     opacity: 0
+  },
+  debug: {
+    opacity: 0.1
   }
 });
