@@ -218,8 +218,9 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
 
     @Override
     Drawable createDrawable(Resources res, Bitmap bitmap) {
-      //return mHelper.createDrawable(new ProgressBitmapDrawable(new BitmapDrawable(res, bitmap), mLayerID == DRAWABLE_ID2));
-
+      return mHelper.createDrawable(new ProgressBitmapDrawable(new BitmapDrawable(res, bitmap), mLayerID == DRAWABLE_ID2));
+      // TODO: 06/04/2020 switch to ReactDrawableGroup, requires handling view addition/removal + drawing -> 60fps
+/*
       ReactDrawableGroup.Builder builder = new ReactDrawableGroup.Builder(this);
       return new ReactDrawableGroup.ReactRootDrawableGroup(builder) {
         @Override
@@ -240,6 +241,8 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
         }
       };
 
+
+ */
     }
   }
 

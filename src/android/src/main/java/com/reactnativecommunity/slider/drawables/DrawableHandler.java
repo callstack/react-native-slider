@@ -154,6 +154,9 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
       ((ReactDrawableGroup.ReactRootDrawableGroup) drawable).updateFromProps(tag, props);
     } else if (tag == getView().getId()) {
       drawable.updateFromProps(props);
+    } else {
+      // TODO: 06/04/2020 remove this once ReactDrawableGroup is ready -> 60fps!
+      dispatchDraw();
     }
   }
 }
