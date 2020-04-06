@@ -21,6 +21,7 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
   private final Drawable mOriginal;
   private View mView;
   private boolean mIsDrawing = false;
+  boolean mSystemDrawable = true;
 
   DrawableHandler(ReactContext context, Drawable original) {
     mContext = context;
@@ -81,10 +82,19 @@ public abstract class DrawableHandler implements ViewTreeObserver.OnDrawListener
     }
     mView = view;
     if (mView != null) {
+      mSystemDrawable = false;
       draw();
     } else {
+      mSystemDrawable = true;
       restore();
     }
+  }
+
+  /**
+   * restore to previous drawable if exists
+   */
+  void restoreToLast() {
+    setView(mView);
   }
 
   public final void tearDown() {

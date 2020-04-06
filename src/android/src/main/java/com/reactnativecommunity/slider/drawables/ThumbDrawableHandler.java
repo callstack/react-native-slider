@@ -13,7 +13,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.Property;
 import android.view.MotionEvent;
@@ -26,6 +25,8 @@ import com.facebook.react.bridge.ReactContext;
 import com.reactnativecommunity.slider.ReactSlider;
 import com.reactnativecommunity.slider.ReactSliderManager;
 
+import static com.reactnativecommunity.slider.drawables.ReactSliderDrawableHelper.getBitmap;
+
 public class ThumbDrawableHandler extends DrawableHandler {
 
   private static final long ANIM_DURATION = 400;
@@ -33,23 +34,50 @@ public class ThumbDrawableHandler extends DrawableHandler {
   private static final float MAX_SCALE = 1.2f;
 
   private ReactSlider mSlider;
-  private final AnimatorSet mScaleAnimator;
   private Paint mPaint = new Paint();
   private final ReactDrawable.ReactDrawableHelper mHelper;
+  private final ThumbDrawableHelper mDrawableHelper;
 
   ThumbDrawableHandler(ReactSlider slider) {
     super((ReactContext) slider.getContext(), slider.getThumb());
     mSlider = slider;
     mHelper = new ReactDrawable.ReactDrawableHelper(this);
-    mScaleAnimator = new AnimatorSet();
-    mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-    mScaleAnimator.setDuration(ANIM_DURATION);
-    mScaleAnimator.setStartDelay(ANIM_DELAY);
+    mDrawableHelper = new ThumbDrawableHelper(mSlider.isInverted()) {
+      @Override
+      Drawable get() {
+        return ThumbDrawableHandler.this.get();
+      }
+    };
+
   }
 
   @Override
   Drawable createDrawable(Resources res, Bitmap bitmap) {
-    return mHelper.createDrawable(new ThumbDrawable(mSlider, bitmap));
+    return mHelper.createDrawable(createFromBitmap(bitmap));
+/*
+    ReactDrawableGroup.Builder builder = new ReactDrawableGroup.Builder(this);
+    return new ReactDrawableGroup.ReactRootDrawableGroup(builder) {
+      @Override
+      public PointF getCenter() {
+        Rect bounds = ThumbDrawableHandler.this.getBounds();
+        return new PointF(bounds.centerX(), bounds.centerY());
+      }
+
+      @Override
+      public void transformBounds(Rect bounds) {
+        //bounds.set(0, 0, bounds.width(), ForegroundDrawableHandler.this.getBarHeight(bounds));
+      }
+
+      @Override
+      void onPreDraw(Canvas canvas) {
+        ThumbDrawableHandler.this.onPreDraw(canvas);
+        super.onPreDraw(canvas);
+        //ThumbDrawableHandler.this.mDrawableHelper.onPreDraw(canvas);
+      }
+    };
+
+
+ */
   }
 
   @Override
@@ -74,6 +102,22 @@ public class ThumbDrawableHandler extends DrawableHandler {
     get().jumpToCurrentState();
   }
 
+  void setThumbImage(final String uri) {
+    if (uri != null) {
+      BitmapDrawable drawable = createFromBitmap(getBitmap(mSlider, uri));
+      mSystemDrawable = false;
+      set(drawable);
+      // Enable alpha channel for the thumbImage
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        mSlider.setSplitTrack(false);
+      }
+    } else {
+      restoreToLast();
+    }
+    // adjust ripple immediately in case a touch is in progress, fixes system default behaviour
+    mSlider.getBackground().setBounds(get().copyBounds());
+  }
+
   @Override
   public void setTintColor(Integer color) {
     super.setTintColor(color);
@@ -95,9 +139,9 @@ public class ThumbDrawableHandler extends DrawableHandler {
     }
   }
 
-  @Override
-  void draw(Canvas canvas, View view) {
+  void onPreDraw(Canvas canvas) {
     RectF bounds = new RectF(getBounds());
+    View view = getView();
     RectF src = new RectF(0, 0, view.getWidth(), view.getHeight());
     PointF scale = new PointF(bounds.width() / src.width(),bounds.height() / src.height());
     float scaleOut = Math.min(scale.x, scale.y);
@@ -117,95 +161,84 @@ public class ThumbDrawableHandler extends DrawableHandler {
     canvas.scale(scaler.x, scaler.y);
     // draw
     canvas.drawPaint(mPaint);
+  }
+
+  @Override
+  void draw(Canvas canvas, View view) {
+    onPreDraw(canvas);
     view.draw(canvas);
   }
 
-  @Nullable
-  private ThumbDrawable getThumbDrawable() {
-    if (get() instanceof LayerDrawable && ((LayerDrawable) get()).getDrawable(0) instanceof ThumbDrawable) {
-      return ((ThumbDrawable) ((LayerDrawable) get()).getDrawable(0));
-    } else if (get() instanceof ThumbDrawable) {
-      return (ThumbDrawable) get();
-    } else {
-      return null;
-    }
-  }
-
   void setInverted(boolean inverted) {
-    ThumbDrawable drawable = getThumbDrawable();
-    if (drawable != null) {
-      drawable.setInverted(inverted);
-    }
-  }
-
-  private void animate(float scale) {
-    if (mScaleAnimator.isRunning()) {
-      mScaleAnimator.cancel();
-    }
-    ThumbDrawable drawable = getThumbDrawable();
-    if (drawable != null) {
-      ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
-          drawable,
-          Property.of(ThumbDrawable.class, Float.class, "scale"),
-          scale);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-        scaleAnim.setAutoCancel(true);
-      }
-      mScaleAnimator.play(scaleAnim);
-      mScaleAnimator.start();
-    }
+    mDrawableHelper.setInverted(inverted);
   }
 
   void onTouchEvent(MotionEvent event) {
     int action = event.getActionMasked();
     if (action == MotionEvent.ACTION_DOWN) {
-      animate(MAX_SCALE);
+      mDrawableHelper.animate(MAX_SCALE);
     } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-      animate(1);
+      mDrawableHelper.animate(1);
     }
   }
 
-  @SuppressWarnings("unused")
-  static class ThumbDrawable extends BitmapDrawable implements ReactDrawable.DrawableChild {
+  BitmapDrawable createFromBitmap(Bitmap bitmap) {
+    return new BitmapDrawable(mSlider.getResources(), bitmap) {
+      @Override
+      public void draw(Canvas canvas) {
+        mDrawableHelper.onPreDraw(canvas);
+        super.draw(canvas);
+      }
+    };
+  }
 
+  @SuppressWarnings("unused")
+  static abstract class ThumbDrawableHelper {
     private float mScale = 1;
     private boolean mInverted;
+    private final AnimatorSet mScaleAnimator;
 
-    ThumbDrawable(ReactSlider slider, Bitmap bitmap) {
-      this(slider.getResources(), bitmap, slider.isInverted());
-    }
-
-    ThumbDrawable(Resources res, Bitmap bitmap) {
-      this(res, bitmap, false);
-    }
-
-    ThumbDrawable(Resources res, Bitmap bitmap, boolean inverted) {
-      super(res, bitmap);
+    ThumbDrawableHelper(boolean inverted) {
       mInverted = inverted;
+      mScaleAnimator = new AnimatorSet();
+      mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+      mScaleAnimator.setDuration(ANIM_DURATION);
+      mScaleAnimator.setStartDelay(ANIM_DELAY);
     }
-    
+
     void setInverted(boolean inverted) {
       if (mInverted != inverted) {
         mInverted = inverted;
-        invalidateSelf();
+        get().invalidateSelf();
       }
     }
 
-    /**
-     * used by {@link ThumbDrawableHandler#mScaleAnimator}
-     * @return scale
-     */
+    abstract Drawable get();
+
+    private void animate(float scale) {
+      if (mScaleAnimator.isRunning()) {
+        mScaleAnimator.cancel();
+      }
+      if (get() != null) {
+        ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
+            this,
+            Property.of(ThumbDrawableHelper.class, Float.class, "scale"),
+            scale);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+          scaleAnim.setAutoCancel(true);
+        }
+        mScaleAnimator.play(scaleAnim);
+        mScaleAnimator.start();
+      }
+    }
+
     public float getScale() {
       return mScale;
     }
 
-    /**
-     * used by {@link ThumbDrawableHandler#mScaleAnimator}
-     * @param scale
-     */
     public void setScale(float scale) {
       mScale = scale;
-      invalidateSelf();
+      get().invalidateSelf();
     }
 
     /**
@@ -213,17 +246,10 @@ public class ThumbDrawableHandler extends DrawableHandler {
      * so that the thumb remains the same
      * @param canvas
      */
-    @Override
-    public void draw(Canvas canvas) {
-      Rect bounds = copyBounds();
+    public void onPreDraw(Canvas canvas) {
+      Rect bounds = get().getBounds();
       canvas.scale(mScale * (mInverted ? -1 : 1), mScale, bounds.centerX(), bounds.centerY());
-      super.draw(canvas);
-    }
-
-    @Override
-    public PointF getCenter() {
-      Rect bounds = copyBounds();
-      return new PointF(bounds.centerX(), bounds.centerY());
     }
   }
+
 }

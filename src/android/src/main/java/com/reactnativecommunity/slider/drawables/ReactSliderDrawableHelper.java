@@ -8,7 +8,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -88,16 +87,7 @@ public class ReactSliderDrawableHelper {
   }
 
   public void setThumbImage(final String uri) {
-    if (uri != null) {
-      Drawable bitmapDrawable = new ThumbDrawableHandler.ThumbDrawable(mSlider, getBitmap(mSlider, uri));
-      mSlider.setThumb(bitmapDrawable);
-      // Enable alpha channel for the thumbImage
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        mSlider.setSplitTrack(false);
-      }
-    } else {
-      mSlider.setThumb(mSlider.getThumb());
-    }
+    mThumbDrawableHandler.setThumbImage(uri);
   }
 
   public DrawableHandler getDrawableHandler(@SliderDrawable int type) {
@@ -148,7 +138,7 @@ public class ReactSliderDrawableHelper {
     mThumbDrawableHandler.tearDown();
   }
 
-  private static Bitmap getBitmap(final View view, final String uri) {
+  static Bitmap getBitmap(final View view, final String uri) {
     Bitmap bitmap = null;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     Future<Bitmap> future = executorService.submit(new Callable<Bitmap>() {
