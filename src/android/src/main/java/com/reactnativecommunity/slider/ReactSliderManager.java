@@ -11,6 +11,8 @@ import android.os.Build;
 import android.view.View;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -173,6 +175,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     }
 
     return slider;
+  }
+
+  @Override
+  public void setRenderToHardwareTexture(@NonNull ReactSlider view, boolean useHWTexture) {
+    super.setRenderToHardwareTexture(view, useHWTexture);
   }
 
   @Override

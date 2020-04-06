@@ -3,10 +3,14 @@ package com.reactnativecommunity.slider.drawables;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +27,7 @@ import java.util.Set;
 public class ReactDrawableGroup extends ReactDrawable {
 
   static ReactDrawableGroup obtain(DrawableHandler handler) {
-    return Builder.obtain(handler);
+    return new Builder(handler).get(true);
   }
 
   static class ReactRootDrawableGroup extends ReactDrawableGroup implements PropsUpdater {
@@ -55,10 +59,11 @@ public class ReactDrawableGroup extends ReactDrawable {
   private Drawable mBaseDrawable;
 
   ReactDrawableGroup(Builder builder) {
-    super(builder.toLayers(), builder.view);
+    super(builder.getLayers(), builder.view);
     mID = builder.view;
     mBaseDrawable = builder.bare;
     mDrawables = builder.children;
+    Log.d("Sliderr", "ReactDrawableGroup: " + mBaseDrawable);
   }
 
   private Drawable getDrawable(View view) {
@@ -97,7 +102,18 @@ public class ReactDrawableGroup extends ReactDrawable {
   public void draw(@NonNull Canvas canvas) {
     canvas.save();
     onPreDraw(canvas);
-    mBaseDrawable.draw(canvas);
+    drawBackground(canvas);
+    drawChildren(canvas);
+    canvas.restore();
+  }
+
+  void drawBackground(Canvas canvas) {
+    new ColorDrawable(Color.MAGENTA).draw(canvas);
+    //mBaseDrawable.draw(canvas);
+  }
+
+  void drawChildren(Canvas canvas) {
+    Log.d("Sliderrrrrrrrr", "drawChildren: "+(mID instanceof ViewGroup? ((ViewGroup) mID).getChildCount() :0 ) );
     if (mID instanceof ViewGroup) {
       ViewGroup viewGroup = ((ViewGroup) mID);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
@@ -111,7 +127,6 @@ public class ReactDrawableGroup extends ReactDrawable {
         canvas.restore();
       }
     }
-    canvas.restore();
   }
 
   static class Builder {
@@ -130,7 +145,7 @@ public class ReactDrawableGroup extends ReactDrawable {
       children = traverseChildren(res, view);
     }
 
-    private Drawable[] toLayers() {
+    Drawable[] getLayers() {
       return toLayers(bare, children);
     }
 
@@ -142,12 +157,6 @@ public class ReactDrawableGroup extends ReactDrawable {
       }
     }
 
-    static ReactDrawableGroup obtain(DrawableHandler handler) {
-      ReactDrawableGroup drawableGroup = new Builder(handler).get(true);
-      drawableGroup.setBounds(handler.getBounds());
-      return drawableGroup;
-    }
-    
     private static HashMap<View, ReactDrawableGroup> traverseChildren(Resources res, View view) {
       HashMap<View, ReactDrawableGroup> drawables = new HashMap<>();
       if (view instanceof ViewGroup) {
@@ -155,7 +164,7 @@ public class ReactDrawableGroup extends ReactDrawable {
         View child;
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
           child = viewGroup.getChildAt(i);
-          drawables.put(child, new Builder(res, viewGroup.getChildAt(i)).get(false));
+          drawables.put(child, new Builder(res, child).get(false));
         }
       }
       return drawables;
@@ -177,16 +186,14 @@ public class ReactDrawableGroup extends ReactDrawable {
       view.getDrawingRect(src);
       Bitmap bitmap = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
       Canvas canvas = new Canvas(bitmap);
+      Paint f = new Paint();
+      f.setColor(Color.MAGENTA);
+      canvas.drawPaint(f);
       drawBareView(canvas, view);
       return new BitmapDrawable(res, bitmap);
     }
 
     private static void drawBareView(Canvas canvas, View view) {
-      if (view.getParent() != null) {
-        Rect r = new Rect();
-        view.getDrawingRect(r);
-        ((ViewGroup) view.getParent()).offsetDescendantRectToMyCoords(view, r);
-      }
       if (view instanceof ViewGroup) {
         ArrayList<Integer> visibility = new ArrayList<>();
         View child;
