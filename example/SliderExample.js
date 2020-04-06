@@ -10,11 +10,10 @@
 
 'use strict';
 
-import React from 'react';
-import { Text, StyleSheet, View, Image, Animated, I18nManager } from 'react-native';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { Text, StyleSheet, View, Image, Animated, findNodeHandle } from 'react-native';
 import Slider, { ANDROID_DEFAULT_COLOR } from '@react-native-community/slider';
 const AnimatedSlider = Animated.createAnimatedComponent(Slider);
-import type { Element } from 'react';
 
 class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
   static defaultProps = {
@@ -181,7 +180,15 @@ exports.examples = [
   {
     title: 'Custom thumb image',
     Element: (): React.Element<any> => {
-      return <SliderExample inverted thumbImage={require('./uie_thumb_big.png')} value={0.8} />;
+      const SRC = require('./uie_thumb_big.png');
+      const [src, setSrc] = useState(SRC);
+      useEffect(() => {
+        let t = setInterval(() => {
+          setSrc(src === null ? SRC : null);
+        }, 1000);
+        return () => clearInterval(t);
+      }, [src]);
+      return <SliderExample inverted thumbImage={src} value={0.8} />;
     },
   },
   {
@@ -229,44 +236,62 @@ exports.examples = [
     platform: 'android',
     Element: (): React.Element<any> => {
       const useNativeDriver = true;
-      const springer = new Animated.Value(0);
-      const timer = new Animated.Value(0);
-      const rads = 6 * Math.PI;
-      const rotate = Animated.multiply(springer, rads);
+      const [springer, timer, rotate, shrink, scale, scale1, gentleOpacity, animator] = useMemo(() => {
+        const springer = new Animated.Value(0);
+        const timer = new Animated.Value(0);
+        const rads = 6 * Math.PI;
+        const rotate = Animated.multiply(springer, rads);
 
-      const shrink = timer.interpolate({
-        inputRange: [0, 1],
-        outputRange: [1, 0.5]
-      });
-      const scale = timer.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.1, 2]
-      });
-      const scale1 = timer.interpolate({
-        inputRange: [0, 1],
-        outputRange: [1, 2]
-      });
-      const gentleOpacity = springer.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.4, 0.9]
-      });
+        const shrink = timer.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 0.5]
+        });
+        const scale = timer.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.1, 2]
+        });
+        const scale1 = timer.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 2]
+        });
+        const gentleOpacity = springer.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.4, 0.9]
+        });
 
-      const animator = Animated.loop(
-        Animated.parallel([
-          Animated.sequence([
-            Animated.spring(springer, { toValue: 1, useNativeDriver }),
-            Animated.spring(springer, { toValue: 0, useNativeDriver }),
-          ]),
-          Animated.sequence([
-            Animated.timing(timer, { toValue: 1, useNativeDriver }),
-            Animated.timing(timer, { toValue: 0, useNativeDriver }),
+        const animator = Animated.loop(
+          Animated.parallel([
+            Animated.sequence([
+              Animated.spring(springer, { toValue: 1, useNativeDriver }),
+              Animated.spring(springer, { toValue: 0, useNativeDriver }),
+            ]),
+            Animated.sequence([
+              Animated.timing(timer, { toValue: 1, useNativeDriver }),
+              Animated.timing(timer, { toValue: 0, useNativeDriver }),
+            ])
           ])
-        ])
-      );
-      animator.start();
+        );
+        animator.start();
+        return [springer, timer, rotate, shrink, scale, scale1, gentleOpacity, animator];
+      }, []);
 
-      const thumb = React.createRef();
-      const timeout = React.createRef();
+      const thumb = useRef();
+      const track = useRef();
+      const ref = useRef();
+
+      const [a, setA] = useState(0);
+
+      useEffect(() => {
+        let t = setInterval(() => {
+          setA(a + 1);
+        }, 1000);
+        return () => clearInterval(t);
+      }, [a]);
+
+      useEffect(() => {
+        let t = setTimeout(() => ref.current && ref.current.setNativeProps({ minimumTrackViewTag: null }), 15000);
+        return () => clearTimeout(t);
+      }, []);
 
 
       return (
@@ -298,12 +323,7 @@ exports.examples = [
             minimumValue={-1}
             maximumValue={2}
             style={{ width: 300 }}
-            ref={r => {
-              clearTimeout(timeout.current);
-              if (r) {
-                //timeout.current = setTimeout(() => r && r.setNativeProps({ minimumTrackViewTag: null }), 15000);
-              }             
-            }}
+            ref={ref}
             minimumTrackTintColor={'magenta'}
             maximumTrackTintColor={'red'}
             thumb={thumb}
@@ -312,13 +332,14 @@ exports.examples = [
               collapsable={false}
             >
               <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
+              
             </Animated.View>}
             minimumTrack={() => <Animated.View
-              style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: rotate }, { scaleY: scale1 }] }}
+              style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: 0 }, { scaleY: scale1 }] }}
               collapsable={false}
             >
               <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />
-              <View style={{ backgroundColor: 'white', flex: 1 }}>
+              <View style={{ backgroundColor: 'white', flex: 1 }} ref={track}>
                 <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }, { rotateY: '180deg' }], justifyContent: 'center', alignItems: 'center' }}>
                   <Animated.Text>AWESOME</Animated.Text>
                 </Animated.View>
