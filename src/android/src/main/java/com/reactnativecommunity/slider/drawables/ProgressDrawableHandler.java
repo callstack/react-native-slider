@@ -126,7 +126,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
       return new PointF(x, bounds.centerY());
     }
 
-    void prepare(Canvas canvas) {
+    void onPreDraw(Canvas canvas) {
       float scale = getScale();
       if (mInverted) {
         Rect bounds = get().getBounds();
@@ -169,7 +169,7 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
 
     public void draw(Canvas canvas) {
       canvas.save();
-      mHelper.prepare(canvas);
+      mHelper.onPreDraw(canvas);
       super.draw(canvas);
       canvas.restore();
     }
@@ -219,8 +219,8 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
 
     @Override
     Drawable createDrawable(Resources res, Bitmap bitmap) {
-      return mHelper.createDrawable(new ProgressBitmapDrawable(new BitmapDrawable(res, bitmap), mLayerID == DRAWABLE_ID2));
-/*
+      //return mHelper.createDrawable(new ProgressBitmapDrawable(new BitmapDrawable(res, bitmap), mLayerID == DRAWABLE_ID2));
+
       ReactDrawableGroup.Builder builder = new ReactDrawableGroup.Builder(this);
       return new ReactDrawableGroup.ReactRootDrawableGroup(builder) {
         @Override
@@ -237,10 +237,10 @@ abstract class ProgressDrawableHandler extends DrawableHandler {
         void onPreDraw(Canvas canvas) {
           ForegroundDrawableHandler.this.onPreDraw(canvas);
           super.onPreDraw(canvas);
-          ForegroundDrawableHandler.this.mDrawableHelper.prepare(canvas);
+          ForegroundDrawableHandler.this.mDrawableHelper.onPreDraw(canvas);
         }
       };
-      */
+
     }
   }
 
