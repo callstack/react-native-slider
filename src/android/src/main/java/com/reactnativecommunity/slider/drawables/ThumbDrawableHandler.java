@@ -100,6 +100,9 @@ public class ThumbDrawableHandler extends DrawableHandler {
     mSlider.setThumb(drawable);
     mSlider.setProgress(mSlider.getProgress());
     get().jumpToCurrentState();
+
+    // adjust ripple immediately in case a touch is in progress, fixes system default behaviour
+    mSlider.getBackground().setBounds(get().copyBounds());
   }
 
   void setThumbImage(final String uri) {
@@ -114,8 +117,6 @@ public class ThumbDrawableHandler extends DrawableHandler {
     } else {
       restoreToLast();
     }
-    // adjust ripple immediately in case a touch is in progress, fixes system default behaviour
-    mSlider.getBackground().setBounds(get().copyBounds());
   }
 
   @Override
