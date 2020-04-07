@@ -222,7 +222,7 @@ const RCTSliderWebComponent = React.forwardRef(
       const newValue = inverted
         ? maximumValue - ((maximumValue - minimumValue) * x) / width
         : minimumValue + ((maximumValue - minimumValue) * x) / width;
-      const roundedValue = Math.round(newValue / step) * step;
+      const roundedValue = step ? Math.round(newValue / step) * step : newValue;
       // Ensure that the new value is still between the bounds
       const withinBounds = Math.max(
         minimumValue,
