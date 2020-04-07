@@ -339,7 +339,7 @@ exports.examples = [
               collapsable={false}
             >
               <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />
-              <View style={{ backgroundColor: 'white', flex: 1 }} ref={track}>
+              <View style={{ backgroundColor: 'white', flex: 1, zIndex: 5 }} ref={track}>
                 <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }, { rotateY: '180deg' }], justifyContent: 'center', alignItems: 'center' }}>
                   <Animated.Text>AWESOME</Animated.Text>
                 </Animated.View>

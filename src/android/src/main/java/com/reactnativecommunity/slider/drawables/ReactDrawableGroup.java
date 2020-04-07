@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.facebook.react.uimanager.ReactStylesDiffMap;
+import com.facebook.react.views.view.ReactViewGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,7 +122,7 @@ public class ReactDrawableGroup extends ReactDrawable {
       ViewGroup viewGroup = ((ViewGroup) mID);
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
         canvas.save();
-        mDrawables.get(viewGroup.getChildAt(i)).draw(canvas);
+        mDrawables.get(Builder.getChildInDrawingOrderAtIndex(viewGroup, i)).draw(canvas);
         canvas.restore();
       }
     }
@@ -173,6 +174,13 @@ public class ReactDrawableGroup extends ReactDrawable {
         }
       }
       return drawables;
+    }
+    
+    private static View getChildInDrawingOrderAtIndex(ViewGroup parent, int index) {
+      if (parent instanceof ReactViewGroup) {
+        return parent.getChildAt(((ReactViewGroup) parent).getZIndexMappedChildIndex(index));
+      }
+      return parent.getChildAt(index);
     }
 
     private static Drawable createBaseDrawable(Resources res, View view) {
