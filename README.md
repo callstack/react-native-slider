@@ -265,6 +265,13 @@ Assigns a single image for the track. Only static images are supported. The cent
 
 ## Contributing
 
+This project uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) to handle its internal dependencies.
+Make sure to use `yarn` to install dependencies
+
+```sh
+yarn install
+```
+
 While developing, you can run the [example app](/example/README.md) to test your changes.
 
 Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
@@ -274,6 +281,7 @@ yarn validate:flow
 yarn validate:eslint
 yarn test:jest
 ```
+
 or 
 
 ```sh
