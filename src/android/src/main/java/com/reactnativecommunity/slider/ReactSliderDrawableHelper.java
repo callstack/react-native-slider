@@ -25,7 +25,10 @@ import java.util.concurrent.Future;
 
 public class ReactSliderDrawableHelper {
 
+  static final int MAX_LEVEL = 10000;
+
   @IntDef({
+      SliderDrawable.SLIDER,
       SliderDrawable.BACKGROUND,
       SliderDrawable.MAXIMUM_TRACK,
       SliderDrawable.MINIMUM_TRACK,
@@ -33,10 +36,11 @@ public class ReactSliderDrawableHelper {
   })
   @Retention(RetentionPolicy.SOURCE)
   public @interface SliderDrawable {
-    int BACKGROUND = -1;
-    int MAXIMUM_TRACK = 0;
-    int MINIMUM_TRACK = 1;
-    int THUMB = 2;
+    int SLIDER = 0;
+    int BACKGROUND = 1;
+    int MAXIMUM_TRACK = 2;
+    int MINIMUM_TRACK = 3;
+    int THUMB = 4;
   }
 
   private final ReactSlider mSlider;
@@ -45,8 +49,10 @@ public class ReactSliderDrawableHelper {
     mSlider = slider;
     setViewBackgroundDrawable();
     LayerDrawable outDrawable = (LayerDrawable) slider.getProgressDrawable().getCurrent().mutate();
+    Drawable progress = outDrawable.findDrawableByLayerId(android.R.id.progress).mutate();
+    Drawable background = outDrawable.findDrawableByLayerId(android.R.id.background).mutate();
 
-    outDrawable.setDrawableByLayerId(android.R.id.progress, new ColorDrawable(Color.TRANSPARENT) {
+    outDrawable.setDrawableByLayerId(android.R.id.progress, new LayerDrawable(new Drawable[]{progress}) {
       @Override
       protected boolean onLevelChange(int level) {
         if (mSlider.getParent() instanceof ReactSliderContainer) {
@@ -63,7 +69,7 @@ public class ReactSliderDrawableHelper {
         }
       }
     });
-    outDrawable.setDrawableByLayerId(android.R.id.background, new ColorDrawable(Color.TRANSPARENT));
+    outDrawable.setDrawableByLayerId(android.R.id.background, new ColorDrawable(Color.MAGENTA));
     slider.setProgressDrawable(outDrawable);
   }
 

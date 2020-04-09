@@ -57,3 +57,5 @@ buck-out/
 .tmp/
 
 */ios/Pods
+*.prefs
+*.project

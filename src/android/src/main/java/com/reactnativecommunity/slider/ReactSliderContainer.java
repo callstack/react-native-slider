@@ -11,13 +11,25 @@ import android.view.ViewGroup;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
 
-public class ReactSliderContainer extends ReactViewGroup {
+public class ReactSliderContainer extends ReactViewGroup implements ViewDrawableContainer {
 
   private boolean mIsInverted = false;
   private Rect mBounds;
+  private final ProgressDrawableHelper mMinimumTrackHandler;
+  private final ProgressDrawableHelper mMaximumTrackHandler;
 
   public ReactSliderContainer(Context context) {
     super(context);
+    mMaximumTrackHandler = new ProgressDrawableHelper(this,false);
+    mMinimumTrackHandler = new ProgressDrawableHelper(this,true);
+  }
+
+  @Override
+  public void onViewAdded(View child) {
+    super.onViewAdded(child);
+    int index = indexOfChild(child);
+    mMaximumTrackHandler.tryAttach(index, child);
+    mMinimumTrackHandler.tryAttach(index, child);
   }
 
   public void setInverted(boolean inverted) {
@@ -31,37 +43,63 @@ public class ReactSliderContainer extends ReactViewGroup {
     super.setScaleX(scaleX * (mIsInverted ? -1 : 1));
   }
 
-  ReactSlider getSlider() {
-    return (ReactSlider) getChildAt(0);
+  @Override
+  public ReactSlider getSlider() {
+    return (ReactSlider) getChildAt(SliderDrawable.SLIDER);
   }
 
-  public int getIndex(@SliderDrawable int type) {
-    switch (type) {
-      case SliderDrawable.BACKGROUND:
-        return 1;
-      case SliderDrawable.MAXIMUM_TRACK:
-        return 2;
-      case SliderDrawable.MINIMUM_TRACK:
-        return 3;
-      case SliderDrawable.THUMB:
-        return 4;
-      default:
-        return -1;
-    }
-  }
-
+  @Override
   public View getViewByType(@SliderDrawable int type) {
-    return getChildAt(getIndex(type));
+    return getChildAt(type);
   }
 
   private PointF getThumbSize() {
     View thumb = getViewByType(SliderDrawable.THUMB);
     if (thumb instanceof ViewGroup) {
       View inner = ((ViewGroup) thumb).getChildAt(0);
-      if (inner != null) return new PointF(inner.getWidth(), inner.getHeight());
+      if (inner != null) {
+        int size = Math.min(inner.getWidth(), inner.getHeight());
+        getSlider().setThumbOffset(size / 2);
+        return new PointF(size, size);
+      }
     }
-    return new PointF(0, 0);
+    Rect bounds = getSlider().getThumb().getBounds();
+    return new PointF(bounds.width(), bounds.height());
   }
+
+  private Point getIntrinsicThumbSize() {
+    Drawable drawable = getSlider().getThumb();
+    return new Point(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+  }
+
+  public void setLevel(int level) {
+    mMaximumTrackHandler.setLevel(level);
+    mMinimumTrackHandler.setLevel(level);
+    setThumbLevel(level);
+  }
+
+  private void setThumbLevel(int level) {
+    //getSlider().getThumbOffset()
+    View thumb = getViewByType(SliderDrawable.THUMB);
+    PointF thumbSize = getThumbSize();
+    float scale = level * 1f / 10000;
+    float translateX = mBounds.width() * scale - (getIntrinsicThumbSize().x) / 2;
+    thumb.setTranslationX(translateX);
+    thumb.setTranslationY((-thumbSize.y + mBounds.height()) / 2);
+  }
+
+  public void setBounds(Rect bounds) {
+    mBounds = bounds;
+    mMaximumTrackHandler.setBounds(bounds);
+    mMinimumTrackHandler.setBounds(bounds);
+    refresh();
+  }
+
+  private void refresh() {
+    ReactSlider slider = getSlider();
+    slider.setProgress(slider.getProgress());
+  }
+
 
   @Override
   protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -75,61 +113,4 @@ public class ReactSliderContainer extends ReactViewGroup {
     refresh();
   }
 
-  public void setLevel(int level) {
-    setMaximumTrackLevel(level);
-    setMinimumTrackLevel(level);
-    setThumbLevel(level);
-  }
-
-  private void setMinimumTrackLevel(int level) {
-    View track = getViewByType(SliderDrawable.MINIMUM_TRACK);
-    PointF thumb = getThumbSize();
-    float actualHeight = Math.max(Math.min(mBounds.height(), track.getHeight()), getIntrinsicTrackSize().y);
-    float scale = level * 1f / 10000;
-    float delta = mBounds.width() * (1 - scale) / 2;
-    track.setTranslationX(-delta);
-    track.setTranslationY((getSlider().getHeight() - track.getHeight()) / 2);
-    scale *= (mBounds.width() - thumb.x / 2 + getIntrinsicThumbSize().x / 2) / track.getWidth();
-    track.setScaleX(scale);
-  }
-
-  private void setMaximumTrackLevel(int level) {
-    View track = getViewByType(SliderDrawable.MAXIMUM_TRACK);
-    PointF thumb = getThumbSize();
-    float scale = 1 - level * 1f / 10000;
-    float delta = mBounds.width() * (1 - scale) / 2;
-    track.setTranslationX(delta);
-    track.setTranslationY((getSlider().getHeight() - track.getHeight()) / 2);
-    scale *= (mBounds.width() - thumb.x / 2 + getIntrinsicThumbSize().x / 2) / track.getWidth();
-    track.setScaleX(scale);
-  }
-
-  private Point getIntrinsicThumbSize() {
-    Drawable drawable = getSlider().getThumb();
-    return new Point(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-  }
-
-  private Point getIntrinsicTrackSize() {
-    Drawable drawable = getSlider().getProgressDrawable();
-    return new Point(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-  }
-
-  private void setThumbLevel(int level) {
-    View thumb = getViewByType(SliderDrawable.THUMB);
-    PointF thumbSize = getThumbSize();
-    float scale = level * 1f / 10000;
-    float translateX = mBounds.width() * scale - (getIntrinsicThumbSize().x) / 2;
-    thumb.setTranslationX(translateX);
-    thumb.setTranslationY((-thumbSize.y + mBounds.height()) / 2);
-  }
-
-  public void setBounds(Rect bounds) {
-    mBounds = bounds;
-    refresh();
-  }
-
-  private void refresh() {
-    ReactSlider slider = getSlider();
-    slider.setProgress(slider.getProgress());
-  }
 }

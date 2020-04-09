@@ -45,17 +45,37 @@ const SliderContainer = (
       <Wrapper>{backgroundTrack}</Wrapper>
       <Wrapper>{maximumTrack}</Wrapper>
       <Wrapper>{minimumTrack}</Wrapper>
-      <Wrapper>{thumb}</Wrapper>
+      <Wrapper thumb>{thumb}</Wrapper>
     </RCTSliderContainerNativeComponent>
   );
 };
 
-const Wrapper = ({ children }) => <View
-  style={StyleSheet.absoluteFill}
-  collapsable={false}
-  pointerEvents="none">
-  {typeof children === 'function' ? children() : children}
-</View>;
+const Wrapper = ({ children, thumb }) => {
+  const el = children && React.cloneElement(typeof children === 'function' ? children() : children, { collapsable: false });
+  return (
+    <View
+      style={StyleSheet.absoluteFill}
+      collapsable={false}
+      pointerEvents="none"
+      overflow="hidden"
+    >
+      {
+        thumb ?
+          el :
+          <View style={styles.default} collapsable={false} overflow="visible">
+            {el}
+          </View>
+
+      }
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  default: {
+    flex: 1
+  }
+})
 
 const SliderWithRef = React.forwardRef(SliderContainer);
 

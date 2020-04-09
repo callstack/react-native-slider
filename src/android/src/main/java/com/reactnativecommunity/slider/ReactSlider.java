@@ -8,6 +8,8 @@ package com.reactnativecommunity.slider;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Rect;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -155,4 +157,21 @@ public class ReactSlider extends AppCompatSeekBar {
     drawableHelper.onTouchEvent(event);
     return retVal;
   }
+/*
+  @Override
+  protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    super.onSizeChanged(w, h, oldw, oldh);
+    int dh = h - oldh;
+    Rect bounds = getProgressDrawable().copyBounds();
+    bounds.bottom += dh;
+    ((LayerDrawable) getProgressDrawable()).findDrawableByLayerId(android.R.id.progress).setBounds(bounds);
+    ((LayerDrawable) getProgressDrawable()).findDrawableByLayerId(android.R.id.background).setBounds(bounds);
+    bounds = getThumb().copyBounds();
+    bounds.top += dh / 2;
+    bounds.bottom += dh / 2;
+    getThumb().setBounds(bounds);
+    invalidate();
+  }
+
+ */
 }
