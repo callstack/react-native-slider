@@ -238,6 +238,31 @@ const RCTSliderWebComponent = React.forwardRef(
         onLayout={({nativeEvent}) =>
           (containerSize.current = nativeEvent.layout)
         }
+        accessibilityActions={[
+          {name: 'increment', label: 'increment'},
+          {name: 'decrement', label: 'decrement'},
+        ]}
+        onAccessibilityAction={event => {
+          const tenth = (maximumValue - minimumValue) / 10;
+          function updateValue(newValue) {
+            const withinBounds = Math.max(
+              minimumValue,
+              Math.min(newValue, maximumValue),
+            );
+            setValue(withinBounds);
+          }
+          switch (event.nativeEvent.actionName) {
+            case 'increment':
+              updateValue(value + (step || tenth));
+              break;
+            case 'decrement':
+              updateValue(value - (step || tenth));
+              break;
+          }
+        }}
+        accessible={true}
+        accessibleValue={value}
+        accessibilityRole={'adjustable'}
         style={containerStyle}
         onStartShouldSetResponder={() => !disabled}
         onMoveShouldSetResponder={() => !disabled}
