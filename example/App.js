@@ -24,7 +24,7 @@ export default class App extends Component<Props> {
         {examples.map((e, i) => (
           <View key={`slider${i}`}>
             <Text>{e.title}</Text>
-            {e.render()}
+            <e.Element />
           </View>
         ))}
       </ScrollView>
