@@ -293,67 +293,68 @@ exports.examples = [
         return () => clearTimeout(t);
       }, []);
 
+      const thumbEl = (
+        <View style={[StyleSheet.absoluteFill, { opacity: 0 }]} pointerEvents="none">
+          <Animated.View
+            ref={thumb}
+            style={{
+              alignItems: 'center', justifyContent: 'center', width: 40, height: 40,
+              transform: [{ rotateX: rotate, rotateY: rotate, rotateZ: rotate, scale: scale1 }]
+            }}
+            collapsable={false}
+          >
+            <Animated.View
+              style={{ backgroundColor: a % 2 === 0 ? 'blue' : 'black', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
+              collapsable={false}
+            >
+              <Image
+                source={require('./uie_thumb_big.png')}
+                style={{ width: 25, height: 25 }}
+              />
+            </Animated.View>
+          </Animated.View>
+        </View>
+      )
+
 
       return (
-        <>
-          <View style={[StyleSheet.absoluteFill, { opacity: 0 }]} pointerEvents="none">
-            <Animated.View
-              ref={thumb}
-              style={{
-                alignItems: 'center', justifyContent: 'center', width: 40, height: 40,
-                transform: [{ rotateX: rotate, rotateY: rotate, rotateZ: rotate, scale: scale1 }]
-              }}
-              collapsable={false}
-            >
-              <Animated.View
-                style={{ backgroundColor: a%2===0?'blue':'black', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
-                collapsable={false}
-              >
-                <Image
-                  source={require('./uie_thumb_big.png')}
-                  style={{ width: 25, height: 25 }}
-                />
+        <SliderExample
+          value={0.6}
+          inverted
+          thumbTintColor={'yellow'}
+          minimumValue={-1}
+          maximumValue={2}
+          style={{ width: 300 }}
+          ref={ref}
+          minimumTrackTintColor={'magenta'}
+          maximumTrackTintColor={'red'}
+          thumb={thumbEl}
+          maximumTrack={() => <Animated.View
+            style={{ height: 5, opacity: Animated.subtract(1, timer), transform: [{ rotate: rotate }] }}
+            collapsable={false}
+          >
+            <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
+
+          </Animated.View>}
+          minimumTrack={() => <Animated.View
+            style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: 0 }, { scaleY: scale1 }] }}
+            collapsable={false}
+          >
+            <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />
+            <View style={{ backgroundColor: 'white', flex: 1, zIndex: 5 }} ref={track}>
+              <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }, { rotateY: '180deg' }], justifyContent: 'center', alignItems: 'center' }}>
+                <Animated.Text>AWESOME</Animated.Text>
               </Animated.View>
-            </Animated.View>
-          </View>
-          <SliderExample
-            value={0.6}
-            inverted
-            thumbTintColor={'yellow'}
-            minimumValue={-1}
-            maximumValue={2}
-            style={{ width: 300 }}
-            ref={ref}
-            minimumTrackTintColor={'magenta'}
-            maximumTrackTintColor={'red'}
-            thumb={thumb}
-            maximumTrack={() => <Animated.View
-              style={{ height: 5, opacity: Animated.subtract(1, timer), transform: [{ rotate: rotate }] }}
-              collapsable={false}
-            >
-              <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
-              
-            </Animated.View>}
-            minimumTrack={() => <Animated.View
-              style={{ flex: 1, flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: 0 }, { scaleY: scale1 }] }}
-              collapsable={false}
-            >
-              <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />
-              <View style={{ backgroundColor: 'white', flex: 1, zIndex: 5 }} ref={track}>
-                <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }, { rotateY: '180deg' }], justifyContent: 'center', alignItems: 'center' }}>
-                  <Animated.Text>AWESOME</Animated.Text>
-                </Animated.View>
-              </View>
-              <Animated.View style={{ backgroundColor: 'red', flex: 1, transform: [{ rotateX: rotate }] }} />
-              <Animated.View
-                style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink }, { rotate }], opacity: gentleOpacity }}
-                ref={r => {
-                  setTimeout(() => r && r.setNativeProps({ backgroundColor: 'pink' }), 5000)
-                }}
-              />
-            </Animated.View>}
-          />
-        </>
+            </View>
+            <Animated.View style={{ backgroundColor: 'red', flex: 1, transform: [{ rotateX: rotate }] }} />
+            <Animated.View
+              style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink }, { rotate }], opacity: gentleOpacity }}
+              ref={r => {
+                setTimeout(() => r && r.setNativeProps({ backgroundColor: 'pink' }), 5000)
+              }}
+            />
+          </Animated.View>}
+        />
       );
     },
   },
