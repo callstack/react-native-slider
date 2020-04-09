@@ -8,15 +8,13 @@
 package com.reactnativecommunity.slider;
 
 import android.os.Build;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.SeekBar;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -27,8 +25,11 @@ import com.facebook.yoga.YogaMeasureFunction;
 import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
+import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
+
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -36,9 +37,11 @@ import javax.annotation.Nullable;
  *
  * Note that the slider is _not_ a controlled component.
  */
+@ReactModule(name = ReactSliderManager.REACT_CLASS)
 public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   private static final int STYLE = android.R.attr.seekBarStyle;
+  private static final String DEFAULT_COLOR = "#009688";
 
   public static final String REACT_CLASS = "RNCSlider";
 
@@ -108,6 +111,10 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
         }
       };
 
+  private void setTintColor(ReactSlider view, Integer color, @SliderDrawable int type) {
+
+  }
+
   @Override
   public String getName() {
     return REACT_CLASS;
@@ -136,6 +143,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     }
 
     return slider;
+  }
+
+  @Override
+  public void onDropViewInstance(@Nonnull ReactSlider view) {
+    view.drawableHelper.tearDown();
   }
 
   @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
@@ -167,24 +179,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "thumbTintColor", customType = "Color")
   public void setThumbTintColor(ReactSlider view, Integer color) {
-    if (view.getThumb() != null) {
-      if (color == null) {
-        view.getThumb().clearColorFilter();
-      } else {
-        view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-      }
-    }
-  }
-
-  @ReactProp(name = "minimumTrackTintColor", customType = "Color")
-  public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
-    LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
-    Drawable progress = drawable.findDrawableByLayerId(android.R.id.progress);
-    if (color == null) {
-      progress.clearColorFilter();
-    } else {
-      progress.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
+    setTintColor(view, color, SliderDrawable.THUMB);
   }
 
   @ReactProp(name = "thumbImage")
@@ -193,24 +188,27 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     if (source != null) {
       uri = source.getString("uri");
     }
-    view.setThumbImage(uri);
+    view.drawableHelper.setThumbImage(uri);
+  }
+
+  @ReactProp(name = "minimumTrackTintColor", customType = "Color")
+  public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
+    setTintColor(view, color, SliderDrawable.MINIMUM_TRACK);
   }
 
   @ReactProp(name = "maximumTrackTintColor", customType = "Color")
   public void setMaximumTrackTintColor(ReactSlider view, Integer color) {
-    LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
-    Drawable background = drawable.findDrawableByLayerId(android.R.id.background);
-    if (color == null) {
-      background.clearColorFilter();
-    } else {
-      background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
+    setTintColor(view, color, SliderDrawable.MAXIMUM_TRACK);
+  }
+
+  @ReactProp(name = "backgroundTrackTintColor", customType = "Color")
+  public void setBackgroundTrackTintColor(ReactSlider view, Integer color) {
+    setTintColor(view, color, SliderDrawable.BACKGROUND);
   }
 
   @ReactProp(name = "inverted", defaultBoolean = false)
   public void setInverted(ReactSlider view, boolean inverted) {
-    if (inverted) view.setScaleX(-1f);
-    else view.setScaleX(1f);
+    view.setInverted(inverted);
   }
 
   @Override
@@ -223,4 +221,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingComplete"),
         ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
   }
+
+  @Nullable
+  @Override
+  public Map getConstants() {
+    return MapBuilder.of("style", MapBuilder.of("defaultColor", DEFAULT_COLOR));
+  }
+
 }
