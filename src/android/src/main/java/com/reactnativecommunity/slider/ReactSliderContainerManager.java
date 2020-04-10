@@ -20,8 +20,6 @@ import com.facebook.yoga.YogaNode;
 public class ReactSliderContainerManager extends ViewGroupManager<ReactSliderContainer> {
   private final static String REACT_CLASS = "RNCSliderContainer";
 
-  @StringDef
-
   @NonNull
   @Override
   public String getName() {

@@ -324,7 +324,7 @@ exports.examples = [
           thumbTintColor={'yellow'}
           minimumValue={-1}
           maximumValue={2}
-          style={{ width: 300, height:200,backgroundColor:'red' }}
+          style={{ width: 300 }}
           ref={ref}
           minimumTrackTintColor={'magenta'}
           maximumTrackTintColor={'red'}
@@ -337,7 +337,7 @@ exports.examples = [
 
           </Animated.View>}
           minimumTrack={() => <Animated.View
-            style={{flex:1, width:'100%', flexDirection: 'row', borderColor: 'purple', height:1000, borderWidth: 3, transform: [{ rotateY: 0 }, { scaleY: scale1 }] }}
+            style={{flex:1, width:'100%', flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: 0 }, { scaleY: scale1 }] }}
             collapsable={false}
           >
             <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />

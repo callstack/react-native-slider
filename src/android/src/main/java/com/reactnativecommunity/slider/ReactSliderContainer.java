@@ -17,9 +17,11 @@ public class ReactSliderContainer extends ReactViewGroup implements ViewDrawable
   private Rect mBounds;
   private final ProgressDrawableHelper mMinimumTrackHandler;
   private final ProgressDrawableHelper mMaximumTrackHandler;
+  //private final ProgressDrawableHelper mBackgroundTrackHandler;
 
   public ReactSliderContainer(Context context) {
     super(context);
+    //mBackgroundTrackHandler = new ProgressDrawableHelper(this,false);
     mMaximumTrackHandler = new ProgressDrawableHelper(this,false);
     mMinimumTrackHandler = new ProgressDrawableHelper(this,true);
   }

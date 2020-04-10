@@ -42,16 +42,33 @@ const SliderContainer = (
         inverted={false}
         ref={ref}
       />
-      <Wrapper>{backgroundTrack}</Wrapper>
-      <Wrapper>{maximumTrack}</Wrapper>
-      <Wrapper>{minimumTrack}</Wrapper>
-      <Wrapper thumb>{thumb}</Wrapper>
+      <TrackWrapper>{backgroundTrack}</TrackWrapper>
+      <TrackWrapper>{maximumTrack}</TrackWrapper>
+      <TrackWrapper>{minimumTrack}</TrackWrapper>
+      <Wrapper>{thumb}</Wrapper>
     </RCTSliderContainerNativeComponent>
   );
 };
 
-const Wrapper = ({ children, thumb }) => {
-  const el = children && React.cloneElement(typeof children === 'function' ? children() : children, { collapsable: false });
+const extractChildren = (children) => children &&
+  React.cloneElement(
+    typeof children === 'function' ? children() : children,
+    { collapsable: false }
+  );
+
+const Wrapper = ({ children }) => {
+  return (
+    <View
+      style={StyleSheet.absoluteFill}
+      collapsable={false}
+      pointerEvents="none"
+    >
+      {extractChildren(children)}
+    </View>
+  );
+}
+
+const TrackWrapper = ({ children }) => {
   return (
     <View
       style={StyleSheet.absoluteFill}
@@ -59,14 +76,9 @@ const Wrapper = ({ children, thumb }) => {
       pointerEvents="none"
       overflow="hidden"
     >
-      {
-        thumb ?
-          el :
-          <View style={styles.default} collapsable={false} overflow="visible">
-            {el}
-          </View>
-
-      }
+      <View style={styles.default} collapsable={false}>
+        {extractChildren(children)}
+      </View>
     </View>
   );
 }
