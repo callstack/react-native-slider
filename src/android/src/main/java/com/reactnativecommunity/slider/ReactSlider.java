@@ -9,6 +9,7 @@ package com.reactnativecommunity.slider;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -79,6 +80,13 @@ public class ReactSlider extends AppCompatSeekBar {
   @Override
   public void setBackgroundColor(int color) {
     drawableHelper.handleSetBackgroundColor(color);
+  }
+
+  @Override
+  public void setThumb(Drawable thumb) {
+    super.setThumb(thumb);
+    // adjust ripple immediately in case a touch is in progress, fixes system default behaviour
+    getBackground().setBounds(thumb.copyBounds());
   }
 
   /* package */ void setMaxValue(double max) {

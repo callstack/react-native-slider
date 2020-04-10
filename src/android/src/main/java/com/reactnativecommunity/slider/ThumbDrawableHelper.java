@@ -1,5 +1,9 @@
 package com.reactnativecommunity.slider;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.view.View;
 
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
@@ -15,4 +19,5 @@ public class ThumbDrawableHelper extends DrawableHelper {
       attach(view);
     }
   }
+
 }

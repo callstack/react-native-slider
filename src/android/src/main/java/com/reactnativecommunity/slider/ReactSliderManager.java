@@ -113,7 +113,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
       };
 
   private void setTintColor(ReactSlider view, Integer color, @SliderDrawable int type) {
-
+    view.drawableHelper.setTintColor(type, color);
   }
 
   @Override
