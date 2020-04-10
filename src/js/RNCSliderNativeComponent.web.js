@@ -147,16 +147,22 @@ const RCTSliderWebComponent = React.forwardRef(
       enabled = true,
       trackHeight = 4,
       thumbSize = 20,
-      onRNCSliderSlidingStart= () => {},
-      onRNCSliderSlidingComplete= () => {},
-      onRNCSliderValueChange= () => {},
+      onRNCSliderSlidingStart = () => {},
+      onRNCSliderSlidingComplete = () => {},
+      onRNCSliderValueChange = () => {},
       ...others
     },
     forwardedRef,
   ) => {
-    const onValueChange = value => onRNCSliderValueChange && onRNCSliderValueChange({ nativeEvent: { fromUser: true, value }});
-    const onSlidingStart = value => onRNCSliderSlidingStart && onRNCSliderSlidingStart({ nativeEvent: { fromUser: true, value }});
-    const onSlidingComplete = value => onRNCSliderSlidingComplete && onRNCSliderSlidingComplete({ nativeEvent: { fromUser: true, value }});
+    const onValueChange = value =>
+      onRNCSliderValueChange &&
+      onRNCSliderValueChange({nativeEvent: {fromUser: true, value}});
+    const onSlidingStart = value =>
+      onRNCSliderSlidingStart &&
+      onRNCSliderSlidingStart({nativeEvent: {fromUser: true, value}});
+    const onSlidingComplete = value =>
+      onRNCSliderSlidingComplete &&
+      onRNCSliderSlidingComplete({nativeEvent: {fromUser: true, value}});
 
     const containerSize = React.useRef({width: 0, height: 0});
     const containerRef = forwardedRef || React.createRef();
@@ -217,10 +223,15 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     const updateValue = newValue => {
-      if (value !== newValue) {
-        setValue(newValue);
-        onValueChange(newValue);
-      };
+      // Ensure that the new value is still between the bounds
+      const withinBounds = Math.max(
+        minimumValue,
+        Math.min(newValue, maximumValue),
+      );
+      if (value !== withinBounds) {
+        setValue(withinBounds);
+        onValueChange(withinBounds);
+      }
     };
 
     const onTouchEnd = () => {
@@ -234,12 +245,30 @@ const RCTSliderWebComponent = React.forwardRef(
         ? maximumValue - ((maximumValue - minimumValue) * x) / width
         : minimumValue + ((maximumValue - minimumValue) * x) / width;
       const roundedValue = step ? Math.round(newValue / step) * step : newValue;
-      // Ensure that the new value is still between the bounds
-      const withinBounds = Math.max(
-        minimumValue,
-        Math.min(roundedValue, maximumValue),
-      );
-      updateValue(withinBounds);
+      updateValue(roundedValue);
+    };
+    const accessibilityActions = event => {
+      const tenth = (maximumValue - minimumValue) / 10;
+      switch (event.nativeEvent.actionName) {
+        case 'increment':
+          updateValue(value + (step || tenth));
+          break;
+        case 'decrement':
+          updateValue(value - (step || tenth));
+          break;
+      }
+    };
+    const handleAccessibilityKeys = key => {
+      switch (key) {
+        case 'ArrowUp':
+        case 'ArrowRight':
+          accessibilityActions({nativeEvent: {actionName: 'increment'}});
+          break;
+        case 'ArrowDown':
+        case 'ArrowLeft':
+          accessibilityActions({nativeEvent: {actionName: 'decrement'}});
+          break;
+      }
     };
 
     return (
@@ -252,24 +281,7 @@ const RCTSliderWebComponent = React.forwardRef(
           {name: 'increment', label: 'increment'},
           {name: 'decrement', label: 'decrement'},
         ]}
-        onAccessibilityAction={event => {
-          const tenth = (maximumValue - minimumValue) / 10;
-          function updateValue(newValue) {
-            const withinBounds = Math.max(
-              minimumValue,
-              Math.min(newValue, maximumValue),
-            );
-            updateValue(withinBounds);
-          }
-          switch (event.nativeEvent.actionName) {
-            case 'increment':
-              updateValue(value + (step || tenth));
-              break;
-            case 'decrement':
-              updateValue(value - (step || tenth));
-              break;
-          }
-        }}
+        onAccessibilityAction={accessibilityActions}
         accessible={true}
         accessibleValue={value}
         accessibilityRole={'adjustable'}
@@ -279,6 +291,7 @@ const RCTSliderWebComponent = React.forwardRef(
         onResponderGrant={() => onSlidingStart(value)}
         onResponderRelease={onTouchEnd}
         onResponderMove={onMove}
+        onKeyDown={({nativeEvent: {key}}) => handleAccessibilityKeys(key)}
         {...others}>
         <View pointerEvents="none" style={minimumTrackStyle} />
         <View pointerEvents="none" style={thumbViewStyle} />

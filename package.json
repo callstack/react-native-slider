@@ -13,6 +13,33 @@
       "/e2e/"
     ]
   },
+  "eslintConfig": {
+    "extends": "@react-native-community",
+    "env": {
+      "es6": true,
+      "jest": true
+    },
+    "globals": {
+      "it": true,
+      "expect": true,
+      "element": true,
+      "describe": true,
+      "by": true,
+      "device": true,
+      "beforeAll": true,
+      "beforeEach": true,
+      "afterAll": true,
+      "jest": true,
+      "jasmine": true
+    }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": false,
+    "jsxBracketSameLine": true,
+    "parser": "flow"
+  },
   "detox": {
     "test-runner": "jest",
     "runner-config": "example/e2e/config.json",
@@ -42,32 +69,5 @@
         "name": "TestingAVD"
       }
     }
-  },
-  "eslintConfig": {
-    "extends": "@react-native-community",
-    "env": {
-      "es6": true,
-      "jest": true
-    },
-    "globals": {
-      "it": true,
-      "expect": true,
-      "element": true,
-      "describe": true,
-      "by": true,
-      "device": true,
-      "beforeAll": true,
-      "beforeEach": true,
-      "afterAll": true,
-      "jest": true,
-      "jasmine": true
-    }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "all",
-    "bracketSpacing": false,
-    "jsxBracketSameLine": true,
-    "parser": "flow"
   }
 }
