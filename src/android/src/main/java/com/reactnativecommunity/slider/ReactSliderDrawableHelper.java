@@ -1,5 +1,7 @@
 package com.reactnativecommunity.slider;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,9 +15,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.util.Log;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.IntDef;
 
@@ -30,6 +33,8 @@ import java.util.concurrent.Future;
 public class ReactSliderDrawableHelper {
 
   static final int MAX_LEVEL = 10000;
+  private static long ANIM_DURATION = 400;
+  private static long ANIM_DELAY = 250;
 
   @IntDef({
       SliderDrawable.SLIDER,
@@ -48,12 +53,15 @@ public class ReactSliderDrawableHelper {
   }
 
   private final ReactSlider mSlider;
-  private final Drawable mOriginalThumb;
   private boolean mIsInverted = false;
+  private final Drawable mOriginalThumb;
+  private boolean mIsCustomThumb = false;
+  private final ThumbDrawableHelper mThumbDrawableHelper;
 
   public ReactSliderDrawableHelper(ReactSlider slider) {
     mSlider = slider;
     mOriginalThumb = slider.getThumb().mutate();
+    mThumbDrawableHelper = new ThumbDrawableHelper();
     setViewBackgroundDrawable();
     LayerDrawable outDrawable = (LayerDrawable) slider.getProgressDrawable().getCurrent().mutate();
     Drawable progress = outDrawable.findDrawableByLayerId(android.R.id.progress).mutate();
@@ -84,7 +92,7 @@ public class ReactSliderDrawableHelper {
    * this fixes the thumb's ripple drawable and preserves it even when a background color is applied
    * when used with {@link #handleSetBackgroundColor(int)}
    */
-  public void setViewBackgroundDrawable() {
+  void setViewBackgroundDrawable() {
     int color = Color.TRANSPARENT;
     if (mSlider.getBackground() instanceof ColorDrawable) {
       color = ((ColorDrawable) mSlider.getBackground()).getColor();
@@ -100,7 +108,7 @@ public class ReactSliderDrawableHelper {
    * {@link #setViewBackgroundDrawable()}
    * @param color
    */
-  public void handleSetBackgroundColor(int color) {
+  void handleSetBackgroundColor(int color) {
     ((ColorDrawable) ((LayerDrawable) mSlider.getBackground()).getDrawable(0)).setColor(color);
   }
 
@@ -118,7 +126,7 @@ public class ReactSliderDrawableHelper {
     }
   }
 
-  public void setTintColor(@SliderDrawable int type, Integer color) {
+  void setTintColor(@SliderDrawable int type, Integer color) {
     Drawable drawable = getDrawable(type);
     if (color == null) {
       drawable.clearColorFilter();
@@ -137,31 +145,27 @@ public class ReactSliderDrawableHelper {
 
   void setThumbImage(final String uri) {
     if (uri != null) {
-      BitmapDrawable drawable = new BitmapDrawable(mSlider.getResources(), getBitmap(mSlider, uri)) {
-        @Override
-        public void draw(Canvas canvas) {
-          if (mIsInverted) canvas.scale(-1, 1);
-          super.draw(canvas);
-        }
-      };
+      BitmapDrawable drawable = new BitmapDrawable(mSlider.getResources(), getBitmap(mSlider, uri));
       mSlider.setThumb(drawable);
       // Enable alpha channel for the thumbImage
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         mSlider.setSplitTrack(false);
       }
+      mIsCustomThumb = true;
     } else {
       mSlider.setThumb(mOriginalThumb);
+      mIsCustomThumb = false;
     }
   }
 
-  public void setInverted(boolean inverted) {
+  void setInverted(boolean inverted) {
     mIsInverted = inverted;
     mSlider.getThumb().invalidateSelf();
   }
 
 
-  public void onTouchEvent(MotionEvent event) {
-   // mThumbDrawableHandler.onTouchEvent(event);
+  void onTouchEvent(MotionEvent event) {
+    mThumbDrawableHelper.onTouchEvent(event);
   }
 
   public void tearDown() {
@@ -172,6 +176,57 @@ public class ReactSliderDrawableHelper {
     mThumbDrawableHandler.tearDown();
 
      */
+  }
+
+  @SuppressWarnings("unused")
+  class ThumbDrawableHelper {
+
+    private float mScale = 1;
+    private boolean mInverted;
+    private final AnimatorSet mScaleAnimator;
+
+    ThumbDrawableHelper() {
+      mScaleAnimator = new AnimatorSet();
+      mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+      mScaleAnimator.setDuration(ANIM_DURATION);
+      mScaleAnimator.setStartDelay(ANIM_DELAY);
+    }
+
+    private Drawable get() {
+      return mSlider.getThumb();
+    };
+
+    private void animate(float scale) {
+      if (mScaleAnimator.isRunning()) {
+        mScaleAnimator.cancel();
+      }
+      if (mIsCustomThumb) {
+        ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
+            this,
+            Property.of(ThumbDrawableHelper.class, Float.class, "scale"),
+            scale);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+          scaleAnim.setAutoCancel(true);
+        }
+        mScaleAnimator.play(scaleAnim);
+        mScaleAnimator.start();
+      }
+    }
+
+    public float getScale() {
+      return mScale;
+    }
+
+    public void setScale(float scale) {
+      mScale = scale;
+      get().invalidateSelf();
+    }
+
+    public void onPreDraw(Canvas canvas) {
+      Rect bounds = get().getBounds();
+      if (mIsInverted) canvas.scale(-1, 1);
+      canvas.scale(mScale, mScale, bounds.centerX(), bounds.centerY());
+    }
   }
 
   private static Bitmap getBitmap(final View view, final String uri) {

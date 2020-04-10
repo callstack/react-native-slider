@@ -15,15 +15,15 @@ public class ReactSliderContainer extends ReactViewGroup implements ViewDrawable
 
   private boolean mIsInverted = false;
   private Rect mBounds;
-  private final ProgressDrawableHelper mMinimumTrackHandler;
-  private final ProgressDrawableHelper mMaximumTrackHandler;
-  //private final ProgressDrawableHelper mBackgroundTrackHandler;
+  private final RaectSliderProgressHelper mMinimumTrackHandler;
+  private final RaectSliderProgressHelper mMaximumTrackHandler;
+  //private final RaectSliderProgressHelper mBackgroundTrackHandler;
 
   public ReactSliderContainer(Context context) {
     super(context);
-    //mBackgroundTrackHandler = new ProgressDrawableHelper(this,false);
-    mMaximumTrackHandler = new ProgressDrawableHelper(this,false);
-    mMinimumTrackHandler = new ProgressDrawableHelper(this,true);
+    //mBackgroundTrackHandler = new RaectSliderProgressHelper(this,false);
+    mMaximumTrackHandler = new RaectSliderProgressHelper(this,false);
+    mMinimumTrackHandler = new RaectSliderProgressHelper(this,true);
   }
 
   @Override

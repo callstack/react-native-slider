@@ -8,8 +8,8 @@ import android.view.View;
 
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
 
-public class ThumbDrawableHelper extends DrawableHelper {
-  ThumbDrawableHelper(ViewDrawableContainer drawableContainer) {
+public class ReactSliderThumbHelper extends DrawableHelper {
+  ReactSliderThumbHelper(ViewDrawableContainer drawableContainer) {
     super(drawableContainer);
   }
 

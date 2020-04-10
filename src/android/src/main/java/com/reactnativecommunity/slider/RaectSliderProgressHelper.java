@@ -10,13 +10,13 @@ import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
 
 import static com.reactnativecommunity.slider.ReactSliderDrawableHelper.MAX_LEVEL;
 
-public class ProgressDrawableHelper extends DrawableHelper {
+public class RaectSliderProgressHelper extends DrawableHelper {
 
   private final boolean mPrimary;
   private boolean mShouldScaleChildren = false;
   private final Rect mThumbBounds = new Rect();
 
-  ProgressDrawableHelper(ViewDrawableContainer drawableContainer, boolean isPrimary) {
+  RaectSliderProgressHelper(ViewDrawableContainer drawableContainer, boolean isPrimary) {
     super(drawableContainer);
     mPrimary = isPrimary;
   }
