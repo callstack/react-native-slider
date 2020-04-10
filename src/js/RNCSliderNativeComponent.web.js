@@ -144,16 +144,20 @@ const RCTSliderWebComponent = React.forwardRef(
       thumbStyle = {},
       style = [],
       inverted = false,
-      disabled = false,
+      enabled = true,
       trackHeight = 4,
       thumbSize = 20,
-      onSlidingStart = () => {},
-      onSlidingComplete = () => {},
-      onValueChange = () => {},
+      onRNCSliderSlidingStart= () => {},
+      onRNCSliderSlidingComplete= () => {},
+      onRNCSliderValueChange= () => {},
       ...others
     },
     forwardedRef,
   ) => {
+    const onValueChange = value => onRNCSliderValueChange && onRNCSliderValueChange({ nativeEvent: { fromUser: true, value }});
+    const onSlidingStart = value => onRNCSliderSlidingStart && onRNCSliderSlidingStart({ nativeEvent: { fromUser: true, value }});
+    const onSlidingComplete = value => onRNCSliderSlidingComplete && onRNCSliderSlidingComplete({ nativeEvent: { fromUser: true, value }});
+
     const containerSize = React.useRef({width: 0, height: 0});
     const containerRef = forwardedRef || React.createRef();
     const [value, setValue] = React.useState(initialValue || minimumValue);
@@ -212,6 +216,13 @@ const RCTSliderWebComponent = React.forwardRef(
       thumbStyle,
     );
 
+    const updateValue = newValue => {
+      if (value !== newValue) {
+        setValue(newValue);
+        onValueChange(newValue);
+      };
+    };
+
     const onTouchEnd = () => {
       onSlidingComplete(value);
     };
@@ -228,8 +239,7 @@ const RCTSliderWebComponent = React.forwardRef(
         minimumValue,
         Math.min(roundedValue, maximumValue),
       );
-      setValue(withinBounds);
-      onValueChange(withinBounds);
+      updateValue(withinBounds);
     };
 
     return (
@@ -249,7 +259,7 @@ const RCTSliderWebComponent = React.forwardRef(
               minimumValue,
               Math.min(newValue, maximumValue),
             );
-            setValue(withinBounds);
+            updateValue(withinBounds);
           }
           switch (event.nativeEvent.actionName) {
             case 'increment':
@@ -264,8 +274,8 @@ const RCTSliderWebComponent = React.forwardRef(
         accessibleValue={value}
         accessibilityRole={'adjustable'}
         style={containerStyle}
-        onStartShouldSetResponder={() => !disabled}
-        onMoveShouldSetResponder={() => !disabled}
+        onStartShouldSetResponder={() => enabled}
+        onMoveShouldSetResponder={() => enabled}
         onResponderGrant={() => onSlidingStart(value)}
         onResponderRelease={onTouchEnd}
         onResponderMove={onMove}
