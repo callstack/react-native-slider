@@ -15,7 +15,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.util.Log;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
@@ -72,8 +71,8 @@ public class ReactSliderDrawableHelper {
     outDrawable.setDrawableByLayerId(android.R.id.progress, new LayerDrawable(new Drawable[]{progress}) {
       @Override
       protected boolean onLevelChange(int level) {
-        if (mSlider.getParent() instanceof ReactSliderContainer) {
-          ((ReactSliderContainer) mSlider.getParent()).setLevel(level);
+        if (mSlider.getParent() instanceof ReactSliderContainerImpl) {
+          ((ReactSliderContainerImpl) mSlider.getParent()).setLevel(level);
         }
         return super.onLevelChange(level);
       }
@@ -81,8 +80,8 @@ public class ReactSliderDrawableHelper {
       @Override
       protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        if (mSlider.getParent() instanceof ReactSliderContainer) {
-          ((ReactSliderContainer) mSlider.getParent()).setBounds(bounds);
+        if (mSlider.getParent() instanceof ReactSliderContainerImpl) {
+          ((ReactSliderContainerImpl) mSlider.getParent()).setBounds(bounds);
         }
       }
     });
@@ -115,17 +114,7 @@ public class ReactSliderDrawableHelper {
   }
 
   Drawable getDrawable(@SliderDrawable int type) {
-    switch (type) {
-      case SliderDrawable.BACKGROUND:
-      case SliderDrawable.MAXIMUM_TRACK:
-        return ((LayerDrawable) mSlider.getProgressDrawable()).findDrawableByLayerId(android.R.id.background);
-      case SliderDrawable.MINIMUM_TRACK:
-        return ((LayerDrawable) mSlider.getProgressDrawable()).findDrawableByLayerId(android.R.id.progress);
-      case SliderDrawable.THUMB:
-        return mSlider.getThumb();
-      default:
-        throw new Error("ReactSlider: bad id");
-    }
+    return getDrawable(mSlider, type);
   }
 
   void setTintColor(@SliderDrawable int type, Integer color) {
@@ -171,6 +160,10 @@ public class ReactSliderDrawableHelper {
     mSlider.getThumb().invalidateSelf();
   }
 
+  void setVisible(@SliderDrawable int type, boolean visible) {
+    Drawable drawable = getDrawable(type);
+    drawable.setAlpha(visible ? 255 : 0);
+  }
 
   void onTouchEvent(MotionEvent event) {
     mThumbDrawableHelper.onTouchEvent(event);
@@ -247,6 +240,21 @@ public class ReactSliderDrawableHelper {
     void onPreDraw(Canvas canvas) {
       Rect bounds = get().getBounds();
       canvas.scale(mScale * (mIsInverted ? -1 : 1), mScale, bounds.centerX(), bounds.centerY());
+    }
+  }
+
+  private static Drawable getDrawable(ReactSlider slider, @SliderDrawable int type) {
+    switch (type) {
+      case SliderDrawable.BACKGROUND:
+      case SliderDrawable.MAXIMUM_TRACK:
+        return ((LayerDrawable) slider.getProgressDrawable()).findDrawableByLayerId(android.R.id.background);
+      case SliderDrawable.MINIMUM_TRACK:
+        return ((LayerDrawable) slider.getProgressDrawable()).findDrawableByLayerId(android.R.id.progress);
+      case SliderDrawable.THUMB:
+        return slider.getThumb();
+      case SliderDrawable.SLIDER:
+      default:
+        throw new Error("ReactSlider: bad id");
     }
   }
 

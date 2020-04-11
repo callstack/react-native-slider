@@ -10,28 +10,53 @@ import android.view.ViewGroup;
 
 import com.facebook.react.views.view.ReactViewGroup;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
+import com.reactnativecommunity.slider.ReactSliderProgressHelper.ResizeMode;
 
-public class ReactSliderContainer extends ReactViewGroup implements SliderContainer {
+import java.util.ArrayList;
+
+public class ReactSliderContainerImpl extends ReactViewGroup implements SliderContainer {
 
   private boolean mIsInverted = false;
   private Rect mBounds;
-  private final ReactSliderProgressHelper mMinimumTrackHandler;
-  private final ReactSliderProgressHelper mMaximumTrackHandler;
-  //private final ReactSliderProgressHelper mBackgroundTrackHandler;
+  private final ReactSliderProgressHelper mMinimumTrackHelper;
+  private final ReactSliderProgressHelper mMaximumTrackHelper;
+  private final ReactSliderProgressHelper mBackgroundTrackHelper;
+  private final ReactSliderThumbHelper mThumbHelper;
+  private final ArrayList<SliderRunnable> mPendingOperations = new ArrayList<>();
 
-  public ReactSliderContainer(Context context) {
+  @Override
+  public void runOnSlider(SliderRunnable runnable) {
+    if (getSlider() == null) {
+      mPendingOperations.add(runnable);
+    } else {
+      runnable.run(getSlider());
+    }
+  }
+
+  private void attach(ReactSlider slider) {
+    for (SliderRunnable runnable : mPendingOperations) {
+      runnable.run(slider);
+    }
+    mPendingOperations.clear();
+  }
+
+  public ReactSliderContainerImpl(Context context) {
     super(context);
-    //mBackgroundTrackHandler = new ReactSliderProgressHelper(this,false);
-    mMaximumTrackHandler = new ReactSliderProgressHelper(this,false);
-    mMinimumTrackHandler = new ReactSliderProgressHelper(this,true);
+    mBackgroundTrackHelper = new ReactSliderProgressHelper(this,SliderDrawable.BACKGROUND);
+    mMaximumTrackHelper = new ReactSliderProgressHelper(this, SliderDrawable.MAXIMUM_TRACK);
+    mMinimumTrackHelper = new ReactSliderProgressHelper(this, SliderDrawable.MINIMUM_TRACK);
+    mThumbHelper = new ReactSliderThumbHelper(this);
   }
 
   @Override
   public void onViewAdded(View child) {
     super.onViewAdded(child);
+    if (child instanceof ReactSlider) {
+      attach((ReactSlider) child);
+    }
     int index = indexOfChild(child);
-    mMaximumTrackHandler.tryAttach(index, child);
-    mMinimumTrackHandler.tryAttach(index, child);
+    mMaximumTrackHelper.attach(index, child);
+    mMinimumTrackHelper.attach(index, child);
   }
 
   @Override
@@ -41,19 +66,38 @@ public class ReactSliderContainer extends ReactViewGroup implements SliderContai
 
   public void setInverted(boolean inverted) {
     mIsInverted = inverted;
-    //setScaleX(getScaleX());
     invalidate();
   }
-/*
-  @Override
-  public void setScaleX(float scaleX) {
-    super.setScaleX(scaleX * (mIsInverted ? -1 : 1));
+
+  void setResizeMode(@SliderDrawable int type, @ResizeMode String resizeMode) {
+    ReactSliderProgressHelper helper;
+    if (type == SliderDrawable.MAXIMUM_TRACK) {
+      helper = mMaximumTrackHelper;
+    } else if (type == SliderDrawable.MINIMUM_TRACK) {
+      helper = mMinimumTrackHelper;
+    } else {
+      return;
+    }
+    helper.setResizeMode(resizeMode);
+    invalidate();
   }
 
+  void setState(@SliderDrawable int type, boolean state) {
+    DrawableHelper helper;
+    if (type == SliderDrawable.MAXIMUM_TRACK) {
+      helper = mMaximumTrackHelper;
+    } else if (type == SliderDrawable.MINIMUM_TRACK) {
+      helper = mMinimumTrackHelper;
+    } else if (type == SliderDrawable.THUMB) {
+      helper = mThumbHelper;
+    } else {
+      return;
+    }
+    helper.setState(state);
+    invalidate();
+  }
 
- */
-  @Override
-  public ReactSlider getSlider() {
+  private ReactSlider getSlider() {
     return (ReactSlider) getChildAt(SliderDrawable.SLIDER);
   }
 
@@ -82,8 +126,8 @@ public class ReactSliderContainer extends ReactViewGroup implements SliderContai
   }
 
   public void setLevel(int level) {
-    mMaximumTrackHandler.setLevel(level);
-    mMinimumTrackHandler.setLevel(level);
+    mMaximumTrackHelper.setLevel(level);
+    mMinimumTrackHelper.setLevel(level);
     setThumbLevel(level);
   }
 
@@ -99,8 +143,8 @@ public class ReactSliderContainer extends ReactViewGroup implements SliderContai
 
   public void setBounds(Rect bounds) {
     mBounds = bounds;
-    mMaximumTrackHandler.setBounds(bounds);
-    mMinimumTrackHandler.setBounds(bounds);
+    mMaximumTrackHelper.setBounds(bounds);
+    mMinimumTrackHelper.setBounds(bounds);
     refresh();
   }
 
@@ -108,7 +152,6 @@ public class ReactSliderContainer extends ReactViewGroup implements SliderContai
     ReactSlider slider = getSlider();
     slider.setProgress(slider.getProgress());
   }
-
 
   @Override
   protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
