@@ -26,6 +26,7 @@ public class ReactSliderPackage implements ReactPackage {
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
         return Arrays.<ViewManager>asList(
             new ReactSliderContainerManager(),
+            new ReactSliderProgressClippingViewManager(),
             new ReactSliderManager());
     }
 }

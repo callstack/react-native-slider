@@ -13,7 +13,7 @@
 import React, { useImperativeHandle } from 'react';
 import {StyleSheet, View} from 'react-native';
 import Slider from './Slider';
-import RCTSliderContainerNativeComponent from './‏‏RNCSliderContainerNativeComponent';
+import RCTSliderContainerNativeComponent, {RNCSliderProgressClippingViewNativeComponent} from './‏‏RNCSliderContainerNativeComponent';
 
 import type {Ref} from 'react';
 
@@ -35,16 +35,15 @@ const SliderContainer = (
   return (
     <RCTSliderContainerNativeComponent
       {...localProps}
-    >
-      <Slider
-        {...localProps}
-        style={null}
-        inverted={false}
-        ref={ref}
-      />
+    >      
       <TrackWrapper>{backgroundTrack}</TrackWrapper>
       <TrackWrapper>{maximumTrack}</TrackWrapper>
       <TrackWrapper>{minimumTrack}</TrackWrapper>
+      <Slider
+        {...localProps}
+        style={null}
+        ref={ref}
+      />
       <Wrapper>{thumb}</Wrapper>
     </RCTSliderContainerNativeComponent>
   );
@@ -70,16 +69,15 @@ const Wrapper = ({ children }) => {
 
 const TrackWrapper = ({ children }) => {
   return (
-    <View
+    <RNCSliderProgressClippingViewNativeComponent
       style={StyleSheet.absoluteFill}
       collapsable={false}
       pointerEvents="none"
-      overflow="hidden"
     >
       <View style={styles.default} collapsable={false}>
         {extractChildren(children)}
       </View>
-    </View>
+    </RNCSliderProgressClippingViewNativeComponent>
   );
 }
 

@@ -16,4 +16,9 @@ import type { RNCSliderType } from './RNCSliderNativeComponent';
 const RNCSliderContainerNativeComponent = ((requireNativeComponent(
   'RNCSliderContainer',
 ): any): RNCSliderType);
+
 export default RNCSliderContainerNativeComponent;
+
+export const RNCSliderProgressClippingViewNativeComponent = requireNativeComponent(
+  'RNCSliderProgressClippingView',
+);
