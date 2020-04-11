@@ -5,10 +5,10 @@ import android.view.View;
 
 public abstract class DrawableHelper {
   private View mView;
-  private final ViewDrawableContainer mDrawableContainer;
+  private final SliderContainer mDrawableContainer;
   private final Rect mBounds = new Rect();
 
-  DrawableHelper(ViewDrawableContainer drawableContainer) {
+  DrawableHelper(SliderContainer drawableContainer) {
     mDrawableContainer = drawableContainer;
   }
 
@@ -22,7 +22,7 @@ public abstract class DrawableHelper {
     return mView;
   }
 
-  ViewDrawableContainer getContainer() {
+  SliderContainer getContainer() {
     return mDrawableContainer;
   }
 

@@ -11,19 +11,19 @@ import android.view.ViewGroup;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
 
-public class ReactSliderContainer extends ReactViewGroup implements ViewDrawableContainer {
+public class ReactSliderContainer extends ReactViewGroup implements SliderContainer {
 
   private boolean mIsInverted = false;
   private Rect mBounds;
-  private final RaectSliderProgressHelper mMinimumTrackHandler;
-  private final RaectSliderProgressHelper mMaximumTrackHandler;
-  //private final RaectSliderProgressHelper mBackgroundTrackHandler;
+  private final ReactSliderProgressHelper mMinimumTrackHandler;
+  private final ReactSliderProgressHelper mMaximumTrackHandler;
+  //private final ReactSliderProgressHelper mBackgroundTrackHandler;
 
   public ReactSliderContainer(Context context) {
     super(context);
-    //mBackgroundTrackHandler = new RaectSliderProgressHelper(this,false);
-    mMaximumTrackHandler = new RaectSliderProgressHelper(this,false);
-    mMinimumTrackHandler = new RaectSliderProgressHelper(this,true);
+    //mBackgroundTrackHandler = new ReactSliderProgressHelper(this,false);
+    mMaximumTrackHandler = new ReactSliderProgressHelper(this,false);
+    mMinimumTrackHandler = new ReactSliderProgressHelper(this,true);
   }
 
   @Override
@@ -34,17 +34,24 @@ public class ReactSliderContainer extends ReactViewGroup implements ViewDrawable
     mMinimumTrackHandler.tryAttach(index, child);
   }
 
-  public void setInverted(boolean inverted) {
-    mIsInverted = inverted;
-    setScaleX(getScaleX());
-    invalidate();
+  @Override
+  public boolean isInverted() {
+    return mIsInverted;
   }
 
+  public void setInverted(boolean inverted) {
+    mIsInverted = inverted;
+    //setScaleX(getScaleX());
+    invalidate();
+  }
+/*
   @Override
   public void setScaleX(float scaleX) {
     super.setScaleX(scaleX * (mIsInverted ? -1 : 1));
   }
 
+
+ */
   @Override
   public ReactSlider getSlider() {
     return (ReactSlider) getChildAt(SliderDrawable.SLIDER);
