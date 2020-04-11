@@ -14,7 +14,7 @@ import com.reactnativecommunity.slider.ReactSliderProgressHelper.ResizeMode;
 
 import java.util.ArrayList;
 
-public class ReactSliderContainerImpl extends ReactViewGroup implements SliderContainer {
+public class ReactSliderContainerImpl extends ReactViewGroup implements ReactSliderContainer {
 
   private boolean mIsInverted = false;
   private Rect mBounds;
