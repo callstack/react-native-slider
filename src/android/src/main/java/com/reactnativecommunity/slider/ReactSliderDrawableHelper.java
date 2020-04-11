@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +36,7 @@ public class ReactSliderDrawableHelper {
   static final int MAX_LEVEL = 10000;
   private static long ANIM_DURATION = 400;
   private static long ANIM_DELAY = 250;
+  private static float ANIM_MAX_SCALE = 1.2f;
 
   @IntDef({
       SliderDrawable.SLIDER,
@@ -45,10 +47,10 @@ public class ReactSliderDrawableHelper {
   })
   @Retention(RetentionPolicy.SOURCE)
   public @interface SliderDrawable {
-    int SLIDER = 0;
-    int BACKGROUND = 1;
-    int MAXIMUM_TRACK = 2;
-    int MINIMUM_TRACK = 3;
+    int SLIDER = 3;
+    int BACKGROUND = 0;
+    int MAXIMUM_TRACK = 1;
+    int MINIMUM_TRACK = 2;
     int THUMB = 4;
   }
 
@@ -145,7 +147,13 @@ public class ReactSliderDrawableHelper {
 
   void setThumbImage(final String uri) {
     if (uri != null) {
-      BitmapDrawable drawable = new BitmapDrawable(mSlider.getResources(), getBitmap(mSlider, uri));
+      BitmapDrawable drawable = new BitmapDrawable(mSlider.getResources(), getBitmap(mSlider, uri)) {
+        @Override
+        public void draw(Canvas canvas) {
+          mThumbDrawableHelper.onPreDraw(canvas);
+          super.draw(canvas);
+        }
+      };
       mSlider.setThumb(drawable);
       // Enable alpha channel for the thumbImage
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -182,7 +190,6 @@ public class ReactSliderDrawableHelper {
   class ThumbDrawableHelper {
 
     private float mScale = 1;
-    private boolean mInverted;
     private final AnimatorSet mScaleAnimator;
 
     ThumbDrawableHelper() {
@@ -213,19 +220,33 @@ public class ReactSliderDrawableHelper {
       }
     }
 
+    /**
+     * used by {@link #mScaleAnimator}
+     */
     public float getScale() {
       return mScale;
     }
 
+    /**
+     * used by {@link #mScaleAnimator}
+     */
     public void setScale(float scale) {
       mScale = scale;
       get().invalidateSelf();
     }
 
-    public void onPreDraw(Canvas canvas) {
+    void onTouchEvent(MotionEvent event) {
+      int action = event.getActionMasked();
+      if (action == MotionEvent.ACTION_DOWN) {
+        animate(ANIM_MAX_SCALE);
+      } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+        animate(1);
+      }
+    }
+
+    void onPreDraw(Canvas canvas) {
       Rect bounds = get().getBounds();
-      if (mIsInverted) canvas.scale(-1, 1);
-      canvas.scale(mScale, mScale, bounds.centerX(), bounds.centerY());
+      canvas.scale(mScale * (mIsInverted ? -1 : 1), mScale, bounds.centerX(), bounds.centerY());
     }
   }
 
