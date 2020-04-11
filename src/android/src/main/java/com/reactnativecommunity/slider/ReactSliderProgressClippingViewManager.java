@@ -2,6 +2,8 @@ package com.reactnativecommunity.slider;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
@@ -26,15 +28,17 @@ public class ReactSliderProgressClippingViewManager extends ViewGroupManager<Rea
   }
 
   static class ProgressClippingView extends ReactViewGroup {
+    private Rect mRect = new Rect();
     public ProgressClippingView(Context context) {
       super(context);
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-      int[] location = new int[2];
-      getLocationInWindow(location);
-      canvas.clipRect(0, -location[1], getWidth(), getRootView().getHeight() - location[1]);
+      mRect.set(0, 0, 0, 0);
+      ViewGroup root = (ViewGroup) getRootView();
+      root.offsetDescendantRectToMyCoords(this, mRect);
+      canvas.clipRect(0, mRect.top, getWidth(), getRootView().getHeight() - mRect.top);
       super.dispatchDraw(canvas);
     }
   }
