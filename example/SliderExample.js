@@ -319,14 +319,13 @@ exports.examples = [
         <SliderExample
           value={0}
           //inverted
-          thumbTintColor={'yellow'}
           minimumValue={-1}
           maximumValue={2}
           style={{ width: 300 }}
           ref={ref}
           minimumTrackTintColor={'magenta'}
           maximumTrackTintColor={'red'}
-          thumb={a % 5 === 0 ? null : thumbEl}
+          thumb={a % 5 === 0 ? thumbEl:null}
           //thumb={thumbEl}
           maximumTrackResizeMode="scale"
           maximumTrack={() => <Animated.View
