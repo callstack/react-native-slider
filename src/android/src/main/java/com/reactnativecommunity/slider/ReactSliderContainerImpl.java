@@ -120,6 +120,9 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
       helper = mMinimumTrackHelper;
     } else if (type == SliderDrawable.THUMB) {
       helper = mThumbHelper;
+      if (helper.getWrapperView() != null && state) {
+        helper.getWrapperView().setAlpha(0);
+      }
     } else {
       return;
     }
