@@ -289,7 +289,7 @@ class ReactSliderDrawableHelper {
         throw new Error("ReactSlider: bad id");
     }
   }
-  
+
   private static Bitmap getBitmap(final View view, final String uri) {
     Bitmap bitmap = null;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
