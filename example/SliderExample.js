@@ -297,7 +297,6 @@ exports.examples = [
         <Animated.View
           ref={thumb}
           style={[customSliderStyles.thumbContainer, {
-            opacity:0.1,
             transform: [{ rotateX: rotate, rotateY: rotate, rotateZ: rotate, scale: scale1 }]
           }]}
           collapsable={false}
@@ -318,15 +317,14 @@ exports.examples = [
       return (
         <SliderExample
           value={0}
-          //inverted
+          inverted
           minimumValue={-1}
           maximumValue={2}
           style={{ width: 300 }}
           ref={ref}
           minimumTrackTintColor={'magenta'}
           maximumTrackTintColor={'red'}
-          thumb={a % 5 === 0 ? thumbEl:null}
-          //thumb={thumbEl}
+          thumb={a % 3 === 0 ? thumbEl : null}
           maximumTrackResizeMode="scale"
           maximumTrack={() => <Animated.View
             style={{ height: 5, opacity: Animated.subtract(1, timer), transform: [{ rotate: rotate }] }}
