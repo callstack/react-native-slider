@@ -294,33 +294,31 @@ exports.examples = [
       }, []);
 
       const thumbEl = (
-        <View style={[StyleSheet.absoluteFill, { opacity: 0 }]} pointerEvents="none">
+        <Animated.View
+          ref={thumb}
+          style={[customSliderStyles.thumbContainer, {
+            opacity:0.1,
+            transform: [{ rotateX: rotate, rotateY: rotate, rotateZ: rotate, scale: scale1 }]
+          }]}
+          collapsable={false}
+        >
           <Animated.View
-            ref={thumb}
-            style={{
-              alignItems: 'center', justifyContent: 'center', width: 40, height: 40,
-              transform: [{ rotateX: rotate, rotateY: rotate, rotateZ: rotate, scale: scale1 }]
-            }}
+            style={[customSliderStyles.thumb, { backgroundColor: a % 2 === 0 ? 'blue' : 'black', transform: [{ rotateX: rotate }] }]}
             collapsable={false}
           >
-            <Animated.View
-              style={{ backgroundColor: a % 2 === 0 ? 'blue' : 'black', borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30, transform: [{ rotateX: rotate }] }}
-              collapsable={false}
-            >
-              <Image
-                source={require('./uie_thumb_big.png')}
-                style={{ width: 25, height: 25 }}
-              />
-            </Animated.View>
+            <Image
+              source={require('./uie_thumb_big.png')}
+              style={customSliderStyles.thumbImage}
+            />
           </Animated.View>
-        </View>
-      )
+        </Animated.View>
+      );
 
 
       return (
         <SliderExample
-          value={0.6}
-          inverted
+          value={0}
+          //inverted
           thumbTintColor={'yellow'}
           minimumValue={-1}
           maximumValue={2}
@@ -328,27 +326,28 @@ exports.examples = [
           ref={ref}
           minimumTrackTintColor={'magenta'}
           maximumTrackTintColor={'red'}
-          thumb={thumbEl}
+          thumb={a % 5 === 0 ? null : thumbEl}
+          //thumb={thumbEl}
+          maximumTrackResizeMode="scale"
           maximumTrack={() => <Animated.View
             style={{ height: 5, opacity: Animated.subtract(1, timer), transform: [{ rotate: rotate }] }}
             collapsable={false}
           >
-            <Animated.View style={{ backgroundColor: 'blue', flex: 1, borderRadius: 50 }} />
-
+            <Animated.View style={customSliderStyles.maximumTrack} />
           </Animated.View>}
           minimumTrack={() => <Animated.View
-            style={{flex:1, width:'100%', flexDirection: 'row', borderColor: 'purple', borderWidth: 3, transform: [{ rotateY: 0 }, { scaleY: scale1 }] }}
+            style={[customSliderStyles.minimumTrackContainer, { transform: [{ rotateY: 0 }, { scaleY: scale1 }] }]}
             collapsable={false}
           >
-            <Animated.View style={{ backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1, transform: [{ rotateY: Animated.divide(rotate, 6) }] }} />
-            <View style={{ backgroundColor: 'white', flex: 1, zIndex: 5 }} ref={track}>
-              <Animated.View style={{ backgroundColor: 'orange', flex: 1, transform: [{ scale }, { rotateY: '180deg' }], justifyContent: 'center', alignItems: 'center' }}>
+            <Animated.View style={[customSliderStyles.minimumTrack1, {  transform: [{ rotateY: Animated.divide(rotate, 6) }] }]} />
+            <View style={customSliderStyles.minimumTrack2} ref={track}>
+              <Animated.View style={[customSliderStyles.minimumTrack2TextContainer, { transform: [{ scale }, { rotateY: '180deg' }] }]}>
                 <Animated.Text>AWESOME</Animated.Text>
               </Animated.View>
             </View>
-            <Animated.View style={{ backgroundColor: 'red', flex: 1, transform: [{ rotateX: rotate }] }} />
+            <Animated.View style={[customSliderStyles.minimumTrack3, { transform: [{ rotateX: rotate }] }]} />
             <Animated.View
-              style={{ backgroundColor: 'magenta', flex: 1, transform: [{ scale: shrink }, { rotate }], opacity: gentleOpacity }}
+              style={[customSliderStyles.minimumTrack4, { transform: [{ scale: shrink }, { rotate }], opacity: gentleOpacity }]}
               ref={r => {
                 setTimeout(() => r && r.setNativeProps({ backgroundColor: 'pink' }), 5000)
               }}
@@ -359,3 +358,41 @@ exports.examples = [
     },
   },
 ];
+
+const customSliderStyles = StyleSheet.create({
+  thumbContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    backgroundColor: 'pink', 
+    borderRadius: 50
+  },
+  thumb: {
+    borderRadius: 50, alignItems: 'center', justifyContent: 'center', width: 30, height: 30,
+  },
+  thumbImage: {
+    width: 25, height: 25
+  },
+  maximumTrack: {
+    backgroundColor: 'blue', flex: 1, borderRadius: 50
+  },
+  minimumTrackContainer: {
+    height: 50, width: '100%', flexDirection: 'row', borderColor: 'purple', borderWidth: 3,
+  },
+  minimumTrack1: {
+    backgroundColor: 'yellow', borderColor: 'gold', borderWidth: 5, flex: 1,
+  },
+  minimumTrack2: {
+    backgroundColor: 'white', flex: 1, zIndex: 5
+  },
+  minimumTrack2TextContainer: {
+    backgroundColor: 'orange', flex: 1, justifyContent: 'center', alignItems: 'center'
+  },
+  minimumTrack3: {
+    backgroundColor: 'red', flex: 1
+  },
+  minimumTrack4: {
+    backgroundColor: 'magenta', flex: 1
+  }
+})
