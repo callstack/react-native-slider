@@ -15,7 +15,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.util.Log;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +25,7 @@ import androidx.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,6 +37,7 @@ class ReactSliderDrawableHelper {
   private static long ANIM_DURATION = 400;
   private static long ANIM_DELAY = 250;
   private static float ANIM_MAX_SCALE = 1.2f;
+  private final static int RIPPLE_ID = android.R.id.background;
 
   @IntDef({
       SliderDrawable.SLIDER,
@@ -59,9 +60,6 @@ class ReactSliderDrawableHelper {
   private final Drawable mOriginalThumb;
   private boolean mIsCustomThumb = false;
   private final ThumbDrawableHelper mThumbDrawableHelper;
-  private Drawable mBackgroundDrawable;
-  private final Drawable mNoBackground = new ColorDrawable(Color.TRANSPARENT);
-  private int[] mBackgroundState;
 
   ReactSliderDrawableHelper(ReactSlider slider) {
     mSlider = slider;
@@ -78,7 +76,6 @@ class ReactSliderDrawableHelper {
         }
       }
     });
-
 
     LayerDrawable outDrawable = (LayerDrawable) slider.getProgressDrawable().getCurrent().mutate();
     Drawable progress = outDrawable.findDrawableByLayerId(android.R.id.progress).mutate();
@@ -119,10 +116,9 @@ class ReactSliderDrawableHelper {
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
       RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
       LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{new ColorDrawable(color), rippleDrawable});
+      layerDrawable.setId(1, RIPPLE_ID);
       mSlider.setBackground(layerDrawable);
     }
-    mBackgroundState = mSlider.getBackground().getState();
-    mBackgroundDrawable = mSlider.getBackground().mutate();
   }
 
   /**
@@ -181,10 +177,18 @@ class ReactSliderDrawableHelper {
   void setVisible(@SliderDrawable int type, boolean visible) {
     Drawable drawable = getDrawable(type);
     drawable.setAlpha(visible ? 255 : 0);
-    if (type == SliderDrawable.THUMB) {
-      Log.d("Sliderr", "setVisible: " + mSlider.getBackground().getState().length + " " + mBackgroundState.length);
-      mSlider.getBackground().setState(visible ? mBackgroundState : new int[]{});
-      mSlider.getBackground().jumpToCurrentState();
+    if (type == SliderDrawable.THUMB && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+      LayerDrawable bg = (LayerDrawable) mSlider.getBackground().mutate();
+      Drawable ripple;
+      if (visible) {
+        ripple = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
+      } else {
+        ripple = new ColorDrawable(Color.TRANSPARENT);
+      }
+      bg.setDrawableByLayerId(RIPPLE_ID, ripple);
+      bg.setBounds(mSlider.getThumb().copyBounds());
+      bg.jumpToCurrentState();
+      mSlider.setBackground(bg);
     }
   }
 
