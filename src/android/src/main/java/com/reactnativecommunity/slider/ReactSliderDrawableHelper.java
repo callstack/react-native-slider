@@ -179,14 +179,13 @@ class ReactSliderDrawableHelper {
     drawable.setAlpha(visible ? 255 : 0);
     if (type == SliderDrawable.THUMB && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
       LayerDrawable bg = (LayerDrawable) mSlider.getBackground().mutate();
-      Drawable ripple;
-      if (visible) {
-        ripple = new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY), null, null);
-      } else {
-        ripple = new ColorDrawable(Color.TRANSPARENT);
-      }
+      Drawable ripple = new RippleDrawable(ColorStateList.valueOf(visible ? Color.LTGRAY : Color.TRANSPARENT), null, null);
       bg.setDrawableByLayerId(RIPPLE_ID, ripple);
       bg.setBounds(mSlider.getThumb().copyBounds());
+      int[] state = bg.getState();
+      bg.setState(new int[]{});
+      bg.jumpToCurrentState();
+      bg.setState(state);
       bg.jumpToCurrentState();
       mSlider.setBackground(bg);
     }
@@ -290,7 +289,7 @@ class ReactSliderDrawableHelper {
         throw new Error("ReactSlider: bad id");
     }
   }
-
+  
   private static Bitmap getBitmap(final View view, final String uri) {
     Bitmap bitmap = null;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
