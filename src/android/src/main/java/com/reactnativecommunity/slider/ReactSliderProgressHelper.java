@@ -1,7 +1,6 @@
 package com.reactnativecommunity.slider;
 
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -14,7 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import static com.reactnativecommunity.slider.ReactSliderDrawableHelper.MAX_LEVEL;
 
-class ReactSliderProgressHelper extends DrawableHelper {
+class ReactSliderProgressHelper extends ReactSliderViewDrawableHelper {
 
   @StringDef({
       ResizeMode.NONE,
@@ -34,18 +33,6 @@ class ReactSliderProgressHelper extends DrawableHelper {
     mPrimary = type == SliderDrawable.MINIMUM_TRACK;
   }
 
-  private static View maybeGetFirstChild(View view) {
-    if (view instanceof ViewGroup) {
-      return  ((ViewGroup) view).getChildAt(0);
-    } else {
-      return view;
-    }
-  }
-
-  private View getTrack() {
-    return maybeGetFirstChild(maybeGetFirstChild(getView()));
-  }
-
   void setResizeMode(@ResizeMode String resizeMode) {
     mResizeMode = resizeMode;
   }
@@ -54,13 +41,13 @@ class ReactSliderProgressHelper extends DrawableHelper {
     return mResizeMode.equals(ResizeMode.SCALE);
   }
 
-  void setLevel(int level) {
+  void onLevelChanged(int level) {
     if (!isStateful()) return;
-    View wrapper = getView();
+    View wrapper = getWrapperView();
     Rect bounds = getBounds();
     int inversion = getContainer().isInverted() ? -1 : 1;
     Rect viewRect = new Rect();
-    getTrack().getDrawingRect(viewRect);
+    getView().getDrawingRect(viewRect);
     float scale = level * 1f / MAX_LEVEL;
     if (!mPrimary) scale = 1 - scale;
     float delta = bounds.width() * (1 - scale) / 2;

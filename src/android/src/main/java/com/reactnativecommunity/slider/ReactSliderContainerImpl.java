@@ -4,7 +4,10 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.view.View;
 
-import com.facebook.react.views.view.ReactViewGroup;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.NativeViewHierarchyManager;
+import com.facebook.react.uimanager.UIBlock;
+import com.facebook.react.uimanager.UIManagerModule;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
 import com.reactnativecommunity.slider.ReactSliderProgressHelper.ResizeMode;
 
@@ -15,7 +18,7 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
   private boolean mIsInverted = false;
   private final ReactSliderProgressHelper mMinimumTrackHelper;
   private final ReactSliderProgressHelper mMaximumTrackHelper;
-  private final ReactSliderProgressHelper mBackgroundTrackHelper;
+  private final ReactSliderBackgroundHelper mBackgroundTrackHelper;
   private final ReactSliderThumbHelper mThumbHelper;
   private final ArrayList<SliderRunnable> mPendingOperations = new ArrayList<>();
 
@@ -28,16 +31,23 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
     }
   }
 
-  private void attach(ReactSlider slider) {
-    for (SliderRunnable runnable : mPendingOperations) {
-      runnable.run(slider);
-    }
-    mPendingOperations.clear();
+  private void attach(final ReactSlider slider) {
+    ((ReactContext) getContext())
+        .getNativeModule(UIManagerModule.class)
+        .prependUIBlock(new UIBlock() {
+          @Override
+          public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
+            for (SliderRunnable runnable : mPendingOperations) {
+              runnable.run(slider);
+            }
+            mPendingOperations.clear();
+          }
+        });
   }
 
   public ReactSliderContainerImpl(Context context) {
     super(context);
-    mBackgroundTrackHelper = new ReactSliderProgressHelper(this,SliderDrawable.BACKGROUND);
+    mBackgroundTrackHelper = new ReactSliderBackgroundHelper(this);
     mMaximumTrackHelper = new ReactSliderProgressHelper(this, SliderDrawable.MAXIMUM_TRACK);
     mMinimumTrackHelper = new ReactSliderProgressHelper(this, SliderDrawable.MINIMUM_TRACK);
     mThumbHelper = new ReactSliderThumbHelper(this);
@@ -54,6 +64,23 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
     mMaximumTrackHelper.attach(index, child);
     mMinimumTrackHelper.attach(index, child);
     mThumbHelper.attach(index, child);
+  }
+
+  @Override
+  public void onViewRemoved(View child) {
+    super.onViewRemoved(child);
+    int index = indexOfChild(child);
+    mBackgroundTrackHelper.detach(index);
+    mMaximumTrackHelper.detach(index);
+    mMinimumTrackHelper.detach(index);
+    mThumbHelper.detach(index);
+  }
+
+  void tearDown() {
+    mBackgroundTrackHelper.cleanup();
+    mMaximumTrackHelper.cleanup();
+    mMinimumTrackHelper.cleanup();
+    mThumbHelper.cleanup();
   }
 
   private ReactSlider getSlider() {
@@ -83,9 +110,11 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
     invalidate();
   }
 
-  void setState(@SliderDrawable int type, boolean state) {
-    DrawableHelper helper;
-    if (type == SliderDrawable.MAXIMUM_TRACK) {
+  void setState(@SliderDrawable int type, final boolean state) {
+    final ReactSliderViewDrawableHelper helper;
+    if (type == SliderDrawable.BACKGROUND) {
+      helper = mBackgroundTrackHelper;
+    } else if (type == SliderDrawable.MAXIMUM_TRACK) {
       helper = mMaximumTrackHelper;
     } else if (type == SliderDrawable.MINIMUM_TRACK) {
       helper = mMinimumTrackHelper;
@@ -94,8 +123,16 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
     } else {
       return;
     }
-    helper.setState(state);
-    invalidate();
+    ((ReactContext) getContext())
+        .getNativeModule(UIManagerModule.class)
+        .addUIBlock(new UIBlock() {
+          @Override
+          public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
+            helper.setState(state);
+            invalidate();
+            refresh();
+          }
+        });
   }
 
   @Override
@@ -134,7 +171,7 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
     runOnSlider(new SliderRunnable() {
       @Override
       public void run(ReactSlider slider) {
-        setLevel(slider.drawableHelper.getProgress());
+        setLevel(slider.drawableHelper.getLevel());
       }
     });
   }

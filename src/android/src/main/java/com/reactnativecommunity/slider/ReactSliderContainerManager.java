@@ -23,6 +23,11 @@ public class ReactSliderContainerManager extends ViewGroupManager<ReactSliderCon
     return new ReactSliderContainerImpl(reactContext);
   }
 
+  @Override
+  public void onDropViewInstance(@NonNull ReactSliderContainerImpl view) {
+    view.tearDown();
+  }
+
   @ReactProp(name = "inverted", defaultBoolean = false)
   public void setInverted(ReactSliderContainerImpl view, boolean inverted) {
     view.setInverted(inverted);
@@ -31,6 +36,11 @@ public class ReactSliderContainerManager extends ViewGroupManager<ReactSliderCon
   @ReactProp(name = "thumbState", defaultBoolean = false)
   public void setThumbState(ReactSliderContainerImpl view, boolean state) {
     view.setState(SliderDrawable.THUMB, state);
+  }
+
+  @ReactProp(name = "backgroundTrackState", defaultBoolean = false)
+  public void setBackgroundTrackState(ReactSliderContainerImpl view, boolean state) {
+    view.setState(SliderDrawable.BACKGROUND, state);
   }
 
   @ReactProp(name = "minimumTrackState", defaultBoolean = false)

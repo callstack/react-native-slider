@@ -59,6 +59,9 @@ class ReactSliderDrawableHelper {
   private final Drawable mOriginalThumb;
   private boolean mIsCustomThumb = false;
   private final ThumbDrawableHelper mThumbDrawableHelper;
+  private Drawable mBackgroundDrawable;
+  private final Drawable mNoBackground = new ColorDrawable(Color.TRANSPARENT);
+  private int[] mBackgroundState;
 
   ReactSliderDrawableHelper(ReactSlider slider) {
     mSlider = slider;
@@ -118,6 +121,8 @@ class ReactSliderDrawableHelper {
       LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{new ColorDrawable(color), rippleDrawable});
       mSlider.setBackground(layerDrawable);
     }
+    mBackgroundState = mSlider.getBackground().getState();
+    mBackgroundDrawable = mSlider.getBackground().mutate();
   }
 
   /**
@@ -132,7 +137,7 @@ class ReactSliderDrawableHelper {
     return getDrawable(mSlider, type);
   }
 
-  int getProgress() {
+  int getLevel() {
     return ((LayerDrawable) mSlider.getProgressDrawable())
         .findDrawableByLayerId(android.R.id.progress)
         .getLevel();
@@ -176,37 +181,42 @@ class ReactSliderDrawableHelper {
   void setVisible(@SliderDrawable int type, boolean visible) {
     Drawable drawable = getDrawable(type);
     drawable.setAlpha(visible ? 255 : 0);
+    if (type == SliderDrawable.THUMB) {
+      Log.d("Sliderr", "setVisible: " + mSlider.getBackground().getState().length + " " + mBackgroundState.length);
+      mSlider.getBackground().setState(visible ? mBackgroundState : new int[]{});
+      mSlider.getBackground().jumpToCurrentState();
+    }
   }
 
   void onTouchEvent(MotionEvent event) {
     mThumbDrawableHelper.onTouchEvent(event);
   }
 
-  @SuppressWarnings("unused")
-  class ThumbDrawableHelper {
+  @SuppressWarnings({"unused", "WeakerAccess"})
+  static class ScaleAnimator {
 
     private float mScale = 1;
     private final AnimatorSet mScaleAnimator;
 
-    ThumbDrawableHelper() {
+    ScaleAnimator() {
       mScaleAnimator = new AnimatorSet();
       mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
       mScaleAnimator.setDuration(ANIM_DURATION);
       mScaleAnimator.setStartDelay(ANIM_DELAY);
     }
 
-    private Drawable get() {
-      return mSlider.getThumb();
-    };
+    public boolean shouldAnimate() {
+      return false;
+    }
 
     private void animate(float scale) {
       if (mScaleAnimator.isRunning()) {
         mScaleAnimator.cancel();
       }
-      if (mIsCustomThumb) {
+      if (shouldAnimate()) {
         ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(
             this,
-            Property.of(ThumbDrawableHelper.class, Float.class, "scale"),
+            Property.of(ScaleAnimator.class, Float.class, "scale"),
             scale);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
           scaleAnim.setAutoCancel(true);
@@ -228,7 +238,6 @@ class ReactSliderDrawableHelper {
      */
     public void setScale(float scale) {
       mScale = scale;
-      get().invalidateSelf();
     }
 
     void onTouchEvent(MotionEvent event) {
@@ -239,10 +248,27 @@ class ReactSliderDrawableHelper {
         animate(1);
       }
     }
+  }
+
+  private class ThumbDrawableHelper extends ScaleAnimator {
+    private Drawable get() {
+      return mSlider.getThumb();
+    };
+
+    @Override
+    public boolean shouldAnimate() {
+      return mIsCustomThumb;
+    }
+
+    @Override
+    public void setScale(float scale) {
+      super.setScale(scale);
+      get().invalidateSelf();
+    }
 
     void onPreDraw(Canvas canvas) {
       Rect bounds = get().getBounds();
-      canvas.scale(mScale * (mIsInverted ? -1 : 1), mScale, bounds.centerX(), bounds.centerY());
+      canvas.scale(getScale() * (mIsInverted ? -1 : 1), getScale(), bounds.centerX(), bounds.centerY());
     }
   }
 

@@ -40,15 +40,15 @@ const SliderContainer = (
       minimumTrackState={minimumTrack != null}
       thumbState={thumb != null}
     >      
-      <TrackWrapper>{backgroundTrack}</TrackWrapper>
-      <TrackWrapper>{maximumTrack}</TrackWrapper>
-      <TrackWrapper>{minimumTrack}</TrackWrapper>
+      <Wrapper>{backgroundTrack}</Wrapper>
+      <Wrapper>{maximumTrack}</Wrapper>
+      <Wrapper>{minimumTrack}</Wrapper>
       <Slider
         {...localProps}
         style={null}
         ref={ref}
       />
-      <Wrapper>{thumb}</Wrapper>
+      <Wrapper thumb>{thumb}</Wrapper>
     </RCTSliderContainerNativeComponent>
   );
 };
@@ -59,21 +59,10 @@ const extractChildren = (children) => children &&
     { collapsable: false }
   );
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ children, thumb }) => {
+  const Component = thumb ? View : RNCSliderProgressClippingViewNativeComponent;
   return (
-    <View
-      style={StyleSheet.absoluteFill}
-      collapsable={false}
-      pointerEvents="none"
-    >
-      {extractChildren(children)}
-    </View>
-  );
-}
-
-const TrackWrapper = ({ children }) => {
-  return (
-    <RNCSliderProgressClippingViewNativeComponent
+    <Component
       style={StyleSheet.absoluteFill}
       collapsable={false}
       pointerEvents="none"
@@ -81,7 +70,7 @@ const TrackWrapper = ({ children }) => {
       <View style={styles.default} collapsable={false}>
         {extractChildren(children)}
       </View>
-    </RNCSliderProgressClippingViewNativeComponent>
+    </Component>
   );
 }
 
