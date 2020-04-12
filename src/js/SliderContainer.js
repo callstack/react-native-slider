@@ -13,7 +13,8 @@
 import React, { useImperativeHandle } from 'react';
 import {StyleSheet, View} from 'react-native';
 import Slider from './Slider';
-import RCTSliderContainerNativeComponent, {RNCSliderProgressClippingViewNativeComponent} from './‏‏RNCSliderContainerNativeComponent';
+import RCTSliderContainerNativeComponent from './‏‏RNCSliderContainerNativeComponent';
+import ProgressClippingView from './RNCProgressClippingView';
 
 import type {Ref} from 'react';
 
@@ -60,7 +61,7 @@ const extractChildren = (children) => children &&
   );
 
 const Wrapper = ({ children, thumb }) => {
-  const Component = thumb ? View : RNCSliderProgressClippingViewNativeComponent;
+  const Component = thumb ? View : ProgressClippingView;
   return (
     <Component
       style={StyleSheet.absoluteFill}

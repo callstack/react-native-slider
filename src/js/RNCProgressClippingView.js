@@ -11,10 +11,9 @@
 'use strict';
 
 import { requireNativeComponent } from 'react-native';
-import type { RNCSliderType } from './RNCSliderNativeComponent';
 
-const RNCSliderContainerNativeComponent = ((requireNativeComponent(
-  'RNCSliderContainer',
-): any): RNCSliderType);
+const RNCSliderProgressClippingViewNativeComponent = requireNativeComponent(
+  'RNCSliderProgressClippingView',
+);
 
-export default RNCSliderContainerNativeComponent;
+export default RNCSliderProgressClippingViewNativeComponent;
