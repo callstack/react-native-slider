@@ -17,6 +17,11 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
    * Sets a view for the track.
    */
+  backgroundTrack?: ViewHolderProp;
+
+  /**
+   * Sets a view for the track.
+   */
   maximumtrack?: ViewHolderProp;
 
   /**
@@ -39,11 +44,6 @@ export interface SliderPropsIOS extends ReactNative.ViewProps {
   minimumTrackImage?: ReactNative.ImageURISource;
 
   /**
-   * Sets an image for the thumb. Only static images are supported.
-   */
-  thumbImage?: ReactNative.ImageURISource;
-
-  /**
    * Assigns a single image for the track. Only static images
    * are supported. The center pixel of the image will be stretched
    * to fill the track.
@@ -57,6 +57,11 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
    * Default value is false.
    */
   disabled?: boolean;
+
+  /**
+   * Sets an image for the thumb. Only static images are supported.
+   */
+  thumbImage?: ReactNative.ImageURISource;
 
   /**
    * The color used for the track to the right of the button.
