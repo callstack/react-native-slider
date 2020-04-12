@@ -35,6 +35,10 @@ const SliderContainer = (
   return (
     <RCTSliderContainerNativeComponent
       {...localProps}
+      backgroundTrackState={backgroundTrack != null}
+      maximumTrackState={maximumTrack != null}
+      minimumTrackState={minimumTrack != null}
+      thumbState={thumb != null}
     >      
       <TrackWrapper>{backgroundTrack}</TrackWrapper>
       <TrackWrapper>{maximumTrack}</TrackWrapper>

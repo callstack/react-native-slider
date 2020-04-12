@@ -146,11 +146,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     return slider;
   }
 
-  @Override
-  public void onDropViewInstance(@Nonnull ReactSlider view) {
-    view.drawableHelper.tearDown();
-  }
-
   @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
   public void setEnabled(ReactSlider view, boolean enabled) {
     view.setEnabled(enabled);

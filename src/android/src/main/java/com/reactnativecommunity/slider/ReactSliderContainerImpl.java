@@ -1,12 +1,8 @@
 package com.reactnativecommunity.slider;
 
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.facebook.react.views.view.ReactViewGroup;
 import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
@@ -14,10 +10,9 @@ import com.reactnativecommunity.slider.ReactSliderProgressHelper.ResizeMode;
 
 import java.util.ArrayList;
 
-public class ReactSliderContainerImpl extends ReactViewGroup implements ReactSliderContainer {
+public class ReactSliderContainerImpl extends ReactSliderContainer {
 
   private boolean mIsInverted = false;
-  private Rect mBounds;
   private final ReactSliderProgressHelper mMinimumTrackHelper;
   private final ReactSliderProgressHelper mMaximumTrackHelper;
   private final ReactSliderProgressHelper mBackgroundTrackHelper;
@@ -55,8 +50,14 @@ public class ReactSliderContainerImpl extends ReactViewGroup implements ReactSli
       attach((ReactSlider) child);
     }
     int index = indexOfChild(child);
+    mBackgroundTrackHelper.attach(index, child);
     mMaximumTrackHelper.attach(index, child);
     mMinimumTrackHelper.attach(index, child);
+    mThumbHelper.attach(index, child);
+  }
+
+  private ReactSlider getSlider() {
+    return (ReactSlider) getChildAt(SliderDrawable.SLIDER);
   }
 
   @Override
@@ -97,66 +98,45 @@ public class ReactSliderContainerImpl extends ReactViewGroup implements ReactSli
     invalidate();
   }
 
-  private ReactSlider getSlider() {
-    return (ReactSlider) getChildAt(SliderDrawable.SLIDER);
+  @Override
+  public void setLevel(int level) {
+    mBackgroundTrackHelper.setLevel(level);
+    mMaximumTrackHelper.setLevel(level);
+    mMinimumTrackHelper.setLevel(level);
+    mThumbHelper.setLevel(level);
   }
 
   @Override
-  public View getViewByType(@SliderDrawable int type) {
-    return getChildAt(type);
-  }
-
-  private PointF getThumbSize() {
-    View thumb = getViewByType(SliderDrawable.THUMB);
-    if (thumb instanceof ViewGroup) {
-      View inner = ((ViewGroup) thumb).getChildAt(0);
-      if (inner != null) {
-        int size = Math.min(inner.getWidth(), inner.getHeight());
-        getSlider().setThumbOffset(size / 2);
-        return new PointF(size, size);
-      }
+  Rect getSliderBounds() {
+    Rect bounds = new Rect();
+    ReactSlider slider = getSlider();
+    if (slider != null) {
+      bounds.set(0,0, slider.getWidth(), slider.getHeight());
     }
-    Rect bounds = getSlider().getThumb().getBounds();
-    return new PointF(bounds.width(), bounds.height());
+    return bounds;
   }
 
-  private Point getIntrinsicThumbSize() {
-    Drawable drawable = getSlider().getThumb();
-    return new Point(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-  }
-
-  public void setLevel(int level) {
-    mMaximumTrackHelper.setLevel(level);
-    mMinimumTrackHelper.setLevel(level);
-    setThumbLevel(level);
-  }
-
-  private void setThumbLevel(int level) {
-    //getSlider().getThumbOffset()
-    View thumb = getViewByType(SliderDrawable.THUMB);
-    PointF thumbSize = getThumbSize();
-    float scale = level * 1f / 10000;
-    float translateX = mBounds.width() * scale - (getIntrinsicThumbSize().x) / 2;
-    thumb.setTranslationX(translateX);
-    thumb.setTranslationY((-thumbSize.y + mBounds.height()) / 2);
-  }
-
+  @Override
   public void setBounds(Rect bounds) {
-    mBounds = bounds;
+    mBackgroundTrackHelper.setBounds(bounds);
     mMaximumTrackHelper.setBounds(bounds);
     mMinimumTrackHelper.setBounds(bounds);
+    mThumbHelper.setBounds(bounds);
     refresh();
+  }
+
+  @Override
+  public void setThumbBounds(Rect bounds) {
+    mThumbHelper.setThumbBounds(bounds);
   }
 
   private void refresh() {
-    ReactSlider slider = getSlider();
-    slider.setProgress(slider.getProgress());
-  }
-
-  @Override
-  protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-    super.onLayout(changed, left, top, right, bottom);
-    refresh();
+    runOnSlider(new SliderRunnable() {
+      @Override
+      public void run(ReactSlider slider) {
+        setLevel(slider.drawableHelper.getProgress());
+      }
+    });
   }
 
   @Override

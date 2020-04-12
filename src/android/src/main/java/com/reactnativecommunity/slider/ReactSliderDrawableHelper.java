@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class ReactSliderDrawableHelper {
+class ReactSliderDrawableHelper {
 
   static final int MAX_LEVEL = 10000;
   private static long ANIM_DURATION = 400;
@@ -59,20 +60,32 @@ public class ReactSliderDrawableHelper {
   private boolean mIsCustomThumb = false;
   private final ThumbDrawableHelper mThumbDrawableHelper;
 
-  public ReactSliderDrawableHelper(ReactSlider slider) {
+  ReactSliderDrawableHelper(ReactSlider slider) {
     mSlider = slider;
     mOriginalThumb = slider.getThumb().mutate();
     mThumbDrawableHelper = new ThumbDrawableHelper();
     setViewBackgroundDrawable();
+
+    slider.setThumb(new LayerDrawable(new Drawable[]{mOriginalThumb}) {
+      @Override
+      protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+        if (mSlider.getParent() instanceof ReactSliderContainer) {
+          ((ReactSliderContainer) mSlider.getParent()).setThumbBounds(bounds);
+        }
+      }
+    });
+
+
     LayerDrawable outDrawable = (LayerDrawable) slider.getProgressDrawable().getCurrent().mutate();
     Drawable progress = outDrawable.findDrawableByLayerId(android.R.id.progress).mutate();
     Drawable background = outDrawable.findDrawableByLayerId(android.R.id.background).mutate();
 
-    outDrawable.setDrawableByLayerId(android.R.id.progress, new LayerDrawable(new Drawable[]{progress}) {
+    LayerDrawable progressWrapper = new LayerDrawable(new Drawable[]{progress}) {
       @Override
       protected boolean onLevelChange(int level) {
-        if (mSlider.getParent() instanceof ReactSliderContainerImpl) {
-          ((ReactSliderContainerImpl) mSlider.getParent()).setLevel(level);
+        if (mSlider.getParent() instanceof ReactSliderContainer) {
+          ((ReactSliderContainer) mSlider.getParent()).setLevel(level);
         }
         return super.onLevelChange(level);
       }
@@ -80,11 +93,13 @@ public class ReactSliderDrawableHelper {
       @Override
       protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        if (mSlider.getParent() instanceof ReactSliderContainerImpl) {
-          ((ReactSliderContainerImpl) mSlider.getParent()).setBounds(bounds);
+        if (mSlider.getParent() instanceof ReactSliderContainer) {
+          ((ReactSliderContainer) mSlider.getParent()).setBounds(bounds);
         }
       }
-    });
+    };
+
+    outDrawable.setDrawableByLayerId(android.R.id.progress, progressWrapper);
     outDrawable.setDrawableByLayerId(android.R.id.background, background);
     slider.setProgressDrawable(outDrawable);
   }
@@ -113,8 +128,14 @@ public class ReactSliderDrawableHelper {
     ((ColorDrawable) ((LayerDrawable) mSlider.getBackground()).getDrawable(0)).setColor(color);
   }
 
-  Drawable getDrawable(@SliderDrawable int type) {
+  private Drawable getDrawable(@SliderDrawable int type) {
     return getDrawable(mSlider, type);
+  }
+
+  int getProgress() {
+    return ((LayerDrawable) mSlider.getProgressDrawable())
+        .findDrawableByLayerId(android.R.id.progress)
+        .getLevel();
   }
 
   void setTintColor(@SliderDrawable int type, Integer color) {
@@ -124,14 +145,6 @@ public class ReactSliderDrawableHelper {
     } else {
       drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
-    /*
-    if (color == null) {
-      mPaint.setColor(Color.TRANSPARENT);
-    } else {
-      mPaint.setColor(color);
-    }
-
-     */
   }
 
   void setThumbImage(final String uri) {
@@ -167,16 +180,6 @@ public class ReactSliderDrawableHelper {
 
   void onTouchEvent(MotionEvent event) {
     mThumbDrawableHelper.onTouchEvent(event);
-  }
-
-  public void tearDown() {
-    /*
-    mMinimumTrackDrawableHandler.tearDown();
-    mMaximumTrackDrawableHandler.tearDown();
-    mBackgroundDrawableHandler.tearDown();
-    mThumbDrawableHandler.tearDown();
-
-     */
   }
 
   @SuppressWarnings("unused")

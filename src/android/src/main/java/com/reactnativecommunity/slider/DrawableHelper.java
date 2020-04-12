@@ -3,27 +3,30 @@ package com.reactnativecommunity.slider;
 import android.graphics.Rect;
 import android.view.View;
 
-public abstract class DrawableHelper {
-  private View mView;
-  private final SliderContainer mDrawableContainer;
-  private final Rect mBounds = new Rect();
+import com.reactnativecommunity.slider.ReactSliderDrawableHelper.SliderDrawable;
 
-  DrawableHelper(SliderContainer drawableContainer) {
-    mDrawableContainer = drawableContainer;
+abstract class DrawableHelper {
+  private View mView;
+  private final ReactSliderContainer mContainer;
+  private final Rect mBounds = new Rect();
+  private boolean mState = false;
+  private final @SliderDrawable int mType;
+
+  DrawableHelper(ReactSliderContainer sliderContainer, @SliderDrawable int type) {
+    mContainer = sliderContainer;
+    mType = type;
   }
 
-  abstract void tryAttach(int index, View view);
-
-  final void attach(View view) {
-    mView = view;
+  final void attach(int index, View view) {
+    if (index == mType) mView = view;
   }
 
   final View getView () {
     return mView;
   }
 
-  SliderContainer getContainer() {
-    return mDrawableContainer;
+  ReactSliderContainer getContainer() {
+    return mContainer;
   }
 
   Rect getBounds() {
@@ -32,5 +35,21 @@ public abstract class DrawableHelper {
 
   void setBounds(Rect bounds) {
     mBounds.set(bounds);
+  }
+
+  abstract void setLevel(int level);
+
+  final boolean isStateful() {
+    return mState;
+  }
+
+  final void setState(boolean state) {
+    mState = state;
+    mContainer.runOnSlider(new ReactSliderContainer.SliderRunnable() {
+      @Override
+      public void run(ReactSlider slider) {
+        slider.drawableHelper.setVisible(mType, !mState);
+      }
+    });
   }
 }
