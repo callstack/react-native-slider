@@ -11,12 +11,12 @@
 'use strict';
 
 import React, { useImperativeHandle } from 'react';
-import {StyleSheet, View} from 'react-native';
+import { StyleSheet, View, I18nManager } from 'react-native';
 import Slider from './Slider';
 import RCTSliderContainerNativeComponent from './‏‏RNCSliderContainerNativeComponent';
 import ProgressClippingView from './RNCProgressClippingView';
 
-import type {Ref} from 'react';
+import type { Ref } from 'react';
 
 const SliderContainer = (
   props: Props,
@@ -40,7 +40,7 @@ const SliderContainer = (
       maximumTrackState={maximumTrack != null}
       minimumTrackState={minimumTrack != null}
       thumbState={thumb != null}
-    >      
+    >
       <Wrapper>{backgroundTrack}</Wrapper>
       <Wrapper>{maximumTrack}</Wrapper>
       <Wrapper>{minimumTrack}</Wrapper>
@@ -68,7 +68,7 @@ const Wrapper = ({ children, thumb }) => {
       collapsable={false}
       pointerEvents="none"
     >
-      <View style={styles.default} collapsable={false}>
+      <View style={thumb ? styles.thumb : styles.default} collapsable={false}>
         {extractChildren(children)}
       </View>
     </Component>
@@ -78,6 +78,10 @@ const Wrapper = ({ children, thumb }) => {
 const styles = StyleSheet.create({
   default: {
     flex: 1
+  },
+  thumb: {
+    flex: 1,
+    alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start'
   }
 })
 
