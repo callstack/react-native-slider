@@ -95,6 +95,7 @@ public class ReactSliderContainerImpl extends ReactSliderContainer {
   public void setInverted(boolean inverted) {
     mIsInverted = inverted;
     invalidate();
+    refresh();
   }
 
   void setResizeMode(@SliderDrawable int type, @ResizeMode String resizeMode) {
