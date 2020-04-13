@@ -116,7 +116,7 @@ public class ReactSlider extends AppCompatSeekBar {
   void setInverted(boolean inverted) {
     mIsInverted = inverted;
     drawableHelper.setInverted(mIsInverted);
-    setScaleX(getScaleX());
+    setScaleX(Math.abs(getScaleX()));
     invalidate();
   }
 
