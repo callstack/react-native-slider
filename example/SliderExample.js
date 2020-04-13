@@ -216,7 +216,7 @@ exports.examples = [
       return <SliderExample
         value={0.6}
         inverted
-        style={{transform:[{scale:1}]}}
+        style={{ transform: [{ scale: 1 }] }}
       />;
     },
   },
@@ -280,6 +280,7 @@ exports.examples = [
       const ref = useRef();
 
       const [a, setA] = useState(0);
+      const [inverted, setInverted] = useState(false);
 
       useEffect(() => {
         let t = setInterval(() => {
@@ -287,6 +288,13 @@ exports.examples = [
         }, 1000);
         return () => clearInterval(t);
       }, [a]);
+
+      useEffect(() => {
+        let t = setInterval(() => {
+          setInverted(!inverted);
+        }, 5000);
+        return () => clearInterval(t);
+      }, [inverted]);
 
       useEffect(() => {
         let t = setTimeout(() => ref.current && ref.current.setNativeProps({ minimumTrackViewTag: null }), 15000);
@@ -317,7 +325,7 @@ exports.examples = [
       return (
         <SliderExample
           value={0}
-          inverted
+          inverted={inverted}
           minimumValue={-1}
           maximumValue={2}
           style={{ width: 300 }}
@@ -336,7 +344,7 @@ exports.examples = [
             style={[customSliderStyles.minimumTrackContainer, { transform: [{ rotateY: 0 }, { scaleY: scale1 }] }]}
             collapsable={false}
           >
-            <Animated.View style={[customSliderStyles.minimumTrack1, {  transform: [{ rotateY: Animated.divide(rotate, 6) }] }]} />
+            <Animated.View style={[customSliderStyles.minimumTrack1, { transform: [{ rotateY: Animated.divide(rotate, 6) }] }]} />
             <View style={customSliderStyles.minimumTrack2} ref={track}>
               <Animated.View style={[customSliderStyles.minimumTrack2TextContainer, { transform: [{ scale }, { rotateY: '180deg' }] }]}>
                 <Animated.Text>AWESOME</Animated.Text>
@@ -362,7 +370,7 @@ const customSliderStyles = StyleSheet.create({
     justifyContent: 'center',
     width: 40,
     height: 40,
-    backgroundColor: 'pink', 
+    backgroundColor: 'pink',
     borderRadius: 50
   },
   thumb: {
