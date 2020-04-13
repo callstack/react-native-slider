@@ -6,22 +6,16 @@
  */
 package com.reactnativecommunity.slider;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.widget.AppCompatSeekBar;
-
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
-import java.net.URL;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import androidx.appcompat.widget.AppCompatSeekBar;
 
 import javax.annotation.Nullable;
 
@@ -60,9 +54,14 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
+  private boolean mIsInverted = false;
+
+  final ReactSliderDrawableHelper drawableHelper;
+
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
     disableStateListAnimatorIfNeeded();
+    drawableHelper = new ReactSliderDrawableHelper(this);
   }
 
   private void disableStateListAnimatorIfNeeded() {
@@ -72,6 +71,22 @@ public class ReactSlider extends AppCompatSeekBar {
         && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       super.setStateListAnimator(null);
     }
+  }
+
+  /**
+   * see {@link ReactSliderDrawableHelper#setViewBackgroundDrawable()}, {@link ReactSliderDrawableHelper#handleSetBackgroundColor(int)}
+   * @param color
+   */
+  @Override
+  public void setBackgroundColor(int color) {
+    drawableHelper.handleSetBackgroundColor(color);
+  }
+
+  @Override
+  public void setThumb(Drawable thumb) {
+    super.setThumb(thumb);
+    // adjust ripple immediately in case a touch is in progress, fixes system default behaviour
+    getBackground().setBounds(thumb.copyBounds());
   }
 
   /* package */ void setMaxValue(double max) {
@@ -94,14 +109,31 @@ public class ReactSlider extends AppCompatSeekBar {
     updateAll();
   }
 
+  public boolean isInverted() {
+    return mIsInverted;
+  }
+
+  void setInverted(boolean inverted) {
+    mIsInverted = inverted;
+    drawableHelper.setInverted(mIsInverted);
+    setScaleX(Math.abs(getScaleX()));
+    invalidate();
+  }
+
+  @Override
+  public void setScaleX(float scaleX) {
+    super.setScaleX(scaleX * (mIsInverted ? -1 : 1));
+  }
+
   /**
-   * Convert SeekBar's native progress value (e.g. 0..100) to a value passed to JS (e.g. -1.0..2.5).
+   * Convert SeekBar's native progress value (e.g. 0..{@link ReactSlider#getMax()}) to a value passed to JS (e.g. -1.0..2.5).
    */
   public double toRealProgress(int seekBarProgress) {
-    if (seekBarProgress == getMax()) {
+    double progress = seekBarProgress;
+    if (progress == getMax()) {
       return mMaxValue;
     }
-    return seekBarProgress * getStepValue() + mMinValue;
+    return progress * getStepValue() + mMinValue;
   }
 
   /** Update underlying native SeekBar's values. */
@@ -126,49 +158,28 @@ public class ReactSlider extends AppCompatSeekBar {
     return mStep > 0 ? mStep : mStepCalculated;
   }
 
-  private BitmapDrawable getBitmapDrawable(final String uri) {
-    BitmapDrawable bitmapDrawable = null;
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    Future<BitmapDrawable> future = executorService.submit(new Callable<BitmapDrawable>() {
-      @Override
-      public BitmapDrawable call() {
-        BitmapDrawable bitmapDrawable = null;
-        try {
-          Bitmap bitmap = null;
-          if (uri.startsWith("http://") || uri.startsWith("https://") ||
-              uri.startsWith("file://") || uri.startsWith("asset://") || uri.startsWith("data:")) {
-            bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
-          } else {
-            int drawableId = getResources()
-                .getIdentifier(uri, "drawable", getContext()
-                .getPackageName());
-            bitmap = BitmapFactory.decodeResource(getResources(), drawableId);
-          }
-
-          bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        return bitmapDrawable;
-      }
-    });
-    try {
-      bitmapDrawable = future.get();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return bitmapDrawable;
+  @SuppressLint("ClickableViewAccessibility")
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    boolean retVal = super.onTouchEvent(event);
+    drawableHelper.onTouchEvent(event);
+    return retVal;
+  }
+/*
+  @Override
+  protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    super.onSizeChanged(w, h, oldw, oldh);
+    int dh = h - oldh;
+    Rect bounds = getProgressDrawable().copyBounds();
+    bounds.bottom += dh;
+    ((LayerDrawable) getProgressDrawable()).findDrawableByLayerId(android.R.id.progress).setBounds(bounds);
+    ((LayerDrawable) getProgressDrawable()).findDrawableByLayerId(android.R.id.background).setBounds(bounds);
+    bounds = getThumb().copyBounds();
+    bounds.top += dh / 2;
+    bounds.bottom += dh / 2;
+    getThumb().setBounds(bounds);
+    invalidate();
   }
 
-  public void setThumbImage(final String uri) {
-    if (uri != null) {
-      setThumb(getBitmapDrawable(uri));
-      // Enable alpha channel for the thumbImage
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        setSplitTrack(false);
-      }
-    } else {
-      setThumb(getThumb());
-    }
-  }
+ */
 }
