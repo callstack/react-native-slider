@@ -8,19 +8,24 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "js/Slider.js",
+  "main": "dist/Slider.js",
   "types": "typings/index.d.ts",
   "keywords": [
     "react-native",
     "react native",
     "slider"
   ],
+  "scripts": {
+    "prepare": "babel --out-dir dist js"
+  },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
     "@babel/core": "^7.6.2",
+    "@babel/preset-flow": "^7.9.0",
     "@babel/runtime": "^7.6.2",
     "@react-native-community/eslint-config": "0.0.5",
     "babel-jest": "^24.9.0",
