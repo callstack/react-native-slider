@@ -27,6 +27,9 @@ To use this library you need to ensure you are using the correct version of Reac
 | `2.x.x`                                  | `>= 0.60`                     |
 | [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0)  | `<= 0.59`                     |
 
+## Web support
+
+For web support please use `@react-native-community/slider@next`
 
 ## Migrating from the core `react-native` module
 This module was created when the Slider was split out from the core of React Native. To migrate to this module you need to follow the installation instructions above and then change you imports from:
