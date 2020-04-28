@@ -147,6 +147,22 @@ type Props = $ReadOnly<{|
    * Default value is false.
    */
   inverted?: ?boolean,
+
+  /**
+   * A string of one or more words to be announced by the screen reader.
+   * Otherwise, it will announce the value as a percentage.
+   * Requires passing a value to `accessibilityIncrements` to work correctly.
+   * Should be a plural word, as singular units will be handled.
+   */
+  accessibilityUnits?: string,
+
+  /**
+   * An array of values that represent the different increments displayed
+   * by the slider. All the values passed into this prop must be strings.
+   * Requires passing a value to `accessibilityUnits` to work correctly.
+   * The number of elements must be the same as `maximumValue`.
+   */
+  accessibilityIncrements?: Array<string>,
 |}>;
 
 /**

@@ -12,9 +12,9 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.SeekBar;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.LayoutShadowNode;
@@ -27,8 +27,9 @@ import com.facebook.yoga.YogaMeasureFunction;
 import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Nullable;
 
 /**
@@ -211,6 +212,21 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   public void setInverted(ReactSlider view, boolean inverted) {
     if (inverted) view.setScaleX(-1f);
     else view.setScaleX(1f);
+  }
+
+  @ReactProp(name = "accessibilityUnits")
+  public void setAccessibilityUnits(ReactSlider view, String accessibilityUnits) {
+    view.setAccessibilityUnits(accessibilityUnits);
+  }
+
+  @ReactProp(name = "accessibilityIncrements")
+  public void setAccessibilityIncrements(ReactSlider view, ReadableArray accessibilityIncrements) {
+    List objectList = accessibilityIncrements.toArrayList();
+    List<String> stringList = new ArrayList<>();
+    for(Object item: objectList) {
+      stringList.add((String)item);
+    }
+    view.setAccessibilityIncrements(stringList);
   }
 
   @Override

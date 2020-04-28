@@ -21,8 +21,8 @@
 @property (nonatomic, strong) UIImage *trackImage;
 @property (nonatomic, strong) UIImage *minimumTrackImage;
 @property (nonatomic, strong) UIImage *maximumTrackImage;
-
 @property (nonatomic, strong) UIImage *thumbImage;
-
+@property (nonatomic, strong) NSString *accessibilityUnits;
+@property (nonatomic, strong) NSArray *accessibilityIncrements;
 
 @end
