@@ -108,6 +108,21 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
    */
   inverted?: boolean;
 
+  /**
+   * A string of one or more words to be announced by the screen reader.
+   * Otherwise, it will announce the value as a percentage.
+   * Requires passing a value to `accessibilityIncrements` to work correctly.
+   * Should be a plural word, as singular units will be handled.
+   */
+  accessibilityUnits?: string;
+
+  /**
+   * A string of one or more words to be announced by the screen reader.
+   * Otherwise, it will announce the value as a percentage.
+   * Requires passing a value to `accessibilityIncrements` to work correctly.
+   * Should be a plural word, as singular units will be handled.
+   */
+  accessibilityIncrements?: Array<string>;
 }
 
 /**

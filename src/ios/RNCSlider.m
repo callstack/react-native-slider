@@ -21,12 +21,30 @@
 {
   _unclippedValue = value;
   super.value = value;
+  [self setupAccessibility:value];
 }
 
 - (void)setValue:(float)value animated:(BOOL)animated
 {
   _unclippedValue = value;
   [super setValue:value animated:animated];
+  [self setupAccessibility:value];
+}
+
+- (void)setupAccessibility:(float)value
+{
+  if (self.accessibilityUnits && self.accessibilityIncrements && [self.accessibilityIncrements count] - 1 == (int)self.maximumValue) {
+    int index = (int)value;
+    NSString *sliderValue = (NSString *)[self.accessibilityIncrements objectAtIndex:index];
+    NSUInteger stringLength = [self.accessibilityUnits length];
+
+    NSString *spokenUnits = [NSString stringWithString:self.accessibilityUnits];
+    if (sliderValue && [sliderValue intValue] == 1) {
+      spokenUnits = [spokenUnits substringToIndex:stringLength-1];
+    }
+    
+    self.accessibilityValue = [NSString stringWithFormat:@"%@ %@", sliderValue, spokenUnits];
+  }
 }
 
 - (void)setMinimumValue:(float)minimumValue
@@ -104,7 +122,8 @@
   }
 }
 
-- (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
+- (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
+{
     return YES;
 }
 

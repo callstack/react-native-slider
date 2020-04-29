@@ -27,6 +27,8 @@ type Event = SyntheticEvent<
 
 type NativeProps = $ReadOnly<{|
   ...ViewProps,
+  accessibilityUnits?: string,
+  accessibilityIncrements?: Array<string>,
   disabled?: ?boolean,
   enabled?: ?boolean,
   inverted?: ?boolean,

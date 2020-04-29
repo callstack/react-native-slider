@@ -11,18 +11,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.widget.AppCompatSeekBar;
-
 import android.util.AttributeSet;
-
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+import androidx.appcompat.widget.AppCompatSeekBar;
 import java.net.URL;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import javax.annotation.Nullable;
 
 /**
@@ -60,6 +60,10 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
+  private String mAccessibilityUnits;
+
+  private List<String> mAccessibilityIncrements;
+
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
     disableStateListAnimatorIfNeeded();
@@ -93,6 +97,64 @@ public class ReactSlider extends AppCompatSeekBar {
     mStep = step;
     updateAll();
   }
+
+  void setAccessibilityUnits(String accessibilityUnits) {
+    mAccessibilityUnits = accessibilityUnits;
+  }
+
+  void setAccessibilityIncrements(List<String> accessibilityIncrements) {
+    mAccessibilityIncrements = accessibilityIncrements;
+  }
+
+  @Override
+  public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+    super.onPopulateAccessibilityEvent(event);
+    if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED ||
+        (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED && this.isAccessibilityFocused())) {
+      this.setupAccessibility();
+    }
+  }
+
+  @Override
+  public void announceForAccessibility(CharSequence text) {
+    Context ctx = this.getContext();
+    final AccessibilityManager manager = (AccessibilityManager) ctx.getSystemService(Context.ACCESSIBILITY_SERVICE);
+
+    if (manager.isEnabled()) {
+      final AccessibilityEvent e = AccessibilityEvent.obtain();
+      e.setEventType(AccessibilityEvent.TYPE_ANNOUNCEMENT);
+      e.setClassName(this.getClass().getName());
+      e.setPackageName(ctx.getPackageName());
+      e.getText().add(text);
+
+      TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+          manager.sendAccessibilityEvent(e);
+        }
+      };
+
+      Timer timer = new Timer();
+      timer.schedule(task, 1000);
+    }
+  }
+
+  private void setupAccessibility() {
+    if (mAccessibilityUnits != null && mAccessibilityIncrements != null && mAccessibilityIncrements.size() - 1 == (int)mMaxValue) {
+      int index = (int)mValue;
+      String sliderValue = mAccessibilityIncrements.get(index);
+      int stringLength = mAccessibilityUnits.length();
+
+      String spokenUnits = mAccessibilityUnits;
+      if (sliderValue != null && Integer.parseInt(sliderValue) == 1) {
+        spokenUnits = spokenUnits.substring(0, stringLength - 1);
+      }
+
+      this.announceForAccessibility(String.format("%s %s", sliderValue, spokenUnits));
+    }
+  }
+
+
 
   /**
    * Convert SeekBar's native progress value (e.g. 0..100) to a value passed to JS (e.g. -1.0..2.5).
