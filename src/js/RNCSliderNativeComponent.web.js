@@ -268,24 +268,30 @@ const RCTSliderWebComponent = React.forwardRef(
         if (value !== withinBounds) {
           setValue(withinBounds);
           onValueChange(withinBounds);
+          return withinBounds;
         }
+        return hardRounded;
       },
       [minimumValue, maximumValue, value, onValueChange],
     );
 
-    const onTouchEnd = () => {
-      onSlidingComplete(value);
-    };
-
-    const onMove = event => {
-      const {locationX: x} = event.nativeEvent;
+    const getValueFromNativeEvent = ({locationX: x}) => {
       const width = containerSize.current ? containerSize.current.width : 1;
       const newValue = inverted
         ? maximumValue - ((maximumValue - minimumValue) * x) / width
         : minimumValue + ((maximumValue - minimumValue) * x) / width;
-      const roundedValue = step ? Math.round(newValue / step) * step : newValue;
-      updateValue(roundedValue);
+      return step ? Math.round(newValue / step) * step : newValue;
     };
+
+    const onTouchEnd = ({nativeEvent}) => {
+      const newValue = updateValue(getValueFromNativeEvent(nativeEvent));
+      onSlidingComplete(newValue);
+    };
+
+    const onMove = ({nativeEvent}) => {
+      updateValue(getValueFromNativeEvent(nativeEvent));
+    };
+
     const accessibilityActions = event => {
       const tenth = (maximumValue - minimumValue) / 10;
       switch (event.nativeEvent.actionName) {
