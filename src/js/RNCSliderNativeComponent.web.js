@@ -175,7 +175,9 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const containerStyle = StyleSheet.compose(
       {
-        width: '100%',
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: 'auto',
         flexDirection: 'row',
         userSelect: 'none',
         alignItems: 'center',
