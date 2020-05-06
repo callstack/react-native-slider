@@ -17,7 +17,7 @@ or
 
 and install cocoapods
 
-`pod install`
+`npx pod-install`
 
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
