@@ -175,7 +175,9 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const containerStyle = StyleSheet.compose(
       {
-        width: '100%',
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: 'auto',
         flexDirection: 'row',
         userSelect: 'none',
         alignItems: 'center',
@@ -188,19 +190,18 @@ const RCTSliderWebComponent = React.forwardRef(
       height: trackHeight,
       borderRadius: trackHeight / 2,
       userSelect: 'none',
-      flexGrow: 1,
     };
 
     const minimumTrackStyle = {
       ...trackStyle,
       backgroundColor: minimumTrackTintColor,
-      flexBasis: minPercent * 100 + '%',
+      flexGrow: minPercent * 100,
     };
 
     const maximumTrackStyle = {
       ...trackStyle,
       backgroundColor: maximumTrackTintColor,
-      flexBasis: maxPercent * 100 + '%',
+      flexGrow: maxPercent * 100,
     };
 
     // const width = (containerSize.current ? containerSize.current.width : 0)
