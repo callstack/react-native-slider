@@ -6,7 +6,7 @@
  *
  */
 
-import React from 'react';
+import React, {useCallback} from 'react';
 import {View, StyleSheet} from 'react-native';
 
 // import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
@@ -154,19 +154,37 @@ const RCTSliderWebComponent = React.forwardRef(
     },
     forwardedRef,
   ) => {
-    const onValueChange = value =>
-      onRNCSliderValueChange &&
-      onRNCSliderValueChange({nativeEvent: {fromUser: true, value}});
-    const onSlidingStart = value =>
-      onRNCSliderSlidingStart &&
-      onRNCSliderSlidingStart({nativeEvent: {fromUser: true, value}});
-    const onSlidingComplete = value =>
-      onRNCSliderSlidingComplete &&
-      onRNCSliderSlidingComplete({nativeEvent: {fromUser: true, value}});
+    const onValueChange = useCallback(
+      value => {
+        onRNCSliderValueChange &&
+          onRNCSliderValueChange({nativeEvent: {fromUser: true, value}});
+      },
+      [onRNCSliderValueChange],
+    );
+
+    const onSlidingStart = useCallback(
+      value => {
+        onRNCSliderSlidingStart &&
+          onRNCSliderSlidingStart({nativeEvent: {fromUser: true, value}});
+      },
+      [onRNCSliderSlidingStart],
+    );
+
+    const onSlidingComplete = useCallback(
+      value => {
+        onRNCSliderSlidingComplete &&
+          onRNCSliderSlidingComplete({nativeEvent: {fromUser: true, value}});
+      },
+      [onRNCSliderSlidingComplete],
+    );
 
     const containerSize = React.useRef({width: 0, height: 0});
     const containerRef = forwardedRef || React.createRef();
     const [value, setValue] = React.useState(initialValue || minimumValue);
+    React.useLayoutEffect(() => updateValue(initialValue), [
+      initialValue,
+      updateValue,
+    ]);
 
     const percentageValue =
       (value - minimumValue) / (maximumValue - minimumValue);
@@ -223,17 +241,20 @@ const RCTSliderWebComponent = React.forwardRef(
       thumbStyle,
     );
 
-    const updateValue = newValue => {
-      // Ensure that the new value is still between the bounds
-      const withinBounds = Math.max(
-        minimumValue,
-        Math.min(newValue, maximumValue),
-      );
-      if (value !== withinBounds) {
-        setValue(withinBounds);
-        onValueChange(withinBounds);
-      }
-    };
+    const updateValue = useCallback(
+      newValue => {
+        // Ensure that the new value is still between the bounds
+        const withinBounds = Math.max(
+          minimumValue,
+          Math.min(newValue, maximumValue),
+        );
+        if (value !== withinBounds) {
+          setValue(withinBounds);
+          onValueChange(value);
+        }
+      },
+      [minimumValue, maximumValue, value, onValueChange],
+    );
 
     const onTouchEnd = () => {
       onSlidingComplete(value);
