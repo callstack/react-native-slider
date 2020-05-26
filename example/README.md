@@ -3,8 +3,7 @@
 ## Set up
 
 - Clone the repository 
-- Run `yarn` to install dependencies
-- Run `yarn build` in `src` to generate build artifacts
+- Run `yarn` in root to install dependencies and again in `src` to create dist build
 - Run `npx pod-install` from the `example` directory
 
 ## Start the app
