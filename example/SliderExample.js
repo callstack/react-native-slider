@@ -106,10 +106,10 @@ const styles = StyleSheet.create({
   },
 });
 
-exports.title = '<Slider>';
-exports.displayName = 'SliderExample';
-exports.description = 'Slider input for numeric values';
-exports.examples = [
+export const title = '<Slider>';
+export const displayName = 'SliderExample';
+export const description = 'Slider input for numeric values';
+export const examples = [
   {
     title: 'Default settings',
     render(): Element<any> {

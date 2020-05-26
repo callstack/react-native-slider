@@ -58,3 +58,7 @@ buck-out/
 src/dist
 
 */ios/Pods
+
+# Expo
+.expo
+web-build

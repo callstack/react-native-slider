@@ -5,11 +5,16 @@
   "scripts": {
     "start": "node ../node_modules/react-native/local-cli/cli.js start",
     "run:android": "react-native run-android",
-    "run:ios": "react-native run-ios"
+    "run:ios": "react-native run-ios",
+    "run:web": "expo web"
   },
   "dependencies": {
+    "@react-native-community/slider": "./src",
+    "babel-preset-expo": "^8.2.1",
+    "expo": "^37.0.12",
     "react": "16.9.0",
+    "react-dom": "~16.9.0",
     "react-native": "0.61.2",
-    "@react-native-community/slider": "./src"
+    "react-native-web": "~0.11"
   }
 }
