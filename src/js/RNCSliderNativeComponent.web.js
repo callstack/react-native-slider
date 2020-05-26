@@ -241,12 +241,29 @@ const RCTSliderWebComponent = React.forwardRef(
       thumbStyle,
     );
 
+    const decimalPrecision = React.useRef(
+      calculatePrecision(minimumValue, maximumValue, step),
+    );
+    React.useEffect(() => {
+      decimalPrecision.current = calculatePrecision(
+        minimumValue,
+        maximumValue,
+        step,
+      );
+    }, [maximumValue, minimumValue, step]);
+
     const updateValue = useCallback(
       newValue => {
+        // Ensure that the value is correctly rounded
+        const hardRounded =
+          decimalPrecision.current < 20
+            ? Number.parseFloat(newValue.toFixed(decimalPrecision.current))
+            : newValue;
+
         // Ensure that the new value is still between the bounds
         const withinBounds = Math.max(
           minimumValue,
-          Math.min(newValue, maximumValue),
+          Math.min(hardRounded, maximumValue),
         );
         if (value !== withinBounds) {
           setValue(withinBounds);
@@ -322,6 +339,19 @@ const RCTSliderWebComponent = React.forwardRef(
     );
   },
 );
+
+// We should round number with the same precision as the min, max or step values if provided
+function calculatePrecision(minimumValue, maximumValue, step) {
+  if (!step) {
+    return Infinity;
+  } else {
+    // Calculate the number of decimals we can encounter in the results
+    const decimals = [minimumValue, maximumValue, step].map(
+      value => ((value + '').split('.').pop() || '').length,
+    );
+    return Math.max(...decimals);
+  }
+}
 
 RCTSliderWebComponent.displayName = 'RTCSliderWebComponent';
 
