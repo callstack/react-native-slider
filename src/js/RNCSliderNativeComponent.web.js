@@ -267,7 +267,7 @@ const RCTSliderWebComponent = React.forwardRef(
         );
         if (value !== withinBounds) {
           setValue(withinBounds);
-          onValueChange(value);
+          onValueChange(withinBounds);
         }
       },
       [minimumValue, maximumValue, value, onValueChange],
