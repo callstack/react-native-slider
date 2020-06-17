@@ -125,7 +125,7 @@ The color used for the track to the left of the button. Overrides the default bl
 
 | Type               | Required |
 | ------------------ | -------- |
-| [color](colors.md) | No       |
+| [color](https://reactnative.dev/docs/colors) | No       |
 
 ---
 
@@ -185,7 +185,7 @@ The color used for the track to the right of the button. Overrides the default g
 
 | Type               | Required |
 | ------------------ | -------- |
-| [color](colors.md) | No       |
+| [color](https://reactnative.dev/docs/colors) | No       |
 
 ---
 
@@ -226,7 +226,7 @@ Color of the foreground switch grip.
 
 | Type               | Required | Platform |
 | ------------------ | -------- | -------- |
-| [color](colors.md) | No       | Android  |
+| [color](https://reactnative.dev/docs/colors) | No       | Android  |
 
 ---
 
