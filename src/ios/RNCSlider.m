@@ -23,9 +23,12 @@
     }
     return self;
 }
+
 - (void)tapHandler:(UITapGestureRecognizer *)gesture {
     CGPoint touchPoint = [gesture locationInView:self];
-    [self setValue:touchPoint.x / self.bounds.size.width animated: YES];
+    float rangeWidth = self.maximumValue - self.minimumValue;
+    float sliderPercent = touchPoint.x / self.bounds.size.width;
+    [self setValue:self.minimumValue + (rangeWidth * sliderPercent) animated: YES];
 }
 
 - (void)setValue:(float)value
