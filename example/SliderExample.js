@@ -29,9 +29,10 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
           {this.state.value && +this.state.value.toFixed(3)}
         </Text>
         <Slider
+          step={0.5}
+          style={{width: 300, opacity: 1, height: 50, marginTop: 50}}
           {...this.props}
           onValueChange={value => this.setState({value: value})}
-          onSlidingComplete={value => this.setState({value: value})}
         />
       </View>
     );
@@ -152,9 +153,11 @@ export const examples = [
     render(): Element<any> {
       return (
         <SliderExample
-          minimumTrackTintColor={'blue'}
+          minimumTrackTintColor={'#00FF00'}
           maximumTrackTintColor={'red'}
-          value={0.5}
+          thumbImage={require('./uie_thumb_big.png')}
+          value={4}
+          maximumValue={7}
         />
       );
     },
@@ -162,13 +165,27 @@ export const examples = [
   {
     title: 'Custom thumb tint color',
     render(): Element<any> {
-      return <SliderExample thumbTintColor={'blue'} />;
+      return <SliderExample thumbTintColor={'magenta'} />;
     },
   },
   {
     title: 'Custom thumb image',
     render(): Element<any> {
       return <SliderExample thumbImage={require('./uie_thumb_big.png')} />;
+    },
+  },
+  {
+    title: 'Custom thumb (network image)',
+    platform: 'windows',
+    render(): Element<any> {
+      return (
+        <SliderExample
+          thumbImage={{
+            uri:
+              'https://cdn2.iconfinder.com/data/icons/minimalism/512/twitter.png',
+          }}
+        />
+      );
     },
   },
   {
@@ -194,6 +211,13 @@ export const examples = [
     title: 'Inverted slider direction',
     render(): Element<any> {
       return <SliderExample value={0.6} inverted />;
+    },
+  },
+  {
+    title: 'Vertical slider',
+    platform: 'windows',
+    render(): Element<any> {
+      return <SliderExample value={0.6} vertical />;
     },
   },
 ];
