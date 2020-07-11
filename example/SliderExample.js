@@ -31,6 +31,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
         <Slider
           {...this.props}
           onValueChange={value => this.setState({value: value})}
+          onSlidingComplete={value => this.setState({value: value})}
         />
       </View>
     );
