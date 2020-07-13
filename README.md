@@ -274,7 +274,7 @@ Assigns a single image for the track. Only static images are supported. The cent
 Reference object.
 
 | Type             | Required | Platform |
-| -----------------| -------- | -------- |
+| ---------------- | -------- | -------- |
 | MutableRefObject | No       | web      |
 
 ## Contributing
