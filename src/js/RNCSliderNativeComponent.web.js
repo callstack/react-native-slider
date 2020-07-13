@@ -310,6 +310,16 @@ const RCTSliderWebComponent = React.forwardRef(
       }
     };
 
+    React.useImperativeHandle(
+      forwardedRef,
+      () => ({
+        updateValue: (val) => {
+          updateValue(val);
+        },
+      }),
+      [updateValue],
+    );
+
     return (
       <View
         ref={containerRef}
@@ -347,7 +357,7 @@ function calculatePrecision(minimumValue, maximumValue, step) {
   } else {
     // Calculate the number of decimals we can encounter in the results
     const decimals = [minimumValue, maximumValue, step].map(
-      value => ((value + '').split('.').pop() || '').length,
+      (value) => ((value + '').split('.').pop() || '').length,
     );
     return Math.max(...decimals);
   }
