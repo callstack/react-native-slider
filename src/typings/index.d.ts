@@ -8,6 +8,10 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
   thumbTintColor?: string;
 }
 
+export interface SliderRef {
+  updateValue(value: number): void;
+}
+
 export interface SliderPropsIOS extends ReactNative.ViewProps {
   /**
    * Assigns a maximum track image. Only static images are supported.
@@ -123,6 +127,11 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
    * Should be a plural word, as singular units will be handled.
    */
   accessibilityIncrements?: Array<string>;
+
+  /**
+   * Reference object.
+   */
+  ref: React.MutableRefObject<SliderRef>;
 }
 
 /**

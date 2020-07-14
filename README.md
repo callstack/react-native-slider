@@ -86,6 +86,7 @@ Check out the [example project](example) for more examples.
 - [`minimumTrackImage`](#minimumtrackimage)
 - [`thumbImage`](#thumbimage)
 - [`trackImage`](#trackimage)
+- [`ref`](#ref)
 
 ---
 
@@ -265,6 +266,16 @@ Assigns a single image for the track. Only static images are supported. The cent
 | Type                   | Required | Platform |
 | ---------------------- | -------- | -------- |
 | Image.propTypes.source | No       | iOS      |
+
+---
+
+### `ref`
+
+Reference object.
+
+| Type             | Required | Platform |
+| ---------------- | -------- | -------- |
+| MutableRefObject | No       | web      |
 
 ## Contributing
 

@@ -310,6 +310,16 @@ const RCTSliderWebComponent = React.forwardRef(
       }
     };
 
+    React.useImperativeHandle(
+      forwardedRef,
+      () => ({
+        updateValue: val => {
+          updateValue(val);
+        },
+      }),
+      [updateValue],
+    );
+
     return (
       <View
         ref={containerRef}
