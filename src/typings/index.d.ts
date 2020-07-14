@@ -131,7 +131,7 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
   /**
    * Reference object.
    */
-  ref: React.MutableRefObject<SliderRef>;
+  ref?: React.MutableRefObject<SliderRef>;
 }
 
 /**
