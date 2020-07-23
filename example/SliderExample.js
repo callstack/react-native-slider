@@ -155,9 +155,7 @@ export const examples = [
         <SliderExample
           minimumTrackTintColor={'#00FF00'}
           maximumTrackTintColor={'red'}
-          thumbImage={require('./uie_thumb_big.png')}
-          value={4}
-          maximumValue={7}
+          value={0.5}
         />
       );
     },
@@ -181,8 +179,7 @@ export const examples = [
       return (
         <SliderExample
           thumbImage={{
-            uri:
-              'https://cdn2.iconfinder.com/data/icons/minimalism/512/twitter.png',
+            uri: 'https://img.icons8.com/windows/50/000000/bus.png',
           }}
         />
       );

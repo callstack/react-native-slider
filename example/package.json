@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ../node_modules/react-native/local-cli/cli.js start",
     "run:android": "react-native run-android",
-    "run:windows": "react-native start --use-react-native-windows --projectRoot ../",
+    "run:windows": "npx react-native run-windows",
     "run:ios": "react-native run-ios",
     "run:web": "expo web"
   },

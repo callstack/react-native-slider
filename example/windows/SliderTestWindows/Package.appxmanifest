@@ -7,7 +7,7 @@
   IgnorableNamespaces="uap mp">
 
  <Identity
-    Name="359e3698-40e8-432a-a406-1213a9404462"
+    Name="sliderExample"
     Publisher="CN=igklemen"
     Version="1.0.0.0" />
 

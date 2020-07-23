@@ -24,7 +24,7 @@ module.exports = {
       'react-native-windows': rnwPath,
     },
     // Include the macos platform in addition to the defaults because the fork includes macos, but doesn't declare it
-    platforms: ['ios', 'android', 'windesktop', 'windows', 'web', 'macos'],
+    platforms: ['ios', 'android', 'windows', 'web', 'macos'],
     // Since there are multiple copies of react-native, we need to ensure that metro only sees one of them
     // This should go in RN 0.62 when haste is removed
     blacklistRE: blacklist([

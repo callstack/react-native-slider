@@ -263,7 +263,8 @@ Assigns a minimum track image. Only static images are supported. The rightmost p
 
 ### `thumbImage`
 
-Sets an image for the thumb. Only static images are supported.
+Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported.
+
 
 | Type                   | Required | 
 | ---------------------- | -------- | 
@@ -337,7 +338,7 @@ While developing, you can run the example app to test your changes.
 - Run `yarn run:web` to run on web
 
 ### Windows
-- Run `yarn run:windows` to run the bundler. Then, run the example app solution in Visual Studio.
+- Run `yarn run:windows` to run on Windows.
 
 # Manual linking of the module on Windows
 On Windows, you need to manually link the `Slider` native module to your project.
