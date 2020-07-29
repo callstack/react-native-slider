@@ -336,8 +336,6 @@ While developing, you can run the example app to test your changes.
 - Run `yarn run:android` to run on Android
 - Run `yarn run:ios` to run on iOS
 - Run `yarn run:web` to run on web
-
-### Windows
 - Run `yarn run:windows` to run on Windows.
 
 # Manual linking of the module on Windows
