@@ -25,4 +25,6 @@
 @property (nonatomic, strong) NSString *accessibilityUnits;
 @property (nonatomic, strong) NSArray *accessibilityIncrements;
 
+- (void)setValue:(float)value animated:(BOOL)animated matchingSteps:(BOOL)matchingSteps;
+
 @end

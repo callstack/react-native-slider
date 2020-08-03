@@ -32,41 +32,32 @@ RCT_EXPORT_MODULE()
 
 static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidingStart)
 {
-  float value = sender.value;
-
   if (sender.step > 0 &&
       sender.step <= (sender.maximumValue - sender.minimumValue)) {
 
-    value =
-      MAX(sender.minimumValue,
-        MIN(sender.maximumValue,
-          sender.minimumValue + round((sender.value - sender.minimumValue) / sender.step) * sender.step
-        )
-      );
-
-    [sender setValue:value animated:NO];
+    [sender setValue:sender.value animated:NO matchingSteps:YES];
   }
 
   if (continuous) {
-    if (sender.onRNCSliderValueChange && sender.lastValue != value) {
+    if (sender.onRNCSliderValueChange && sender.lastValue != sender.value) {
       sender.onRNCSliderValueChange(@{
-        @"value": @(value),
+        @"value": @(sender.value),
       });
     }
   } else {
     if (sender.onRNCSliderSlidingComplete && !isSlidingStart) {
       sender.onRNCSliderSlidingComplete(@{
-        @"value": @(value),
+        @"value": @(sender.value),
       });
     }
       if (sender.onRNCSliderSlidingStart && isSlidingStart) {
         sender.onRNCSliderSlidingStart(@{
-          @"value": @(value),
+          @"value": @(sender.value),
         });
       }
   }
 
-  sender.lastValue = value;
+  sender.lastValue = sender.value;
 }
 
 - (void)sliderValueChanged:(RNCSlider *)sender

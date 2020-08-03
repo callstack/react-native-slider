@@ -28,7 +28,25 @@
     CGPoint touchPoint = [gesture locationInView:self];
     float rangeWidth = self.maximumValue - self.minimumValue;
     float sliderPercent = touchPoint.x / self.bounds.size.width;
-    [self setValue:self.minimumValue + (rangeWidth * sliderPercent) animated: YES];
+    
+    float value = self.minimumValue + (rangeWidth * sliderPercent);
+    [self setValue:value animated:YES matchingSteps:YES];
+
+    self.onRNCSliderValueChange(@{
+        @"value": @(self.value),
+    });
+}
+
+- (void)setValue:(float)value animated:(BOOL)animated matchingSteps:(BOOL)matchingSteps {
+    if ( matchingSteps ) {
+        value = MAX(self.minimumValue,
+          MIN(self.maximumValue,
+            self.minimumValue + round((value - self.minimumValue) / self.step) * self.step
+          )
+        );
+    }
+    
+    [self setValue:value animated:animated];
 }
 
 - (void)setValue:(float)value
