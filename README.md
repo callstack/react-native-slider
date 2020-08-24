@@ -6,24 +6,26 @@ React Native component used to select a single value from a range of values.
 ![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)
 ![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)
 
+![Windows Screenshot](example/sliderWindows.jpg)
 
 ## Getting started
 
 `yarn add @react-native-community/slider`
-
 or
-
 `npm install @react-native-community/slider --save`
 
-and install cocoapods
+If using iOS, install cocoapods: `npx pod-install`
 
-`npx pod-install`
+On Windows, [`manually link the module`](#Manual-linking-of-the-module-on-Windows) to your app (autolinking will be released in RNW 63). 
+You can see the example app's code for an example of how to do it.
+
 
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
 
 | `@react-native-community/slider` version | Required React Native Version |
 | ---------------------------------------- | ----------------------------- |
+| `3.1.x`                                  | `>=0.60`; `>=0.62` (on Windows);  |
 | `2.x.x`                                  | `>= 0.60`                     |
 | [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0)  | `<= 0.59`                     |
 
@@ -81,6 +83,7 @@ Check out the [example project](example) for more examples.
 - [`testID`](#testid)
 - [`value`](#value)
 - [`inverted`](#inverted)
+- [`vertical`](#vertical)
 - [`thumbTintColor`](#thumbtintcolor)
 - [`maximumTrackImage`](#maximumtrackimage)
 - [`minimumTrackImage`](#minimumtrackimage)
@@ -221,6 +224,15 @@ Reverses the direction of the slider. Default value is false.
 
 ---
 
+### `vertical`
+Changes the orientation of the slider to vertical, if set to `true`. Default value is false.
+
+| Type | Required | Platform |
+| ---- | -------- | -------- |
+| bool | No       | Windows  |
+
+---
+
 ### `thumbTintColor`
 
 Color of the foreground switch grip.
@@ -251,7 +263,8 @@ Assigns a minimum track image. Only static images are supported. The rightmost p
 
 ### `thumbImage`
 
-Sets an image for the thumb. Only static images are supported.
+Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported.
+
 
 | Type                   | Required | 
 | ---------------------- | -------- | 
@@ -286,8 +299,6 @@ Make sure to use `yarn` to install dependencies
 yarn install
 ```
 
-While developing, you can run the [example app](/example/README.md) to test your changes.
-
 Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
 
 ```sh
@@ -308,8 +319,49 @@ To fix formatting errors, run the following:
 ```sh
 yarn validate:eslint --fix
 ```
-
 Remember to cover your changes with tests if possible.
+
+# Running the example app 
+While developing, you can run the example app to test your changes.
+
+## Setup
+
+- Clone the repository 
+- Run `yarn` in the root directory to install dependencies, and again in `src` to create the dist build.
+- (on iOS) Run `npx pod-install` from the `example` directory
+- (on Windows) You need to manually link the Slider module to your project.
+
+## Start the app
+
+- Run `yarn run:android` to run on Android
+- Run `yarn run:ios` to run on iOS
+- Run `yarn run:web` to run on web
+- Run `yarn run:windows` to run on Windows.
+
+# Manual linking of the module on Windows
+On Windows, you need to manually link the `Slider` native module to your project.
+
+#### Add the SliderWindows project to your solution
+
+1. Open the solution in Visual Studio 2019.
+2. Right-click solution icon in Solution Explorer > Add > Existing Project.
+   Select 'D:\pathToYourApp\node_modules\@react-native-community\slider\windows\SliderWindows\SliderWindows.vcxproj'.
+
+#### **windows/myapp.sln**
+
+Add a reference to `SliderWindows` to your main application project. From Visual Studio 2019:
+
+Right-click main application project > Add > Reference...
+Check 'SliderWindows' from the 'Project > Solution' tab on the left.
+
+#### **pch.h**
+
+Add `#include "winrt/SliderWindows.h"`.
+
+#### **app.cpp**
+
+Add `PackageProviders().Append(winrt::SliderWindows::ReactPackageProvider());` before `InitializeComponent();`.
+
 
 ## Maintainers
 
@@ -318,7 +370,7 @@ Remember to cover your changes with tests if possible.
 
 ## Contributors
 
-This module was extracted from `react-native` core. Please reffer to https://github.com/react-native-community/react-native-slider/graphs/contributors for the complete list of contributors.
+This module was extracted from `react-native` core. Please, refer to https://github.com/react-native-community/react-native-slider/graphs/contributors for the complete list of contributors.
 
 ## License
 The library is released under the MIT licence. For more information see `LICENSE`.

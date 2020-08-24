@@ -32,6 +32,14 @@ type Event = SyntheticEvent<
   |}>,
 >;
 
+type WindowsProps = $ReadOnly<{|
+  /**
+   * If true the slider will be inverted.
+   * Default value is false.
+   */
+  vertical?: ?boolean,
+|}>;
+
 type IOSProps = $ReadOnly<{|
   /**
    * Assigns a single image for the track. Only static images are supported.
@@ -55,6 +63,7 @@ type IOSProps = $ReadOnly<{|
 type Props = $ReadOnly<{|
   ...ViewProps,
   ...IOSProps,
+  ...WindowsProps,
 
   /**
    * Used to style and layout the `Slider`.  See `StyleSheet.js` and
@@ -292,6 +301,7 @@ const SliderWithRef = React.forwardRef(SliderComponent);
 /* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
  * found when Flow v0.89 was deployed. To see the error, delete this comment
  * and run Flow. */
+
 SliderWithRef.defaultProps = {
   disabled: false,
   value: 0,

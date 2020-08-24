@@ -38,7 +38,15 @@ export interface SliderPropsIOS extends ReactNative.ViewProps {
   trackImage?: ReactNative.ImageURISource;
 }
 
-export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid {
+export interface SliderPropsWindows extends ReactNative.ViewProps {
+  /**
+   * Controls the orientation of the slider, default value is 'false' (horizontal).
+   */
+  vertical?: boolean;
+}
+
+
+export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid, SliderPropsWindows {
   /**
    * If true the user won't be able to move the slider.
    * Default value is false.

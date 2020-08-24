@@ -1,0 +1,11 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+namespace SliderWindows {
+
+    [default_interface]
+    runtimeclass SliderView : Windows.UI.Xaml.Controls.Slider {
+        SliderView(Microsoft.ReactNative.IReactContext context);
+        void UpdateProperties(Microsoft.ReactNative.IJSValueReader reader);
+    };
+}
