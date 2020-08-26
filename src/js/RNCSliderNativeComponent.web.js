@@ -6,6 +6,7 @@
  *
  */
 
+import ReactDOM from 'react-dom';
 import React, {useCallback} from 'react';
 import {View, StyleSheet} from 'react-native';
 
@@ -179,7 +180,9 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     const containerSize = React.useRef({width: 0, height: 0});
+    const containerPositionX = React.useRef(0);
     const containerRef = forwardedRef || React.createRef();
+    const hasBeenResized = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
     React.useLayoutEffect(() => updateValue(initialValue), [
       initialValue,
@@ -190,6 +193,17 @@ const RCTSliderWebComponent = React.forwardRef(
       (value - minimumValue) / (maximumValue - minimumValue);
     const minPercent = percentageValue;
     const maxPercent = 1 - percentageValue;
+
+    const onResize = () => {
+      hasBeenResized.current = true;
+    };
+    React.useEffect(() => {
+      window.addEventListener('resize', onResize);
+
+      return () => {
+        window.removeEventListener('resize', onResize);
+      };
+    }, []);
 
     const containerStyle = StyleSheet.compose(
       {
@@ -252,6 +266,13 @@ const RCTSliderWebComponent = React.forwardRef(
       );
     }, [maximumValue, minimumValue, step]);
 
+    const updateContainerPositionX = () => {
+      const positionX = ReactDOM.findDOMNode(
+        containerRef.current,
+      )?.getBoundingClientRect()?.x;
+      containerPositionX.current = positionX ?? 0;
+    };
+
     const updateValue = useCallback(
       newValue => {
         // Ensure that the value is correctly rounded
@@ -275,12 +296,27 @@ const RCTSliderWebComponent = React.forwardRef(
       [minimumValue, maximumValue, value, onValueChange],
     );
 
-    const getValueFromNativeEvent = ({locationX: x}) => {
-      const width = containerSize.current ? containerSize.current.width : 1;
-      const newValue = inverted
-        ? maximumValue - ((maximumValue - minimumValue) * x) / width
-        : minimumValue + ((maximumValue - minimumValue) * x) / width;
-      return step ? Math.round(newValue / step) * step : newValue;
+    const getValueFromNativeEvent = ({pageX}) => {
+      const {width = 1} = containerSize.current;
+
+      if (hasBeenResized.current) {
+        hasBeenResized.current = false;
+        updateContainerPositionX();
+      }
+      const containerX = containerPositionX.current;
+
+      if (pageX < containerX) {
+        return inverted ? maximumValue : minimumValue;
+      } else if (pageX > containerX + width) {
+        return inverted ? minimumValue : maximumValue;
+      } else {
+        const x = pageX - containerX;
+        const newValue = inverted
+          ? maximumValue - ((maximumValue - minimumValue) * x) / width
+          : minimumValue + ((maximumValue - minimumValue) * x) / width;
+
+        return step ? Math.round(newValue / step) * step : newValue;
+      }
     };
 
     const onTouchEnd = ({nativeEvent}) => {
@@ -329,9 +365,12 @@ const RCTSliderWebComponent = React.forwardRef(
     return (
       <View
         ref={containerRef}
-        onLayout={({nativeEvent}) =>
-          (containerSize.current = nativeEvent.layout)
-        }
+        onLayout={({nativeEvent}) => {
+          containerSize.current = nativeEvent.layout;
+          if (containerRef.current) {
+            updateContainerPositionX();
+          }
+        }}
         accessibilityActions={[
           {name: 'increment', label: 'increment'},
           {name: 'decrement', label: 'decrement'},
