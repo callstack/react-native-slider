@@ -1,6 +1,7 @@
 {
   "private": true,
   "workspaces": ["src", "example"],
+  "version": "1.0.0",
   "scripts": {
     "validate:eslint": "eslint src example",
     "validate:flow": "flow check src",
