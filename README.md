@@ -83,6 +83,7 @@ Check out the [example project](example) for more examples.
 - [`testID`](#testid)
 - [`value`](#value)
 - [`inverted`](#inverted)
+- [`tapToSeek`](#tapToSeek)
 - [`vertical`](#vertical)
 - [`thumbTintColor`](#thumbtintcolor)
 - [`maximumTrackImage`](#maximumtrackimage)
@@ -212,6 +213,15 @@ _This is not a controlled component_, you don't need to update the value during 
 | Type   | Required |
 | ------ | -------- |
 | number | No       |
+
+---
+
+### `tapToSeek`
+Permits tapping on the slider track to set the thumb position. Defaults to false on iOS. No effect on Android or Windows.
+
+| Type | Required | Platform |
+| ---- | -------- | -------- |
+| bool | No       | iOS      |
 
 ---
 

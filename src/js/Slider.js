@@ -309,6 +309,7 @@ SliderWithRef.defaultProps = {
   maximumValue: 1,
   step: 0,
   inverted: false,
+  tapToSeek: false,
 };
 
 let styles;

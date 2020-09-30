@@ -44,6 +44,10 @@ RCT_EXPORT_MODULE()
   }
   RNCSlider *slider = (RNCSlider *)gesture.view;
 
+  if (!slider.tapToSeek) {
+    return;
+  }
+
   CGPoint touchPoint = [gesture locationInView:slider];
   float rangeWidth = slider.maximumValue - slider.minimumValue;
   float sliderPercent = touchPoint.x / slider.bounds.size.width;
@@ -139,6 +143,7 @@ RCT_EXPORT_VIEW_PROPERTY(onRNCSliderSlidingComplete, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(thumbTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(thumbImage, UIImage);
 RCT_EXPORT_VIEW_PROPERTY(inverted, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(tapToSeek, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(accessibilityUnits, NSString);
 RCT_EXPORT_VIEW_PROPERTY(accessibilityIncrements, NSArray);
 
