@@ -131,9 +131,9 @@ export const examples = [
     },
   },
   {
-    title: 'step: 0.25',
+    title: 'step: 0.25, tap to seek on iOS',
     render(): Element<any> {
-      return <SliderExample step={0.25} />;
+      return <SliderExample step={0.25} tapToSeek={true} />;
     },
   },
   {
