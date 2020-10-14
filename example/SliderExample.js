@@ -30,7 +30,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
         </Text>
         <Slider
           step={0.5}
-          style={{width: 300, opacity: 1, height: 50, marginTop: 50}}
+          style={styles.slider}
           {...this.props}
           onValueChange={value => this.setState({value: value})}
         />
@@ -100,6 +100,12 @@ class SlidingCompleteExample extends React.Component<
 }
 
 const styles = StyleSheet.create({
+  slider: {
+    width: 300,
+    opacity: 1,
+    height: 50,
+    marginTop: 50,
+  },
   text: {
     fontSize: 14,
     textAlign: 'center',
