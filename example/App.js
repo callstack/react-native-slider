@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, ScrollView, View} from 'react-native';
+import {StyleSheet, Text, ScrollView, View, Platform} from 'react-native';
 import {examples} from './SliderExample';
 
 type Props = {};
@@ -12,12 +12,14 @@ export default class App extends Component<Props> {
         <Text testID="testTextId" style={styles.title}>
           {'<Slider />'}
         </Text>
-        {examples.map((e, i) => (
-          <View key={`slider${i}`}>
-            <Text>{e.title}</Text>
-            {e.render()}
-          </View>
-        ))}
+        {examples
+          .filter(e => !e.platform || e.platform === Platform.OS)
+          .map((e, i) => (
+            <View key={`slider${i}`}>
+              <Text>{e.title}</Text>
+              {e.render()}
+            </View>
+          ))}
       </ScrollView>
     );
   }

@@ -11,8 +11,8 @@ if (process.argv.includes(windowsSwitch)) {
 } else {
   module.exports = {
     project: {
-      android: {sourceDir: './example/android'},
-      ios: {project: './example/ios/example.xcodeproj'},
+      android: {sourceDir: './android'},
+      ios: {project: './ios/example.xcodeproj'},
     },
   };
 }
