@@ -11,9 +11,11 @@
 #import <React/RCTEventDispatcher.h>
 #import "RNCSlider.h"
 #import <React/UIView+React.h>
-#import "os/log.h"
 
 @implementation RNCSliderManager
+{
+  BOOL _isSliding;
+}
 
 RCT_EXPORT_MODULE()
 
@@ -38,6 +40,11 @@ RCT_EXPORT_MODULE()
 }
 
 - (void)tapHandler:(UITapGestureRecognizer *)gesture {
+  // Ignore this tap if in the middle of a slide.
+  if (_isSliding) {
+    return;
+  }
+
   // Bail out if the source view of the gesture isn't an RNCSlider.
   if ([gesture.view class] != [RNCSlider class]) {
     return;
@@ -121,11 +128,13 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
 - (void)sliderTouchStart:(RNCSlider *)sender
 {
   RNCSendSliderEvent(sender, NO, YES);
+  _isSliding = YES;
 }
 
 - (void)sliderTouchEnd:(RNCSlider *)sender
 {
   RNCSendSliderEvent(sender, NO, NO);
+  _isSliding = NO;
 }
 
 RCT_EXPORT_VIEW_PROPERTY(value, float);
