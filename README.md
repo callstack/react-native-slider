@@ -24,7 +24,8 @@ To use this library you need to ensure you are using the correct version of Reac
 
 | `@react-native-community/slider` version | Required React Native Version |
 | ---------------------------------------- | ----------------------------- |
-| `3.1.x`                                  | `>=0.60`; `>=0.62` (on Windows);  |
+| `4.x.x`                                  | `>=0.60`; `>=0.62` (on Windows);  |
+| `3.1.x`                                  | `>=0.60`                      |
 | `2.x.x`                                  | `>= 0.60`                     |
 | [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0)  | `<= 0.59`                     |
 
