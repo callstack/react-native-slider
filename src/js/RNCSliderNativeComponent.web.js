@@ -184,10 +184,9 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerRef = forwardedRef || React.createRef();
     const hasBeenResized = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
-    React.useLayoutEffect(() => updateValue(initialValue), [
-      initialValue,
-      updateValue,
-    ]);
+    React.useLayoutEffect(() => {
+      updateValue(initialValue);
+    }, [initialValue, updateValue]);
 
     const percentageValue =
       (value - minimumValue) / (maximumValue - minimumValue);
