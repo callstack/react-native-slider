@@ -2,3 +2,4 @@
 /.github
 /example
 /src/android/build
+**/__tests__/**/*
