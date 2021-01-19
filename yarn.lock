@@ -2049,7 +2049,7 @@
     prettier "1.16.4"
 
 "@react-native-community/slider@./src":
-  version "3.0.2"
+  version "4.0.0-rc.2"
   dependencies:
     flow-bin "0.113.0"
 
@@ -7195,6 +7195,25 @@ react-native-web@~0.11:
     normalize-css-color "^1.0.2"
     prop-types "^15.6.0"
     react-timer-mixin "^0.13.4"
+
+react-native-windows@^0.62.0:
+  version "0.62.21"
+  resolved "https://registry.yarnpkg.com/react-native-windows/-/react-native-windows-0.62.21.tgz#6d11a859fddf569505a884f2d34116342db00d29"
+  integrity sha512-wA/4FD6Hh2MZi3f002s87AMGgFg+YxW9znAfw1dLAaLrMPmy4ERRx2fCKuTkPDMKC/ZjMUTvnj0yKkZofApYsg==
+  dependencies:
+    "@babel/runtime" "^7.8.4"
+    cli-spinners "^2.2.0"
+    create-react-class "^15.6.3"
+    envinfo "^7.5.0"
+    fbjs "^1.0.0"
+    glob "^7.1.1"
+    ora "^3.4.0"
+    prop-types "^15.7.2"
+    regenerator-runtime "^0.13.2"
+    shelljs "^0.7.8"
+    username "^5.1.0"
+    uuid "^3.3.2"
+    xml-parser "^1.2.1"
 
 react-native-windows@^0.62.0-0:
   version "0.62.2"
