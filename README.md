@@ -15,8 +15,8 @@ or
 
 If using iOS, install cocoapods: `npx pod-install`
 
-On Windows, [`manually link the module`](#Manual-linking-of-the-module-on-Windows) to your app (autolinking will be released in RNW 63). 
-You can see the example app's code for an example of how to do it.
+On Windows, autolinking is available from version 0.63. On 0.62 you need to [`manually link the module`](#Manual-linking-of-the-module-on-Windows) to your app. 
+You can see the example app's code for how to do it.
 
 
 ## React Native Compatibility
