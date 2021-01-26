@@ -178,6 +178,8 @@ Callback continuously called while the user is dragging the slider.
 
 Step value of the slider. The value should be between 0 and (maximumValue - minimumValue). Default value is 0.
 
+On Windows OS the default value is 1% of slider's range (from `minimumValue` to `maximumValue`).
+
 | Type   | Required |
 | ------ | -------- |
 | number | No       |
