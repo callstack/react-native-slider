@@ -80,7 +80,7 @@ namespace winrt::SliderWindows::implementation {
                 }
                 else {
                     updatedMaxValue = true;
-                    m_maxValue = propertyValue.AsInt64();
+                    m_maxValue = propertyValue.AsDouble();
                 }
             }
             else if (propertyName == "minimumValue") {
@@ -89,15 +89,18 @@ namespace winrt::SliderWindows::implementation {
                 }
                 else {
                     updatedMinValue = true;
-                    m_minValue = propertyValue.AsInt64();
+                    m_minValue = propertyValue.AsDouble();
                 }
             }
             else if (propertyName == "step") {
                 if (propertyValue.IsNull()) {
                     this->ClearValue(xaml::Controls::Slider::StepFrequencyProperty());
                 }
-                else {
+                else if (propertyValue.AsDouble() != 0) {
                     this->StepFrequency(propertyValue.AsDouble());
+                }
+                else {
+                    this->StepFrequency(c_stepDefault);
                 }
             }
             else if (propertyName == "inverted") {

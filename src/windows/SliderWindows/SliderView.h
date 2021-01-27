@@ -35,8 +35,8 @@ namespace winrt::SliderWindows::implementation {
             winrt::Windows::Foundation::IInspectable const& sender,
             xaml::Input::ManipulationCompletedRoutedEventArgs const& args);
         
-        int64_t m_maxValue, m_minValue;
-        double m_value;
+        double m_value, m_maxValue, m_minValue;
+        const double c_stepDefault = 0.1;
     };
 }
 
