@@ -96,11 +96,9 @@ namespace winrt::SliderWindows::implementation {
                 if (propertyValue.IsNull()) {
                     this->ClearValue(xaml::Controls::Slider::StepFrequencyProperty());
                 }
-                else if (propertyValue.AsDouble() != 0) {
-                    this->StepFrequency(propertyValue.AsDouble());
-                }
                 else {
-                    this->StepFrequency(c_stepDefault);
+                    auto&& step = CalculateStepFrequencyPercentageValue(propertyValue.AsDouble());
+                    this->StepFrequency(step);
                 }
             }
             else if (propertyName == "inverted") {
@@ -235,6 +233,15 @@ namespace winrt::SliderWindows::implementation {
                     }
                     eventDataWriter.WriteObjectEnd();
                 });
+        }
+    }
+
+    const double SliderView::CalculateStepFrequencyPercentageValue(const double& stepPropertyValue) const noexcept {
+        if (stepPropertyValue != 0) {
+            return stepPropertyValue;
+        }
+        else {
+            return (m_maxValue - m_minValue) / 100.f;
         }
     }
 }
