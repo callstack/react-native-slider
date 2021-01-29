@@ -37,7 +37,7 @@ namespace winrt::SliderWindows::implementation {
 
         const double CalculateStepFrequencyPercentageValue(const double& stepPropertyValue) const noexcept;
 
-        int64_t m_maxValue, m_minValue;
+        double m_maxValue, m_minValue;
         double m_value;
     };
 }
