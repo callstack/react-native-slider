@@ -240,9 +240,7 @@ public class ReactSlider extends AppCompatSeekBar {
         if (getParent() != null) {
             try {
                 getParent().requestDisallowInterceptTouchEvent(true);
-                //SeekBar 放在其他视图中，手指放在 SeekBar 上面不会立即触发滑动操作，
-                //要滑动一段距离或者松开手指才行
-                //测试过，添加如下代码滑动更流畅
+                //SeekBar 放在其他视图中，手指放在 SeekBar 上面不会立即触发滑动操作
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     MotionEvent evup = MotionEvent.obtain(event);
                     evup.setAction(MotionEvent.ACTION_MOVE);
