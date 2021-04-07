@@ -10,7 +10,7 @@
     "run:web": "expo web"
   },
   "dependencies": {
-    "@react-native-community/slider": "./src",
+    "@react-native-community/slider": "^4.0.0-rc.2",
     "babel-preset-expo": "^8.2.1",
     "expo": "^37.0.12",
     "react-dom": "~16.9.0",
