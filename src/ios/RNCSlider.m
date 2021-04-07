@@ -10,7 +10,8 @@
 @implementation RNCSlider
 {
   float _unclippedValue;
-}
+  bool _minimumTrackImageSet;
+  bool _maximumTrackImageSet;}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
