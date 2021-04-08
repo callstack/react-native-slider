@@ -10,6 +10,8 @@
 @implementation RNCSlider
 {
   float _unclippedValue;
+  bool _minimumTrackImageSet;
+  bool _maximumTrackImageSet;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -64,20 +66,25 @@
   if (trackImage != _trackImage) {
     _trackImage = trackImage;
     CGFloat width = trackImage.size.width / 2;
-    UIImage *minimumTrackImage = [trackImage resizableImageWithCapInsets:(UIEdgeInsets){
-      0, width, 0, width
-    } resizingMode:UIImageResizingModeStretch];
-    UIImage *maximumTrackImage = [trackImage resizableImageWithCapInsets:(UIEdgeInsets){
-      0, width, 0, width
-    } resizingMode:UIImageResizingModeStretch];
-    [self setMinimumTrackImage:minimumTrackImage forState:UIControlStateNormal];
-    [self setMaximumTrackImage:maximumTrackImage forState:UIControlStateNormal];
+    if (!_minimumTrackImageSet) {
+      UIImage *minimumTrackImage = [trackImage resizableImageWithCapInsets:(UIEdgeInsets){
+        0, width, 0, width
+      } resizingMode:UIImageResizingModeStretch];
+      [self setMinimumTrackImage:minimumTrackImage forState:UIControlStateNormal];
+    }
+    if (!_maximumTrackImageSet) {
+      UIImage *maximumTrackImage = [trackImage resizableImageWithCapInsets:(UIEdgeInsets){
+        0, width, 0, width
+      } resizingMode:UIImageResizingModeStretch];
+      [self setMaximumTrackImage:maximumTrackImage forState:UIControlStateNormal];
+    }
   }
 }
 
 - (void)setMinimumTrackImage:(UIImage *)minimumTrackImage
 {
   _trackImage = nil;
+  _minimumTrackImageSet = true;
   minimumTrackImage = [minimumTrackImage resizableImageWithCapInsets:(UIEdgeInsets){
     0, minimumTrackImage.size.width, 0, 0
   } resizingMode:UIImageResizingModeStretch];
@@ -92,6 +99,7 @@
 - (void)setMaximumTrackImage:(UIImage *)maximumTrackImage
 {
   _trackImage = nil;
+  _maximumTrackImageSet = true;
   maximumTrackImage = [maximumTrackImage resizableImageWithCapInsets:(UIEdgeInsets){
     0, 0, 0, maximumTrackImage.size.width
   } resizingMode:UIImageResizingModeStretch];
