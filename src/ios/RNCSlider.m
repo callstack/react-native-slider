@@ -11,7 +11,8 @@
 {
   float _unclippedValue;
   bool _minimumTrackImageSet;
-  bool _maximumTrackImageSet;}
+  bool _maximumTrackImageSet;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
