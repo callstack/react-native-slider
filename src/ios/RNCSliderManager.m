@@ -84,13 +84,15 @@ static float discreteValue(RNCSlider *sender, float value) {
     
     // Round up when increase, round down when decrease.
     double (^_round)(double) = ^(double x) {
-      if (sender.lastValue > value) {
+      if (!UIAccessibilityIsVoiceOverRunning()) {
+        return round(x);
+      } else if (sender.lastValue > value) {
         return floor(x);
       } else {
         return ceil(x);
       }
     };
-  
+      
     return
       MAX(sender.minimumValue,
         MIN(sender.maximumValue,
@@ -108,7 +110,7 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
   float value = discreteValue(sender, sender.value);
 
   [sender setValue:value animated:NO];
-
+  
   if (continuous) {
     if (sender.onRNCSliderValueChange && sender.lastValue != value) {
       sender.onRNCSliderValueChange(@{
