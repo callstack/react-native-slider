@@ -377,8 +377,8 @@ Add `PackageProviders().Append(winrt::SliderWindows::ReactPackageProvider());` b
 
 ## Maintainers
 
-- [Bartosz Klonowski](https://github.com/BartoszKlonowski) - [Callstack](https://callstack.com)
-- [Wojciech Szafraniec](https://github.com/wojteg1337) - [Callstack](https://callstack.com/)
+- [Michał Chudziak](https://github.com/michalchudziak) - [Callstack](https://callstack.com/)
+- [Bartosz Klonowski](https://github.com/BartoszKlonowski) - [Callstack](https://callstack.com/)
 
 ## Contributors
 
