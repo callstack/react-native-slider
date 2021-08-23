@@ -2,9 +2,6 @@
   <h1 align="center"> <code>@react-native-community/slider</code> </h1>
 </p>
 <p align="center">
-  React Native component used to select a single value from a range of values.
-</p>
-<p align="center">
     <a href="https://www.npmjs.com/package/@react-native-community/slider">
         <img src="https://img.shields.io/npm/v/@react-native-community/slider.svg" alt="Latest version released on npmjs" />
     </a>
@@ -18,11 +15,14 @@
         <img src="https://img.shields.io/npm/l/@react-native-community/slider.svg" alt="License" />
     </a>
 </p>
+<p align="center">
+  React Native component used to select a single value from a range of values.
+  <br>Currently supported on following platforms:
+</p>
 
-
-![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)
-![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)
-![Windows Screenshot](example/sliderWindows.JPG)
+|iOS|Android|Windows|
+|:-:|:-:|:-:|
+|![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)|![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)|![Windows Screenshot](example/sliderWindows.JPG)|
 
 ## Getting started
 
