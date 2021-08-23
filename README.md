@@ -157,5 +157,14 @@ While developing, you can run the example app to test your changes.
 
 This module was extracted from `react-native` core. Please, refer to https://github.com/react-native-community/react-native-slider/graphs/contributors for the complete list of contributors.
 
+---
+
+## Made with ❤️ at Callstack
+
+`@callstack/ReactNativeNotes` is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com/) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
+
+Like the project? ⚛️ [Join the team](https://callstack.com/careers) who does amazing stuff for clients and drives React Native Open Source! 🔥
+
+
 ## License
 The library is released under the MIT licence. For more information see `LICENSE`.
