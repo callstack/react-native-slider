@@ -155,7 +155,7 @@ While developing, you can run the example app to test your changes.
 
 ## Contributors
 
-This module was extracted from `react-native` core. Please, refer to https://github.com/react-native-community/react-native-slider/graphs/contributors for the complete list of contributors.
+This module was extracted from `react-native` core. Please, refer to [contributors graph](https://github.com/react-native-community/react-native-slider/graphs/contributors) for the complete list of contributors.
 
 ---
 
