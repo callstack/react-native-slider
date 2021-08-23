@@ -24,17 +24,33 @@
 |:-:|:-:|:-:|
 |![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)|![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)|![Windows Screenshot](example/sliderWindows.JPG)|
 
-## Getting started
+## Installation & Usage
 
-`yarn add @react-native-community/slider`
+To install this module `cd` to your project directory and enter the following command:
+```
+yarn add @react-native-community/slider
+```
 or
-`npm install @react-native-community/slider --save`
+```
+npm install @react-native-community/slider --save
+```
+If using iOS please remember to install cocoapods by running: `npx pod-install`
+<br/>For web support please use `@react-native-community/slider@next`
 
-If using iOS, install cocoapods: `npx pod-install`
+The following code presents the basic usage scenario of this library:
+```javascript
+import Slider from '@react-native-community/slider';
 
-On Windows, autolinking is available from version 0.63. On 0.62 you need to [`manually link the module`](#Manual-linking-of-the-module-on-Windows) to your app. 
-You can see the example app's code for how to do it.
+<Slider
+  style={{width: 200, height: 40}}
+  minimumValue={0}
+  maximumValue={1}
+  minimumTrackTintColor="#FFFFFF"
+  maximumTrackTintColor="#000000"
+/>
+```
 
+Check out the [example project](example) for more examples.
 
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
@@ -46,9 +62,6 @@ To use this library you need to ensure you are using the correct version of Reac
 | `2.x.x`                                  | `>= 0.60`                     |
 | [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0)  | `<= 0.59`                     |
 
-## Web support
-
-For web support please use `@react-native-community/slider@next`
 
 ## Migrating from the core `react-native` module
 This module was created when the Slider was split out from the core of React Native. To migrate to this module you need to follow the installation instructions above and then change you imports from:
@@ -63,25 +76,6 @@ to:
 import Slider from '@react-native-community/slider';
 ```
 
-## Usage
-
-### Example
-
-```javascript
-import Slider from '@react-native-community/slider';
-```
-
-```javascript
-  <Slider
-    style={{width: 200, height: 40}}
-    minimumValue={0}
-    maximumValue={1}
-    minimumTrackTintColor="#FFFFFF"
-    maximumTrackTintColor="#000000"
-  />
-```
-
-Check out the [example project](example) for more examples.
 
 ### Props
 
