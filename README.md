@@ -128,6 +128,8 @@ yarn test
 to run them all.
 * Remember to cover your changes with tests if possible.
 
+When [creating an issue](https://github.com/callstack/react-native-slider/issues/new/choose) please remember to specify the platform which the issue occurs on.
+
 # Running the example app 
 While developing, you can run the example app to test your changes.
 
