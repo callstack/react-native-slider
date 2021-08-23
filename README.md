@@ -111,33 +111,22 @@ To use this library you need to ensure you are using the correct version of Reac
 ## Contributing
 
 This project uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) to handle its internal dependencies.
-Make sure to use `yarn` to install dependencies
-
+* Make sure to use `yarn` to install dependencies when implementing changes to this library.
 ```sh
 yarn install
 ```
-
-Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
-
+* Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
 ```sh
 yarn validate:flow
-yarn validate:eslint
+yarn validate:eslint --fix
 yarn test:jest
 ```
-
 or 
-
 ```sh
 yarn test
 ```
 to run them all.
-
-To fix formatting errors, run the following:
-
-```sh
-yarn validate:eslint --fix
-```
-Remember to cover your changes with tests if possible.
+* Remember to cover your changes with tests if possible.
 
 # Running the example app 
 While developing, you can run the example app to test your changes.
