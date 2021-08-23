@@ -156,30 +156,6 @@ While developing, you can run the example app to test your changes.
 - Run `yarn run:web` to run on web
 - Run `yarn run:windows` to run on Windows.
 
-# Manual linking of the module on Windows
-On Windows, you need to manually link the `Slider` native module to your project.
-
-#### Add the SliderWindows project to your solution
-
-1. Open the solution in Visual Studio 2019.
-2. Right-click solution icon in Solution Explorer > Add > Existing Project.
-   Select 'D:\pathToYourApp\node_modules\@react-native-community\slider\windows\SliderWindows\SliderWindows.vcxproj'.
-
-#### **windows/myapp.sln**
-
-Add a reference to `SliderWindows` to your main application project. From Visual Studio 2019:
-
-Right-click main application project > Add > Reference...
-Check 'SliderWindows' from the 'Project > Solution' tab on the left.
-
-#### **pch.h**
-
-Add `#include "winrt/SliderWindows.h"`.
-
-#### **app.cpp**
-
-Add `PackageProviders().Append(winrt::SliderWindows::ReactPackageProvider());` before `InitializeComponent();`.
-
 
 ## Maintainers
 
