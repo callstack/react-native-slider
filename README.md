@@ -130,17 +130,17 @@ to run them all.
 
 When [creating an issue](https://github.com/callstack/react-native-slider/issues/new/choose) please remember to specify the platform which the issue occurs on.
 
-# Running the example app 
+## Running the example app 
 While developing, you can run the example app to test your changes.
 
-## Setup
+### Setup
 
 - Clone the repository 
 - Run `yarn` in the root directory to install dependencies, and again in `src` to create the dist build.
 - (on iOS) Run `npx pod-install` from the `example` directory
 - (on Windows) You need to manually link the Slider module to your project.
 
-## Start the app
+### Start the app
 
 - Run `yarn run:android` to run on Android
 - Run `yarn run:ios` to run on iOS
@@ -161,10 +161,6 @@ This module was extracted from `react-native` core. Please, refer to https://git
 
 ## Made with ❤️ at Callstack
 
-`@callstack/ReactNativeNotes` is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com/) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
+`@callstack/react-native-slider` is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com/) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
 
 Like the project? ⚛️ [Join the team](https://callstack.com/careers) who does amazing stuff for clients and drives React Native Open Source! 🔥
-
-
-## License
-The library is released under the MIT licence. For more information see `LICENSE`.
