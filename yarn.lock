@@ -7199,25 +7199,6 @@ react-native-windows@^0.62.0:
     uuid "^3.3.2"
     xml-parser "^1.2.1"
 
-react-native-windows@^0.62.0-0:
-  version "0.62.2"
-  resolved "https://registry.yarnpkg.com/react-native-windows/-/react-native-windows-0.62.2.tgz#eae6d9e55116d69c8d8316ec6e52505c760ba1bd"
-  integrity sha512-ZsPxhJrzkBjzLmt9xzAwos1iTykAsyIij2P6radH2eZJmMYJ2sqQwRAsNcjk9OKNM0zj3T4lyCN3879gRZ6yMg==
-  dependencies:
-    "@babel/runtime" "^7.8.4"
-    cli-spinners "^2.2.0"
-    create-react-class "^15.6.3"
-    envinfo "^7.5.0"
-    fbjs "^1.0.0"
-    glob "^7.1.1"
-    ora "^3.4.0"
-    prop-types "^15.7.2"
-    regenerator-runtime "^0.13.2"
-    shelljs "^0.7.8"
-    username "^5.1.0"
-    uuid "^3.3.2"
-    xml-parser "^1.2.1"
-
 react-native@^0.62.3:
   version "0.62.3"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.62.3.tgz#9a2e96af3dedd0723c8657831eec4ed3c30f3299"
