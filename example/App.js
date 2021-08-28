@@ -15,8 +15,8 @@ export default class App extends Component<Props> {
         {examples
           .filter(e => !e.platform || e.platform === Platform.OS)
           .map((e, i) => (
-            <View key={`slider${i}`}>
-              <Text>{e.title}</Text>
+            <View key={`slider${i}`} style={styles.sliderWidget}>
+              <Text style={styles.instructions}>{e.title}</Text>
               {e.render()}
             </View>
           ))}
@@ -44,5 +44,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5,
+    fontSize: 20,
   },
+  sliderWidget: {
+    marginVertical: 30,
+  }
 });

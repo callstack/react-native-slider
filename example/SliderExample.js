@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
     width: 300,
     opacity: 1,
     height: 50,
-    marginTop: 50,
   },
   text: {
     fontSize: 14,
