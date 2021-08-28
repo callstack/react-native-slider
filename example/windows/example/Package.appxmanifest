@@ -6,16 +6,16 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   IgnorableNamespaces="uap mp">
 
- <Identity
-    Name="sliderExample"
+  <Identity
+    Name="135ba346-5636-4141-a7fb-eb441d1c096d"
     Publisher="CN=Bartosz Klonowski"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="359e3698-40e8-432a-a406-1213a9404462" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="135ba346-5636-4141-a7fb-eb441d1c096d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>SliderTestWindows</DisplayName>
-    <PublisherDisplayName>BartoszKlonowski</PublisherDisplayName>
+    <DisplayName>example</DisplayName>
+    <PublisherDisplayName>Bartosz Klonowski</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -28,14 +28,15 @@
   </Resources>
 
   <Applications>
-    <Application Id="App"
+    <Application
+      Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="SliderTestWindows.App">
+      EntryPoint="example.App">
       <uap:VisualElements
-        DisplayName="SliderTestWindows"
+        DisplayName="example"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="SliderTestWindows"
+        Description="example"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />

@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "windows": "react-native run-windows"
   },
   "dependencies": {
 <<<<<<< HEAD
@@ -22,7 +23,8 @@
 =======
     "@react-native-community/slider": "^4.1.1",
     "react": "17.0.1",
-    "react-native": "0.64.2"
+    "react-native": "0.64.2",
+    "react-native-windows": "^0.64.0-0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
