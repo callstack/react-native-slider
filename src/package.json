@@ -36,9 +36,6 @@
     "flow-bin": "0.113.0",
     "jest": "^24.9.0",
     "metro-react-native-babel-preset": "^0.56.0",
-    "react": "^16.11.0",
-    "react-native": "^0.62.3",
-    "react-native-windows": "^0.62.0-0",
     "react-test-renderer": "16.9.0"
   },
   "repository": {
