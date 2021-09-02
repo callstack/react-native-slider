@@ -48,5 +48,5 @@ const styles = StyleSheet.create({
   },
   sliderWidget: {
     marginVertical: 30,
-  }
+  },
 });
