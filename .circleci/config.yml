@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   rn: react-native-community/react-native@5.5.0
+  windows: circleci/windows@2.4.0
 
 jobs:
   checkout_code:
@@ -26,15 +27,54 @@ jobs:
       - run:
           name: Jest
           command: yarn run test:jest
-      - run:
-          name: Build example Android
-          command: cd example && npx react-native run-android
+      - save_cache:
+          key: v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}
+          paths:
+              - node_module
+              - src/node_modules
+              - example/node_modules
+
+  build_example_ios:
+    executor: rn/linux_js
+    steps:
+      - attach_workspace:
+          at: .
+      - rn/yarn_install
       - run:
           name: Build example iOS
           command: cd example && npx react-native run-ios
+
+  build_example_android:
+    executor:
+      name: windows/default
+      shell: powershell
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Install examples
+          command: cd example; yarn install --frozen-lockfile
+      - run:
+          name: Build example Android
+          command: cd example; npx react-native run-android
+
+  build_example_windows:
+    executor:
+      name: windows/default
+      shell: powershell
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Install examples
+          command: cd example; yarn install --frozen-lockfile
       - run:
           name: Build example Windows
-          command: cd example && npx react-native run-windows --no-packager --no-launch
+          command: cd example; npx react-native run-windows --no-packager --no-launch
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
@@ -54,31 +94,13 @@ workflows:
       - analyse:
           requires:
             - checkout_code
-      - rn/android_build:
-          name: build_android_debug
-          project_path: "example/android"
-          build_type: debug
+      - build_example_ios:
           requires:
             - analyse
-      - rn/android_build:
-          name: build_android_release
-          project_path: "example/android"
-          build_type: release
+      - build_example_android:
           requires:
             - analyse
-      - rn/android_test:
-          detox_configuration: "android.emu.release"
-          detox_loglevel: "trace"
-          requires:
-            - build_android_release
-      - rn/ios_build_and_test:
-          project_path: "example/ios/example.xcworkspace"
-          derived_data_path: "example/ios/build"
-          device: "iPhone X"
-          build_configuration: "Release"
-          scheme: "example"
-          detox_configuration: "ios.sim.release"
-          detox_loglevel: "trace"
+      - build_example_windows:
           requires:
             - analyse
       # - publish:
