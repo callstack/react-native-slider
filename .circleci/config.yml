@@ -26,6 +26,9 @@ jobs:
       - run:
           name: Jest
           command: yarn run test:jest
+      - run:
+          name: Build with gradlew
+          command: cd src/android && chmod +x gradlew && ./gradlew assembleDebug
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
