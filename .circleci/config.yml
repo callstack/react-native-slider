@@ -145,6 +145,7 @@ jobs:
         name: Build example app
         command: |-
           cd example
+          npx pod-install
           npx react-native run-ios --project-path ios
 
 # -------------------------
