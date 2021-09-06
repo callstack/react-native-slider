@@ -121,7 +121,6 @@ jobs:
     steps:
     - attach_workspace:
         at: ~/react-native-slider
-    - restore-cache: *restore-gradle-cache
     - run:
         name: Accept Android licences
         command: |-
@@ -132,7 +131,6 @@ jobs:
         command: |-
           cd example/android
           ./gradlew clean assembleDebug
-    - save-cache: *save-gradle-cache
 
   ios-checkout:
     <<: *macos_defaults
