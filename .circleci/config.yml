@@ -144,7 +144,8 @@ jobs:
     - run:
         name: Build example app
         command: |-
-          npx react-native run-ios --project-path example/ios
+          cd example
+          npx react-native run-ios --project-path ios
 
 # -------------------------
 #        WORKFLOWS
