@@ -66,11 +66,11 @@ aliases:
 # ANALYSE
 - &eslint
   name: ESLint Checks
-  command: yarn test:eslint
+  command: yarn validate:eslint
 
 - &flow
   name: Flow Checks
-  command: yarn test:flow
+  command: yarn validate:flow
 
 - &jest
   name: Jest Unit Tests
