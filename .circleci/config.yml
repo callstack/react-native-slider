@@ -80,6 +80,7 @@ aliases:
 #          JOBS
 # -------------------------
 version: 2
+
 jobs:
   # Set up a Linux environment for downstream jobs
   linux-checkout:
@@ -136,6 +137,7 @@ jobs:
     <<: *macos_defaults
     steps:
     - checkout
+    - run: npm install -g node
     - run: rm -rf node_modules
     - run: yarn cache clean
     - run: *yarn
