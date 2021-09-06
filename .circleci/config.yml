@@ -136,11 +136,9 @@ jobs:
     <<: *macos_defaults
     steps:
     - checkout
-    - restore-cache: *restore-yarn-cache
     - run: rm -rf node_modules
     - run: yarn cache clean
     - run: *yarn
-    - save-cache: *save-yarn-cache
     - persist_to_workspace:
         root: .
         paths: .
