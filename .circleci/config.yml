@@ -116,7 +116,7 @@ workflows:
       - rn/ios_build:
           name: build_ios_release
           project_path: "example/ios/example.xcodeproj"
-          device: "iPhone X"
+          device: "iPhone 12"
           build_configuration: "Release"
           scheme: "example"
           requires:
