@@ -56,9 +56,8 @@ jobs:
       - run:
           name: Install examples
           command: cd example && yarn install --frozen-lockfile
-      - run:
-          name: Build example Android
-          command: cd example && npx react-native run-android
+      - android/run:
+          app_src_directory: example/android
 
   build_example_windows:
     executor:
@@ -100,8 +99,7 @@ workflows:
       - analyse:
           requires:
             - checkout_code
-      - android/run:
-          app_src_directory: example/android
+      - build_example_android:
           requires:
             - analyse
       - build_example_windows:
