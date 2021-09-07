@@ -80,7 +80,7 @@ jobs:
           command: msbuild -t:restore .\example\windows\SliderTestWindows.sln
       - run:
           name: Build example Windows
-          command: cd example; npx react-native run-windows --no-packager --no-launch
+          command: cd example; npx react-native run-windows --no-packager --no-launch --arch x64
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
