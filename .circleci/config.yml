@@ -56,8 +56,9 @@ jobs:
       - run:
           name: Install examples
           command: cd example && yarn install --frozen-lockfile
-      - android/run:
-          app_src_directory: example/android
+      - run:
+          name: Build example Android
+          command: cd example && npx react-native run-android
 
   build_example_windows:
     executor:
@@ -99,12 +100,28 @@ workflows:
       - analyse:
           requires:
             - checkout_code
-      - build_example_android:
-          requires:
-            - analyse
       - build_example_windows:
           requires:
             - analyse
+
+      # Build the Android app in debug mode
+      - rn/android_build:
+          name: build_android_debug
+          project_path: "example/android"
+          build_type: "debug"
+          requires:
+            - analyse
+
+      # Build the iOS app in release mode and do not run tests
+      - rn/ios_build:
+          name: build_ios_release
+          project_path: "example/ios/example.xcodeproj"
+          device: "iPhone X"
+          build_configuration: "Release"
+          scheme: "example"
+          requires:
+            - analyse
+
       # - publish:
       #     requires:
       #       - analyse
