@@ -1,175 +1,117 @@
-# -------------------------
-#        DEFAULTS
-# -------------------------
-defaults: &defaults
-  working_directory: ~/react-native-slider
-  environment:
-  - GIT_COMMIT_DESC: git log --format=oneline -n 1 $CIRCLE_SHA1
+version: 2.1
 
-# LINUX
-linux_defaults: &linux_defaults
-  <<: *defaults
-  docker:
-  - image: circleci/node:8
-  environment:
-  - PATH: "/opt/yarn/yarn-v1.5.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-# ANDROID
-android_defaults: &android_defaults
-  <<: *defaults
-  docker:
-  - image: circleci/android:api-27-node8-alpha
-  resource_class: "large"
-  environment:
-  - TERM: "dumb"
-  - ADB_INSTALL_TIMEOUT: 10
-  - _JAVA_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-  - GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-XX:+HeapDumpOnOutOfMemoryError"'
-  - BUILD_THREADS: 2
-
-# MACOS
-macos_defaults: &macos_defaults
-  <<: *defaults
-  resource_class: "large"
-  macos:
-    xcode: "10.1.0"
-
-# -------------------------
-#         ALIASES
-# -------------------------
-
-aliases:
-# CACHE
-- &restore-yarn-cache
-  keys:
-  - yarn-cache-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-  - yarn-cache-{{ arch }}
-- &save-yarn-cache
-  paths:
-  - ~/.cache/yarn
-  - ~/Library/Detox/ios
-  key: yarn-cache-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-
-- &restore-gradle-cache
-  keys:
-  - gradle-cache-{{ checksum "android/build.gradle" }}-{{ checksum "example/android/build.gradle" }}-{{ checksum "example/android/app/build.gradle" }}
-- &save-gradle-cache
-  paths:
-  - ~/.gradle
-  key: gradle-cache-{{ checksum "android/build.gradle" }}-{{ checksum "example/android/build.gradle" }}-{{ checksum "example/android/app/build.gradle" }}
-
-# INSTALLATION
-- &yarn
-  name: Yarn Install
-  command: |
-    yarn install --network-concurrency 1 --non-interactive --cache-folder ~/.cache/yarn & wait
-# ANALYSE
-- &eslint
-  name: ESLint Checks
-  command: yarn validate:eslint
-
-- &flow
-  name: Flow Checks
-  command: yarn validate:flow
-
-- &jest
-  name: Jest Unit Tests
-  command: yarn test:jest
-
-# -------------------------
-#          JOBS
-# -------------------------
-version: 2
+orbs:
+  rn: react-native-community/react-native@5.5.0
+  windows: circleci/windows@2.4.0
+  android: circleci/gradle@2.2.0
 
 jobs:
-  # Set up a Linux environment for downstream jobs
-  linux-checkout:
-    <<: *linux_defaults
+  checkout_code:
+    executor: rn/linux_js
     steps:
-    - checkout
-    - restore-cache: *restore-yarn-cache
-    - run: rm -rf node_modules
-    - run: yarn cache clean
-    - run: *yarn
-    - save-cache: *save-yarn-cache
-    - persist_to_workspace:
-        root: .
-        paths: .
-
-  eslint:
-    <<: *linux_defaults
+      - checkout
+      - persist_to_workspace:
+          root: .
+          paths: .
+  analyse:
+    executor: rn/linux_js
     steps:
-    - attach_workspace:
-        at: ~/react-native-slider
-    - run: *eslint
+      - attach_workspace:
+          at: .
+      - rn/yarn_install
+      - run:
+          name: Lint JS Code (ESLint)
+          command: yarn run validate:eslint
+      - run:
+          name: Flow
+          command: yarn run validate:flow
+      - run:
+          name: Jest
+          command: yarn run test:jest
+      - save_cache:
+          key: v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}
+          paths:
+              - node_module
+              - src/node_modules
+              - example/node_modules
 
-  flow:
-    <<: *linux_defaults
+  build_example_ios:
+    executor: rn/linux_js
     steps:
-    - attach_workspace:
-        at: ~/react-native-slider
-    - run: *flow
+      - attach_workspace:
+          at: .
+      - rn/yarn_install
+      - run:
+          name: Build example iOS
+          command: cd example && npx react-native run-ios
 
-  jest:
-    <<: *linux_defaults
+  build_example_android:
+    executor:
+      name: android/default
     steps:
-    - attach_workspace:
-        at: ~/react-native-slider
-    - run: *jest
+      - checkout
+      - run:
+          name: Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Install examples
+          command: cd example && yarn install --frozen-lockfile
+      - run:
+          name: Build example Android
+          command: cd example && npx react-native run-android
 
-  android-compile:
-    <<: *android_defaults
+  build_example_windows:
+    executor:
+      name: windows/default
+      shell: powershell
     steps:
-    - attach_workspace:
-        at: ~/react-native-slider
-    - run:
-        name: Accept Android licences
-        command: |-
-          yes | sdkmanager --licenses || exit 0
-          yes | sdkmanager --update || exit 0
-    - run:
-        name: Build Android Example App and Library
-        command: |-
-          cd example/android
-          ./gradlew clean assembleDebug
+      - checkout
+      - run:
+          name: Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Install examples
+          command: cd example; yarn install --frozen-lockfile
+      - run:
+          name: "Restore NuGet packages for Components"
+          command: nuget restore .\example\windows\ReactNativeNotes.sln
+      - run:
+          name: "Restore .NET dependencies"
+          command: msbuild -t:restore .\example\windows\ReactNativeNotes.sln
+      - run:
+          name: Build example Windows
+          command: cd example; npx react-native run-windows --no-packager --no-launch
 
-  ios-compile:
-    <<: *macos_defaults
-    steps:
-    - checkout
-    - run: npm install -g node
-    - run: rm -rf node_modules
-    - run: yarn cache clean
-    - run: *yarn
-    - run:
-        name: Build example app
-        command: |-
-          cd example
-          npx pod-install
-          npx react-native run-ios --project-path ios
+  # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
+  # publish:
+  #   executor: rn/linux_js
+  #   steps:
+  #     - attach_workspace:
+  #         at: .
+  #     - rn/yarn_install
+  #     - run:
+  #         name: Publish to NPM
+  #         command: yarn ci:publish
 
-# -------------------------
-#        WORKFLOWS
-# -------------------------
 workflows:
-  version: 2
-  Test:
+  test:
     jobs:
-    - linux-checkout
-    - eslint:
-        requires:
-        - linux-checkout
-    - flow:
-        requires:
-        - linux-checkout
-    - jest:
-        requires:
-        - linux-checkout
-    - android-compile:
-        requires:
-        - linux-checkout
-    - ios-compile:
-        requires:
-        - eslint
-        - flow
-        - jest
+      - checkout_code
+      - analyse:
+          requires:
+            - checkout_code
+      - android/run:
+          app_src_directory: example/android
+          requires:
+            - analyse
+      - build_example_windows:
+          requires:
+            - analyse
+      # - publish:
+      #     requires:
+      #       - analyse
+      #       - rn/android_test
+      #       - rn/ios_build_and_test
+      #     filters:
+      #       branches:
+      #         only: master
