@@ -118,6 +118,7 @@ workflows:
           project_path: "example/ios/example.xcodeproj"
           device: "iPhone 12"
           build_configuration: "Release"
+          yarn_cache_folder: ~/.cache/yarn
           scheme: "example"
           requires:
             - analyse
