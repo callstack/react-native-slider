@@ -43,12 +43,10 @@ jobs:
     working_directory: example
     executor: rn/macos
     steps:
-      - attach_workspace:
-          at: .
-      - run: ls -la
-      - rn/setup_macos_executor
-      - rn/pod_install
-      - rn/yarn_install
+      - restore_cache:
+          keys:
+            - v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}-{{ checksum "example/package.json" }}
+            - v1-deps-
       - rn/ios_build:
           device: "iPhone 12"
           project_path: "example/ios/example.xcodeproj"
