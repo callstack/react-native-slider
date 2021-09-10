@@ -42,9 +42,7 @@ jobs:
   build_example_ios:
     executor: rn/macos
     steps:
-      - persist_to_workspace:
-          root: example/
-          path: ./example/
+      - run: cd example
       - rn/setup_macos_executor
       - rn/pod_install
       - rn/yarn_install
