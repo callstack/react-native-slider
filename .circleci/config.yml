@@ -48,6 +48,12 @@ jobs:
           keys:
             - v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}-{{ checksum "example/package.json" }}
             - v1-deps-
+      - run:
+          name: Install deps
+          command: cd example && yarn install
+      - run:
+          name: Install Pods
+          command: cd example && npx pod-install
       - rn/ios_build:
           device: "iPhone 12"
           project_path: "example/ios/example.xcodeproj"
