@@ -40,7 +40,6 @@ jobs:
               - example/ios/Pods
 
   build_example_ios:
-    working_directory: example
     executor: rn/macos
     steps:
       - restore_cache:
