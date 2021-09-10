@@ -42,7 +42,9 @@ jobs:
   build_example_ios:
     executor: rn/macos
     steps:
+      - checkout
       - run: cd example
+      - run: ls -la
       - rn/setup_macos_executor
       - rn/pod_install
       - rn/yarn_install
