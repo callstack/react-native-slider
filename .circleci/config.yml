@@ -17,7 +17,9 @@ jobs:
     executor: rn/macos
     steps:
       - checkout
-      - rn/yarn_install
+      - run:
+          name: install yarn
+          command: yarn install --frozen-lockfile
       - run:
           name: Install Pods
           command: cd example && npx pod-install
@@ -51,6 +53,7 @@ jobs:
           project_path: "example/ios/example.xcodeproj"
           build_configuration: "Release"
           scheme: "example"
+          cache: false
 
   build_example_android:
     executor:
