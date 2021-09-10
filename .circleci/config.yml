@@ -42,11 +42,12 @@ jobs:
   build_example_ios:
     executor: rn/macos
     steps:
-      - attach_workspace:
-          at: .
+      - persist_to_workspace:
+          root: example/
+          path: ./example/
       - rn/setup_macos_executor
-      - rn/yarn_install
       - rn/pod_install
+      - rn/yarn_install
       - rn/ios_build:
           device: "iPhone 12"
           project_path: "example/ios/example.xcodeproj"
