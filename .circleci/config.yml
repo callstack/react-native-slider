@@ -32,7 +32,7 @@ jobs:
           name: Jest
           command: yarn run test:jest
       - save_cache:
-          key: v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}
+          key: v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}-{{ checksum "example/package.json" }}
           paths:
               - node_module
               - src/node_modules
