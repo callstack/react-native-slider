@@ -20,6 +20,9 @@ jobs:
           at: .
       - rn/yarn_install
       - run:
+          name: Install Pods
+          command: cd example && npx pod-install
+      - run:
           name: Lint JS Code (ESLint)
           command: yarn run validate:eslint
       - run:
@@ -34,6 +37,7 @@ jobs:
               - node_module
               - src/node_modules
               - example/node_modules
+              - example/ios/Pods
 
   build_example_ios:
     executor: rn/linux_js

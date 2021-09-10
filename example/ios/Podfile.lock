@@ -182,7 +182,7 @@ PODS:
     - React-cxxreact (= 0.62.3)
     - React-jsi (= 0.62.3)
   - React-jsinspector (0.62.3)
-  - react-native-slider (4.1.1):
+  - react-native-slider (4.1.6):
     - React-Core
   - React-RCTActionSheet (0.62.3):
     - React-Core/RCTActionSheetHeaders (= 0.62.3)
@@ -261,7 +261,7 @@ DEPENDENCIES:
   - React-jsi (from `../../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../../node_modules/react-native/ReactCommon/jsinspector`)
-  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - react-native-slider (from `../../src`)
   - React-RCTActionSheet (from `../../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../../node_modules/react-native/Libraries/NativeAnimation`)
   - React-RCTBlob (from `../../node_modules/react-native/Libraries/Blob`)
@@ -309,7 +309,7 @@ EXTERNAL SOURCES:
   React-jsinspector:
     :path: "../../node_modules/react-native/ReactCommon/jsinspector"
   react-native-slider:
-    :path: "../node_modules/@react-native-community/slider"
+    :path: "../../src"
   React-RCTActionSheet:
     :path: "../../node_modules/react-native/Libraries/ActionSheetIOS"
   React-RCTAnimation:
@@ -349,7 +349,7 @@ SPEC CHECKSUMS:
   React-jsi: ef7ed91688be7e01bc78080062b428ce1bcd79d0
   React-jsiexecutor: d664a436303eb2cf9919df250f40ce5cf5e99fbe
   React-jsinspector: 74f6ea8f9d38ff44cc8f9867b2ecc9130d6cc2e5
-  react-native-slider: 4f759d111693442fa662098fded7304fc98fb720
+  react-native-slider: c983657bf7d95450c8d64cceb4b318452b24ccd0
   React-RCTActionSheet: abb6e20cdc3710d3442d735cdb2c641a5597f35d
   React-RCTAnimation: cacf34437277ae266c95896f40eb4e7604017132
   React-RCTBlob: ab3a193130b61816f8f3807941087873bfd5e8a4
