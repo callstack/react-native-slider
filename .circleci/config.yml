@@ -40,10 +40,11 @@ jobs:
               - example/ios/Pods
 
   build_example_ios:
+    working_directory: example
     executor: rn/macos
     steps:
-      - checkout
-      - run: cd example
+      - attach_workspace:
+          at: .
       - run: ls -la
       - rn/setup_macos_executor
       - rn/pod_install
