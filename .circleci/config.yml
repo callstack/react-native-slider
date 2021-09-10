@@ -16,8 +16,7 @@ jobs:
   analyse:
     executor: rn/macos
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
       - rn/yarn_install
       - run:
           name: Install Pods
