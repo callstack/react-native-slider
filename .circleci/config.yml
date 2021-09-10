@@ -42,6 +42,7 @@ jobs:
   build_example_ios:
     executor: rn/macos
     steps:
+      - checkout
       - restore_cache:
           keys:
             - v1-deps-{{ .Branch }}-{{ checksum "src/package.json"}}-{{ checksum "example/package.json" }}
