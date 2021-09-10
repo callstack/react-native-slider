@@ -40,14 +40,18 @@ jobs:
               - example/ios/Pods
 
   build_example_ios:
-    executor: rn/linux_js
+    executor: rn/macos
     steps:
       - attach_workspace:
           at: .
+      - rn/setup_macos_executor
       - rn/yarn_install
-      - run:
-          name: Build example iOS
-          command: cd example && npx react-native run-ios
+      - rn/pod_install
+      - rn/ios_build:
+          device: "iPhone 12"
+          project_path: "example/ios/example.xcodeproj"
+          build_configuration: "Release"
+          scheme: "example"
 
   build_example_android:
     executor:
@@ -117,13 +121,7 @@ workflows:
             - analyse
 
       # Build the iOS app in release mode and do not run tests
-      - rn/ios_build:
-          name: build_ios_release
-          project_path: "example/ios/example.xcodeproj"
-          device: "iPhone 12"
-          build_configuration: "Release"
-          yarn_cache_folder: ~/.cache/yarn
-          scheme: "example"
+      - build_example_ios:
           requires:
             - analyse
 
