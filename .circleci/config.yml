@@ -54,12 +54,9 @@ jobs:
       - run:
           name: Install Pods
           command: cd example && npx pod-install
-      - rn/ios_build:
-          device: "iPhone 12"
-          project_path: "example/ios/example.xcodeproj"
-          build_configuration: "Release"
-          scheme: "example"
-          cache: false
+      - run:
+          name: Build the iOS example project
+          command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES -verbose
 
   build_example_android:
     executor:
