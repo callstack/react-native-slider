@@ -1,6 +1,6 @@
 PODS:
   - boost-for-react-native (1.63.0)
-  - DoubleConversion (1.1.5)
+  - DoubleConversion (1.1.6)
   - FBLazyVector (0.62.3)
   - FBReactNativeSpec (0.62.3):
     - Folly (= 2018.10.22.00)
@@ -246,6 +246,7 @@ PODS:
   - Yoga (1.14.0)
 
 DEPENDENCIES:
+  - DoubleConversion (from `../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Folly (from `../../node_modules/react-native/third-party-podspecs/Folly.podspec`)
@@ -277,9 +278,10 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - boost-for-react-native
-    - DoubleConversion
 
 EXTERNAL SOURCES:
+  DoubleConversion:
+    :podspec: "../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   FBLazyVector:
     :path: "../../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
@@ -333,7 +335,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
-  DoubleConversion: e22e0762848812a87afd67ffda3998d9ef29170c
+  DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
   FBLazyVector: a93c5eef764b16789fa7875aac4e09119e806ad4
   FBReactNativeSpec: 587095d51601d15e04d21658df4bb7f030d0e7e1
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
@@ -360,6 +362,6 @@ SPEC CHECKSUMS:
   ReactCommon: 3ea86417fa6e432b500579df40b057df54cfb4d4
   Yoga: b5db822228963b87948afa7a5a531088607151dc
 
-PODFILE CHECKSUM: b027505a3c76bc972ce2aaeafbea695ee99d699c
+PODFILE CHECKSUM: d0ef363257fa701cdc2f444520d1af2be244d93a
 
 COCOAPODS: 1.10.2
