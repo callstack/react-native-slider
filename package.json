@@ -9,6 +9,7 @@
   },
   "jest": {
     "preset": "react-native",
+    "verbose": true,
     "modulePathIgnorePatterns": [
       "/e2e/"
     ]
