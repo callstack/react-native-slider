@@ -43,9 +43,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install
-          command: yarn install --frozen-lockfile
-      - run:
           name: Install examples
           command: cd example; yarn install --frozen-lockfile
       - run:
@@ -62,19 +59,15 @@ jobs:
     executor: rn/macos
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-deps-{{ .Branch }}-{{ checksum "src/package.json" }}-{{ checksum "example/package.json" }}
-            - v1-deps-
       - run:
           name: Install deps
-          command: cd example && yarn install
+          command: cd example && yarn install --frozen-lockfile
       - run:
           name: Install Pods
           command: cd example && npx pod-install
       - run:
           name: Build the iOS example project
-          command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES -verbose
+          command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
@@ -88,7 +81,7 @@ jobs:
   #         command: yarn ci:publish
 
 workflows:
-  test:
+  slider-full-ci:
     jobs:
       - checkout_code
       - verify:
