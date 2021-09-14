@@ -44,7 +44,7 @@ jobs:
       - checkout
       - run:
           name: Install examples
-          command: cd src && yarn install && cd ../example && yarn install --force --frozen-lockfile
+          command: cd src; yarn install; cd ../example; yarn install --force --frozen-lockfile
       - run:
           name: "Restore NuGet packages for Components"
           command: nuget restore .\example\windows\SliderTestWindows.sln
