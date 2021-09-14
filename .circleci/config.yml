@@ -12,6 +12,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths: .
+
   verify:
     executor: rn/linux_js
     steps:
@@ -57,6 +58,24 @@ jobs:
           name: Build example Windows
           command: cd example; npx react-native run-windows --no-packager --no-launch --arch x64 --logging --no-deploy
 
+  build_example_ios:
+    executor: rn/macos
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ .Branch }}-{{ checksum "src/package.json" }}-{{ checksum "example/package.json" }}
+            - v1-deps-
+      - run:
+          name: Install deps
+          command: cd example && yarn install
+      - run:
+          name: Install Pods
+          command: cd example && npx pod-install
+      - run:
+          name: Build the iOS example project
+          command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES -verbose
+
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
   #   executor: rn/linux_js
@@ -87,14 +106,7 @@ workflows:
           build_type: debug
           requires:
             - verify
-      - rn/ios_build_and_test:
-          project_path: "example/ios/example.xcworkspace"
-          derived_data_path: "example/ios/build"
-          device: "iPhone X"
-          build_configuration: "Release"
-          scheme: "example"
-          detox_configuration: "ios.sim.release"
-          detox_loglevel: "trace"
+      - build_example_ios:
           requires:
             - verify
       # - publish:
