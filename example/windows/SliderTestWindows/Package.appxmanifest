@@ -8,14 +8,14 @@
 
  <Identity
     Name="sliderExample"
-    Publisher="CN=igklemen"
+    Publisher="CN=Bartosz Klonowski"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="359e3698-40e8-432a-a406-1213a9404462" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>SliderTestWindows</DisplayName>
-    <PublisherDisplayName>igklemen</PublisherDisplayName>
+    <PublisherDisplayName>BartoszKlonowski</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

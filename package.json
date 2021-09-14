@@ -9,6 +9,7 @@
   },
   "jest": {
     "preset": "react-native",
+    "verbose": true,
     "modulePathIgnorePatterns": [
       "/e2e/"
     ]
@@ -19,35 +20,5 @@
     "bracketSpacing": false,
     "jsxBracketSameLine": true,
     "parser": "flow"
-  },
-  "detox": {
-    "test-runner": "jest",
-    "runner-config": "example/e2e/config.json",
-    "configurations": {
-      "ios.sim.debug": {
-        "binaryPath": "example/ios/build/Build/Products/Debug-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example/ios/example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
-        "type": "ios.simulator",
-        "name": "iPhone X"
-      },
-      "ios.sim.release": {
-        "binaryPath": "example/ios/build/Build/Products/Release-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project example/ios/example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone X' -scheme example -parallelizeTargets -configuration Release -derivedDataPath example/ios/build  -UseModernBuildSystem=YES",
-        "type": "ios.simulator",
-        "name": "iPhone X"
-      },
-      "android.emu.debug": {
-        "binaryPath": "example/android/app/build/outputs/apk/debug/app-debug.apk",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && pushd example/android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug && popd",
-        "type": "android.emulator",
-        "name": "TestingAVD"
-      },
-      "android.emu.release": {
-        "binaryPath": "example/android/app/build/outputs/apk/release/app-release.apk",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && pushd example/android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release && popd",
-        "type": "android.emulator",
-        "name": "TestingAVD"
-      }
-    }
   }
 }

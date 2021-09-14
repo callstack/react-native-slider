@@ -1,7 +1,8 @@
 version: 2.1
 
 orbs:
-  rn: react-native-community/react-native@5.1.0
+  rn: react-native-community/react-native@5.5.0
+  windows: circleci/windows@2.4.0
 
 jobs:
   checkout_code:
@@ -11,7 +12,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths: .
-  analyse:
+
+  verify:
     executor: rn/linux_js
     steps:
       - attach_workspace:
@@ -23,16 +25,49 @@ jobs:
       - run:
           name: Flow
           command: yarn run validate:flow
+
+  test:
+    executor: rn/linux_js
+    steps:
+      - attach_workspace:
+          at: .
+      - rn/yarn_install
       - run:
-          name: Jest
+          name: Run unit tests with Jest
           command: yarn run test:jest
-      # TODO: Uncomment after fixing detox setup
-      # - run:
-      #     name: Build Android JavaScript Bundle
-      #     command: yarn run test:detox:android:bundle:release
-      # - run:
-      #     name: Build iOS JavaScript Bundle
-      #     command: yarn run test:detox:ios:bundle:release
+
+  build_example_windows:
+    executor:
+      name: windows/default
+      shell: powershell
+    steps:
+      - checkout
+      - run:
+          name: Install examples
+          command: cd src; yarn install; cd ../example; yarn install --force --frozen-lockfile
+      - run:
+          name: "Restore NuGet packages for Components"
+          command: nuget restore .\example\windows\SliderTestWindows.sln
+      - run:
+          name: "Restore .NET dependencies"
+          command: msbuild -t:restore .\example\windows\SliderTestWindows.sln
+      - run:
+          name: Build example Windows
+          command: cd example; npx react-native run-windows --no-packager --no-launch --arch x64 --logging --no-deploy
+
+  build_example_ios:
+    executor: rn/macos
+    steps:
+      - checkout
+      - run:
+          name: Install deps
+          command: cd src && yarn install && cd ../example && yarn install --force --frozen-lockfile
+      - run:
+          name: Install Pods
+          command: cd example && npx pod-install
+      - run:
+          name: Build the iOS example project
+          command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
@@ -46,41 +81,27 @@ jobs:
   #         command: yarn ci:publish
 
 workflows:
-  test:
+  slider-full-ci:
     jobs:
       - checkout_code
-      - analyse:
+      - verify:
           requires:
             - checkout_code
-      # Disabled until Detox works correctly with 0.60
-      # - rn/android_build:
-      #     name: build_android_debug
-      #     project_path: "example/android"
-      #     build_type: debug
-      #     requires:
-      #       - analyse
-      # - rn/android_build:
-      #     name: build_android_release
-      #     project_path: "example/android"
-      #     build_type: release
-      #     requires:
-      #       - analyse
-      # - rn/android_test:
-      #     detox_configuration: "android.emu.release"
-      #     detox_loglevel: "trace"
-      #     requires:
-      #       - build_android_release
-      # - rn/ios_build_and_test:
-      #     project_path: "example/ios/example.xcworkspace"
-      #     derived_data_path: "example/ios/build"
-      #     device: "iPhone X"
-      #     build_configuration: "Release"
-      #     scheme: "example"
-      #     detox_configuration: "ios.sim.release"
-      #     detox_loglevel: "trace"
-      #     requires:
-      #       - analyse
-      # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
+      - test:
+          requires:
+            - verify
+      - build_example_windows:
+          requires:
+            - verify
+      - rn/android_build:
+          name: build_android_debug
+          project_path: "example/android"
+          build_type: debug
+          requires:
+            - verify
+      - build_example_ios:
+          requires:
+            - verify
       # - publish:
       #     requires:
       #       - analyse
