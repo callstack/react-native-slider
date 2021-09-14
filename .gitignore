@@ -2,6 +2,10 @@
 #
 .DS_Store
 
+# Windows OS
+#
+msbuild.binlog
+
 # Xcode
 #
 build/

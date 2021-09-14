@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   rn: react-native-community/react-native@5.5.0
+  windows: circleci/windows@2.4.0
 
 jobs:
   checkout_code:
@@ -26,6 +27,28 @@ jobs:
       - run:
           name: Jest
           command: yarn run test:jest
+
+  build_example_windows:
+    executor:
+      name: windows/default
+      shell: powershell
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Install examples
+          command: cd example; yarn install --frozen-lockfile
+      - run:
+          name: "Restore NuGet packages for Components"
+          command: nuget restore .\example\windows\SliderTestWindows.sln
+      - run:
+          name: "Restore .NET dependencies"
+          command: msbuild -t:restore .\example\windows\SliderTestWindows.sln
+      - run:
+          name: Build example Windows
+          command: cd example; npx react-native run-windows --no-packager --no-launch --arch x64 --logging --no-deploy
 
   # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
   # publish:
