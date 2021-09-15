@@ -104,13 +104,13 @@ const styles = StyleSheet.create({
     width: 300,
     opacity: 1,
     height: 50,
-    marginTop: 50,
+    marginTop: 10,
   },
   text: {
     fontSize: 14,
     textAlign: 'center',
     fontWeight: '500',
-    margin: 10,
+    margin: 0,
   },
 });
 
