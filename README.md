@@ -22,7 +22,7 @@
 
 |iOS|Android|Windows|
 |:-:|:-:|:-:|
-|![iOS Screenshot](https://i.postimg.cc/dQTYzGD5/Screenshot-2019-03-25-at-11-24-59.png)|![Android Screenshot](https://i.postimg.cc/CKdtbVqc/Screenshot-2019-03-25-at-11-26-54.png)|![Windows Screenshot](example/sliderWindows.JPG)|
+|![iOS Screenshot](.github/Examples/Slider-iOS-Example.gif)|![Android Screenshot](.github/Examples/Slider-Android-Example.gif)|![Windows Screenshot](.github/Examples/Slider-Windows-Example.gif)|
 
 ## Installation & Usage
 

@@ -16,14 +16,12 @@ using namespace winrt::SliderTestWindows::implementation;
 /// </summary>
 App::App() noexcept
 {
-    MainComponentName(L"example");
-
 #if BUNDLE
     JavaScriptBundleFile(L"index.windows");
     InstanceSettings().UseWebDebugger(false);
     InstanceSettings().UseFastRefresh(false);
 #else
-    JavaScriptMainModuleName(L"example/index");
+    JavaScriptBundleFile(L"example/index");
     InstanceSettings().UseWebDebugger(true);
     InstanceSettings().UseFastRefresh(true);
 #endif
