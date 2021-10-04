@@ -139,7 +139,7 @@ public class ReactSlider extends AppCompatSeekBar {
     }
   }
 
-  public void setupAccessibility() {
+  private void setupAccessibility() {
     if (mAccessibilityUnits != null && mAccessibilityIncrements != null && mAccessibilityIncrements.size() - 1 == (int)mMaxValue) {
       int index = (int)mValue;
       String sliderValue = mAccessibilityIncrements.get(index);
