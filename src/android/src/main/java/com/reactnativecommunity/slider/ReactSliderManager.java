@@ -152,7 +152,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     if (view.isAccessibilityFocused() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       int index = (int)value;
       view.setupAccessibility(index);
-    }  
+    }
   }
 
   @ReactProp(name = "minimumValue", defaultDouble = 0d)
