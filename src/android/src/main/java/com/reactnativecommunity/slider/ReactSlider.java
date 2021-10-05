@@ -60,9 +60,9 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private double mStepCalculated = 0;
 
-  public String mAccessibilityUnits;
+  private String mAccessibilityUnits;
 
-  public List<String> mAccessibilityIncrements;
+  private List<String> mAccessibilityIncrements;
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs, int style) {
     super(context, attrs, style);
@@ -111,7 +111,7 @@ public class ReactSlider extends AppCompatSeekBar {
     super.onPopulateAccessibilityEvent(event);
     if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED ||
         (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED && this.isAccessibilityFocused())) {
-      this.setupAccessibility();
+      this.setupAccessibility((int) mValue);
     }
   }
 
@@ -139,9 +139,8 @@ public class ReactSlider extends AppCompatSeekBar {
     }
   }
 
-  private void setupAccessibility() {
+  public void setupAccessibility(int index) {
     if (mAccessibilityUnits != null && mAccessibilityIncrements != null && mAccessibilityIncrements.size() - 1 == (int)mMaxValue) {
-      int index = (int)mValue;
       String sliderValue = mAccessibilityIncrements.get(index);
       int stringLength = mAccessibilityUnits.length();
 

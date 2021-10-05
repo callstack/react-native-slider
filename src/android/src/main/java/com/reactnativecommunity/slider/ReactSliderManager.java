@@ -151,13 +151,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER);
     if (view.isAccessibilityFocused() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       int index = (int)value;
-      String sliderValue = view.mAccessibilityIncrements.get(index);
-      int stringLength = view.mAccessibilityUnits.length();
-      String spokenUnits = view.mAccessibilityUnits;
-      if (sliderValue != null && Integer.parseInt(sliderValue) == 1) {
-        spokenUnits = spokenUnits.substring(0, stringLength - 1);
-      }
-      view.announceForAccessibility(String.format("%s %s", sliderValue, spokenUnits));
+      view.setupAccessibility(index);
     }  
   }
 
