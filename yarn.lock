@@ -2196,7 +2196,7 @@
     prettier "1.16.4"
 
 "@react-native-community/slider@file:src":
-  version "4.1.7"
+  version "4.1.9"
   dependencies:
     flow-bin "0.113.0"
 
