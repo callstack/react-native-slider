@@ -150,8 +150,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     view.setValue(value);
     view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER);
     if (view.isAccessibilityFocused() && Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-      int index = (int)value;
-      view.setupAccessibility(index);
+      view.setupAccessibility((int)value);
     }
   }
 
