@@ -113,7 +113,7 @@ public class ReactSlider extends AppCompatSeekBar {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED ||
           (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED && this.isAccessibilityFocused())) {
-          this.setupAccessibility();
+          this.setupAccessibility((int)mValue);
       }
     }
   }
