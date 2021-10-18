@@ -77,9 +77,12 @@ RCT_EXPORT_MODULE()
 }
 
 static float discreteValue(RNCSlider *sender, float value) {
+  if (sender.step > 0 && value >= sender.maximumValue) {
+    return sender.maximumValue
+  }
+
   // If step is set and less than or equal to difference between max and min values,
   // pick the closest discrete multiple of step to return.
-
   if (sender.step > 0 && sender.step <= (sender.maximumValue - sender.minimumValue)) {
     
     // Round up when increase, round down when decrease.
