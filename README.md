@@ -5,13 +5,13 @@
     <a href="https://www.npmjs.com/package/@react-native-community/slider">
         <img src="https://img.shields.io/npm/v/@react-native-community/slider.svg" alt="Latest version released on npmjs" />
     </a>
-    <a href="https://app.circleci.com/pipelines/github/callstack/react-native-slider?branch=master">
-        <img src="https://img.shields.io/circleci/project/github/callstack/react-native-slider/master.svg" alt="Build on CircleCI" />
+    <a href="https://app.circleci.com/pipelines/github/callstack/react-native-slider?branch=main">
+        <img src="https://img.shields.io/circleci/project/github/callstack/react-native-slider/main.svg" alt="Build on CircleCI" />
     </a>
     <a href="https://github.com/callstack/react-native-slider">
         <img src="https://img.shields.io/badge/platforms-android%20|%20ios%20|%20windows%20|%20web-lightgrey.svg" alt="Supported platforms" />
     </a>
-    <a href="https://github.com/callstack/react-native-slider/blob/master/LICENSE.md">
+    <a href="https://github.com/callstack/react-native-slider/blob/main/LICENSE.md">
         <img src="https://img.shields.io/npm/l/@react-native-community/slider.svg" alt="License" />
     </a>
 </p>
