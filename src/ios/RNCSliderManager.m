@@ -58,6 +58,7 @@ RCT_EXPORT_MODULE()
   CGPoint touchPoint = [gesture locationInView:slider];
   float rangeWidth = slider.maximumValue - slider.minimumValue;
   float sliderPercent = touchPoint.x / slider.bounds.size.width;
+  slider.lastValue = slider.value;
   float value = slider.minimumValue + (rangeWidth * sliderPercent);
 
   [slider setValue:discreteValue(slider, value) animated: YES];
@@ -65,7 +66,7 @@ RCT_EXPORT_MODULE()
 
   if (slider.onRNCSliderSlidingStart) {
     slider.onRNCSliderSlidingStart(@{
-      @"value": @(slider.value),
+      @"value": @(slider.lastValue),
     });
   }
 
