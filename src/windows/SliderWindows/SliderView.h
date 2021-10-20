@@ -42,8 +42,6 @@ namespace winrt::SliderWindows::implementation {
             winrt::Windows::Foundation::IInspectable const& sender,
             xaml::Input::ManipulationCompletedRoutedEventArgs const& args);
 
-        void LaunchEvents(const EventType& eventType) const noexcept;
-
         const double CalculateStepFrequencyPercentageValue(const double& stepPropertyValue) const noexcept;
 
         double m_maxValue, m_minValue;
