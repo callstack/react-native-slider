@@ -61,7 +61,14 @@ RCT_EXPORT_MODULE()
   float value = slider.minimumValue + (rangeWidth * sliderPercent);
 
   [slider setValue:discreteValue(slider, value) animated: YES];
-  
+
+
+  if (slider.onRNCSliderSlidingStart) {
+    slider.onRNCSliderSlidingStart(@{
+      @"value": @(slider.value),
+    });
+  }
+
   // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
   if (slider.onRNCSliderValueChange) {
     slider.onRNCSliderValueChange(@{
