@@ -144,9 +144,13 @@ public class ReactSlider extends AppCompatSeekBar {
   }
 
   @Override
-  public boolean onHoverEvent(MotionEvent arg0) {
+  public boolean onHoverEvent(android.view.MotionEvent arg0) {
     super.onHoverEvent(arg0);
-    announceForAccessibility("bla");
+
+    if (arg0.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER && this.isEnabled() == false) {
+      announceForAccessibility(String.format("slider disabled"));
+    }
+    // Returns: True if the view handled the hover event
     return true;
   }
 
