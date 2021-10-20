@@ -183,56 +183,86 @@ namespace winrt::SliderWindows::implementation {
         m_updating = false;
     }
 
-    void SliderView::OnValueChangedHandler(winrt::IInspectable const& /*sender*/,
-        xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args){
-
-        if (!m_updating) {
+    void SliderView::OnValueChangedHandler( winrt::IInspectable const& /*sender*/,
+        xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args )
+    {
+        if( !m_updating )
+        {
             m_reactContext.DispatchEvent(
                 *this,
                 L"topChange",
-                [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
+                [&]( winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter ) noexcept
+                {
                     eventDataWriter.WriteObjectBegin();
                     {
-                        WriteProperty(eventDataWriter, L"value", args.NewValue());
+                        WriteProperty( eventDataWriter, L"value", args.NewValue() );
                     }
                     eventDataWriter.WriteObjectEnd();
-                });
+                } );
+            onValueChangeSent = true;
         }
     }
 
-    void SliderView::OnManipulationStartingHandler(winrt::IInspectable const& sender,
-        xaml::Input::ManipulationStartingRoutedEventArgs const& args) {
-        if (!m_updating) {
+    void SliderView::OnManipulationStartingHandler( winrt::IInspectable const& sender,
+        xaml::Input::ManipulationStartingRoutedEventArgs const& args )
+    {
+        if( !m_updating )
+        {
             auto self = sender.try_as<xaml::Controls::Slider>();
 
             m_reactContext.DispatchEvent(
                 *this,
                 L"topSlidingStart",
-                [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
+                [&]( winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter ) noexcept
+                {
                     eventDataWriter.WriteObjectBegin();
                     {
-                        WriteProperty(eventDataWriter, L"value", self.Value());
+                        WriteProperty( eventDataWriter, L"value", self.Value() );
                     }
                     eventDataWriter.WriteObjectEnd();
-                });
+                } );
+
+            if( onValueChangeSent )
+            {
+                m_reactContext.DispatchEvent(
+                    *this,
+                    L"topSlidingComplete",
+                    [&]( winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter ) noexcept
+                    {
+                        eventDataWriter.WriteObjectBegin();
+                        {
+                            WriteProperty( eventDataWriter, L"value", self.Value() );
+                        }
+                        eventDataWriter.WriteObjectEnd();
+                    } );
+                onSlidingCompleteSent = true;
+            }
+            onValueChangeSent = false;
+            onSlidingStartSent = true;
+            onSlidingCompleteSent = false;
         }
     }
-    
-    void SliderView::OnManipulationCompletedHandler(winrt::IInspectable const& sender,
-        xaml::Input::ManipulationCompletedRoutedEventArgs const& args) {
-        if (!m_updating) {
+
+    void SliderView::OnManipulationCompletedHandler( winrt::IInspectable const& sender,
+        xaml::Input::ManipulationCompletedRoutedEventArgs const& args )
+    {
+        if( !m_updating && onSlidingCompleteSent == false )
+        {
             auto self = sender.try_as<xaml::Controls::Slider>();
 
             m_reactContext.DispatchEvent(
                 *this,
                 L"topSlidingComplete",
-                [&](winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter) noexcept {
+                [&]( winrt::Microsoft::ReactNative::IJSValueWriter const& eventDataWriter ) noexcept
+                {
                     eventDataWriter.WriteObjectBegin();
                     {
-                        WriteProperty(eventDataWriter, L"value", self.Value());
+                        WriteProperty( eventDataWriter, L"value", self.Value() );
                     }
                     eventDataWriter.WriteObjectEnd();
-                });
+                } );
+            onSlidingCompleteSent = true;
+            onValueChangeSent = false;
         }
     }
 

@@ -58,10 +58,18 @@ RCT_EXPORT_MODULE()
   CGPoint touchPoint = [gesture locationInView:slider];
   float rangeWidth = slider.maximumValue - slider.minimumValue;
   float sliderPercent = touchPoint.x / slider.bounds.size.width;
+  slider.lastValue = slider.value;
   float value = slider.minimumValue + (rangeWidth * sliderPercent);
 
   [slider setValue:discreteValue(slider, value) animated: YES];
-  
+
+
+  if (slider.onRNCSliderSlidingStart) {
+    slider.onRNCSliderSlidingStart(@{
+      @"value": @(slider.lastValue),
+    });
+  }
+
   // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
   if (slider.onRNCSliderValueChange) {
     slider.onRNCSliderValueChange(@{

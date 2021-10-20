@@ -8,9 +8,9 @@
 #include "NativeModules.h"
 
 namespace winrt::SliderWindows::implementation {
-    
+
     namespace xaml = winrt::Windows::UI::Xaml;
-    
+
     class SliderView : public SliderViewT<SliderView> {
     public:
         SliderView(Microsoft::ReactNative::IReactContext const& reactContext);
@@ -39,6 +39,8 @@ namespace winrt::SliderWindows::implementation {
 
         double m_maxValue, m_minValue;
         double m_value;
+
+        bool onValueChangeSent, onSlidingStartSent, onSlidingCompleteSent;
     };
 }
 
