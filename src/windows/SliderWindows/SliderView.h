@@ -11,13 +11,6 @@ namespace winrt::SliderWindows::implementation {
 
     namespace xaml = winrt::Windows::UI::Xaml;
 
-    enum class EventType
-    {
-        Start,
-        Change,
-        Complete
-    };
-
     class SliderView : public SliderViewT<SliderView> {
     public:
         SliderView(Microsoft::ReactNative::IReactContext const& reactContext);
