@@ -8,9 +8,16 @@
 #include "NativeModules.h"
 
 namespace winrt::SliderWindows::implementation {
-    
+
     namespace xaml = winrt::Windows::UI::Xaml;
-    
+
+    enum class EventType
+    {
+        Start,
+        Change,
+        Complete
+    };
+
     class SliderView : public SliderViewT<SliderView> {
     public:
         SliderView(Microsoft::ReactNative::IReactContext const& reactContext);
@@ -35,10 +42,14 @@ namespace winrt::SliderWindows::implementation {
             winrt::Windows::Foundation::IInspectable const& sender,
             xaml::Input::ManipulationCompletedRoutedEventArgs const& args);
 
+        void LaunchEvents(const EventType& eventType) const noexcept;
+
         const double CalculateStepFrequencyPercentageValue(const double& stepPropertyValue) const noexcept;
 
         double m_maxValue, m_minValue;
         double m_value;
+
+        bool onValueChangeSent, onSlidingStartSent, onSlidingCompleteSent;
     };
 }
 
