@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import androidx.appcompat.widget.AppCompatSeekBar;
@@ -140,6 +141,17 @@ public class ReactSlider extends AppCompatSeekBar {
       Timer timer = new Timer();
       timer.schedule(task, 1000);
     }
+  }
+
+  @Override
+  public boolean onTouchEvent(MotionEvent arg0) {
+    super.onTouchEvent(arg0);
+
+    if (arg0.getActionMasked() == MotionEvent.ACTION_DOWN && this.isEnabled() == false) {
+      announceForAccessibility("slider disabled");
+    }
+    // Returns: True if the view handled the hover event
+    return true;
   }
 
   public void setupAccessibility(int index) {
