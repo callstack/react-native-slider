@@ -94,7 +94,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
         @Override
         public void onStartTrackingTouch(SeekBar seekbar) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
-          ((ReactSlider)seekbar).isSliding = true;
+          ((ReactSlider)seekbar).isSliding(true);
           reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
               new ReactSlidingStartEvent(
                   seekbar.getId(),
@@ -104,7 +104,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
         @Override
         public void onStopTrackingTouch(SeekBar seekbar) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
-          ((ReactSlider)seekbar).isSliding = false;
+          ((ReactSlider)seekbar).isSliding(false);
           reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
               new ReactSlidingCompleteEvent(
                   seekbar.getId(),
@@ -149,7 +149,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = "value", defaultDouble = 0d)
   public void setValue(ReactSlider view, double value) {
-    if (view.isSliding == false) {
+    if (view.isSliding() == false) {
       view.setOnSeekBarChangeListener(null);
       view.setValue(value);
       view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER);
