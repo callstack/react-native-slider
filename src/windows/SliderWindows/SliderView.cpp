@@ -22,7 +22,7 @@ namespace winrt {
 
 namespace winrt::SliderWindows::implementation {
 
-    SliderView::SliderView(winrt::IReactContext const& reactContext) : m_reactContext(reactContext) {
+    SliderView::SliderView(winrt::IReactContext const& reactContext) : m_reactContext(reactContext), onSlidingStartSent(false) {
         RegisterEvents();
     }
 
@@ -69,7 +69,7 @@ namespace winrt::SliderWindows::implementation {
                 if (propertyValue.IsNull()) {
                     this->ClearValue(xaml::Controls::Primitives::RangeBase::ValueProperty());
                 }
-                else {
+                else if (!onSlidingStartSent && onSlidingCompleteSent) {
                     updatedValue = true;
                     m_value = propertyValue.AsDouble();
                 }
@@ -200,13 +200,15 @@ namespace winrt::SliderWindows::implementation {
                     eventDataWriter.WriteObjectEnd();
                 } );
             onValueChangeSent = true;
+            onSlidingCompleteSent = false;
+            onSlidingStartSent = false;
         }
     }
 
     void SliderView::OnManipulationStartingHandler( winrt::IInspectable const& sender,
         xaml::Input::ManipulationStartingRoutedEventArgs const& args )
     {
-        if( !m_updating )
+        if( !m_updating && !onSlidingStartSent )
         {
             auto self = sender.try_as<xaml::Controls::Slider>();
 
@@ -238,8 +240,6 @@ namespace winrt::SliderWindows::implementation {
                 onSlidingCompleteSent = true;
             }
             onValueChangeSent = false;
-            onSlidingStartSent = true;
-            onSlidingCompleteSent = false;
         }
     }
 
@@ -263,6 +263,7 @@ namespace winrt::SliderWindows::implementation {
                 } );
             onSlidingCompleteSent = true;
             onValueChangeSent = false;
+            onSlidingStartSent = false;
         }
     }
 
