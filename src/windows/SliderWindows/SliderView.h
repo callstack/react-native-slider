@@ -40,6 +40,8 @@ namespace winrt::SliderWindows::implementation {
         double m_maxValue, m_minValue;
         double m_value;
 
+        bool isSliding;
+
         bool onValueChangeSent, onSlidingStartSent, onSlidingCompleteSent;
     };
 }
