@@ -35,8 +35,6 @@ import javax.annotation.Nullable;
 
 /**
  * Manages instances of {@code ReactSlider}.
- *
- * Note that the slider is _not_ a controlled component.
  */
 public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
@@ -87,8 +85,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
           reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
               new ReactSliderEvent(
                   seekbar.getId(),
-                  ((ReactSlider) seekbar).toRealProgress(progress),
-                  fromUser));
+                  ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
         }
 
         @Override
@@ -98,7 +95,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
           reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
               new ReactSlidingStartEvent(
                   seekbar.getId(),
-                  ((ReactSlider) seekbar).toRealProgress(seekbar.getProgress())));
+                  ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
         }
 
         @Override
@@ -108,7 +105,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
           reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
               new ReactSlidingCompleteEvent(
                   seekbar.getId(),
-                  ((ReactSlider) seekbar).toRealProgress(seekbar.getProgress())));
+                  ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
+          reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
+              new ReactSliderEvent(
+                  seekbar.getId(),
+                  ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()), false));
         }
       };
 
