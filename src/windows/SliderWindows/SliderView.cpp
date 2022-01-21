@@ -22,7 +22,7 @@ namespace winrt {
 
 namespace winrt::SliderWindows::implementation {
 
-    SliderView::SliderView(winrt::IReactContext const& reactContext) : m_reactContext(reactContext) {
+    SliderView::SliderView(winrt::IReactContext const& reactContext) : m_reactContext(reactContext), isSliding(false) {
         RegisterEvents();
     }
 
@@ -55,10 +55,6 @@ namespace winrt::SliderWindows::implementation {
     void SliderView::UpdateProperties(winrt::IJSValueReader const& reader) {
         m_updating = true;
 
-        bool updatedValue = false;
-        bool updatedMaxValue = false;
-        bool updatedMinValue = false;
-
         auto const& propertyMap = JSValueObject::ReadFrom(reader);
 
         for (auto const& pair : propertyMap) {
@@ -69,9 +65,9 @@ namespace winrt::SliderWindows::implementation {
                 if (propertyValue.IsNull()) {
                     this->ClearValue(xaml::Controls::Primitives::RangeBase::ValueProperty());
                 }
-                else {
-                    updatedValue = true;
+                else if (!isSliding) {
                     m_value = propertyValue.AsDouble();
+                    this->Value( m_value );
                 }
             }
             else if (propertyName == "maximumValue") {
@@ -79,8 +75,8 @@ namespace winrt::SliderWindows::implementation {
                     this->ClearValue(xaml::Controls::Primitives::RangeBase::MaximumProperty());
                 }
                 else {
-                    updatedMaxValue = true;
                     m_maxValue = propertyValue.AsDouble();
+                    this->Maximum( m_maxValue );
                 }
             }
             else if (propertyName == "minimumValue") {
@@ -88,8 +84,8 @@ namespace winrt::SliderWindows::implementation {
                     this->ClearValue(xaml::Controls::Primitives::RangeBase::MinimumProperty());
                 }
                 else {
-                    updatedMinValue = true;
                     m_minValue = propertyValue.AsDouble();
+                    this->Minimum( m_minValue );
                 }
             }
             else if (propertyName == "step") {
@@ -169,17 +165,6 @@ namespace winrt::SliderWindows::implementation {
             }
         }
 
-        // This is to mitigate platform bugs related to the order of setting min/max values in certain XAML controls.
-        if (updatedMaxValue) {
-            this->Maximum(m_maxValue);
-        }
-        if (updatedMinValue) {
-            this->Minimum(m_minValue);
-        }
-        if (updatedValue) {
-            this->Value(m_value);
-        }
-
         m_updating = false;
     }
 
@@ -200,13 +185,16 @@ namespace winrt::SliderWindows::implementation {
                     eventDataWriter.WriteObjectEnd();
                 } );
             onValueChangeSent = true;
+            onSlidingCompleteSent = false;
+            onSlidingStartSent = false;
         }
     }
 
     void SliderView::OnManipulationStartingHandler( winrt::IInspectable const& sender,
         xaml::Input::ManipulationStartingRoutedEventArgs const& args )
     {
-        if( !m_updating )
+        isSliding = true;
+        if( !m_updating && !onSlidingStartSent )
         {
             auto self = sender.try_as<xaml::Controls::Slider>();
 
@@ -236,17 +224,16 @@ namespace winrt::SliderWindows::implementation {
                         eventDataWriter.WriteObjectEnd();
                     } );
                 onSlidingCompleteSent = true;
+                isSliding = false;
             }
             onValueChangeSent = false;
-            onSlidingStartSent = true;
-            onSlidingCompleteSent = false;
         }
     }
 
     void SliderView::OnManipulationCompletedHandler( winrt::IInspectable const& sender,
         xaml::Input::ManipulationCompletedRoutedEventArgs const& args )
     {
-        if( !m_updating && onSlidingCompleteSent == false )
+        if( !m_updating )
         {
             auto self = sender.try_as<xaml::Controls::Slider>();
 
@@ -263,7 +250,9 @@ namespace winrt::SliderWindows::implementation {
                 } );
             onSlidingCompleteSent = true;
             onValueChangeSent = false;
+            onSlidingStartSent = false;
         }
+        isSliding = false;
     }
 
     const double SliderView::CalculateStepFrequencyPercentageValue(const double& stepPropertyValue) const noexcept {

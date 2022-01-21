@@ -56,6 +56,8 @@ public class ReactSlider extends AppCompatSeekBar {
    */
   private double mValue = 0;
 
+  private boolean isSliding = false;
+
   /** If zero it's determined automatically. */
   private double mStep = 0;
 
@@ -97,6 +99,14 @@ public class ReactSlider extends AppCompatSeekBar {
   /* package */ void setStep(double step) {
     mStep = step;
     updateAll();
+  }
+
+  boolean isSliding() {
+    return isSliding;
+  }
+
+  void isSliding(boolean isSliding) {
+    this.isSliding = isSliding;
   }
 
   void setAccessibilityUnits(String accessibilityUnits) {
