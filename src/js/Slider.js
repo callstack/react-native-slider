@@ -21,7 +21,6 @@ import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
 import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
 import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
-import invariant from 'invariant';
 
 type Event = SyntheticEvent<
   $ReadOnly<{|
@@ -264,13 +263,6 @@ const SliderComponent = (
       }
     : null;
 
-  invariant(
-    typeof props.disabled === 'boolean' ||
-      typeof props.disabled === 'undefined',
-    '`disabled` prop must be set as a boolean, but got `' +
-      JSON.stringify(props.disabled ?? 'undefined') +
-      '`',
-  );
   const _disabled =
     typeof props.disabled === 'boolean'
       ? props.disabled
