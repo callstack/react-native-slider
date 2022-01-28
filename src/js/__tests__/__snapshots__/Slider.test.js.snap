@@ -1,6 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<Slider /> accessibilityState disabled renders a disabled slider 1`] = `
+exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
+<RNCSlider
+  accessibilityState={
+    Object {
+      "disabled": true,
+    }
+  }
+  disabled={true}
+  enabled={false}
+  inverted={false}
+  maximumValue={1}
+  minimumValue={0}
+  onChange={null}
+  onRNCSliderSlidingComplete={null}
+  onRNCSliderSlidingStart={null}
+  onRNCSliderValueChange={null}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  step={0}
+  style={
+    Object {
+      "height": 40,
+    }
+  }
+  tapToSeek={false}
+  thumbImage={null}
+  value={0}
+/>
+`;
+
+exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
 <RNCSlider
   accessibilityState={
     Object {
@@ -92,36 +122,6 @@ exports[`<Slider /> renders enabled slider 1`] = `
 <RNCSlider
   disabled={false}
   enabled={true}
-  inverted={false}
-  maximumValue={1}
-  minimumValue={0}
-  onChange={null}
-  onRNCSliderSlidingComplete={null}
-  onRNCSliderSlidingStart={null}
-  onRNCSliderValueChange={null}
-  onResponderTerminationRequest={[Function]}
-  onStartShouldSetResponder={[Function]}
-  step={0}
-  style={
-    Object {
-      "height": 40,
-    }
-  }
-  tapToSeek={false}
-  thumbImage={null}
-  value={0}
-/>
-`;
-
-exports[`<Slider /> the disabled prop will change the accessibilityState.disabled value 1`] = `
-<RNCSlider
-  accessibilityState={
-    Object {
-      "disabled": true,
-    }
-  }
-  disabled={true}
-  enabled={false}
   inverted={false}
   maximumValue={1}
   minimumValue={0}
