@@ -268,6 +268,18 @@ const SliderComponent = (
       ? props.disabled
       : props.accessibilityState?.disabled === true;
 
+  const overridesAccessibilityState =
+    typeof props.disabled === 'boolean' &&
+    props.accessibilityState?.disabled !== props.disabled;
+  if (overridesAccessibilityState) {
+    console.warn(
+      `Detected a conflicting state for accessibility and non-accessibility users. The prop disabled with value of ${
+        props.disabled
+      } for slider overrides the accessibilityState.disabled with value of ${
+        props.accessibilityState?.disabled
+      }`,
+    );
+  }
   const _accessibilityState =
     typeof props.disabled === 'boolean'
       ? {...props.accessibilityState, disabled: props.disabled}
