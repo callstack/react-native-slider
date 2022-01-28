@@ -265,7 +265,8 @@ const SliderComponent = (
     : null;
 
   invariant(
-    typeof props.disabled === 'boolean' || !(props.disabled != null),
+    typeof props.disabled === 'boolean' ||
+      typeof props.disabled === 'undefined',
     '`disabled` prop must be set as a boolean, but got `' +
       JSON.stringify(props.disabled ?? 'undefined') +
       '`',
