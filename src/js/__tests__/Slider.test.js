@@ -17,7 +17,7 @@ describe('<Slider />', () => {
     expect(tree).toMatchSnapshot();
   });
 
-  it('accessibilityState disabled renders a disabled slider', () => {
+  it('accessibilityState disabled sets disabled={true}', () => {
     const tree = renderer
       .create(<Slider accessibilityState={{disabled: true}} />)
       .toJSON();
@@ -25,7 +25,7 @@ describe('<Slider />', () => {
     expect(tree).toMatchSnapshot();
   });
 
-  it('the disabled prop will change the accessibilityState.disabled value', () => {
+  it('disabled prop overrides accessibilityState.disabled', () => {
     const tree = renderer
       .create(<Slider disabled accessibilityState={{disabled: false}} />)
       .toJSON();
