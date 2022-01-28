@@ -223,4 +223,17 @@ export const examples = [
       return <SliderExample value={0.6} vertical />;
     },
   },
+  {
+    title: 'Disabled slider',
+    platform: 'android',
+    render(): Element<any> {
+      return (
+        <SliderExample
+          disabled
+          accessibilityState={{disabled: false}}
+          value={0.6}
+        />
+      );
+    },
+  },
 ];
