@@ -5,19 +5,11 @@
 ; Ignore "BUCK" generated dirs
 <PROJECT_ROOT>/\.buckd/
 
-; Ignore polyfills
-node_modules/react-native/Libraries/polyfills/.*
-
-; These should not be required directly
-; require from fbjs/lib instead: require('fbjs/lib/warning')
-node_modules/warning/.*
+; Ignore node_modules
+<PROJECT_ROOT>/node_modules/.*
 
 ; Flow doesn't support platforms
 .*/Libraries/Utilities/LoadingView.js
-
-; These should not be required directly
-; require from fbjs/lib instead: require('fbjs/lib/warning')
-node_modules/warning/.*
 
 ; Flow doesn't support platforms
 .*/Libraries/Utilities/HMRLoadingView.js
