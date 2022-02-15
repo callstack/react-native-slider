@@ -33,6 +33,14 @@ describe('<Slider />', () => {
     expect(tree).toMatchSnapshot();
   });
 
+  it('disabled prop overrides accessibilityState.enabled', () => {
+    const tree = renderer
+      .create(<Slider disabled={false} accessibilityState={{disabled: true}} />)
+      .toJSON();
+
+    expect(tree).toMatchSnapshot();
+  });
+
   it('renders a slider with custom props', () => {
     const tree = renderer
       .create(
