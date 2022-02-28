@@ -223,4 +223,18 @@ export const examples = [
       return <SliderExample value={0.6} vertical />;
     },
   },
+  {
+    title: 'Disabled slider',
+    platform: 'android',
+    render(): Element<any> {
+      return <SliderExample disabled value={0.6} />;
+    },
+  },
+  {
+    title: 'Slider with accessibilityState disabled',
+    platform: 'android',
+    render(): Element<any> {
+      return <SliderExample disabled value={0.6} />;
+    },
+  },
 ];

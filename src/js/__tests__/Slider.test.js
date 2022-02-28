@@ -17,6 +17,30 @@ describe('<Slider />', () => {
     expect(tree).toMatchSnapshot();
   });
 
+  it('accessibilityState disabled sets disabled={true}', () => {
+    const tree = renderer
+      .create(<Slider accessibilityState={{disabled: true}} />)
+      .toJSON();
+
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('disabled prop overrides accessibilityState.disabled', () => {
+    const tree = renderer
+      .create(<Slider disabled accessibilityState={{disabled: false}} />)
+      .toJSON();
+
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('disabled prop overrides accessibilityState.enabled', () => {
+    const tree = renderer
+      .create(<Slider disabled={false} accessibilityState={{disabled: true}} />)
+      .toJSON();
+
+    expect(tree).toMatchSnapshot();
+  });
+
   it('renders a slider with custom props', () => {
     const tree = renderer
       .create(
