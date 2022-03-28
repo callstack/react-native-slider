@@ -18,6 +18,7 @@
 .*/node_modules/@react-native-community/cli/.*/.*
 
 [include]
+../../node_modules
 
 [libs]
 node_modules/react-native/interface.js
