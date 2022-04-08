@@ -60,7 +60,7 @@ type IOSProps = $ReadOnly<{|
   maximumTrackImage?: ?ImageSource,
 |}>;
 
-type Props = $ReadOnly<{|
+export type Props = $ReadOnly<{|
   ...ViewProps,
   ...IOSProps,
   ...WindowsProps,

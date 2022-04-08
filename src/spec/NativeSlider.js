@@ -1,6 +1,4 @@
-/**
- * @flow strict-local
- */
+// flow strict-local
 
 import * as React from 'react';
 
@@ -13,8 +11,6 @@ export interface SliderRef {
 }
 
 export interface Spec extends TurboModule {
-  +getConstants: () => {||};
-
   /**
    * iOS props
    */
