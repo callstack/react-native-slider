@@ -247,6 +247,7 @@ const SliderComponent = (
     onValueChange,
     onSlidingStart,
     onSlidingComplete,
+    onAccessibilityAction,
     ...localProps
   } = props;
 
@@ -284,6 +285,11 @@ const SliderComponent = (
         onSlidingComplete(event.nativeEvent.value);
       }
     : null;
+  const onAccessibilityActionEvent = onAccessibilityAction
+    ? (event: Event) => {
+        onAccessibilityAction(event.nativeEvent.value);
+      }
+    : null;
 
   return (
     <RCTSliderNativeComponent
@@ -304,6 +310,7 @@ const SliderComponent = (
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
       accessibilityState={_accessibilityState}
+      onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
     />
   );
 };
