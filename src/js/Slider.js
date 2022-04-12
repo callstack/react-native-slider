@@ -11,7 +11,12 @@
 'use strict';
 
 import React from 'react';
-import {Image, Platform, StyleSheet, AccessibilityActionEvent} from 'react-native';
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  AccessibilityActionEvent,
+} from 'react-native';
 import RCTSliderNativeComponent from './RNCSliderNativeComponent';
 
 import type {Ref} from 'react';
