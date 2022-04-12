@@ -11,7 +11,7 @@
 'use strict';
 
 import React from 'react';
-import {Image, Platform, StyleSheet} from 'react-native';
+import {Image, Platform, StyleSheet, AccessibilityActionEvent} from 'react-native';
 import RCTSliderNativeComponent from './RNCSliderNativeComponent';
 
 import type {Ref} from 'react';
@@ -286,7 +286,7 @@ const SliderComponent = (
       }
     : null;
   const onAccessibilityActionEvent = onAccessibilityAction
-    ? (event: Event) => {
+    ? (event: AccessibilityActionEvent) => {
         onAccessibilityAction(event.nativeEvent.value);
       }
     : null;
