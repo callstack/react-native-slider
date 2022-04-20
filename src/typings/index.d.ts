@@ -1,6 +1,11 @@
 import * as React from "react";
 import * as ReactNative from "react-native";
 
+type SliderReferenceType = (
+  React.MutableRefObject<SliderRef> &
+  React.LegacyRef<Slider>
+) | undefined;
+
 export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
    * Color of the foreground switch grip.
@@ -145,7 +150,7 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid, SliderP
   /**
    * Reference object.
    */
-  ref?: React.MutableRefObject<SliderRef>;
+  ref?: SliderReferenceType;
 }
 
 /**
