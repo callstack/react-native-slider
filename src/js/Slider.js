@@ -11,7 +11,12 @@
 'use strict';
 
 import React from 'react';
-import {Image, Platform, StyleSheet} from 'react-native';
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  AccessibilityActionEvent,
+} from 'react-native';
 import RCTSliderNativeComponent from './RNCSliderNativeComponent';
 
 import type {Ref} from 'react';
@@ -247,6 +252,7 @@ const SliderComponent = (
     onValueChange,
     onSlidingStart,
     onSlidingComplete,
+    onAccessibilityAction,
     ...localProps
   } = props;
 
@@ -277,6 +283,11 @@ const SliderComponent = (
         onSlidingComplete(event.nativeEvent.value);
       }
     : null;
+  const onAccessibilityActionEvent = onAccessibilityAction
+    ? (event: AccessibilityActionEvent) => {
+        onAccessibilityAction(event.nativeEvent.value);
+      }
+    : null;
 
   return (
     <RCTSliderNativeComponent
@@ -297,6 +308,7 @@ const SliderComponent = (
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
       accessibilityState={_accessibilityState}
+      onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
     />
   );
 };
