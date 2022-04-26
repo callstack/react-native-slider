@@ -7,10 +7,10 @@ import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
 
 type Event = SyntheticEvent<
-  $ReadOnly<{|
+  Readonly<{
     value: number,
     fromUser?: boolean,
-  |}>,
+  }>,
 >;
 
 type NativeProps = $ReadOnly<{|
