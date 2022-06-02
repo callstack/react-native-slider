@@ -2,7 +2,7 @@
   <h1 align="center"> <code>react-native-slider-kf</code> </h1>
 </p>
 <p align="center">
-  <h2 align="center"> <code>Forked from @react-native-community/slider  with a critical crash fix</h1></h2>
+  <h2 align="center"> <code> Forked from @react-native-community/slider ---- with a critical crash fix </code> </h2>
 </p>
 <p align="center">
     <a href="https://www.npmjs.com/package/@react-native-community/slider">
