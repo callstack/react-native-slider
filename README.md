@@ -1,9 +1,12 @@
 <p align="center">
-  <h1 align="center"> <code>@react-native-community/slider</code> </h1>
+  <h1 align="center"> <code>react-native-slider-kf</code> </h1>
+</p>
+<p align="center">
+  <h2 align="center"> <code>Forked from @react-native-community/slider  with a critical crash fix</h1></h2>
 </p>
 <p align="center">
     <a href="https://www.npmjs.com/package/@react-native-community/slider">
-        <img src="https://img.shields.io/npm/v/@react-native-community/slider.svg" alt="Latest version released on npmjs" />
+        <img src="https://img.shields.io/npm/v/react-native-slider-kf.svg" alt="Latest version released on npmjs" />
     </a>
     <a href="https://app.circleci.com/pipelines/github/callstack/react-native-slider?branch=main">
         <img src="https://img.shields.io/circleci/project/github/callstack/react-native-slider/main.svg" alt="Build on CircleCI" />
@@ -28,18 +31,18 @@
 
 To install this module `cd` to your project directory and enter the following command:
 ```
-yarn add @react-native-community/slider
+yarn add react-native-slider-kf
 ```
 or
 ```
-npm install @react-native-community/slider --save
+npm install react-native-slider-kf --save
 ```
 If using iOS please remember to install cocoapods by running: `npx pod-install`
 <br/>For web support please use `@react-native-community/slider@next`
 
 The following code presents the basic usage scenario of this library:
 ```javascript
-import Slider from '@react-native-community/slider';
+import Slider from 'react-native-slider-kf';
 
 <Slider
   style={{width: 200, height: 40}}
@@ -66,7 +69,7 @@ import { Slider } from 'react-native';
 to:
 
 ```javascript
-import Slider from '@react-native-community/slider';
+import Slider from 'react-native-slider-kf';
 ```
 
 ## React Native Compatibility
@@ -74,10 +77,7 @@ To use this library you need to ensure you are using the correct version of Reac
 
 | `@react-native-community/slider` version | Required React Native Version |
 | ---------------------------------------- | ----------------------------- |
-| `4.x.x`                                  | `>=0.60`; `>=0.62` (on Windows);  |
-| `3.1.x`                                  | `>=0.60`                      |
-| `2.x.x`                                  | `>= 0.60`                     |
-| [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0)  | `<= 0.59` |
+| `1.x.x`                                  | `>=0.60`; `>=0.62` (on Windows);  |
 
 
 ## Properties
