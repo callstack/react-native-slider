@@ -152,9 +152,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "value", defaultDouble = 0d)
   public void setValue(ReactSlider view, double value) {
     if (view.isSliding() == false) {
-      view.setOnSeekBarChangeListener(null);
       view.setValue(value);
-      view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER);
       if (view.isAccessibilityFocused() && Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
         view.setupAccessibility((int)value);
       }
