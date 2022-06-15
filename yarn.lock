@@ -1449,7 +1449,7 @@
     prettier "1.16.4"
 
 "@react-native-community/slider@file:src":
-  version "4.2.2"
+  version "4.2.3"
 
 "@react-native-windows/cli@0.65.3":
   version "0.65.3"
