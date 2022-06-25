@@ -1,154 +1,139 @@
-import React from 'react';
-import {
-  Image,
-  Platform,
-  StyleSheet,
-  AccessibilityActionEvent,
-} from 'react-native';
-import RCTSliderNativeComponent from './RNCSliderNativeComponent';
+'use strict';
 
-import type {Ref} from 'react';
+import * as React from "react";
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
-import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
-import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
-import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
+import { StyleSheet, ViewProps, ImageURISource, StyleProp, ViewStyle, Platform,  } from "react-native";
+import { RNCSliderNativeComponent } from "./RNCSliderNativeComponent";
 
-type Event = SyntheticEvent<
-  $ReadOnly<{|
-    value: number,
-    /**
-     * Android Only.
-     */
-    fromUser?: boolean,
-  |}>,
->;
+type SliderReferenceType = (
+  React.MutableRefObject<SliderRef> &
+  React.LegacyRef<typeof Slider>
+) | undefined;
 
-type WindowsProps = $ReadOnly<{|
+export interface SliderPropsAndroid extends ViewProps {
   /**
-   * If true the slider will be inverted.
+   * Color of the foreground switch grip.
+   */
+  thumbTintColor?: string;
+}
+
+export interface SliderRef {
+  updateValue(value: number): void;
+}
+
+export interface SliderPropsIOS extends ViewProps {
+  /**
+   * Assigns a maximum track image. Only static images are supported.
+   * The leftmost pixel of the image will be stretched to fill the track.
+   */
+  maximumTrackImage?: ImageURISource;
+
+  /**
+   * Assigns a minimum track image. Only static images are supported.
+   * The rightmost pixel of the image will be stretched to fill the track.
+   */
+  minimumTrackImage?: ImageURISource;
+
+  /**
+   * Permits tapping on the slider track to set the thumb position.
+   * Defaults to false on iOS. No effect on Android or Windows.
+   */
+  tapToSeek?: boolean;
+
+  /**
+   * Sets an image for the thumb. Only static images are supported.
+   */
+  thumbImage?: ImageURISource;
+
+  /**
+   * Assigns a single image for the track. Only static images
+   * are supported. The center pixel of the image will be stretched
+   * to fill the track.
+   */
+  trackImage?: ImageURISource;
+}
+
+export interface SliderPropsWindows extends ViewProps {
+  /**
+   * Controls the orientation of the slider, default value is 'false' (horizontal).
+   */
+  vertical?: boolean;
+}
+
+
+export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid, SliderPropsWindows {
+  /**
+   * If true the user won't be able to move the slider.
    * Default value is false.
    */
-  vertical?: ?boolean,
-|}>;
-
-type IOSProps = $ReadOnly<{|
-  /**
-   * Assigns a single image for the track. Only static images are supported.
-   * The center pixel of the image will be stretched to fill the track.
-   */
-  trackImage?: ?ImageSource,
+  disabled?: boolean;
 
   /**
-   * Assigns a minimum track image. Only static images are supported. The
-   * rightmost pixel of the image will be stretched to fill the track.
+   * The color used for the track to the right of the button.
+   * Overrides the default blue gradient image.
    */
-  minimumTrackImage?: ?ImageSource,
+  maximumTrackTintColor?: string;
 
   /**
-   * Assigns a maximum track image. Only static images are supported. The
-   * leftmost pixel of the image will be stretched to fill the track.
+   * Initial maximum value of the slider. Default value is 1.
    */
-  maximumTrackImage?: ?ImageSource,
-|}>;
-
-type Props = $ReadOnly<{|
-  ...ViewProps,
-  ...IOSProps,
-  ...WindowsProps,
+  maximumValue?: number;
 
   /**
-   * Used to style and layout the `Slider`.  See `StyleSheet.js` and
-   * `DeprecatedViewStylePropTypes.js` for more info.
+   * The color used for the track to the left of the button.
+   * Overrides the default blue gradient image.
    */
-  style?: ?ViewStyleProp,
+  minimumTrackTintColor?: string;
+
+  /**
+   * Initial minimum value of the slider. Default value is 0.
+   */
+  minimumValue?: number;
+
+  /**
+   * Callback that is called when the user picks up the slider.
+   * The initial value is passed as an argument to the callback handler.
+   */
+  onSlidingStart?: (value: number) => void;
+
+  /**
+   * Callback called when the user finishes changing the value (e.g. when the slider is released).
+   */
+  onSlidingComplete?: (value: number) => void;
+
+  /**
+   * Callback continuously called while the user is dragging the slider.
+   */
+  onValueChange?: (value: number) => void;
+
+  /**
+   * Step value of the slider. The value should be between 0 and (maximumValue - minimumValue). Default value is 0.
+   */
+  step?: number;
+
+  /**
+   * Used to style and layout the Slider. See StyleSheet.js and ViewStylePropTypes.js for more info.
+   */
+  style?: StyleProp<ViewStyle>;
+
+  /**
+   * Used to locate this view in UI automation tests.
+   */
+  testID?: string;
 
   /**
    * Initial value of the slider. The value should be between minimumValue
    * and maximumValue, which default to 0 and 1 respectively.
    * Default value is 0.
-   *
-   * *This is not a controlled component*, you don't need to update the
-   * value during dragging.
+   * This is not a controlled component, you don't need to update
+   * the value during dragging.
    */
-  value?: ?number,
+  value?: number;
 
   /**
-   * Step value of the slider. The value should be
-   * between 0 and (maximumValue - minimumValue).
-   * Default value is 0.
+   * Reverses the direction of the slider.
    */
-  step?: ?number,
-
-  /**
-   * Initial minimum value of the slider. Default value is 0.
-   */
-  minimumValue?: ?number,
-
-  /**
-   * Initial maximum value of the slider. Default value is 1.
-   */
-  maximumValue?: ?number,
-
-  /**
-   * The color used for the track to the left of the button.
-   * Overrides the default blue gradient image on iOS.
-   */
-  minimumTrackTintColor?: ?ColorValue,
-
-  /**
-   * The color used for the track to the right of the button.
-   * Overrides the default blue gradient image on iOS.
-   */
-  maximumTrackTintColor?: ?ColorValue,
-  /**
-   * The color used to tint the default thumb images on iOS, or the
-   * color of the foreground switch grip on Android.
-   */
-  thumbTintColor?: ?ColorValue,
-
-  /**
-   * If true the user won't be able to move the slider.
-   * Default value is false.
-   */
-  disabled?: ?boolean,
-
-  /**
-   * Callback continuously called while the user is dragging the slider.
-   */
-  onValueChange?: ?(value: number) => void,
-
-  /**
-   * Callback that is called when the user touches the slider,
-   * regardless if the value has changed. The current value is passed
-   * as an argument to the callback handler.
-   */
-
-  onSlidingStart?: ?(value: number) => void,
-
-  /**
-   * Callback that is called when the user releases the slider,
-   * regardless if the value has changed. The current value is passed
-   * as an argument to the callback handler.
-   */
-  onSlidingComplete?: ?(value: number) => void,
-
-  /**
-   * Used to locate this view in UI automation tests.
-   */
-  testID?: ?string,
-
-  /**
-   * Sets an image for the thumb. Only static images are supported.
-   */
-  thumbImage?: ?ImageSource,
-
-  /**
-   * If true the slider will be inverted.
-   * Default value is false.
-   */
-  inverted?: ?boolean,
+  inverted?: boolean;
 
   /**
    * A string of one or more words to be announced by the screen reader.
@@ -156,16 +141,21 @@ type Props = $ReadOnly<{|
    * Requires passing a value to `accessibilityIncrements` to work correctly.
    * Should be a plural word, as singular units will be handled.
    */
-  accessibilityUnits?: string,
+  accessibilityUnits?: string;
 
   /**
-   * An array of values that represent the different increments displayed
-   * by the slider. All the values passed into this prop must be strings.
-   * Requires passing a value to `accessibilityUnits` to work correctly.
-   * The number of elements must be the same as `maximumValue`.
+   * A string of one or more words to be announced by the screen reader.
+   * Otherwise, it will announce the value as a percentage.
+   * Requires passing a value to `accessibilityIncrements` to work correctly.
+   * Should be a plural word, as singular units will be handled.
    */
-  accessibilityIncrements?: Array<string>,
-|}>;
+  accessibilityIncrements?: Array<string>;
+
+  /**
+   * Reference object.
+   */
+  ref?: SliderReferenceType;
+}
 
 /**
  * A component used to select a single value from a range of values.
@@ -228,8 +218,8 @@ type Props = $ReadOnly<{|
  *
  */
 const SliderComponent = (
-  props: Props,
-  forwardedRef?: ?Ref<typeof RCTSliderNativeComponent>,
+  props: SliderProps,
+  forwardedRef?: React.Ref<typeof RNCSliderNativeComponent>,
 ) => {
   const style = StyleSheet.compose(
     styles.slider,
@@ -278,7 +268,7 @@ const SliderComponent = (
     : null;
 
   return (
-    <RCTSliderNativeComponent
+    <RNCSliderNativeComponent
       {...localProps}
       thumbImage={
         Platform.OS === 'web'
@@ -303,10 +293,6 @@ const SliderComponent = (
 
 const SliderWithRef = React.forwardRef(SliderComponent);
 
-/* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
- * found when Flow v0.89 was deployed. To see the error, delete this comment
- * and run Flow. */
-
 SliderWithRef.defaultProps = {
   value: 0,
   minimumValue: 0,
@@ -329,8 +315,5 @@ if (Platform.OS === 'ios') {
   });
 }
 
-/* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
- * found when Flow v0.89 was deployed. To see the error, delete this comment
- * and run Flow. */
-const Slider = (SliderWithRef: Class<NativeComponent<Props>>);
+const Slider = (SliderWithRef: NativeComponent<SliderProps>);
 export default Slider;
