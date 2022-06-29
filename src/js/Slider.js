@@ -77,11 +77,14 @@ type Props = $ReadOnly<{|
   style?: ?ViewStyleProp,
 
   /**
-   * Initial value of the slider. The value should be between minimumValue
-   * and maximumValue, which default to 0 and 1 respectively.
+   * Write-only property representing the value of the slider.
+   * Can be used to programmatically control the position of the thumb.
+   * Entered once at the beginning still acts as an initial value.
+   * The value should be between minimumValue and maximumValue,
+   * which default to 0 and 1 respectively.
    * Default value is 0.
    *
-   * *This is not a controlled component*, you don't need to update the
+   * This is not a controlled component, you don't need to update the
    * value during dragging.
    */
   value?: ?number,
