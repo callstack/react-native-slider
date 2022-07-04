@@ -1,16 +1,6 @@
-import {HostComponent, ImageURISource, requireNativeComponent} from 'react-native';
+import {ColorValue, HostComponent, ImageURISource, requireNativeComponent, ViewProps} from 'react-native';
 
-import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
-import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
 import type { ReactElement } from 'react';
-
-type Event = SyntheticEvent<
-  Readonly<{
-    value: number,
-    fromUser?: boolean,
-  }>
->;
 
 interface NativeProps extends ViewProps {
   accessibilityUnits?: string,
@@ -23,12 +13,12 @@ interface NativeProps extends ViewProps {
   maximumTrackTintColor?: ColorValue,
   maximumValue?: number,
   minimumTrackImage?: ImageURISource,
-  minimumTrackTintColor?:ColorValue,
+  minimumTrackTintColor?: ColorValue,
   minimumValue?:number,
-  onChange?:(event: Event) => void,
-  onRNCSliderSlidingStart?:(event: Event) => void,
-  onRNCSliderSlidingComplete?:(event: Event) => void,
-  onRNCSliderValueChange?:(event: Event) => void,
+  onChange?: (value: number) => void,
+  onRNCSliderSlidingStart?: (value: number) => void,
+  onRNCSliderSlidingComplete?: (value: number) => void,
+  onRNCSliderValueChange?: (value: number) => void,
   step?:number,
   testID?:string,
   thumbImage?: ImageURISource,
