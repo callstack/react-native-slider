@@ -1,10 +1,9 @@
-import {HostComponent, requireNativeComponent} from 'react-native';
+import {HostComponent, ImageURISource, requireNativeComponent} from 'react-native';
 
 import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 type Event = SyntheticEvent<
   Readonly<{
@@ -13,18 +12,17 @@ type Event = SyntheticEvent<
   }>
 >;
 
-type NativeProps = Readonly<
-  ViewProps & {
+interface NativeProps extends ViewProps {
   accessibilityUnits?: string,
   accessibilityIncrements?: Array<string>,
   disabled?: boolean,
   enabled?: boolean,
   inverted?: boolean,
   vertical?: boolean,
-  maximumTrackImage?: ImageSource,
+  maximumTrackImage?: ImageURISource,
   maximumTrackTintColor?: ColorValue,
   maximumValue?: number,
-  minimumTrackImage?:ImageSource,
+  minimumTrackImage?: ImageURISource,
   minimumTrackTintColor?:ColorValue,
   minimumValue?:number,
   onChange?:(event: Event) => void,
@@ -33,11 +31,11 @@ type NativeProps = Readonly<
   onRNCSliderValueChange?:(event: Event) => void,
   step?:number,
   testID?:string,
-  thumbImage?:ImageSource,
+  thumbImage?: ImageURISource,
   thumbTintColor?:ColorValue,
-  trackImage?:ImageSource,
+  trackImage?: ImageURISource,
   value?:number,
-}>;
+};
 
 interface RNCSliderType extends HostComponent<NativeProps> {
   getInnerViewNode(): ReactElement;
