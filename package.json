@@ -2,7 +2,7 @@
   "private": true,
   "workspaces": ["src", "example"],
   "scripts": {
-    "validate:eslint": "eslint src example",
+    "validate:eslint": "eslint src/js example",
     "validate:flow": "flow check src",
     "test:jest": "jest src",
     "test": "yarn validate:eslint && yarn validate:flow && yarn test:jest"
