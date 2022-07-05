@@ -1,6 +1,6 @@
 'use strict';
 
-import * as React from "react";
+import React from "react";
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
 import { StyleSheet, ViewProps, ImageURISource, StyleProp, ViewStyle, Platform,  } from "react-native";
 import { RNCSliderNativeComponent } from "./RNCSliderNativeComponent";
@@ -217,9 +217,9 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid, SliderP
  *```
  *
  */
-const SliderComponent = (
+class Slider extends React.Component<SliderProps> {
   props: SliderProps,
-  forwardedRef?: React.Ref<typeof RNCSliderNativeComponent>,
+  private forwardedRef = React.createRef<typeof RNCSliderNativeComponent>;
 ) => {
   const style = StyleSheet.compose(
     styles.slider,
@@ -232,7 +232,7 @@ const SliderComponent = (
     onSlidingComplete,
     onAccessibilityAction,
     ...localProps
-  } = props;
+  } = this.props;
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
@@ -246,7 +246,7 @@ const SliderComponent = (
       : props.accessibilityState?.disabled === true;
 
   const _accessibilityState =
-    typeof props.disabled === 'boolean'
+    typeof this.props.disabled === 'boolean'
       ? {...props.accessibilityState, disabled: props.disabled}
       : props.accessibilityState;
 
@@ -290,30 +290,3 @@ const SliderComponent = (
     />
   );
 };
-
-const SliderWithRef = React.forwardRef(SliderComponent);
-
-SliderWithRef.defaultProps = {
-  value: 0,
-  minimumValue: 0,
-  maximumValue: 1,
-  step: 0,
-  inverted: false,
-  tapToSeek: false,
-};
-
-let styles;
-if (Platform.OS === 'ios') {
-  styles = StyleSheet.create({
-    slider: {
-      height: 40,
-    },
-  });
-} else {
-  styles = StyleSheet.create({
-    slider: {},
-  });
-}
-
-const Slider = (SliderWithRef: NativeComponent<SliderProps>);
-export default Slider;
