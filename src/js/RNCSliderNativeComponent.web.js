@@ -156,7 +156,7 @@ const RCTSliderWebComponent = React.forwardRef(
     forwardedRef,
   ) => {
     const onValueChange = useCallback(
-      value => {
+      (value) => {
         onRNCSliderValueChange &&
           onRNCSliderValueChange({nativeEvent: {fromUser: true, value}});
       },
@@ -164,7 +164,7 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     const onSlidingStart = useCallback(
-      value => {
+      (value) => {
         onRNCSliderSlidingStart &&
           onRNCSliderSlidingStart({nativeEvent: {fromUser: true, value}});
       },
@@ -172,7 +172,7 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     const onSlidingComplete = useCallback(
-      value => {
+      (value) => {
         onRNCSliderSlidingComplete &&
           onRNCSliderSlidingComplete({nativeEvent: {fromUser: true, value}});
       },
@@ -273,7 +273,7 @@ const RCTSliderWebComponent = React.forwardRef(
     };
 
     const updateValue = useCallback(
-      newValue => {
+      (newValue) => {
         // Ensure that the value is correctly rounded
         const hardRounded =
           decimalPrecision.current < 20
@@ -327,7 +327,7 @@ const RCTSliderWebComponent = React.forwardRef(
       updateValue(getValueFromNativeEvent(nativeEvent));
     };
 
-    const accessibilityActions = event => {
+    const accessibilityActions = (event) => {
       const tenth = (maximumValue - minimumValue) / 10;
       switch (event.nativeEvent.actionName) {
         case 'increment':
@@ -338,7 +338,7 @@ const RCTSliderWebComponent = React.forwardRef(
           break;
       }
     };
-    const handleAccessibilityKeys = key => {
+    const handleAccessibilityKeys = (key) => {
       switch (key) {
         case 'ArrowUp':
         case 'ArrowRight':
@@ -354,7 +354,7 @@ const RCTSliderWebComponent = React.forwardRef(
     React.useImperativeHandle(
       forwardedRef,
       () => ({
-        updateValue: val => {
+        updateValue: (val) => {
           updateValue(val);
         },
       }),
@@ -401,7 +401,7 @@ function calculatePrecision(minimumValue, maximumValue, step) {
   } else {
     // Calculate the number of decimals we can encounter in the results
     const decimals = [minimumValue, maximumValue, step].map(
-      value => ((value + '').split('.').pop() || '').length,
+      (value) => ((value + '').split('.').pop() || '').length,
     );
     return Math.max(...decimals);
   }

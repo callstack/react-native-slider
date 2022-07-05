@@ -32,7 +32,7 @@ class SliderExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
           step={0.5}
           style={styles.slider}
           {...this.props}
-          onValueChange={value => this.setState({value: value})}
+          onValueChange={(value) => this.setState({value: value})}
         />
       </View>
     );
@@ -53,7 +53,7 @@ class SlidingStartExample extends React.Component<
       <View>
         <SliderExample
           {...this.props}
-          onSlidingStart={value =>
+          onSlidingStart={(value) =>
             this.setState({
               slideStartingValue: value,
               slideStartingCount: this.state.slideStartingCount + 1,
@@ -83,7 +83,7 @@ class SlidingCompleteExample extends React.Component<
       <View>
         <SliderExample
           {...this.props}
-          onSlidingComplete={value =>
+          onSlidingComplete={(value) =>
             this.setState({
               slideCompletionValue: value,
               slideCompletionCount: this.state.slideCompletionCount + 1,

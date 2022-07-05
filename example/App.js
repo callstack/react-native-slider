@@ -13,7 +13,7 @@ export default class App extends Component<Props> {
           {'<Slider />'}
         </Text>
         {examples
-          .filter(e => !e.platform || e.platform === Platform.OS)
+          .filter((e) => !e.platform || e.platform === Platform.OS)
           .map((e, i) => (
             <View key={`slider${i}`} style={styles.sliderWidget}>
               <Text style={styles.instructions}>{e.title}</Text>
