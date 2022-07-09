@@ -8,7 +8,8 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "windows": "react-native run-windows"
+    "windows": "react-native run-windows",
+    "postinstall": "rm -rf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider"
   },
   "dependencies": {
     "@react-native-community/slider": "file:../package",
@@ -22,6 +23,7 @@
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.6.3",
     "eslint": "^7.32.0",
+    "copyfiles": "^2.4.1",
     "jest": "^26.6.3",
     "metro-config": "^0.70.3",
     "metro-react-native-babel-preset": "^0.70.3",
