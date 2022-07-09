@@ -16,7 +16,7 @@
     "slider"
   ],
   "scripts": {
-    "prepare": "babel --out-dir dist js"
+    "prepare": "babel --out-dir dist src"
   },
   "peerDependencies": {
     "react": "*",
@@ -40,5 +40,19 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/callstack/react-native-slider.git"
+  },
+  "jest": {
+    "preset": "react-native",
+    "verbose": true,
+    "modulePathIgnorePatterns": [
+      "/e2e/"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": false,
+    "jsxBracketSameLine": true,
+    "parser": "flow"
   }
 }

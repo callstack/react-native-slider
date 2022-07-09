@@ -10,7 +10,6 @@
     "run:web": "expo web"
   },
   "dependencies": {
-    "@react-native-community/slider": "file:../src/",
     "babel-preset-expo": "^8.2.1",
     "expo": "^37.0.12",
     "react": "^17.0.2",
@@ -20,5 +19,19 @@
   },
   "devDependencies": {
     "react-native-codegen": "^0.0.7"
+  },
+  "jest": {
+    "preset": "react-native",
+    "verbose": true,
+    "modulePathIgnorePatterns": [
+      "/e2e/"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": false,
+    "jsxBracketSameLine": true,
+    "parser": "flow"
   }
 }
