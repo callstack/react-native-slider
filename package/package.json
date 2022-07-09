@@ -18,10 +18,6 @@
   "scripts": {
     "prepare": "babel --out-dir dist src"
   },
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
-  },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.6.2",
