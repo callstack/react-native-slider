@@ -41,7 +41,7 @@ jobs:
           command: cd package && npm install
       - run:
           name: Run unit tests with Jest
-          command: cd package && npx jest
+          command: cd package && npx jest src
 
   build_example_windows:
     executor:
@@ -51,13 +51,13 @@ jobs:
       - checkout
       - run:
           name: Install examples
-          command: cd src; npm install; cd ../example; npm install
+          command: cd package; npm install; cd ../example; npm install
       - run:
           name: "Restore NuGet packages for Components"
-          command: nuget restore .\example\windows\SliderTestWindows.sln
+          command: nuget restore .\example\windows\example.sln
       - run:
           name: "Restore .NET dependencies"
-          command: msbuild -t:restore .\example\windows\SliderTestWindows.sln
+          command: msbuild -t:restore .\example\windows\example.sln
       - run:
           name: Build example Windows
           command: cd example; npx react-native run-windows --no-packager --no-launch --arch x64 --logging --no-deploy
@@ -68,7 +68,7 @@ jobs:
       - checkout
       - run:
           name: Install deps
-          command: cd src && npm install && cd ../example && npm install
+          command: cd package && npm install && cd ../example && npm install
       - run:
           name: Install Pods
           command: cd example && npx pod-install
