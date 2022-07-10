@@ -246,10 +246,7 @@ const SliderComponent = (
   props: Props,
   forwardedRef?: ?Ref<typeof RCTSliderNativeComponent>,
 ) => {
-  const style = StyleSheet.compose(
-    styles.slider,
-    props.style,
-  );
+  const style = StyleSheet.compose(styles.slider, props.style);
 
   const {
     onValueChange,
