@@ -83,16 +83,17 @@ jobs:
       name: android/android-machine
       resource-class: large
       tag: 2021.10.1
-    working_directory: ./example/android
+    working_directory: ~/project
     steps:
       - checkout:
           path: ~/project
       - run:
-          command: npm install
+          command: cd package && npm install
+      - run:
+          command: cd example && npm install
       - run:
           name: Assemble debug build
-          command: |
-            ./gradlew clean build
+          command: cd example/android && ./gradlew clean build
 
   ios-debug:
     macos:
@@ -110,7 +111,7 @@ jobs:
       - run:
           name: Compile iOS app
           command: |
-            cd ios && xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_BITCODE=NO
+            cd example/ios && xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_BITCODE=NO
 
 workflows:
   slider-full-ci:
