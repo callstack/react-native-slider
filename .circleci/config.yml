@@ -3,6 +3,8 @@ version: 2.1
 orbs:
   rn: react-native-community/react-native@7.1.0
   windows: circleci/windows@2.4.0
+  android: circleci/android@2.0.3
+  macos: circleci/macos@2.2.0
 
 jobs:
   checkout_code:
@@ -76,6 +78,40 @@ jobs:
           name: Build the iOS example project
           command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES
 
+  android-debug:
+    executor:
+      name: android/android-machine
+      resource-class: large
+      tag: 2021.10.1
+    working_directory: ./example/android
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          command: npm install
+      - run:
+          name: Assemble debug build
+          command: |
+            ./gradlew clean build
+
+  ios-debug:
+    macos:
+      xcode: 13.3.1
+    working_directory: /Users/distiller/project
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          command: cd package && npm install
+      - run:
+          command: cd example && npm install
+      - run:
+          command: cd example/ios && pod install
+      - run:
+          name: Compile iOS app
+          command: |
+            cd ios && xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_BITCODE=NO
+
 workflows:
   slider-full-ci:
     jobs:
@@ -89,12 +125,9 @@ workflows:
       - build_example_windows:
           requires:
             - verify
-      - rn/android_build:
-          name: build_android_debug
-          project_path: "example/android"
-          build_type: debug
+      - android-debug:
           requires:
             - verify
-      - build_example_ios:
+      - ios-debug:
           requires:
             - verify
