@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  rn: react-native-community/react-native@6.1.0
+  rn: react-native-community/react-native@7.1.0
   windows: circleci/windows@2.4.0
 
 jobs:
@@ -18,23 +18,30 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - rn/yarn_install
+      - run:
+          name: Install node modules for package
+          command: cd package && npm install
+      - run:
+          name: Install node modules for example app
+          command: cd example && npm install
       - run:
           name: Lint JS Code (ESLint)
-          command: yarn run validate:eslint
+          command: cd package && npx eslint src
       - run:
-          name: Flow
-          command: yarn run validate:flow
+          name: Lint Example app JS code (ESLint)
+          command: cd example && npx eslint .
 
   test:
     executor: rn/linux_js
     steps:
       - attach_workspace:
           at: .
-      - rn/yarn_install
+      - run:
+          name: Install node modules for package
+          command: cd package && npm install
       - run:
           name: Run unit tests with Jest
-          command: yarn run test:jest
+          command: cd package && npx jest
 
   build_example_windows:
     executor:
@@ -44,7 +51,7 @@ jobs:
       - checkout
       - run:
           name: Install examples
-          command: cd src; yarn install; cd ../example; yarn install --force --frozen-lockfile
+          command: cd src; npm install; cd ../example; npm install
       - run:
           name: "Restore NuGet packages for Components"
           command: nuget restore .\example\windows\SliderTestWindows.sln
@@ -61,24 +68,13 @@ jobs:
       - checkout
       - run:
           name: Install deps
-          command: cd src && yarn install && cd ../example && yarn install --force --frozen-lockfile
+          command: cd src && npm install && cd ../example && npm install
       - run:
           name: Install Pods
           command: cd example && npx pod-install
       - run:
           name: Build the iOS example project
           command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES
-
-  # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
-  # publish:
-  #   executor: rn/linux_js
-  #   steps:
-  #     - attach_workspace:
-  #         at: .
-  #     - rn/yarn_install
-  #     - run:
-  #         name: Publish to NPM
-  #         command: yarn ci:publish
 
 workflows:
   slider-full-ci:
@@ -102,11 +98,3 @@ workflows:
       - build_example_ios:
           requires:
             - verify
-      # - publish:
-      #     requires:
-      #       - analyse
-      #       - rn/android_test
-      #       - rn/ios_build_and_test
-      #     filters:
-      #       branches:
-      #         only: master
