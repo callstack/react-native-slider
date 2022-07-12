@@ -110,22 +110,14 @@ To use this library you need to ensure you are using the correct version of Reac
 
 ## Contributing
 
-This project uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) to handle its internal dependencies.
-* Make sure to use `yarn` to install dependencies when implementing changes to this library.
+The main package implementation is done in the `package/` directory.
+So when implementing changes there, make sure your code passes ESLint and the tests. Run the following to verify:
 ```sh
-yarn install
+cd package/
+npm run lint
+npm run test
 ```
-* Make sure your code passes Flow, ESLint and the tests. Run the following to verify:
-```sh
-yarn validate:flow
-yarn validate:eslint --fix
-yarn test:jest
-```
-or 
-```sh
-yarn test
-```
-to run them all.
+
 * Remember to cover your changes with tests if possible.
 
 When [creating an issue](https://github.com/callstack/react-native-slider/issues/new/choose) please remember to specify the platform which the issue occurs on.
@@ -135,17 +127,14 @@ While developing, you can run the example app to test your changes.
 
 ### Setup
 
-- Clone the repository 
-- Run `yarn` in the root directory to install dependencies, and again in `src` to create the dist build.
-- (on iOS) Run `npx pod-install` from the `example` directory
-- (on Windows) You need to manually link the Slider module to your project.
+- Clone the repository
+- Run `npm install` in the root directory to install dependencies.
+- Run `npm run example-<platform>`, where platform can be: `ios`, `android`, `windows`
 
-### Start the app
-
-- Run `yarn run:android` to run on Android
-- Run `yarn run:ios` to run on iOS
-- Run `yarn run:web` to run on web
-- Run `yarn run:windows` to run on Windows.
+You can also do this manually by:
+- Installing node modules for example app
+- Installing pods for iOS app
+- Running example app like always: `npx react-native run-<platform>`
 
 
 ## Maintainers

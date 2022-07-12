@@ -16,7 +16,9 @@
     "slider"
   ],
   "scripts": {
-    "prepare": "babel --out-dir dist src"
+    "prepare": "babel --out-dir dist src",
+    "lint": "npx eslint src",
+    "test": "npx jest src"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
