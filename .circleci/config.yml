@@ -1,8 +1,10 @@
 version: 2.1
 
 orbs:
-  rn: react-native-community/react-native@6.1.0
+  rn: react-native-community/react-native@7.1.0
   windows: circleci/windows@2.4.0
+  android: circleci/android@2.0.3
+  macos: circleci/macos@2.2.0
 
 jobs:
   checkout_code:
@@ -18,23 +20,30 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - rn/yarn_install
+      - run:
+          name: Install node modules for package
+          command: cd package && npm install
+      - run:
+          name: Install node modules for example app
+          command: cd example && npm install
       - run:
           name: Lint JS Code (ESLint)
-          command: yarn run validate:eslint
+          command: cd package && npx eslint src
       - run:
-          name: Flow
-          command: yarn run validate:flow
+          name: Lint Example app JS code (ESLint)
+          command: cd example && npx eslint .
 
   test:
     executor: rn/linux_js
     steps:
       - attach_workspace:
           at: .
-      - rn/yarn_install
+      - run:
+          name: Install node modules for package
+          command: cd package && npm install
       - run:
           name: Run unit tests with Jest
-          command: yarn run test:jest
+          command: cd package && npx jest src
 
   build_example_windows:
     executor:
@@ -44,13 +53,13 @@ jobs:
       - checkout
       - run:
           name: Install examples
-          command: cd src; yarn install; cd ../example; yarn install --force --frozen-lockfile
+          command: cd package; npm install; cd ../example; npm install
       - run:
           name: "Restore NuGet packages for Components"
-          command: nuget restore .\example\windows\SliderTestWindows.sln
+          command: nuget restore .\example\windows\example.sln
       - run:
           name: "Restore .NET dependencies"
-          command: msbuild -t:restore .\example\windows\SliderTestWindows.sln
+          command: msbuild -t:restore .\example\windows\example.sln
       - run:
           name: Build example Windows
           command: cd example; npx react-native run-windows --no-packager --no-launch --arch x64 --logging --no-deploy
@@ -61,7 +70,7 @@ jobs:
       - checkout
       - run:
           name: Install deps
-          command: cd src && yarn install && cd ../example && yarn install --force --frozen-lockfile
+          command: cd package && npm install && cd ../example && npm install
       - run:
           name: Install Pods
           command: cd example && npx pod-install
@@ -69,16 +78,40 @@ jobs:
           name: Build the iOS example project
           command: cd example/ios && export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -workspace example.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11' -scheme example -parallelizeTargets -configuration Debug -derivedDataPath build  -UseModernBuildSystem=YES
 
-  # To be uncommented as a part of https://github.com/react-native-community/react-native-slider/issues/34
-  # publish:
-  #   executor: rn/linux_js
-  #   steps:
-  #     - attach_workspace:
-  #         at: .
-  #     - rn/yarn_install
-  #     - run:
-  #         name: Publish to NPM
-  #         command: yarn ci:publish
+  android-debug:
+    executor:
+      name: android/android-machine
+      resource-class: large
+      tag: 2021.10.1
+    working_directory: ~/project
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          command: cd package && npm install
+      - run:
+          command: cd example && npm install
+      - run:
+          name: Assemble debug build
+          command: cd example/android && ./gradlew clean build
+
+  ios-debug:
+    macos:
+      xcode: 13.3.1
+    working_directory: /Users/distiller/project
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          command: cd package && npm install
+      - run:
+          command: cd example && npm install
+      - run:
+          command: cd example/ios && pod install
+      - run:
+          name: Compile iOS app
+          command: |
+            cd example/ios && xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ENABLE_BITCODE=NO
 
 workflows:
   slider-full-ci:
@@ -93,20 +126,9 @@ workflows:
       - build_example_windows:
           requires:
             - verify
-      - rn/android_build:
-          name: build_android_debug
-          project_path: "example/android"
-          build_type: debug
+      - android-debug:
           requires:
             - verify
-      - build_example_ios:
+      - ios-debug:
           requires:
             - verify
-      # - publish:
-      #     requires:
-      #       - analyse
-      #       - rn/android_test
-      #       - rn/ios_build_and_test
-      #     filters:
-      #       branches:
-      #         only: master

@@ -1,24 +1,9 @@
 {
-  "private": true,
-  "workspaces": ["src", "example"],
-  "scripts": {
-    "validate:eslint": "eslint src example",
-    "validate:flow": "flow check src",
-    "test:jest": "jest src",
-    "test": "yarn validate:eslint && yarn validate:flow && yarn test:jest"
-  },
-  "jest": {
-    "preset": "react-native",
-    "verbose": true,
-    "modulePathIgnorePatterns": [
-      "/e2e/"
-    ]
-  },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "all",
-    "bracketSpacing": false,
-    "jsxBracketSameLine": true,
-    "parser": "flow"
-  }
+    "scripts": {
+        "install": "cd package && npm install && cd ../example && npm install",
+        "start-example": "cd example && npm start",
+        "example-android": "cd example && npx react-native run-android",
+        "example-ios": "cd example && npx pod-install && npx react-native run-ios",
+        "example-windows": "cd example && npx react-native run-windows"
+    }
 }
