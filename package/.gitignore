@@ -239,6 +239,7 @@ ClientBin/
 *.pfx
 *.publishsettings
 orleans.codegen.cs
+README.md
 
 # Including strong name files can present a security risk
 # (https://github.com/github/gitignore/pull/2483#issue-259490424)
