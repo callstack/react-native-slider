@@ -17,7 +17,7 @@ import {
   StyleSheet,
   AccessibilityActionEvent,
 } from 'react-native';
-import RCTSliderNativeComponent from './RNCSliderNativeComponent';
+import RCTSliderNativeComponent from './index';
 
 import type {Ref} from 'react';
 import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
