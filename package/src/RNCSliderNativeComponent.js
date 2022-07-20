@@ -16,12 +16,12 @@ import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 import type {
-  Int32,
+  Float,
   BubblingEventHandler,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
 type Event = $ReadOnly<{|
-  value: ?Int32,
+  value: ?Float,
   fromUser?: ?boolean,
 |}>;
 
@@ -35,20 +35,20 @@ export type NativeProps = $ReadOnly<{|
   vertical?: ?boolean,
   maximumTrackImage?: ?ImageSource,
   maximumTrackTintColor?: ?ColorValue,
-  maximumValue?: ?Int32,
+  maximumValue?: ?Float,
   minimumTrackImage?: ?ImageSource,
   minimumTrackTintColor?: ?ColorValue,
-  minimumValue?: ?Int32,
+  minimumValue?: ?Float,
   onChange?: ?BubblingEventHandler<Event>,
   onRNCSliderSlidingStart?: ?BubblingEventHandler<Event>,
   onRNCSliderSlidingComplete?: ?BubblingEventHandler<Event>,
   onRNCSliderValueChange?: ?BubblingEventHandler<Event>,
-  step?: ?Int32,
+  step?: ?Float,
   testID?: ?string,
   thumbImage?: ?ImageSource,
   thumbTintColor?: ?ColorValue,
   trackImage?: ?ImageSource,
-  value?: ?Int32,
+  value?: ?Float,
 |}>;
 
 export default (codegenNativeComponent<NativeProps>(
