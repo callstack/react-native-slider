@@ -33,6 +33,18 @@ using namespace facebook::react;
     return concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>();
 }
 
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        static const auto defaultProps = std::make_shared<const RNCSliderProps>();
+        _props = defaultProps;
+        slider = [[RNCSlider alloc] initWithFrame:self.bounds];
+        self.contentView = slider;
+    }
+    return self;
+}
+
+
 - (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
 {
     const auto &oldScreenProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
@@ -76,25 +88,20 @@ using namespace facebook::react;
     }
     if (oldScreenProps.accessibilityUnits != newScreenProps.accessibilityUnits) {
         NSString *convertedAccessibilityUnits = [NSString stringWithCString:newScreenProps.accessibilityUnits.c_str()
-                                           encoding:[NSString defaultCStringEncoding]];
+                                                                   encoding:[NSString defaultCStringEncoding]];
         slider.accessibilityUnits = convertedAccessibilityUnits;
     }
-    
+    if (oldScreenProps.accessibilityIncrements != newScreenProps.accessibilityIncrements) {
+        id accessibilityIncrements = [NSArray new];
+        for (auto str : newScreenProps.accessibilityIncrements) {
+            id nsstr = [NSString stringWithUTF8String:str.c_str()];
+            [accessibilityIncrements addObject:nsstr];
+        }
+        [self setAccessibilityIncrements:accessibilityIncrements];
+    }
     [super updateProps:props oldProps:oldProps];
 }
 
-
-
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    if (self = [super initWithFrame:frame]) {
-        static const auto defaultProps = std::make_shared<const RNCSliderProps>();
-        _props = defaultProps;
-        slider = [[RNCSlider alloc] initWithFrame:self.bounds];
-        self.contentView = slider;
-      }
-    return self;
-}
 
 - (void)setValue:(float)value
 {
