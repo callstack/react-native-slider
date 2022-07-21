@@ -8,7 +8,9 @@
 #import <react/renderer/components/RNCSlider/EventEmitters.h>
 #import <react/renderer/components/RNCSlider/Props.h>
 #import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
-
+#import <React/RCTBridge+Private.h>
+#import "RCTImagePrimitivesConversions.h"
+#import <React/RCTImageLoaderProtocol.h>
 #import "RCTFabricComponentsPlugins.h"
 #import "RNCSlider.h"
 
@@ -23,6 +25,7 @@ using namespace facebook::react;
 @implementation RNCSliderComponentView
 {
     RNCSlider *slider;
+    UIImage *_image;
     BOOL _isSliding;
 }
 
@@ -58,38 +61,38 @@ using namespace facebook::react;
 }
 
 - (void)tapHandler:(UITapGestureRecognizer *)gesture {
-  if ([gesture.view class] != [RNCSlider class]) {
-    return;
-  }
-  RNCSlider *slider = (RNCSlider *)gesture.view;
-  slider.isSliding = _isSliding;
-
-  // Ignore this tap if in the middle of a slide.
-  if (_isSliding) {
-    return;
-  }
-
-  if (!slider.tapToSeek) {
-    return;
-  }
-
-  CGPoint touchPoint = [gesture locationInView:slider];
-  float rangeWidth = slider.maximumValue - slider.minimumValue;
-  float sliderPercent = touchPoint.x / slider.bounds.size.width;
-  slider.lastValue = slider.value;
-  float value = slider.minimumValue + (rangeWidth * sliderPercent);
-
-  [slider setValue:[slider discreteValue:value] animated: YES];
-
+    if ([gesture.view class] != [RNCSlider class]) {
+        return;
+    }
+    RNCSlider *slider = (RNCSlider *)gesture.view;
+    slider.isSliding = _isSliding;
+    
+    // Ignore this tap if in the middle of a slide.
+    if (_isSliding) {
+        return;
+    }
+    
+    if (!slider.tapToSeek) {
+        return;
+    }
+    
+    CGPoint touchPoint = [gesture locationInView:slider];
+    float rangeWidth = slider.maximumValue - slider.minimumValue;
+    float sliderPercent = touchPoint.x / slider.bounds.size.width;
+    slider.lastValue = slider.value;
+    float value = slider.minimumValue + (rangeWidth * sliderPercent);
+    
+    [slider setValue:[slider discreteValue:value] animated: YES];
+    
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-      ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
-
-  // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
+    ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
+    
+    // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-      ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
-
+    ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
+    
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-      ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
+    ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
 }
 
 - (void)sliderValueChanged:(RNCSlider *)sender
@@ -185,7 +188,45 @@ using namespace facebook::react;
         }
         [slider setAccessibilityIncrements:accessibilityIncrements];
     }
+    if (oldScreenProps.thumbImage != newScreenProps.thumbImage) {
+        [self loadImageFromImageSource:newScreenProps.thumbImage completionBlock:^(NSError *error, UIImage *image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->slider setThumbImage:image];
+            });
+        }];
+    }
+    if (oldScreenProps.trackImage != newScreenProps.trackImage) {
+        [self loadImageFromImageSource:newScreenProps.trackImage completionBlock:^(NSError *error, UIImage *image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->slider setTrackImage:image];
+            });
+        }];
+    }
+    if (oldScreenProps.minimumTrackImage != newScreenProps.minimumTrackImage) {
+        [self loadImageFromImageSource:newScreenProps.minimumTrackImage completionBlock:^(NSError *error, UIImage *image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->slider setMinimumTrackImage:image];
+            });
+        }];
+    }
+    if (oldScreenProps.maximumTrackImage != newScreenProps.maximumTrackImage) {
+        [self loadImageFromImageSource:newScreenProps.maximumTrackImage completionBlock:^(NSError *error, UIImage *image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->slider setMaximumTrackImage:image];
+            });
+        }];
+    }
     [super updateProps:props oldProps:oldProps];
+}
+
+
+// TODO temporarily using bridge, workaround for https://github.com/reactwg/react-native-new-architecture/discussions/31#discussioncomment-2717047, rewrite when Meta comes with a solution.
+- (void)loadImageFromImageSource:(ImageSource)source completionBlock:(RNCLoadImageCompletionBlock)completionBlock
+{
+    NSString *uri = [[NSString alloc] initWithUTF8String:source.uri.c_str()];
+    if ((BOOL)uri.length) {
+        [[[RCTBridge currentBridge] moduleForName:@"ImageLoader"] loadImageWithURLRequest:NSURLRequestFromImageSource(source) size:CGSizeMake(source.size.width, source.size.height) scale:source.scale clipped:NO resizeMode:RCTResizeModeCover progressBlock:nil partialLoadBlock:nil completionBlock:completionBlock];
+    }
 }
 
 - (void)setInverted:(BOOL)inverted
