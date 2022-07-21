@@ -39,11 +39,64 @@ using namespace facebook::react;
         static const auto defaultProps = std::make_shared<const RNCSliderProps>();
         _props = defaultProps;
         slider = [[RNCSlider alloc] initWithFrame:self.bounds];
+        [slider addTarget:self action:@selector(sliderValueChanged:)
+         forControlEvents:UIControlEventValueChanged];
+        [slider addTarget:self action:@selector(sliderTouchStart:)
+         forControlEvents:UIControlEventTouchDown];
+        [slider addTarget:self action:@selector(sliderTouchEnd:)
+         forControlEvents:(UIControlEventTouchUpInside |
+                           UIControlEventTouchUpOutside |
+                           UIControlEventTouchCancel)];
+        
+        slider.value = (float)defaultProps->value;
         self.contentView = slider;
     }
     return self;
 }
 
+- (void)sliderValueChanged:(RNCSlider *)sender
+{
+    [self RNCSendSliderEvent:sender withContinuous:YES isSlidingStart:NO];
+}
+
+- (void)sliderTouchStart:(RNCSlider *)sender
+{
+    [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:YES];
+    sender.isSliding = YES;
+}
+
+- (void)sliderTouchEnd:(RNCSlider *)sender
+{
+    [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:NO];
+    sender.isSliding = YES;
+}
+
+- (void)RNCSendSliderEvent:(RNCSlider *)sender withContinuous:(BOOL)continuous isSlidingStart:(BOOL)isSlidingStart
+{
+    float value = [sender discreteValue:sender.value];
+    
+    if(!sender.isSliding) {
+        [sender setValue:value animated:NO];
+    }
+    
+    if (continuous) {
+        if (sender.lastValue != value)  {
+            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+            ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
+        }
+    } else {
+        if (!isSlidingStart) {
+            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+            ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
+        }
+        if (isSlidingStart) {
+            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+            ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
+        }
+    }
+    
+    sender.lastValue = value;
+}
 
 - (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
 {
@@ -94,11 +147,11 @@ using namespace facebook::react;
 
 - (void)setInverted:(BOOL)inverted
 {
-  if (inverted) {
-    self.transform = CGAffineTransformMakeScale(-1, 1);
-  } else {
-    self.transform = CGAffineTransformMakeScale(1, 1);
-  }
+    if (inverted) {
+        self.transform = CGAffineTransformMakeScale(-1, 1);
+    } else {
+        self.transform = CGAffineTransformMakeScale(1, 1);
+    }
 }
 
 @end
