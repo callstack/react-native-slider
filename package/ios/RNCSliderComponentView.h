@@ -1,9 +1,7 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 
 #import <UIKit/UIKit.h>
-
 #import <React/RCTViewComponentView.h>
-
 #import "RNCSlider.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -32,4 +30,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-#endif // RCT_NEW_ARCH_ENABLED
+#endif
