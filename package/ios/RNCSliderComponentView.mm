@@ -23,9 +23,7 @@ using namespace facebook::react;
 @implementation RNCSliderComponentView
 {
     RNCSlider *slider;
-    float _unclippedValue;
-    bool _minimumTrackImageSet;
-    bool _maximumTrackImageSet;
+    BOOL _isSliding;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -83,21 +81,15 @@ using namespace facebook::react;
 
   [slider setValue:[slider discreteValue:value] animated: YES];
 
-  if (slider.onRNCSliderValueChange) {
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
       ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
-  }
 
   // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
-  if (slider.onRNCSliderValueChange) {
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
       ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
-  }
 
-  if (slider.onRNCSliderSlidingComplete) {
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
       ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
-  }
 }
 
 - (void)sliderValueChanged:(RNCSlider *)sender
@@ -109,12 +101,14 @@ using namespace facebook::react;
 {
     [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:YES];
     sender.isSliding = YES;
+    _isSliding = YES;
 }
 
 - (void)sliderTouchEnd:(RNCSlider *)sender
 {
     [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:NO];
     sender.isSliding = YES;
+    _isSliding = NO;
 }
 
 - (void)RNCSendSliderEvent:(RNCSlider *)sender withContinuous:(BOOL)continuous isSlidingStart:(BOOL)isSlidingStart
