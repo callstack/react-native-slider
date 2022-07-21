@@ -48,10 +48,56 @@ using namespace facebook::react;
                            UIControlEventTouchUpOutside |
                            UIControlEventTouchCancel)];
         
+        UITapGestureRecognizer *tapGesturer;
+        tapGesturer = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(tapHandler:)];
+        [tapGesturer setNumberOfTapsRequired: 1];
+        [slider addGestureRecognizer:tapGesturer];
+        
         slider.value = (float)defaultProps->value;
         self.contentView = slider;
     }
     return self;
+}
+
+- (void)tapHandler:(UITapGestureRecognizer *)gesture {
+  if ([gesture.view class] != [RNCSlider class]) {
+    return;
+  }
+  RNCSlider *slider = (RNCSlider *)gesture.view;
+  slider.isSliding = _isSliding;
+
+  // Ignore this tap if in the middle of a slide.
+  if (_isSliding) {
+    return;
+  }
+
+  if (!slider.tapToSeek) {
+    return;
+  }
+
+  CGPoint touchPoint = [gesture locationInView:slider];
+  float rangeWidth = slider.maximumValue - slider.minimumValue;
+  float sliderPercent = touchPoint.x / slider.bounds.size.width;
+  slider.lastValue = slider.value;
+  float value = slider.minimumValue + (rangeWidth * sliderPercent);
+
+  [slider setValue:[slider discreteValue:value] animated: YES];
+
+  if (slider.onRNCSliderValueChange) {
+    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+      ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
+  }
+
+  // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
+  if (slider.onRNCSliderValueChange) {
+    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+      ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
+  }
+
+  if (slider.onRNCSliderSlidingComplete) {
+    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+      ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
+  }
 }
 
 - (void)sliderValueChanged:(RNCSlider *)sender
@@ -117,6 +163,9 @@ using namespace facebook::react;
     }
     if (oldScreenProps.maximumValue != newScreenProps.maximumValue) {
         [slider setMaximumValue:newScreenProps.maximumValue];
+    }
+    if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
+        slider.tapToSeek = newScreenProps.tapToSeek;
     }
     if (oldScreenProps.minimumValue != newScreenProps.minimumValue) {
         [slider setMinimumValue:newScreenProps.minimumValue];

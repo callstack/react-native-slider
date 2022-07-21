@@ -33,6 +33,7 @@ export type NativeProps = $ReadOnly<{|
   enabled?: ?boolean,
   inverted?: ?boolean,
   vertical?: ?boolean,
+  tapToSeek?: ?boolean,
   maximumTrackImage?: ?ImageSource,
   maximumTrackTintColor?: ?ColorValue,
   maximumValue?: ?Float,
