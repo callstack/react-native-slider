@@ -52,7 +52,7 @@ jobs:
           key: ${{ hashFiles('./package/package.json') }}
 
       - name: Run ESLint on the sources
-        run: cd package && npx eslint ./source
+        run: cd package && npx eslint src
 
 
   test:
@@ -74,7 +74,7 @@ jobs:
           key: ${{ hashFiles('./package/package.json') }}
 
       - name: Run unit tests
-        run: cd package && npx jest
+        run: cd package && npx jest src
 
 
   verify:
@@ -88,14 +88,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
 
-      - name: Cache
-        run: cd example && npm install
+      - name: Install dependencies
+        run: npm install
 
       - name: Run ESLint on the sources
         run: cd example && npx eslint .
-
-      - name: Run ESLint on the sources
-        run: cd example && npx tsc --noEmit
 
 
   build-android-app:
@@ -110,7 +107,7 @@ jobs:
         uses: actions/setup-node@v3
 
       - name: Pull the npm dependencies
-        run: cd example && npm install
+        run: npm install
 
       - uses: actions/setup-java@v3
         with:
@@ -132,7 +129,7 @@ jobs:
         uses: actions/setup-node@v3
 
       - name: Install node_modules on MacOS machine
-        run: cd example && npm install
+        run: npm install
 
       - run: cd example/ios && xcode-select -p
 
@@ -164,7 +161,7 @@ jobs:
         uses: actions/setup-node@v3
 
       - name: Install dependencies
-        run: cd example; npm install
+        run: npm install
 
       - name: Build the Windows OS app
         run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging
