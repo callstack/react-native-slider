@@ -1,0 +1,170 @@
+name: ReactNativeSlider-CI
+
+on: [push]
+
+jobs:
+  install:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ensure the cross-platform Git on Windows
+        run: git config --global core.autocrlf false
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+
+      - name: Display tools versions
+        run: npm --version;
+
+      - name: Restore all the packages
+        run: npm install
+
+      - name: Cache
+        uses: actions/cache@v2.1.6
+        with:
+          path: ./package/node_modules
+          key: ${{ hashFiles('./package/package.json') }}
+
+
+  lint:
+    name: Lint the sources
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: Ensure the cross-platform Git on Windows
+        run: git config --global core.autocrlf false
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Cache
+        uses: actions/cache@v2.1.6
+        with:
+          path: ./package/node_modules
+          key: ${{ hashFiles('./package/package.json') }}
+
+      - name: Run ESLint on the sources
+        run: cd package && npx eslint ./source
+
+
+  test:
+    name: Run the unit tests
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Pull the npm dependencies
+        uses: actions/cache@v2.1.6
+        with:
+          path: ./package/node_modules
+          key: ${{ hashFiles('./package/package.json') }}
+
+      - name: Run unit tests
+        run: cd package && npx jest
+
+
+  verify:
+    name: Verify the Example app sources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Cache
+        run: cd example && npm install
+
+      - name: Run ESLint on the sources
+        run: cd example && npx eslint .
+
+      - name: Run ESLint on the sources
+        run: cd example && npx tsc --noEmit
+
+
+  build-android-app:
+    name: Verify the package and example app builds for Android platform
+    runs-on: ubuntu-latest
+    needs: [verify]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Pull the npm dependencies
+        run: cd example && npm install
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Build the Android OS app
+        run: cd example/android && ./gradlew assembleDebug
+
+
+  build-iOS-app:
+    name: Verify the package and example app builds for iOS platform
+    runs-on: macos-latest
+    needs: [verify]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Install node_modules on MacOS machine
+        run: cd example && npm install
+
+      - run: cd example/ios && xcode-select -p
+
+      - name: Install pod dependencies
+        run: cd example/ios && pod install --verbose
+
+      - name: Opening Simulator app
+        run: |
+          while ! open -Fn /Applications/Xcode_13.2.1.app/Contents/Developer/Applications/Simulator.app; do
+            echo "Retry"
+          done
+          echo "Success"
+      - name: Builds the iOS app
+        run: cd example && npx react-native run-ios
+
+
+  build-Windows-app:
+    name: Verify the package and example app builds for Windows platform
+    runs-on: windows-latest
+    needs: [verify]
+    steps:
+      - name: Ensure the cross-platform Git on Windows
+        run: git config --global core.autocrlf false
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Install dependencies
+        run: cd example; npm install
+
+      - name: Build the Windows OS app
+        run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging
