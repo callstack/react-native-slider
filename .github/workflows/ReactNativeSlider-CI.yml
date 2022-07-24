@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ensure the cross-platform Git on Windows
-        run: git config --global core.autocrlf false
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -36,9 +33,6 @@ jobs:
     needs: install
 
     steps:
-      - name: Ensure the cross-platform Git on Windows
-        run: git config --global core.autocrlf false
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
