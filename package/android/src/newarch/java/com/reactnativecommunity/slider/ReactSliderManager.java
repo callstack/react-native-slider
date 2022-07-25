@@ -9,6 +9,8 @@ package com.reactnativecommunity.slider;
 
 import android.view.View;
 import android.widget.SeekBar;
+import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -17,7 +19,6 @@ import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerHelper;
-import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewManagerDelegate;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
@@ -90,21 +91,19 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
         @Override
         public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
-          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(
-                  reactContext, seekbar.getId()
-          );
-          eventDispatcher.dispatchEvent(new ReactSliderEvent(seekbar.getId(), ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
+          int reactTag = seekbar.getId();
+          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+                  .dispatchEvent(new ReactSliderEvent(reactTag, ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekbar) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
-          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(
-                  reactContext, seekbar.getId()
-          );
+          int reactTag = seekbar.getId();
           ((ReactSlider)seekbar).isSliding(true);
-          eventDispatcher.dispatchEvent(new ReactSlidingStartEvent(
-                  seekbar.getId(),
+          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+                  .dispatchEvent(new ReactSlidingStartEvent(
+                  reactTag,
                   ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
         }
 
@@ -112,18 +111,18 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
         public void onStopTrackingTouch(SeekBar seekbar) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
           ((ReactSlider)seekbar).isSliding(false);
-          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(
-                  reactContext, seekbar.getId()
-          );
+          int reactTag = seekbar.getId();
+
+          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag);
 
           eventDispatcher.dispatchEvent(
                   new ReactSlidingCompleteEvent(
-                          seekbar.getId(),
+                          reactTag,
                           ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()))
           );
           eventDispatcher.dispatchEvent(
                   new ReactSliderEvent(
-                          seekbar.getId(),
+                          reactTag,
                           ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
                           !((ReactSlider)seekbar).isSliding()));
         }
