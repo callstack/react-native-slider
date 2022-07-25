@@ -16,10 +16,12 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.UIManagerHelper;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewManagerDelegate;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.yoga.YogaMeasureFunction;
 import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
@@ -88,18 +90,20 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
         @Override
         public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
-          reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
-              new ReactSliderEvent(
-                  seekbar.getId(),
-                  ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
+          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(
+                  reactContext, seekbar.getId()
+          );
+          eventDispatcher.dispatchEvent(new ReactSliderEvent(seekbar.getId(), ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekbar) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
+          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(
+                  reactContext, seekbar.getId()
+          );
           ((ReactSlider)seekbar).isSliding(true);
-          reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
-              new ReactSlidingStartEvent(
+          eventDispatcher.dispatchEvent(new ReactSlidingStartEvent(
                   seekbar.getId(),
                   ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
         }
@@ -108,15 +112,20 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
         public void onStopTrackingTouch(SeekBar seekbar) {
           ReactContext reactContext = (ReactContext) seekbar.getContext();
           ((ReactSlider)seekbar).isSliding(false);
-          reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
-              new ReactSlidingCompleteEvent(
-                  seekbar.getId(),
-                  ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
-          reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
-              new ReactSliderEvent(
-                  seekbar.getId(),
-                  ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
-                  !((ReactSlider)seekbar).isSliding()));
+          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(
+                  reactContext, seekbar.getId()
+          );
+
+          eventDispatcher.dispatchEvent(
+                  new ReactSlidingCompleteEvent(
+                          seekbar.getId(),
+                          ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()))
+          );
+          eventDispatcher.dispatchEvent(
+                  new ReactSliderEvent(
+                          seekbar.getId(),
+                          ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
+                          !((ReactSlider)seekbar).isSliding()));
         }
       };
 
@@ -175,7 +184,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   public void setThumbTintColor(ReactSlider view, Integer color) {
     ReactSliderManagerImpl.setThumbTintColor(view, color);
   }
-
 
   @Override
   @ReactProp(name = "minimumTrackTintColor", customType = "Color")
