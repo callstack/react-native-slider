@@ -62,8 +62,8 @@ dependencies {
 
 if (isNewArchitectureEnabled()) {
     react {
-        jsRootDir = file("../src/")
-        libraryName = "reactslider"
+        jsRootDir = file("../src")
+        libraryName = "ReactSlider"
         codegenJavaPackageName = "com.reactnativecommunity.slider"
     }
 }
