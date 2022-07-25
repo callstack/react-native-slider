@@ -118,6 +118,9 @@ jobs:
           npm install
           cd example/ios && pod install --verbose
 
+      - name: Use the current package sources in build
+        run: cd example && npm install --force
+
       - name: Opening Simulator app
         uses: futureware-tech/simulator-action@v1
         with:
