@@ -112,9 +112,8 @@ jobs:
             example/ios/Pods
           key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles('./example/ios/Podfile.lock') }}
 
-      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
-        name: Install required dependencies
-        continue-on-error: true
+      - name: Install required dependencies on cache miss
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
           cd example/ios && pod install --verbose
