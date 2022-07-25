@@ -9,7 +9,8 @@
     "test": "jest",
     "lint": "eslint .",
     "windows": "react-native run-windows",
-    "postinstall": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules"
+    "postinstall": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules",
+    "refresh-package": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules"
   },
   "dependencies": {
     "@react-native-community/slider": "file:../package",
