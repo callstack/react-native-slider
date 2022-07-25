@@ -5,8 +5,8 @@
     <a href="https://www.npmjs.com/package/@react-native-community/slider">
         <img src="https://img.shields.io/npm/v/@react-native-community/slider.svg" alt="Latest version released on npmjs" />
     </a>
-    <a href="https://app.circleci.com/pipelines/github/callstack/react-native-slider?branch=main">
-        <img src="https://img.shields.io/circleci/project/github/callstack/react-native-slider/main.svg" alt="Build on CircleCI" />
+    <a href="https://github.com/callstack/react-native-slider/actions/workflows/ReactNativeSlider-CI.yml">
+        <img src="https://github.com/callstack/react-native-slider/actions/workflows/ReactNativeSlider-CI.yml/badge.svg?branch=main" alt="Build on GitHub Actions" />
     </a>
     <a href="https://github.com/callstack/react-native-slider">
         <img src="https://img.shields.io/badge/platforms-android%20|%20ios%20|%20windows%20|%20web-lightgrey.svg" alt="Supported platforms" />
