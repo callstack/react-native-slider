@@ -130,6 +130,45 @@ jobs:
         run: cd example && npx react-native run-ios
 
 
+  build-iOS-new-arch-app:
+    name: Verify if app builds for new architecture
+    runs-on: macos-latest
+    needs: [build-iOS-app]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-deps
+        with:
+          path: |
+            example/node_modules
+            example/ios/Pods
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles('./example/ios/Podfile.lock') }}
+
+      - name: Install required dependencies on cache miss
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: |
+          npm install
+          cd example/ios && pod install --verbose
+
+      - name: Use the current package sources in build
+        run: cd example && npm run refresh-package
+
+      - name: Install pods with new arch enabled
+        run: RCT_NEW_ARCH_ENABLED=1 pod install
+
+      - name: Opening Simulator app
+        uses: futureware-tech/simulator-action@v1
+        with:
+          model: 'iPhone 12 mini'
+
+      - name: Builds the iOS app
+        run: cd example && npx react-native run-ios
+
+
   build-Windows-app:
     name: Verify the package and example app builds for Windows platform
     runs-on: windows-latest
