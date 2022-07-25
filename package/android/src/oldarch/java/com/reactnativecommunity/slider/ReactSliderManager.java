@@ -114,7 +114,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   public String getName() {
-    return REACT_CLASS;
+    return ReactSliderManagerImpl.REACT_CLASS;
   }
 
   @Override
