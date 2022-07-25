@@ -11,9 +11,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Display tools versions
-        run: npm --version;
-
       - name: Restore all the packages
         run: npm install
 
@@ -33,7 +30,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Cache
+      - name: Pull npm dependencies
         uses: actions/cache@v3.0.5
         with:
           path: ./package/node_modules
@@ -52,7 +49,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Pull the npm dependencies
+      - name: Pull npm dependencies
         uses: actions/cache@v3.0.5
         with:
           path: ./package/node_modules
@@ -104,11 +101,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install node_modules on MacOS machine
-        run: npm install
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-deps
+        with:
+          path: |
+            example/node_modules
+            example/ios/Pods
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles()./example/ios/Podfile.lock) }}
 
-      - name: Install pod dependencies
-        run: cd example/ios && pod install --verbose
+      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
+        name: Install required dependencies
+        continue-on-error: true
+        run: |
+          npm install
+          cd example/ios && pod install --verbose
 
       - name: Opening Simulator app
         run: |
