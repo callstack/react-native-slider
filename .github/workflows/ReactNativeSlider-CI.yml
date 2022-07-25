@@ -11,9 +11,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-
       - name: Display tools versions
         run: npm --version;
 
@@ -36,9 +33,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-
       - name: Cache
         uses: actions/cache@v3.0.5
         with:
@@ -58,9 +52,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-
       - name: Pull the npm dependencies
         uses: actions/cache@v3.0.5
         with:
@@ -79,9 +70,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-
       - name: Install dependencies
         run: npm install
 
@@ -96,9 +84,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
 
       - name: Pull the npm dependencies
         run: npm install
@@ -119,13 +104,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-
       - name: Install node_modules on MacOS machine
         run: npm install
-
-      - run: cd example/ios && xcode-select -p
 
       - name: Install pod dependencies
         run: cd example/ios && pod install --verbose
@@ -150,9 +130,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
 
       - name: Install dependencies
         run: npm install
