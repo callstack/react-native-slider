@@ -103,14 +103,14 @@ using namespace facebook::react;
 - (void)sliderTouchStart:(RNCSlider *)sender
 {
     [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:YES];
-    sender.isSliding = YES;
     _isSliding = YES;
+    sender.isSliding = YES;
 }
 
 - (void)sliderTouchEnd:(RNCSlider *)sender
 {
     [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:NO];
-    sender.isSliding = YES;
+    sender.isSliding = NO;
     _isSliding = NO;
 }
 
@@ -147,7 +147,9 @@ using namespace facebook::react;
     const auto &newScreenProps = *std::static_pointer_cast<const RNCSliderProps>(props);
     
     if (oldScreenProps.value != newScreenProps.value) {
-        slider.value = newScreenProps.value;
+        if (!slider.isSliding) {
+            slider.value = newScreenProps.value;
+        }
     }
     if (oldScreenProps.disabled != newScreenProps.disabled) {
         slider.enabled = !newScreenProps.disabled;
