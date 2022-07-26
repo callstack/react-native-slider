@@ -158,7 +158,7 @@ jobs:
         run: cd example && npm run refresh-package
 
       - name: Install pods with new arch enabled
-        run: RCT_NEW_ARCH_ENABLED=1 pod install
+        run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
       - name: Opening Simulator app
         uses: futureware-tech/simulator-action@v1
