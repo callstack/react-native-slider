@@ -18,6 +18,7 @@ import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNati
 import type {
   Float,
   BubblingEventHandler,
+  WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
 type Event = $ReadOnly<{|
@@ -29,11 +30,11 @@ export type NativeProps = $ReadOnly<{|
   ...ViewProps,
   accessibilityUnits?: string,
   accessibilityIncrements?: $ReadOnlyArray<string>,
-  disabled?: ?boolean,
-  enabled?: ?boolean,
-  inverted?: ?boolean,
+  disabled?: WithDefault<boolean, false>,
+  enabled?: WithDefault<boolean, true>,
+  inverted?: WithDefault<boolean, false>,
   vertical?: ?boolean,
-  tapToSeek?: ?boolean,
+  tapToSeek?: WithDefault<boolean, false>,
   maximumTrackImage?: ?ImageSource,
   maximumTrackTintColor?: ?ColorValue,
   maximumValue?: ?Float,
