@@ -10,6 +10,7 @@ package com.reactnativecommunity.slider;
 import android.view.View;
 import android.widget.SeekBar;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
@@ -28,7 +29,6 @@ import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import com.facebook.yoga.YogaNode;
 import java.util.Map;
-import javax.annotation.Nullable;
 import com.facebook.react.viewmanagers.RNCSliderManagerInterface;
 import com.facebook.react.viewmanagers.RNCSliderManagerDelegate;
 import com.facebook.react.module.annotations.ReactModule;
@@ -216,15 +216,13 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   @Override
   @ReactProp(name = "thumbImage")
-  public void setThumbImage(ReactSlider reactSlider, @androidx.annotation.Nullable ReadableMap source) {
-    ReactSliderManagerImpl.setThumbImage(reactSlider, source);
+  public void setThumbImage(ReactSlider view, @androidx.annotation.Nullable ReadableMap source) {
+    ReactSliderManagerImpl.setThumbImage(view, source);
   }
 
   @Override
   @ReactProp(name = "disabled")
-  public void setDisabled(ReactSlider reactSlider, boolean b) {
-    reactSlider.setEnabled(!b);
-  }
+  public void setDisabled(ReactSlider view, boolean b) {}
 
   @Override
   protected void addEventEmitters(final ThemedReactContext reactContext, final ReactSlider view) {
@@ -239,16 +237,16 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   // these props are not available on Android, however we must override their setters
   @Override
-  public void setTestID(ReactSlider reactSlider, @androidx.annotation.Nullable String s) {}
+  public void setTestID(ReactSlider view, @Nullable String s) {}
 
   @Override
-  public void setMinimumTrackImage(ReactSlider reactSlider, @androidx.annotation.Nullable ReadableMap readableMap) {}
+  public void setMinimumTrackImage(ReactSlider view, @Nullable ReadableMap readableMap) {}
 
   @Override
-  public void setMaximumTrackImage(ReactSlider reactSlider, @androidx.annotation.Nullable ReadableMap readableMap) {}
+  public void setMaximumTrackImage(ReactSlider view, @Nullable ReadableMap readableMap) {}
 
   @Override
-  public void setTrackImage(ReactSlider view, @androidx.annotation.Nullable ReadableMap value) {}
+  public void setTrackImage(ReactSlider view, @Nullable ReadableMap value) {}
 
   @Override
   public void setTapToSeek(ReactSlider view, boolean value) {}
