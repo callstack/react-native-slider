@@ -292,6 +292,7 @@ const SliderComponent = (
   return (
     <RCTSliderNativeComponent
       {...localProps}
+      accessibilityState={_accessibilityState}
       thumbImage={
         Platform.OS === 'web'
           ? props.thumbImage
@@ -307,7 +308,6 @@ const SliderComponent = (
       disabled={_disabled}
       onStartShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
-      accessibilityState={_accessibilityState}
       onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
     />
   );
