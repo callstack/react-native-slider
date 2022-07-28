@@ -109,13 +109,26 @@ jobs:
         with:
           path: |
             example/node_modules
-            example/ios/Pods
-          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles('./example/ios/Podfile.lock') }}
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }} }}
 
-      - name: Install required dependencies on cache miss
+      - name: Cache pods
+        id: cache-pods
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-pods
+        with:
+          path: |
+            example/ios/Pods
+          key: ${{ ${{ hashFiles('./example/ios/Podfile.lock') }}
+
+      - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
+
+      - name: Install required dependencies on cache miss (pods)
+        if: steps.cache-pods.outputs.cache-hit != 'true'
+        run: |
           cd example/ios && pod install --verbose
 
       - name: Use the current package sources in build
@@ -145,20 +158,30 @@ jobs:
         with:
           path: |
             example/node_modules
-            example/ios/Pods
-          key: new-arch-${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }} }}
 
-      - name: Install required dependencies on cache miss
+      - name: Cache pods
+        id: cache-pods
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-new-arch-pods
+        with:
+          path: |
+            example/ios/Pods
+          key: ${{ new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
+
+      - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
+
+      - name: Install required dependencies on cache miss (pods)
+        if: steps.cache-pods.outputs.cache-hit != 'true'
+        run: |
           cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
-
-      - name: Install pods with new arch enabled
-        run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
       - name: Opening Simulator app
         uses: futureware-tech/simulator-action@v1
