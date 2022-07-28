@@ -116,10 +116,12 @@ jobs:
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
-          cd example/ios && pod install
 
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
+
+      - name: Reinstall Pods
+        run: cd example/ios && pod install
 
       - name: Build iOS
         run: |
@@ -153,7 +155,9 @@ jobs:
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
-          cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
+
+      - name: Reinstall Pods
+        run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
