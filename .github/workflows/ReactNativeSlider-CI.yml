@@ -129,7 +129,7 @@ jobs:
         run: |
           cd example/ios && pod install
 
-      - name: Reinstall Pods
+      - name: Reinstall Pods only if using cached ones
         if: steps.cache-pods.outputs.cache-hit == 'true'
         run: cd example/ios && pod install
 
@@ -181,7 +181,7 @@ jobs:
         run: |
           cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
-      - name: Reinstall Pods
+      - name: Reinstall Pods only if using cached ones
         if: steps.cache-pods.outputs.cache-hit == 'true'
         run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
