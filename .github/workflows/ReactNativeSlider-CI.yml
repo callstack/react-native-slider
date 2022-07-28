@@ -147,7 +147,7 @@ jobs:
           path: |
             example/node_modules
             example/ios/Pods
-          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles('./example/ios/Podfile.lock') }}
+          key: new-arch-${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles('./example/ios/Podfile.lock') }}
 
       - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
