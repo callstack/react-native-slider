@@ -123,13 +123,14 @@ jobs:
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
 
-      - name: Opening Simulator app
-        uses: futureware-tech/simulator-action@v1
-        with:
-          model: 'iPhone 12 mini'
-
-      - name: Builds the iOS app
-        run: cd example && npx react-native run-ios
+      - name: Build iOS
+        run: |
+          device_name='iPhone 13'
+          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
+          re='\(([-0-9A-Fa-f]+)\)'
+          [[ $device =~ $re ]] || exit 1
+          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+        working-directory: example/ios
 
 
   build-iOS-new-arch-app:
@@ -161,13 +162,14 @@ jobs:
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
 
-      - name: Opening Simulator app
-        uses: futureware-tech/simulator-action@v1
-        with:
-          model: 'iPhone 12 mini'
-
-      - name: Builds the iOS app
-        run: cd example && npx react-native run-ios
+      - name: Build iOS - Fabric
+        run: |
+          device_name='iPhone 13'
+          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
+          re='\(([-0-9A-Fa-f]+)\)'
+          [[ $device =~ $re ]] || exit 1
+          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+        working-directory: example/ios
 
 
   build-Windows-app:
