@@ -75,7 +75,7 @@ jobs:
 
 
   build-android-app:
-    name: Verify the package and example app builds for Android platform
+    name: Verify example Android
     runs-on: ubuntu-latest
     needs: [verify]
 
@@ -95,7 +95,7 @@ jobs:
 
 
   build-iOS-app:
-    name: Verify the package and example app builds for iOS platform
+    name: Verify example iOS
     runs-on: macos-latest
     needs: [verify]
     steps:
@@ -109,7 +109,7 @@ jobs:
         with:
           path: |
             example/node_modules
-          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }} }}
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
 
       - name: Cache pods
         id: cache-pods
@@ -119,7 +119,7 @@ jobs:
         with:
           path: |
             example/ios/Pods
-          key: ${{ ${{ hashFiles('./example/ios/Podfile.lock') }}
+          key: ${{ hashFiles('./example/ios/Podfile.lock') }}
 
       - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
@@ -144,7 +144,7 @@ jobs:
 
 
   build-iOS-new-arch-app:
-    name: Verify if app builds for new architecture
+    name: Verify example iOS - Fabric
     runs-on: macos-latest
     needs: [build-iOS-app]
     steps:
@@ -154,11 +154,11 @@ jobs:
         id: cache-npm
         uses: actions/cache@v3
         env:
-          cache-name: cached-ios-new-arch-deps
+          cache-name: cached-ios-deps
         with:
           path: |
             example/node_modules
-          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }} }}
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
 
       - name: Cache pods
         id: cache-pods
@@ -168,7 +168,7 @@ jobs:
         with:
           path: |
             example/ios/Pods
-          key: ${{ new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
+          key: new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
 
       - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
@@ -193,7 +193,7 @@ jobs:
 
 
   build-Windows-app:
-    name: Verify the package and example app builds for Windows platform
+    name: Verify example Windows
     runs-on: windows-latest
     needs: [verify]
     steps:
