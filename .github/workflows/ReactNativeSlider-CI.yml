@@ -111,9 +111,14 @@ jobs:
             example/node_modules
           key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
 
-      - name: Install pods
+      - name: Install required dependencies on cache miss (npm)
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
-          cd example/ios && pod install --verbose
+          npm install
+
+      - name: Install pods
+        run: pod install --verbose
+        working-directory: example/ios
 
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
@@ -149,9 +154,9 @@ jobs:
         run: |
           npm install
 
-      - name: Install Pods - Fabric
-        run: |
-          cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
+      - name: Install pods
+        run: RCT_NEW_ARCH_ENABLED=1 pod install
+        working-directory: example/ios
 
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
