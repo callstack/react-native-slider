@@ -111,23 +111,7 @@ jobs:
             example/node_modules
           key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
 
-      - name: Cache pods
-        id: cache-pods
-        uses: actions/cache@v3
-        env:
-          cache-name: cached-ios-pods
-        with:
-          path: |
-            example/ios/Pods
-          key: ${{ hashFiles('./example/ios/Podfile.lock') }}
-
-      - name: Install required dependencies on cache miss (npm)
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: |
-          npm install
-
-      - name: Install required dependencies on cache miss (pods)
-        if: steps.cache-pods.outputs.cache-hit != 'true'
+      - name: Install pods
         run: |
           cd example/ios && pod install --verbose
 
@@ -160,23 +144,12 @@ jobs:
             example/node_modules
           key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
 
-      - name: Cache pods
-        id: cache-pods
-        uses: actions/cache@v3
-        env:
-          cache-name: cached-ios-new-arch-pods
-        with:
-          path: |
-            example/ios/Pods
-          key: new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
-
       - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
 
-      - name: Install required dependencies on cache miss (pods)
-        if: steps.cache-pods.outputs.cache-hit != 'true'
+      - name: Install Pods - Fabric
         run: |
           cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
