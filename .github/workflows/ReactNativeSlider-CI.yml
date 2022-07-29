@@ -60,7 +60,7 @@ jobs:
 
 
   verify:
-    name: Verify the Example app sources
+    name: Verify example app sources
     runs-on: ubuntu-latest
 
     steps:
@@ -75,7 +75,7 @@ jobs:
 
 
   build-android-app:
-    name: Verify example Android
+    name: Build example app Android
     runs-on: ubuntu-latest
     needs: [verify]
 
@@ -95,7 +95,7 @@ jobs:
 
 
   build-iOS-app:
-    name: Verify example iOS
+    name: Build example app iOS
     runs-on: macos-latest
     needs: [verify]
     steps:
@@ -147,7 +147,7 @@ jobs:
 
 
   build-iOS-new-arch-app:
-    name: Verify example iOS - Fabric
+    name: Build example app iOS (Fabric)
     runs-on: macos-latest
     needs: [build-iOS-app]
     steps:
@@ -199,7 +199,7 @@ jobs:
 
 
   build-Windows-app:
-    name: Verify example Windows
+    name: Build example app Windows
     runs-on: windows-latest
     needs: [verify]
     steps:
