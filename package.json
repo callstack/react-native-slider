@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "cd package && npm install && cd ../example && npm install",
+        "install": "cd package && npm install -f && cd ../example && npm install -f",
         "start-example": "cd example && npm start",
         "example-android": "cd example && npx react-native run-android",
         "example-ios": "cd example && npx pod-install && npx react-native run-ios",

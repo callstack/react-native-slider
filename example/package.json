@@ -17,9 +17,9 @@
   "dependencies": {
     "@react-native-community/slider": "file:../package",
     "babel-preset-expo": "^9.1.0",
-    "react": "18.0.0",
-    "react-native": "0.69.1",
-    "react-native-windows": "0.69.1"
+    "react": "18.1.0",
+    "react-native": "0.70.0-rc.1",
+    "react-native-windows": "0.69.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -30,7 +30,7 @@
     "eslint": "^7.32.0",
     "jest": "^26.6.3",
     "metro-config": "^0.70.3",
-    "metro-react-native-babel-preset": "^0.70.3",
+    "metro-react-native-babel-preset": "^0.71.3",
     "react-test-renderer": "18.0.0",
     "rimraf": "^3.0.2"
   },
