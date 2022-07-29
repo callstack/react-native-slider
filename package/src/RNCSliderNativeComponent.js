@@ -25,7 +25,7 @@ type Event = $ReadOnly<{|
   fromUser?: ?boolean,
 |}>;
 
-export type NativeProps = $ReadOnly<{|
+type NativeProps = $ReadOnly<{|
   ...ViewProps,
   accessibilityUnits?: string,
   accessibilityIncrements?: $ReadOnlyArray<string>,
