@@ -191,8 +191,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   @Override
   public Map getExportedCustomDirectEventTypeConstants() {
-    return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingComplete"),
-            ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
+    return ReactSliderManagerImpl.getExportedCustomDirectEventTypeConstants();
   }
 
   // these props are not available on Android, however we must override their setters
