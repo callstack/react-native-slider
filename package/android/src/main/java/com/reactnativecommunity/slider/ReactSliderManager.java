@@ -108,7 +108,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
               new ReactSliderEvent(
                   seekbar.getId(),
                   ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
-                  !((ReactSlider)seekbar).isSliding()));
+                  false));
         }
       };
 
