@@ -7,9 +7,7 @@
 
 package com.reactnativecommunity.slider;
 
-import android.view.View;
 import android.widget.SeekBar;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
@@ -24,10 +22,6 @@ import com.facebook.react.uimanager.ViewManagerDelegate;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.EventDispatcher;
-import com.facebook.yoga.YogaMeasureFunction;
-import com.facebook.yoga.YogaMeasureMode;
-import com.facebook.yoga.YogaMeasureOutput;
-import com.facebook.yoga.YogaNode;
 import java.util.Map;
 import com.facebook.react.viewmanagers.RNCSliderManagerInterface;
 import com.facebook.react.viewmanagers.RNCSliderManagerDelegate;
@@ -51,82 +45,47 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
     return mDelegate;
   }
 
-  static class ReactSliderShadowNode extends LayoutShadowNode implements
-      YogaMeasureFunction {
-
-    private int mWidth;
-    private int mHeight;
-    private boolean mMeasured;
-
-    private ReactSliderShadowNode() {
-      initMeasureFunction();
-    }
-
-    private void initMeasureFunction() {
-      setMeasureFunction(this);
-    }
-
-    @Override
-    public long measure(
-        YogaNode node,
-        float width,
-        YogaMeasureMode widthMode,
-        float height,
-        YogaMeasureMode heightMode) {
-      if (!mMeasured) {
-        SeekBar reactSlider = new ReactSlider(getThemedContext(), null);
-        final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        reactSlider.measure(spec, spec);
-        mWidth = reactSlider.getMeasuredWidth();
-        mHeight = reactSlider.getMeasuredHeight();
-        mMeasured = true;
-      }
-
-      return YogaMeasureOutput.make(mWidth, mHeight);
-    }
-  }
-
   private static final SeekBar.OnSeekBarChangeListener ON_CHANGE_LISTENER =
-      new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
-          ReactContext reactContext = (ReactContext) seekbar.getContext();
-          int reactTag = seekbar.getId();
-          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-                  .dispatchEvent(new ReactSliderEvent(reactTag, ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
-        }
+          new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+              ReactContext reactContext = (ReactContext) seekbar.getContext();
+              int reactTag = seekbar.getId();
+              UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+                      .dispatchEvent(new ReactSliderEvent(reactTag, ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
+            }
 
-        @Override
-        public void onStartTrackingTouch(SeekBar seekbar) {
-          ReactContext reactContext = (ReactContext) seekbar.getContext();
-          int reactTag = seekbar.getId();
-          ((ReactSlider)seekbar).isSliding(true);
-          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-                  .dispatchEvent(new ReactSlidingStartEvent(
-                  reactTag,
-                  ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
-        }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekbar) {
+              ReactContext reactContext = (ReactContext) seekbar.getContext();
+              int reactTag = seekbar.getId();
+              ((ReactSlider)seekbar).isSliding(true);
+              UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+                      .dispatchEvent(new ReactSlidingStartEvent(
+                              reactTag,
+                              ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
+            }
 
-        @Override
-        public void onStopTrackingTouch(SeekBar seekbar) {
-          ReactContext reactContext = (ReactContext) seekbar.getContext();
-          ((ReactSlider)seekbar).isSliding(false);
-          int reactTag = seekbar.getId();
+            @Override
+            public void onStopTrackingTouch(SeekBar seekbar) {
+              ReactContext reactContext = (ReactContext) seekbar.getContext();
+              ((ReactSlider)seekbar).isSliding(false);
+              int reactTag = seekbar.getId();
 
-          EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag);
+              EventDispatcher eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag);
 
-          eventDispatcher.dispatchEvent(
-                  new ReactSlidingCompleteEvent(
-                          reactTag,
-                          ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()))
-          );
-          eventDispatcher.dispatchEvent(
-                  new ReactSliderEvent(
-                          reactTag,
-                          ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
-                          !((ReactSlider)seekbar).isSliding()));
-        }
-      };
+              eventDispatcher.dispatchEvent(
+                      new ReactSlidingCompleteEvent(
+                              reactTag,
+                              ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()))
+              );
+              eventDispatcher.dispatchEvent(
+                      new ReactSliderEvent(
+                              reactTag,
+                              ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
+                              !((ReactSlider)seekbar).isSliding()));
+            }
+          };
 
   @Override
   public String getName() {
@@ -135,12 +94,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   @Override
   public LayoutShadowNode createShadowNodeInstance() {
-    return new ReactSliderShadowNode();
+    return new ReactSliderManagerImpl.ReactSliderShadowNode();
   }
 
   @Override
   public Class getShadowNodeClass() {
-    return ReactSliderShadowNode.class;
+    return ReactSliderManagerImpl.ReactSliderShadowNode.class;
   }
 
   @Override
@@ -233,7 +192,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   @Override
   public Map getExportedCustomDirectEventTypeConstants() {
     return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingComplete"),
-        ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
+            ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
   }
 
   // these props are not available on Android, however we must override their setters

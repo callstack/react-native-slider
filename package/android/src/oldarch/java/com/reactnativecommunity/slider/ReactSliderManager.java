@@ -7,7 +7,6 @@
 
 package com.reactnativecommunity.slider;
 
-import android.view.View;
 import android.widget.SeekBar;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
@@ -19,10 +18,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.yoga.YogaMeasureFunction;
-import com.facebook.yoga.YogaMeasureMode;
-import com.facebook.yoga.YogaMeasureOutput;
-import com.facebook.yoga.YogaNode;
 import java.util.Map;
 import javax.annotation.Nullable;
 
@@ -30,41 +25,6 @@ import javax.annotation.Nullable;
  * Manages instances of {@code ReactSlider}.
  */
 public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
-
-  static class ReactSliderShadowNode extends LayoutShadowNode implements
-          YogaMeasureFunction {
-
-    private int mWidth;
-    private int mHeight;
-    private boolean mMeasured;
-
-    private ReactSliderShadowNode() {
-      initMeasureFunction();
-    }
-
-    private void initMeasureFunction() {
-      setMeasureFunction(this);
-    }
-
-    @Override
-    public long measure(
-            YogaNode node,
-            float width,
-            YogaMeasureMode widthMode,
-            float height,
-            YogaMeasureMode heightMode) {
-      if (!mMeasured) {
-        SeekBar reactSlider = new ReactSlider(getThemedContext(), null);
-        final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        reactSlider.measure(spec, spec);
-        mWidth = reactSlider.getMeasuredWidth();
-        mHeight = reactSlider.getMeasuredHeight();
-        mMeasured = true;
-      }
-
-      return YogaMeasureOutput.make(mWidth, mHeight);
-    }
-  }
 
   private static final SeekBar.OnSeekBarChangeListener ON_CHANGE_LISTENER =
           new SeekBar.OnSeekBarChangeListener() {
@@ -110,12 +70,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @Override
   public LayoutShadowNode createShadowNodeInstance() {
-    return new ReactSliderShadowNode();
+    return new ReactSliderManagerImpl.ReactSliderShadowNode();
   }
 
   @Override
   public Class getShadowNodeClass() {
-    return ReactSliderShadowNode.class;
+    return ReactSliderManagerImpl.ReactSliderShadowNode.class;
   }
 
   @Override
@@ -125,7 +85,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
 
   @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
   public void setEnabled(ReactSlider view, boolean enabled) {
-    view.setEnabled(enabled);
+    ReactSliderManagerImpl.setEnabled(view, enabled);
   }
 
   @ReactProp(name = "value", defaultFloat = 0f)

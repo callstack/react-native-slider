@@ -5,11 +5,18 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.view.View;
+import android.widget.SeekBar;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.yoga.YogaMeasureFunction;
+import com.facebook.yoga.YogaMeasureMode;
+import com.facebook.yoga.YogaMeasureOutput;
+import com.facebook.yoga.YogaNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +27,41 @@ import javax.annotation.Nullable;
 public class ReactSliderManagerImpl {
 
     public static final String REACT_CLASS = "RNCSlider";
+
+    public static class ReactSliderShadowNode extends LayoutShadowNode implements
+            YogaMeasureFunction {
+
+        private int mWidth;
+        private int mHeight;
+        private boolean mMeasured;
+
+        public ReactSliderShadowNode() {
+            initMeasureFunction();
+        }
+
+        private void initMeasureFunction() {
+            setMeasureFunction(this);
+        }
+
+        @Override
+        public long measure(
+                YogaNode node,
+                float width,
+                YogaMeasureMode widthMode,
+                float height,
+                YogaMeasureMode heightMode) {
+            if (!mMeasured) {
+                SeekBar reactSlider = new ReactSlider(getThemedContext(), null);
+                final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+                reactSlider.measure(spec, spec);
+                mWidth = reactSlider.getMeasuredWidth();
+                mHeight = reactSlider.getMeasuredHeight();
+                mMeasured = true;
+            }
+
+            return YogaMeasureOutput.make(mWidth, mHeight);
+        }
+    }
 
     public static ReactSlider createViewInstance(ThemedReactContext context) {
         ReactSlider slider = new ReactSlider(context, null);
