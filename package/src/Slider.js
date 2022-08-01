@@ -258,7 +258,14 @@ const SliderComponent = (
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
-        onValueChange(event.nativeEvent.value);
+        let userEvent = true;
+        if (Platform.OS === 'android') {
+          // On Android there's a special flag telling us the user is
+          // dragging the slider.
+          userEvent =
+            event.nativeEvent.fromUser != null && event.nativeEvent.fromUser;
+        }
+        userEvent && onValueChange(event.nativeEvent.value);
       }
     : null;
 
