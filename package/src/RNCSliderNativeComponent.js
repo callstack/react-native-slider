@@ -10,50 +10,48 @@
 
 'use strict';
 
-import {requireNativeComponent} from 'react-native';
-
+import type {HostComponent} from 'react-native';
 import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
-import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
-import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
+import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+import type {
+  Float,
+  BubblingEventHandler,
+} from 'react-native/Libraries/Types/CodegenTypes';
 
-type Event = SyntheticEvent<
-  $ReadOnly<{|
-    value: number,
-    fromUser?: boolean,
-  |}>,
->;
+type Event = $ReadOnly<{|
+  value: ?Float,
+  fromUser?: ?boolean,
+|}>;
 
 type NativeProps = $ReadOnly<{|
   ...ViewProps,
   accessibilityUnits?: string,
-  accessibilityIncrements?: Array<string>,
+  accessibilityIncrements?: $ReadOnlyArray<string>,
   disabled?: ?boolean,
   enabled?: ?boolean,
   inverted?: ?boolean,
   vertical?: ?boolean,
+  tapToSeek?: ?boolean,
   maximumTrackImage?: ?ImageSource,
   maximumTrackTintColor?: ?ColorValue,
-  maximumValue?: ?number,
+  maximumValue?: ?Float,
   minimumTrackImage?: ?ImageSource,
   minimumTrackTintColor?: ?ColorValue,
-  minimumValue?: ?number,
-  onChange?: ?(event: Event) => void,
-  onRNCSliderSlidingStart?: ?(event: Event) => void,
-  onRNCSliderSlidingComplete?: ?(event: Event) => void,
-  onRNCSliderValueChange?: ?(event: Event) => void,
-  step?: ?number,
+  minimumValue?: ?Float,
+  onChange?: ?BubblingEventHandler<Event>,
+  onRNCSliderSlidingStart?: ?BubblingEventHandler<Event>,
+  onRNCSliderSlidingComplete?: ?BubblingEventHandler<Event>,
+  onRNCSliderValueChange?: ?BubblingEventHandler<Event>,
+  step?: ?Float,
   testID?: ?string,
   thumbImage?: ?ImageSource,
   thumbTintColor?: ?ColorValue,
   trackImage?: ?ImageSource,
-  value?: ?number,
+  value?: ?Float,
 |}>;
 
-type RNCSliderType = Class<NativeComponent<NativeProps>>;
-
-const RNCSliderNativeComponent = ((requireNativeComponent(
+export default (codegenNativeComponent<NativeProps>(
   'RNCSlider',
-): any): RNCSliderType);
-export default RNCSliderNativeComponent;
+): HostComponent<NativeProps>);

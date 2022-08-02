@@ -59,5 +59,14 @@
     "bracketSpacing": false,
     "jsxBracketSameLine": true,
     "parser": "flow"
+  },
+  "codegenConfig": {
+    "libraries": [
+        {
+        "name": "RNCSlider",
+        "type": "components",
+        "jsSrcsDir": "src"
+        }
+    ]
   }
 }
