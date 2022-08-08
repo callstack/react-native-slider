@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "windows": "react-native run-windows",
     "postinstall": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules",
-    "refresh-package": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules"
+    "refresh-package": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules",
+    "clean-android": "rm -rf android/app/build",
+    "clean-ios": "rm -rf ios/build/generated/ios && rm -rf ios/Pods && rm ios/Podfile.lock"
   },
   "dependencies": {
     "@react-native-community/slider": "file:../package",

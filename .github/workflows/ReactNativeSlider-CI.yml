@@ -60,7 +60,7 @@ jobs:
 
 
   verify:
-    name: Verify the Example app sources
+    name: Verify example app sources
     runs-on: ubuntu-latest
 
     steps:
@@ -75,7 +75,7 @@ jobs:
 
 
   build-android-app:
-    name: Verify the package and example app builds for Android platform
+    name: Build example app Android
     runs-on: ubuntu-latest
     needs: [verify]
 
@@ -95,7 +95,7 @@ jobs:
 
 
   build-iOS-app:
-    name: Verify the package and example app builds for iOS platform
+    name: Build example app iOS
     runs-on: macos-latest
     needs: [verify]
     steps:
@@ -105,33 +105,101 @@ jobs:
         id: cache-npm
         uses: actions/cache@v3
         env:
-          cache-name: cached-ios-deps
+          cache-name: cached-ios-npm-deps
         with:
-          path: |
-            example/node_modules
-            example/ios/Pods
-          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}-${{ hashFiles('./example/ios/Podfile.lock') }}
+          path: example/node_modules
+          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
 
-      - name: Install required dependencies on cache miss
+      - name: Install required dependencies on cache miss (npm)
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           npm install
-          cd example/ios && pod install --verbose
+
+      - name: Cache Pods
+        id: cache-pods
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-pods-deps
+        with:
+          path: example/ios/Pods
+          key: ${{ hashFiles('./example/ios/Podfile.lock') }}
+
+      - name: Install required dependencies on cache miss (Pods)
+        if: steps.cache-pods.outputs.cache-hit != 'true'
+        run: |
+          cd example/ios && pod install
+
+      - name: Reinstall Pods only if using cached ones
+        if: steps.cache-pods.outputs.cache-hit == 'true'
+        run: cd example/ios && pod install
 
       - name: Use the current package sources in build
         run: cd example && npm run refresh-package
 
-      - name: Opening Simulator app
-        uses: futureware-tech/simulator-action@v1
-        with:
-          model: 'iPhone 12 mini'
+      - name: Build iOS
+        run: |
+          device_name='iPhone 13'
+          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
+          re='\(([-0-9A-Fa-f]+)\)'
+          [[ $device =~ $re ]] || exit 1
+          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+        working-directory: example/ios
 
-      - name: Builds the iOS app
-        run: cd example && npx react-native run-ios
+
+  build-iOS-new-arch-app:
+    name: Build example app iOS (Fabric)
+    runs-on: macos-latest
+    needs: [build-iOS-app]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-npm-deps
+        with:
+          path: example/node_modules
+          key: new-arch-${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
+
+      - name: Install required dependencies on cache miss (npm)
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: |
+          npm install
+
+      - name: Cache Pods
+        id: cache-pods
+        uses: actions/cache@v3
+        env:
+          cache-name: cached-ios-pods-deps
+        with:
+          path: example/ios/Pods
+          key: new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
+
+      - name: Install required dependencies on cache miss (Pods)
+        if: steps.cache-pods.outputs.cache-hit != 'true'
+        run: |
+          cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
+
+      - name: Reinstall Pods only if using cached ones
+        if: steps.cache-pods.outputs.cache-hit == 'true'
+        run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
+
+      - name: Use the current package sources in build
+        run: cd example && npm run refresh-package
+
+      - name: Build iOS - Fabric
+        run: |
+          device_name='iPhone 13'
+          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
+          re='\(([-0-9A-Fa-f]+)\)'
+          [[ $device =~ $re ]] || exit 1
+          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+        working-directory: example/ios
 
 
   build-Windows-app:
-    name: Verify the package and example app builds for Windows platform
+    name: Build example app Windows
     runs-on: windows-latest
     needs: [verify]
     steps:

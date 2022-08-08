@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		28C79A22220DC7760061DE82 /* RNCSliderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C79A1F220DC7760061DE82 /* RNCSliderManager.m */; };
 		28C79A23220DC7760061DE82 /* RNCSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C79A21220DC7760061DE82 /* RNCSlider.m */; };
+		7682E5172887E3AB00642F2D /* RNCSliderComponentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7682E5162887E3AB00642F2D /* RNCSliderComponentView.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,8 @@
 		28C79A1F220DC7760061DE82 /* RNCSliderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSliderManager.m; sourceTree = "<group>"; };
 		28C79A20220DC7760061DE82 /* RNCSliderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSliderManager.h; sourceTree = "<group>"; };
 		28C79A21220DC7760061DE82 /* RNCSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSlider.m; sourceTree = "<group>"; };
+		7682E5152887E39900642F2D /* RNCSliderComponentView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCSliderComponentView.h; sourceTree = "<group>"; };
+		7682E5162887E3AB00642F2D /* RNCSliderComponentView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RNCSliderComponentView.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +48,8 @@
 		28C79A00220DC4CC0061DE82 = {
 			isa = PBXGroup;
 			children = (
+				7682E5162887E3AB00642F2D /* RNCSliderComponentView.mm */,
+				7682E5152887E39900642F2D /* RNCSliderComponentView.h */,
 				28C79A1E220DC7760061DE82 /* RNCSlider.h */,
 				28C79A21220DC7760061DE82 /* RNCSlider.m */,
 				28C79A20220DC7760061DE82 /* RNCSliderManager.h */,
@@ -117,6 +122,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7682E5172887E3AB00642F2D /* RNCSliderComponentView.mm in Sources */,
 				28C79A23220DC7760061DE82 /* RNCSlider.m in Sources */,
 				28C79A22220DC7760061DE82 /* RNCSliderManager.m in Sources */,
 			);
