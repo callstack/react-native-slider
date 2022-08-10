@@ -7,6 +7,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^RNCLoadImageCompletionBlock)(NSError * _Nullable error, UIImage * _Nullable image);
+typedef void (^RNCLoadImageFailureBlock)();
 
 @interface RNCSliderComponentView : RCTViewComponentView
 
