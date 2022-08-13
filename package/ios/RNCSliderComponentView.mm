@@ -195,6 +195,9 @@ using namespace facebook::react;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setThumbImage:image];
             });
+        }
+        failureBlock:^{
+            [self->slider setThumbImage:nil];
         }];
     }
     if (oldScreenProps.trackImage != newScreenProps.trackImage) {
@@ -202,6 +205,9 @@ using namespace facebook::react;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setTrackImage:image];
             });
+        }
+        failureBlock:^{
+            [self->slider setTrackImage:nil];
         }];
     }
     if (oldScreenProps.minimumTrackImage != newScreenProps.minimumTrackImage) {
@@ -209,6 +215,9 @@ using namespace facebook::react;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setMinimumTrackImage:image];
             });
+        }
+        failureBlock:^{
+            [self->slider setMinimumTrackImage:nil];
         }];
     }
     if (oldScreenProps.maximumTrackImage != newScreenProps.maximumTrackImage) {
@@ -216,6 +225,9 @@ using namespace facebook::react;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setMaximumTrackImage:image];
             });
+        }
+        failureBlock:^{
+            [self->slider setMaximumTrackImage:nil];
         }];
     }
     [super updateProps:props oldProps:oldProps];
@@ -223,11 +235,21 @@ using namespace facebook::react;
 
 
 // TODO temporarily using bridge, workaround for https://github.com/reactwg/react-native-new-architecture/discussions/31#discussioncomment-2717047, rewrite when Meta comes with a solution.
-- (void)loadImageFromImageSource:(ImageSource)source completionBlock:(RNCLoadImageCompletionBlock)completionBlock
+- (void)loadImageFromImageSource:(ImageSource)source completionBlock:(RNCLoadImageCompletionBlock)completionBlock failureBlock:(RNCLoadImageFailureBlock)failureBlock
 {
     NSString *uri = [[NSString alloc] initWithUTF8String:source.uri.c_str()];
     if ((BOOL)uri.length) {
-        [[[RCTBridge currentBridge] moduleForName:@"ImageLoader"] loadImageWithURLRequest:NSURLRequestFromImageSource(source) size:CGSizeMake(source.size.width, source.size.height) scale:source.scale clipped:NO resizeMode:RCTResizeModeCover progressBlock:nil partialLoadBlock:nil completionBlock:completionBlock];
+        [[[RCTBridge currentBridge] moduleForName:@"ImageLoader"]
+        loadImageWithURLRequest:NSURLRequestFromImageSource(source)
+        size:CGSizeMake(source.size.width, source.size.height)
+        scale:source.scale
+        clipped:NO
+        resizeMode:RCTResizeModeCover
+        progressBlock:nil
+        partialLoadBlock:nil
+        completionBlock:completionBlock];
+    } else {
+        failureBlock();
     }
 }
 
