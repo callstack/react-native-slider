@@ -62,11 +62,11 @@
   },
   "codegenConfig": {
     "libraries": [
-        {
+      {
         "name": "RNCSlider",
         "type": "components",
         "jsSrcsDir": "src"
-        }
+      }
     ]
   }
 }
