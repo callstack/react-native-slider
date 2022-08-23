@@ -136,6 +136,58 @@ You can also do this manually by:
 - Installing pods for iOS app
 - Running example app like always: `npx react-native run-<platform>`
 
+### New architecture setup (Fabric)
+
+In order to use the new architecture some extra steps are needed. 
+#### iOS 
+- Install pods with new arch flag inside `example/ios` folder: `RCT_NEW_ARCH_ENABLED=1 pod install`
+- Run `npm run example-ios`
+
+#### Android 
+- Set `newArchEnabled` to true inside `example/android/gradle.properties`
+- Run `npm run example-android`
+
+<details>
+<summary>
+If you are using React Native version lower than 0.70, you need to setup manual linking for Android to work.
+</summary>
+
+Inside `example/android/app/src/main/jni/Android.mk` add these lines: 
+
+```diff
++ include $(NODE_MODULES_DIR)/@react-native-community/slider/android/build/generated/source/codegen/jni/Android.mk
+include $(CLEAR_VARS)
+```
+
+```diff
+    libreact_codegen_rncore \
++   libreact_codegen_ReactSlider \
+    libreact_debug \
+```
+
+Inside `example/android/app/src/main/jni/MainComponentsRegistry.cpp` update these lines: 
+
+```diff
+#include <react/renderer/components/rncore/ComponentDescriptors.h>
++ #include <react/renderer/components/ReactSlider/ComponentDescriptors.h>
+
+...
+
+MainComponentsRegistry::sharedProviderRegistry() {
+  auto providerRegistry = CoreComponentsRegistry::sharedProviderRegistry();
+
+  // Custom Fabric Components go here. You can register custom
+  // components coming from your App or from 3rd party libraries here.
+  //
+  // providerRegistry->add(concreteComponentDescriptorProvider<
+  //        AocViewerComponentDescriptor>());
++ providerRegistry->add(concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>());
+
+  return providerRegistry;
+}
+```
+
+</details>
 
 ## Maintainers
 
