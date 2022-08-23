@@ -16,53 +16,49 @@ import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTyp
 import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
 type Event = SyntheticEvent<
-  $ReadOnly<{|
+  Readonly<{
     value: number,
     /**
      * Android Only.
      */
     fromUser?: boolean,
-  |}>,
+  }>
 >;
 
-type WindowsProps = $ReadOnly<{|
+type WindowsProps = Readonly<{
   /**
    * If true the slider will be inverted.
    * Default value is false.
    */
-  vertical?: ?boolean,
-|}>;
+  vertical?: boolean,
+}>;
 
-type IOSProps = $ReadOnly<{|
+type IOSProps = Readonly<{
   /**
    * Assigns a single image for the track. Only static images are supported.
    * The center pixel of the image will be stretched to fill the track.
    */
-  trackImage?: ?ImageSource,
+  trackImage?: ImageSource,
 
   /**
    * Assigns a minimum track image. Only static images are supported. The
    * rightmost pixel of the image will be stretched to fill the track.
    */
-  minimumTrackImage?: ?ImageSource,
+  minimumTrackImage?: ImageSource,
 
   /**
    * Assigns a maximum track image. Only static images are supported. The
    * leftmost pixel of the image will be stretched to fill the track.
    */
-  maximumTrackImage?: ?ImageSource,
-|}>;
+  maximumTrackImage?: ImageSource,
+}>;
 
-type Props = $ReadOnly<{|
-  ...ViewProps,
-  ...IOSProps,
-  ...WindowsProps,
-
+type Props = ViewProps & IOSProps & WindowsProps & Readonly<{
   /**
    * Used to style and layout the `Slider`.  See `StyleSheet.js` and
    * `DeprecatedViewStylePropTypes.js` for more info.
    */
-  style?: ?ViewStyleProp,
+  style?: ViewStyleProp,
 
   /**
    * Write-only property representing the value of the slider.
@@ -75,52 +71,52 @@ type Props = $ReadOnly<{|
    * This is not a controlled component, you don't need to update the
    * value during dragging.
    */
-  value?: ?number,
+  value?: number,
 
   /**
    * Step value of the slider. The value should be
    * between 0 and (maximumValue - minimumValue).
    * Default value is 0.
    */
-  step?: ?number,
+  step?: number,
 
   /**
    * Initial minimum value of the slider. Default value is 0.
    */
-  minimumValue?: ?number,
+  minimumValue?: number,
 
   /**
    * Initial maximum value of the slider. Default value is 1.
    */
-  maximumValue?: ?number,
+  maximumValue?: number,
 
   /**
    * The color used for the track to the left of the button.
    * Overrides the default blue gradient image on iOS.
    */
-  minimumTrackTintColor?: ?ColorValue,
+  minimumTrackTintColor?: ColorValue,
 
   /**
    * The color used for the track to the right of the button.
    * Overrides the default blue gradient image on iOS.
    */
-  maximumTrackTintColor?: ?ColorValue,
+  maximumTrackTintColor?: ColorValue,
   /**
    * The color used to tint the default thumb images on iOS, or the
    * color of the foreground switch grip on Android.
    */
-  thumbTintColor?: ?ColorValue,
+  thumbTintColor?: ColorValue,
 
   /**
    * If true the user won't be able to move the slider.
    * Default value is false.
    */
-  disabled?: ?boolean,
+  disabled?: boolean,
 
   /**
    * Callback continuously called while the user is dragging the slider.
    */
-  onValueChange?: ?(value: number) => void,
+  onValueChange?: (value: number) => void,
 
   /**
    * Callback that is called when the user touches the slider,
@@ -128,30 +124,30 @@ type Props = $ReadOnly<{|
    * as an argument to the callback handler.
    */
 
-  onSlidingStart?: ?(value: number) => void,
+  onSlidingStart?: (value: number) => void,
 
   /**
    * Callback that is called when the user releases the slider,
    * regardless if the value has changed. The current value is passed
    * as an argument to the callback handler.
    */
-  onSlidingComplete?: ?(value: number) => void,
+  onSlidingComplete?: (value: number) => void,
 
   /**
    * Used to locate this view in UI automation tests.
    */
-  testID?: ?string,
+  testID?: string,
 
   /**
    * Sets an image for the thumb. Only static images are supported.
    */
-  thumbImage?: ?ImageSource,
+  thumbImage?: ImageSource,
 
   /**
    * If true the slider will be inverted.
    * Default value is false.
    */
-  inverted?: ?boolean,
+  inverted?: boolean,
 
   /**
    * A string of one or more words to be announced by the screen reader.
@@ -168,71 +164,11 @@ type Props = $ReadOnly<{|
    * The number of elements must be the same as `maximumValue`.
    */
   accessibilityIncrements?: Array<string>,
-|}>;
+}>;
 
-/**
- * A component used to select a single value from a range of values.
- *
- * ### Usage
- *
- * The example below shows how to use `Slider` to change
- * a value used by `Text`. The value is stored using
- * the state of the root component (`App`). The same component
- * subscribes to the `onValueChange`  of `Slider` and changes
- * the value using `setState`.
- *
- *```
- * import React from 'react';
- * import { StyleSheet, Text, View, Slider } from 'react-native';
- *
- * export default class App extends React.Component {
- *   constructor(props) {
- *     super(props);
- *     this.state = {
- *       value: 50
- *     }
- *   }
- *
- *   change(value) {
- *     this.setState(() => {
- *       return {
- *         value: parseFloat(value)
- *       };
- *     });
- *   }
- *
- *   render() {
- *     const {value} = this.state;
- *     return (
- *       <View style={styles.container}>
- *         <Text style={styles.text}>{String(value)}</Text>
- *         <Slider
- *           step={1}
- *           maximumValue={100}
- *           onValueChange={this.change.bind(this)}
- *           value={value} />
- *       </View>
- *     );
- *   }
- * }
- *
- * const styles = StyleSheet.create({
- *   container: {
- *     flex: 1,
- *     flexDirection: 'column',
- *     justifyContent: 'center'
- *   },
- *   text: {
- *     fontSize: 50,
- *     textAlign: 'center'
- *   }
- * });
- *```
- *
- */
 const SliderComponent = (
   props: Props,
-  forwardedRef?: ?Ref<typeof RCTSliderNativeComponent>,
+  forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
 ) => {
   const style = StyleSheet.compose(styles.slider, props.style);
 
@@ -303,10 +239,6 @@ const SliderComponent = (
 
 const SliderWithRef = React.forwardRef(SliderComponent);
 
-/* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
- * found when Flow v0.89 was deployed. To see the error, delete this comment
- * and run Flow. */
-
 SliderWithRef.defaultProps = {
   value: 0,
   minimumValue: 0,
@@ -329,8 +261,4 @@ if (Platform.OS === 'ios') {
   });
 }
 
-/* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
- * found when Flow v0.89 was deployed. To see the error, delete this comment
- * and run Flow. */
-const Slider = (SliderWithRef: Class<NativeComponent<Props>>);
-export default Slider;
+export default SliderWithRef;
