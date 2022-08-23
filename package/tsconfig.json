@@ -1,0 +1,23 @@
+{
+  "include": ["./src/**/*"],
+  "exclude": ["./src/RNCSliderNativeComponent.web.ts"],
+
+  "compilerOptions": {
+    "jsx": "react",
+
+    /* Language and Environment */
+    "target": "ESNext",
+    "lib": ["ESNext"],
+
+    /* Modules */
+    "module": "esnext",
+
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking */
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
