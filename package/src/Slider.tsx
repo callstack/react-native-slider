@@ -1,19 +1,17 @@
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import {
   Image,
   Platform,
   StyleSheet,
   AccessibilityActionEvent,
+  ViewProps,
+  ViewStyle,
+  ColorValue,
+  ImageSourcePropType,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 
 import type {Ref} from 'react';
-import type {NativeComponent} from 'react-native/Libraries/Renderer/shims/ReactNative';
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
-import type {ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
-import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import type {ViewProps} from 'react-native/Libraries/Components/View/ViewPropTypes';
-import type {SyntheticEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
 type Event = SyntheticEvent<
   Readonly<{
@@ -38,19 +36,21 @@ type IOSProps = Readonly<{
    * Assigns a single image for the track. Only static images are supported.
    * The center pixel of the image will be stretched to fill the track.
    */
-  trackImage?: ImageSource,
+  trackImage?: ImageSourcePropType,
 
   /**
    * Assigns a minimum track image. Only static images are supported. The
    * rightmost pixel of the image will be stretched to fill the track.
    */
-  minimumTrackImage?: ImageSource,
+  minimumTrackImage?: ImageSourcePropType,
 
   /**
    * Assigns a maximum track image. Only static images are supported. The
    * leftmost pixel of the image will be stretched to fill the track.
    */
-  maximumTrackImage?: ImageSource,
+  maximumTrackImage?: ImageSourcePropType,
+
+  tapToSeek?: boolean,
 }>;
 
 type Props = ViewProps & IOSProps & WindowsProps & Readonly<{
@@ -58,7 +58,7 @@ type Props = ViewProps & IOSProps & WindowsProps & Readonly<{
    * Used to style and layout the `Slider`.  See `StyleSheet.js` and
    * `DeprecatedViewStylePropTypes.js` for more info.
    */
-  style?: ViewStyleProp,
+  style?: ViewStyle,
 
   /**
    * Write-only property representing the value of the slider.
@@ -141,7 +141,7 @@ type Props = ViewProps & IOSProps & WindowsProps & Readonly<{
   /**
    * Sets an image for the thumb. Only static images are supported.
    */
-  thumbImage?: ImageSource,
+  thumbImage?: ImageSourcePropType,
 
   /**
    * If true the slider will be inverted.
@@ -182,7 +182,7 @@ const SliderComponent = (
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
-        onValueChange(event.nativeEvent.value);
+        onValueChange(event.currentTarget.value);
       }
     : null;
 
@@ -199,17 +199,17 @@ const SliderComponent = (
   const onChangeEvent = onValueChangeEvent;
   const onSlidingStartEvent = onSlidingStart
     ? (event: Event) => {
-        onSlidingStart(event.nativeEvent.value);
+        onSlidingStart(event.currentTarget.value);
       }
     : null;
   const onSlidingCompleteEvent = onSlidingComplete
     ? (event: Event) => {
-        onSlidingComplete(event.nativeEvent.value);
+        onSlidingComplete(event.currentTarget.value);
       }
     : null;
   const onAccessibilityActionEvent = onAccessibilityAction
     ? (event: AccessibilityActionEvent) => {
-        onAccessibilityAction(event.nativeEvent.value);
+        onAccessibilityAction(event);
       }
     : null;
 
@@ -220,7 +220,7 @@ const SliderComponent = (
       thumbImage={
         Platform.OS === 'web'
           ? props.thumbImage
-          : Image.resolveAssetSource(props.thumbImage)
+          : props.thumbImage ? Image.resolveAssetSource(props.thumbImage) : undefined
       }
       ref={forwardedRef}
       style={style}
@@ -248,7 +248,7 @@ SliderWithRef.defaultProps = {
   tapToSeek: false,
 };
 
-let styles;
+let styles: any;
 if (Platform.OS === 'ios') {
   styles = StyleSheet.create({
     slider: {
