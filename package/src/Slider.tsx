@@ -51,6 +51,10 @@ type IOSProps = Readonly<{
    */
   maximumTrackImage?: ImageSourcePropType,
 
+  /**
+   * Permits tapping on the slider track to set the thumb position.
+   * Defaults to false on iOS. No effect on Android or Windows.
+   */
   tapToSeek?: boolean,
 }>;
 
