@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import React from 'react';
 import {
   Image,
   Platform,
@@ -8,12 +8,13 @@ import {
   ViewStyle,
   ColorValue,
   ImageSourcePropType,
+  NativeSyntheticEvent,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 
 import type {Ref} from 'react';
 
-type Event = SyntheticEvent<
+type Event = NativeSyntheticEvent<
   Readonly<{
     value: number,
     /**
@@ -123,7 +124,6 @@ type Props = ViewProps & IOSProps & WindowsProps & Readonly<{
    * regardless if the value has changed. The current value is passed
    * as an argument to the callback handler.
    */
-
   onSlidingStart?: (value: number) => void,
 
   /**
@@ -182,7 +182,7 @@ const SliderComponent = (
 
   const onValueChangeEvent = onValueChange
     ? (event: Event) => {
-        onValueChange(event.currentTarget.value);
+        onValueChange(event.nativeEvent.value);
       }
     : null;
 
@@ -196,15 +196,14 @@ const SliderComponent = (
       ? {...props.accessibilityState, disabled: props.disabled}
       : props.accessibilityState;
 
-  const onChangeEvent = onValueChangeEvent;
   const onSlidingStartEvent = onSlidingStart
     ? (event: Event) => {
-        onSlidingStart(event.currentTarget.value);
+        onSlidingStart(event.nativeEvent.value);
       }
     : null;
   const onSlidingCompleteEvent = onSlidingComplete
     ? (event: Event) => {
-        onSlidingComplete(event.currentTarget.value);
+        onSlidingComplete(event.nativeEvent.value);
       }
     : null;
   const onAccessibilityActionEvent = onAccessibilityAction
@@ -224,7 +223,7 @@ const SliderComponent = (
       }
       ref={forwardedRef}
       style={style}
-      onChange={onChangeEvent}
+      onChange={onValueChangeEvent}
       onRNCSliderSlidingStart={onSlidingStartEvent}
       onRNCSliderSlidingComplete={onSlidingCompleteEvent}
       onRNCSliderValueChange={onValueChangeEvent}
