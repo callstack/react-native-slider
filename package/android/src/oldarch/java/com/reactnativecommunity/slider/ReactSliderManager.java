@@ -4,7 +4,6 @@ import android.widget.SeekBar;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -12,7 +11,13 @@ import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import java.util.Map;
+import android.view.View;
 import javax.annotation.Nullable;
+
+import com.facebook.yoga.YogaMeasureFunction;
+import com.facebook.yoga.YogaMeasureMode;
+import com.facebook.yoga.YogaMeasureOutput;
+import com.facebook.yoga.YogaNode;
 
 /**
  * Manages instances of {@code ReactSlider}.
@@ -60,15 +65,50 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   public String getName() {
     return ReactSliderManagerImpl.REACT_CLASS;
   }
+  
+  public static class ReactSliderShadowNode extends LayoutShadowNode implements
+            YogaMeasureFunction {
+
+        private int mWidth;
+        private int mHeight;
+        private boolean mMeasured;
+
+        public ReactSliderShadowNode() {
+            initMeasureFunction();
+        }
+
+        private void initMeasureFunction() {
+            setMeasureFunction(this);
+        }
+
+        @Override
+        public long measure(
+                YogaNode node,
+                float width,
+                YogaMeasureMode widthMode,
+                float height,
+                YogaMeasureMode heightMode) {
+            if (!mMeasured) {
+                SeekBar reactSlider = new ReactSlider(getThemedContext(), null);
+                final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+                reactSlider.measure(spec, spec);
+                mWidth = reactSlider.getMeasuredWidth();
+                mHeight = reactSlider.getMeasuredHeight();
+                mMeasured = true;
+            }
+
+            return YogaMeasureOutput.make(mWidth, mHeight);
+        }
+    }
 
   @Override
   public LayoutShadowNode createShadowNodeInstance() {
-    return new ReactSliderManagerImpl.ReactSliderShadowNode();
+    return new ReactSliderShadowNode();
   }
 
   @Override
   public Class getShadowNodeClass() {
-    return ReactSliderManagerImpl.ReactSliderShadowNode.class;
+    return ReactSliderShadowNode.class;
   }
 
   @Override
