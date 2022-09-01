@@ -1,34 +1,43 @@
+//@ts-ignore
 import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
-import {View, StyleSheet, ColorValue, ViewStyle, NativeSyntheticEvent, GestureResponderEvent, LayoutChangeEvent} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ColorValue,
+  ViewStyle,
+  NativeSyntheticEvent,
+  GestureResponderEvent,
+  LayoutChangeEvent,
+} from 'react-native';
 
 type Event = NativeSyntheticEvent<
   Readonly<{
-    value: number,
+    value: number;
     /**
      * Android Only.
      */
-    fromUser?: boolean,
+    fromUser?: boolean;
   }>
 >;
 
 export interface Props {
-  value: number,
-  minimumValue: number,
-  maximumValue: number,
-  step: number,
-  minimumTrackTintColor: ColorValue,
-  maximumTrackTintColor: ColorValue,
-  thumbTintColor: ColorValue,
-  thumbStyle: ViewStyle,
-  style: ViewStyle,
-  inverted: boolean,
-  enabled: boolean,
-  trackHeight: number,
-  thumbSize: number,
-  onRNCSliderSlidingStart: (value: number) => void,
-  onRNCSliderSlidingComplete: (value: number) => void,
-  onRNCSliderValueChange: (value: number) => void,
+  value: number;
+  minimumValue: number;
+  maximumValue: number;
+  step: number;
+  minimumTrackTintColor: ColorValue;
+  maximumTrackTintColor: ColorValue;
+  thumbTintColor: ColorValue;
+  thumbStyle: ViewStyle;
+  style: ViewStyle;
+  inverted: boolean;
+  enabled: boolean;
+  trackHeight: number;
+  thumbSize: number;
+  onRNCSliderSlidingStart: (value: number) => void;
+  onRNCSliderSlidingComplete: (value: number) => void;
+  onRNCSliderValueChange: (value: number) => void;
 }
 
 const RCTSliderWebComponent = React.forwardRef(
@@ -52,7 +61,7 @@ const RCTSliderWebComponent = React.forwardRef(
       onRNCSliderValueChange = (_: number) => {},
       ...others
     }: Props,
-    forwardedRef,
+    forwardedRef: any,
   ) => {
     const containerSize = React.useRef({width: 0, height: 0});
     const containerPositionX = React.useRef(0);
@@ -62,24 +71,21 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const onValueChange = useCallback(
       (value: number) => {
-        onRNCSliderValueChange &&
-          onRNCSliderValueChange(value);
+        onRNCSliderValueChange && onRNCSliderValueChange(value);
       },
       [onRNCSliderValueChange],
     );
 
     const onSlidingStart = useCallback(
       (value: number) => {
-        onRNCSliderSlidingStart &&
-          onRNCSliderSlidingStart(value);
+        onRNCSliderSlidingStart && onRNCSliderSlidingStart(value);
       },
       [onRNCSliderSlidingStart],
     );
 
     const onSlidingComplete = useCallback(
       (value: number) => {
-        onRNCSliderSlidingComplete &&
-          onRNCSliderSlidingComplete(value);
+        onRNCSliderSlidingComplete && onRNCSliderSlidingComplete(value);
       },
       [onRNCSliderSlidingComplete],
     );
@@ -190,8 +196,7 @@ const RCTSliderWebComponent = React.forwardRef(
       //@ts-ignore
       const positionX = ReactDOM.findDOMNode(
         (containerRef as RefObject<any>).current,
-        //@ts-ignore
-        ).getBoundingClientRect()?.x;
+      ).getBoundingClientRect()?.x;
       containerPositionX.current = positionX ?? 0;
     };
 
@@ -219,7 +224,9 @@ const RCTSliderWebComponent = React.forwardRef(
     };
 
     const onTouchEnd = (nativeEvent: GestureResponderEvent) => {
-      const newValue = updateValue(getValueFromNativeEvent(nativeEvent.currentTarget));
+      const newValue = updateValue(
+        getValueFromNativeEvent(nativeEvent.currentTarget),
+      );
       onSlidingComplete(newValue);
     };
 
@@ -281,7 +288,11 @@ const RCTSliderWebComponent = React.forwardRef(
 );
 
 // We should round number with the same precision as the min, max or step values if provided
-function calculatePrecision(minimumValue: number, maximumValue: number, step: number) {
+function calculatePrecision(
+  minimumValue: number,
+  maximumValue: number,
+  step: number,
+) {
   if (!step) {
     return Infinity;
   } else {
