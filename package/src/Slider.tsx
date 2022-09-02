@@ -7,10 +7,11 @@ import {
   ViewProps,
   ViewStyle,
   ColorValue,
-  ImageSourcePropType,
   NativeSyntheticEvent,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
+//@ts-ignore
+import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 import type {Ref} from 'react';
 
@@ -37,19 +38,19 @@ type IOSProps = Readonly<{
    * Assigns a single image for the track. Only static images are supported.
    * The center pixel of the image will be stretched to fill the track.
    */
-  trackImage?: ImageSourcePropType;
+  trackImage?: ImageSource;
 
   /**
    * Assigns a minimum track image. Only static images are supported. The
    * rightmost pixel of the image will be stretched to fill the track.
    */
-  minimumTrackImage?: ImageSourcePropType;
+  minimumTrackImage?: ImageSource;
 
   /**
    * Assigns a maximum track image. Only static images are supported. The
    * leftmost pixel of the image will be stretched to fill the track.
    */
-  maximumTrackImage?: ImageSourcePropType;
+  maximumTrackImage?: ImageSource;
 
   /**
    * Permits tapping on the slider track to set the thumb position.
@@ -148,7 +149,7 @@ type Props = ViewProps &
     /**
      * Sets an image for the thumb. Only static images are supported.
      */
-    thumbImage?: ImageSourcePropType;
+    thumbImage?: ImageSource;
 
     /**
      * If true the slider will be inverted.
