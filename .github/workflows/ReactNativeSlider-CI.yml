@@ -39,7 +39,7 @@ jobs:
       - name: Run ESLint on the sources
         run: cd package && npx eslint src
 
-      - name: Run ESLint on the sources
+      - name: Run TypeScript on the sources
         run: cd package && npx tsc --noEmit
 
 
