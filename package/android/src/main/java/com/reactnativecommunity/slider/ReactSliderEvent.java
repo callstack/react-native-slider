@@ -10,7 +10,7 @@ package com.reactnativecommunity.slider;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.Event;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.facebook.react.uimanager.events.RCTModernEventEmitter;
 
 /**
  * Event emitted by a ReactSliderManager when user changes slider position.
@@ -46,8 +46,9 @@ public class ReactSliderEvent extends Event<ReactSliderEvent> {
   public short getCoalescingKey() {
     return 0;
   }
+
   @Override
-  public void dispatch(RCTEventEmitter rctEventEmitter) {
+  public void dispatchModern(RCTModernEventEmitter rctEventEmitter) {
     rctEventEmitter.receiveEvent(getViewTag(), getEventName(), serializeEventData());
   }
 

@@ -6,8 +6,6 @@ import androidx.annotation.Nullable;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerHelper;
@@ -83,16 +81,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   @Override
   public String getName() {
     return ReactSliderManagerImpl.REACT_CLASS;
-  }
-
-  @Override
-  public LayoutShadowNode createShadowNodeInstance() {
-    return new ReactSliderManagerImpl.ReactSliderShadowNode();
-  }
-
-  @Override
-  public Class getShadowNodeClass() {
-    return ReactSliderManagerImpl.ReactSliderShadowNode.class;
   }
 
   @Override
