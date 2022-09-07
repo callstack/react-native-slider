@@ -66,40 +66,40 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     return ReactSliderManagerImpl.REACT_CLASS;
   }
   
-  public static class ReactSliderShadowNode extends LayoutShadowNode implements
-            YogaMeasureFunction {
+  static class ReactSliderShadowNode extends LayoutShadowNode implements
+      YogaMeasureFunction {
 
-        private int mWidth;
-        private int mHeight;
-        private boolean mMeasured;
+    private int mWidth;
+    private int mHeight;
+    private boolean mMeasured;
 
-        public ReactSliderShadowNode() {
-            initMeasureFunction();
-        }
-
-        private void initMeasureFunction() {
-            setMeasureFunction(this);
-        }
-
-        @Override
-        public long measure(
-                YogaNode node,
-                float width,
-                YogaMeasureMode widthMode,
-                float height,
-                YogaMeasureMode heightMode) {
-            if (!mMeasured) {
-                SeekBar reactSlider = new ReactSlider(getThemedContext(), null);
-                final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-                reactSlider.measure(spec, spec);
-                mWidth = reactSlider.getMeasuredWidth();
-                mHeight = reactSlider.getMeasuredHeight();
-                mMeasured = true;
-            }
-
-            return YogaMeasureOutput.make(mWidth, mHeight);
-        }
+    private ReactSliderShadowNode() {
+      initMeasureFunction();
     }
+
+    private void initMeasureFunction() {
+      setMeasureFunction(this);
+    }
+
+    @Override
+    public long measure(
+        YogaNode node,
+        float width,
+        YogaMeasureMode widthMode,
+        float height,
+        YogaMeasureMode heightMode) {
+      if (!mMeasured) {
+        SeekBar reactSlider = new ReactSlider(getThemedContext(), null);
+        final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        reactSlider.measure(spec, spec);
+        mWidth = reactSlider.getMeasuredWidth();
+        mHeight = reactSlider.getMeasuredHeight();
+        mMeasured = true;
+      }
+
+      return YogaMeasureOutput.make(mWidth, mHeight);
+    }
+  }
 
   @Override
   public LayoutShadowNode createShadowNodeInstance() {
