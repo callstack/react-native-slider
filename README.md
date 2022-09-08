@@ -107,6 +107,10 @@ To use this library you need to ensure you are using the correct version of Reac
 | `ref` | Reference object. | MutableRefObject | No | web |
 | `View` | [Inherited `View` props...](https://github.com/facebook/react-native-website/blob/master/docs/view.md#props) | | | |
 
+## Roadmap and Progress
+
+There's a Project board available [here](https://github.com/callstack/react-native-slider/projects/1) which contains all reported issues organized into columns regarding their status.
+If you are interested in knowing whether the issue you reported is handled or just to check the status of a feature you would like to have in Slider, please check the board.
 
 ## Contributing
 
