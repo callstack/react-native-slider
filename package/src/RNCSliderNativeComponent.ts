@@ -4,8 +4,8 @@ import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNati
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {
   Float,
-  BubblingEventHandler,
   WithDefault,
+  DirectEventHandler,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
 type Event = Readonly<{
@@ -19,7 +19,7 @@ export interface NativeProps extends ViewProps {
   disabled?: WithDefault<boolean, false>;
   enabled?: WithDefault<boolean, true>;
   inverted?: WithDefault<boolean, false>;
-  vertical?: boolean;
+  vertical?: WithDefault<boolean, false>;
   tapToSeek?: WithDefault<boolean, false>;
   maximumTrackImage?: ImageSource;
   maximumTrackTintColor?: ColorValue;
@@ -27,10 +27,10 @@ export interface NativeProps extends ViewProps {
   minimumTrackImage?: ImageSource;
   minimumTrackTintColor?: ColorValue;
   minimumValue?: Float;
-  onChange?: BubblingEventHandler<Event>;
-  onRNCSliderSlidingStart?: BubblingEventHandler<Event>;
-  onRNCSliderSlidingComplete?: BubblingEventHandler<Event>;
-  onRNCSliderValueChange?: BubblingEventHandler<Event>;
+  onChange?: DirectEventHandler<Event>;
+  onRNCSliderSlidingStart?: DirectEventHandler<Event>;
+  onRNCSliderSlidingComplete?: DirectEventHandler<Event>;
+  onRNCSliderValueChange?: DirectEventHandler<Event>;
   step?: Float;
   testID?: string;
   thumbImage?: ImageSource;

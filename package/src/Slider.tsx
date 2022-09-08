@@ -8,6 +8,7 @@ import {
   ViewStyle,
   ColorValue,
   NativeSyntheticEvent,
+  StyleProp,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 //@ts-ignore
@@ -67,7 +68,7 @@ type Props = ViewProps &
      * Used to style and layout the `Slider`.  See `StyleSheet.js` and
      * `DeprecatedViewStylePropTypes.js` for more info.
      */
-    style?: ViewStyle;
+    style?: StyleProp<ViewStyle>;
 
     /**
      * Write-only property representing the value of the slider.
@@ -178,7 +179,7 @@ const SliderComponent = (
   props: Props,
   forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
 ) => {
-  const style = StyleSheet.compose(styles.slider, props.style);
+  const style = StyleSheet.compose(props.style, styles.slider);
 
   const {
     onValueChange,
@@ -257,17 +258,8 @@ SliderWithRef.defaultProps = {
   tapToSeek: false,
 };
 
-let styles: any;
-if (Platform.OS === 'ios') {
-  styles = StyleSheet.create({
-    slider: {
-      height: 40,
-    },
-  });
-} else {
-  styles = StyleSheet.create({
-    slider: {},
-  });
-}
+let styles = StyleSheet.create(
+  Platform.OS === 'ios' ? {slider: {height: 40}} : {slider: {}},
+);
 
 export default SliderWithRef;
