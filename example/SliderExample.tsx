@@ -75,13 +75,13 @@ const styles = StyleSheet.create({
 export const examples = [
   {
     title: 'Default settings',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample />;
     },
   },
   {
     title: 'Initial value: 0.5',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample value={0.5} />;
     },
   },
@@ -105,13 +105,13 @@ export const examples = [
   },
   {
     title: 'onSlidingComplete',
-    render(): React.ReactElement {
+    render() {
       return <SlidingCompleteExample />;
     },
   },
   {
     title: 'Custom min/max track tint color',
-    render(): React.ReactElement {
+    render() {
       return (
         <SliderExample
           minimumTrackTintColor={'#00FF00'}
@@ -123,20 +123,20 @@ export const examples = [
   },
   {
     title: 'Custom thumb tint color',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample thumbTintColor={'magenta'} />;
     },
   },
   {
     title: 'Custom thumb image',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample thumbImage={require('./uie_thumb_big.png')} />;
     },
   },
   {
     title: 'Custom thumb (network image)',
     platform: 'windows',
-    render(): React.ReactElement {
+    render() {
       return (
         <SliderExample
           thumbImage={{
@@ -149,14 +149,14 @@ export const examples = [
   {
     title: 'Custom track image',
     platform: 'ios',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample trackImage={require('./slider.png')} />;
     },
   },
   {
     title: 'Custom min/max track image',
     platform: 'ios',
-    render(): React.ReactElement {
+    render() {
       return (
         <SliderExample
           minimumTrackImage={require('./slider-left.png')}
@@ -167,21 +167,21 @@ export const examples = [
   },
   {
     title: 'Inverted slider direction',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample value={0.6} inverted />;
     },
   },
   {
     title: 'Disabled slider',
     platform: 'android',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample disabled value={0.6} />;
     },
   },
   {
     title: 'Slider with accessibilityState disabled',
     platform: 'android',
-    render(): React.ReactElement {
+    render() {
       return <SliderExample disabled value={0.6} />;
     },
   },
