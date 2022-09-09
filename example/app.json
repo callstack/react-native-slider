@@ -1,8 +1,4 @@
 {
   "name": "example",
-  "displayName": "example",
-  "expo": {
-    "name": "example",
-    "slug": "example"
-  }
+  "displayName": "example"
 }
