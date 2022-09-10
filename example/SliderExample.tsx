@@ -30,7 +30,7 @@ const SlidingStartExample = (props: SliderProps) => {
         }}
       />
       <Text>
-        Completions: {slideStartingCount} Value: {slideStartingValue}
+        Starts: {slideStartingCount} Value: {slideStartingValue}
       </Text>
     </View>
   );
