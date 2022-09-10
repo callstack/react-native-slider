@@ -172,6 +172,13 @@ export const examples = [
     },
   },
   {
+    title: 'Vertical slider',
+    platform: 'windows',
+    render(): Element<any> {
+      return <SliderExample value={0.6} vertical />;
+    },
+  },
+  {
     title: 'Disabled slider',
     platform: 'android',
     render() {
