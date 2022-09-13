@@ -76,6 +76,8 @@ jobs:
       - name: Run ESLint on the sources
         run: cd example && npx eslint .
 
+      - name: Run TypeScript on the sources
+        run: cd example && npx tsc --noEmit
 
   build-android-app:
     name: Build example app Android
