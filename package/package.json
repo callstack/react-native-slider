@@ -70,5 +70,8 @@
         "jsSrcsDir": "src"
       }
     ]
+  },
+  "dependencies": {
+    "@types/react-test-renderer": "^18.0.0"
   }
 }
