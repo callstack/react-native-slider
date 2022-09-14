@@ -174,7 +174,7 @@ export const examples = [
   {
     title: 'Vertical slider',
     platform: 'windows',
-    render(): Element<any> {
+    render() {
       return <SliderExample value={0.6} vertical />;
     },
   },

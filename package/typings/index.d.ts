@@ -1,10 +1,9 @@
-import * as React from "react";
-import * as ReactNative from "react-native";
+import * as React from 'react';
+import * as ReactNative from 'react-native';
 
-type SliderReferenceType = (
-  React.MutableRefObject<SliderRef> &
-  React.LegacyRef<Slider>
-) | undefined;
+type SliderReferenceType =
+  | (React.MutableRefObject<SliderRef> & React.LegacyRef<Slider>)
+  | undefined;
 
 export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
@@ -56,8 +55,10 @@ export interface SliderPropsWindows extends ReactNative.ViewProps {
   vertical?: boolean;
 }
 
-
-export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid, SliderPropsWindows {
+export interface SliderProps
+  extends SliderPropsIOS,
+    SliderPropsAndroid,
+    SliderPropsWindows {
   /**
    * If true the user won't be able to move the slider.
    * Default value is false.
@@ -158,9 +159,9 @@ export interface SliderProps extends SliderPropsIOS, SliderPropsAndroid, SliderP
 }
 
 /**
-* A component used to select a single value from a range of values.
-*/
+ * A component used to select a single value from a range of values.
+ */
 declare class SliderComponent extends React.Component<SliderProps> {}
-declare const SliderBase: ReactNative.Constructor<ReactNative.NativeMethodsMixin> & typeof SliderComponent;
+declare const SliderBase: ReactNative.Constructor<ReactNative.NativeMethods> & typeof SliderComponent;
 export default class Slider extends SliderBase {}
 export type SliderIOS = Slider;

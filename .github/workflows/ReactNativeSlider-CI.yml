@@ -21,7 +21,7 @@ jobs:
           key: ${{ hashFiles('./package/package.json') }}
 
 
-  lint:
+  verify-package-sources:
     name: Lint the sources
     runs-on: ubuntu-latest
     needs: install
@@ -38,6 +38,9 @@ jobs:
 
       - name: Run ESLint on the sources
         run: cd package && npx eslint src
+
+      - name: Run TypeScript on the sources
+        run: cd package && npx tsc --noEmit
 
 
   test:
@@ -59,7 +62,7 @@ jobs:
         run: cd package && npx jest src
 
 
-  verify:
+  verify-example-sources:
     name: Verify example app sources
     runs-on: ubuntu-latest
 
@@ -73,11 +76,13 @@ jobs:
       - name: Run ESLint on the sources
         run: cd example && npx eslint .
 
+      - name: Run TypeScript on the sources
+        run: cd example && npx tsc --noEmit
 
   build-android-app:
     name: Build example app Android
     runs-on: ubuntu-latest
-    needs: [verify]
+    needs: [verify-example-sources]
 
     steps:
       - uses: actions/checkout@v3
@@ -97,7 +102,7 @@ jobs:
   build-iOS-app:
     name: Build example app iOS
     runs-on: macos-latest
-    needs: [verify]
+    needs: [verify-example-sources]
     steps:
       - uses: actions/checkout@v3
 
