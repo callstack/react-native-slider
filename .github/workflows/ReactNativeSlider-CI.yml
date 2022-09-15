@@ -206,7 +206,7 @@ jobs:
   build-Windows-app:
     name: Build example app Windows
     runs-on: windows-latest
-    needs: [verify]
+    needs: [verify-example-sources]
     steps:
       - name: Ensure the cross-platform Git on Windows
         run: git config --global core.autocrlf false
