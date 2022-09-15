@@ -203,20 +203,19 @@ jobs:
         working-directory: example/ios
 
 
-#  Disabled until Windows Example app is added with v0.70
-#  build-Windows-app:
-#    name: Build example app Windows
-#    runs-on: windows-latest
-#    needs: [verify]
-#    steps:
-#      - name: Ensure the cross-platform Git on Windows
-#        run: git config --global core.autocrlf false
-#
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: Install dependencies
-#        run: npm install
-#
-#      - name: Build the Windows OS app
-#        run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging
+  build-Windows-app:
+    name: Build example app Windows
+    runs-on: windows-latest
+    needs: [verify]
+    steps:
+      - name: Ensure the cross-platform Git on Windows
+        run: git config --global core.autocrlf false
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the Windows OS app
+        run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging
