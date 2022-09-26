@@ -87,6 +87,11 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
 {
   float value = [sender discreteValue:sender.value];
 
+  if (sender.limit > 0 && value > sender.limit) {
+      value = sender.limit;
+      [sender setValue:value animated:NO];
+  }
+
   if(!sender.isSliding) {
     [sender setValue:value animated:NO];
   }
@@ -155,6 +160,7 @@ RCT_EXPORT_VIEW_PROPERTY(inverted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(tapToSeek, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(accessibilityUnits, NSString);
 RCT_EXPORT_VIEW_PROPERTY(accessibilityIncrements, NSArray);
+RCT_EXPORT_VIEW_PROPERTY(limit, float);
 
 RCT_CUSTOM_VIEW_PROPERTY(disabled, BOOL, RNCSlider)
 {

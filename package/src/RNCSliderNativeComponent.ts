@@ -38,6 +38,7 @@ export interface NativeProps extends ViewProps {
   thumbTintColor?: ColorValue;
   trackImage?: ImageSource;
   value?: Float;
+  limit?: Float;
 }
 
 export default codegenNativeComponent<NativeProps>(

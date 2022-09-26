@@ -118,6 +118,11 @@ using namespace facebook::react;
 {
     float value = [sender discreteValue:sender.value];
     
+    if (sender.limit > 0 && value > sender.limit) {
+        value = sender.limit;
+        [sender setValue:value animated:NO];
+    }
+
     if(!sender.isSliding) {
         [sender setValue:value animated:NO];
     }
@@ -162,6 +167,9 @@ using namespace facebook::react;
     }
     if (oldScreenProps.maximumValue != newScreenProps.maximumValue) {
         [slider setMaximumValue:newScreenProps.maximumValue];
+    }
+    if (oldScreenProps.limit != newScreenProps.limit) {
+        slider.limit = newScreenProps.limit;
     }
     if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
         slider.tapToSeek = newScreenProps.tapToSeek;

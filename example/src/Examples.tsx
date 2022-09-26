@@ -3,7 +3,7 @@ import {Text, View, StyleSheet} from 'react-native';
 import Slider, {SliderProps} from '@react-native-community/slider';
 
 const SliderExample = (props: SliderProps) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(props.value ?? 0);
   return (
     <View>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
@@ -11,6 +11,7 @@ const SliderExample = (props: SliderProps) => {
         step={0.5}
         style={styles.slider}
         {...props}
+        value={value}
         onValueChange={setValue}
       />
     </View>
@@ -95,6 +96,14 @@ export const examples = [
     title: 'step: 0.25, tap to seek on iOS',
     render(): React.ReactElement {
       return <SliderExample step={0.25} tapToSeek={true} />;
+    },
+  },
+  {
+    title: 'Limit to 70',
+    render() {
+      return (
+        <SliderExample step={1} value={30} maximumValue={100} limit={70} />
+      );
     },
   },
   {

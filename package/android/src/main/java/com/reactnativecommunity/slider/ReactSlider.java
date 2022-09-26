@@ -66,6 +66,12 @@ public class ReactSlider extends AppCompatSeekBar {
 
   private List<String> mAccessibilityIncrements;
 
+  /** Real limit value based on min and max values. This comes from props */
+  private double mRealLimit = 0;
+
+  /** Limit based on progress from 0..100 */
+  private int mLimit = 0;
+
   public ReactSlider(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
     I18nUtil sharedI18nUtilInstance = I18nUtil.getInstance();
@@ -100,6 +106,15 @@ public class ReactSlider extends AppCompatSeekBar {
   /* package */ void setStep(double step) {
     mStep = step;
     updateAll();
+  }
+
+  /* package */ void setRealLimit(double value) {
+    mRealLimit = value;
+    updateAll();
+  }
+
+  int getLimit() {
+    return this.mLimit;
   }
 
   boolean isSliding() {
@@ -185,8 +200,14 @@ public class ReactSlider extends AppCompatSeekBar {
     if (mStep == 0) {
       mStepCalculated = (mMaxValue - mMinValue) / (double) DEFAULT_TOTAL_STEPS;
     }
+    updateLimit();
     setMax(getTotalSteps());
     updateValue();
+  }
+
+  /** Update limit based on props limit, max and min */
+  private void updateLimit() {
+    mLimit = (int) Math.round((mRealLimit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
   }
 
   /** Update value only (optimization in case only value is set). */

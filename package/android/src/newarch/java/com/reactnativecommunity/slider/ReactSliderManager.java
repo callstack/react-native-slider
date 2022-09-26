@@ -40,10 +40,17 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
           new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+              ReactSlider slider = (ReactSlider)seekbar;
+
+              if(slider.getLimit() > 0 && progress > slider.getLimit()) {
+                progress = slider.getLimit();
+                seekbar.setProgress(progress);
+              }
+
               ReactContext reactContext = (ReactContext) seekbar.getContext();
               int reactTag = seekbar.getId();
               UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-                      .dispatchEvent(new ReactSliderEvent(reactTag, ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
+                      .dispatchEvent(new ReactSliderEvent(reactTag, slider.toRealProgress(progress), fromUser));
             }
 
             @Override
@@ -152,6 +159,11 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   @ReactProp(name = "accessibilityIncrements")
   public void setAccessibilityIncrements(ReactSlider view, ReadableArray accessibilityIncrements) {
     ReactSliderManagerImpl.setAccessibilityIncrements(view, accessibilityIncrements);
+  }
+
+  @ReactProp(name = "limit", defaultFloat = 0f)
+  public void setLimit(ReactSlider view, float value) {
+    ReactSliderManagerImpl.setLimit(view, value);
   }
 
   @Override

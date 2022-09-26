@@ -77,6 +77,12 @@ export interface SliderProps
   maximumValue?: number;
 
   /**
+   * The limit value of the slider. The user won't be able to slide pass this limit.
+   * Default value is 0.
+   */
+  limit?: number;
+
+  /**
    * The color used for the track to the left of the button.
    * Overrides the default blue gradient image.
    */
@@ -162,6 +168,7 @@ export interface SliderProps
  * A component used to select a single value from a range of values.
  */
 declare class SliderComponent extends React.Component<SliderProps> {}
-declare const SliderBase: ReactNative.Constructor<ReactNative.NativeMethods> & typeof SliderComponent;
+declare const SliderBase: ReactNative.Constructor<ReactNative.NativeMethods> &
+  typeof SliderComponent;
 export default class Slider extends SliderBase {}
 export type SliderIOS = Slider;
