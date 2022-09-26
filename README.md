@@ -89,6 +89,7 @@ To use this library you need to ensure you are using the correct version of Reac
 | `maximumValue` | Initial maximum value of the slider.<br/>Default value is 1. | number | No | |
 | `minimumTrackTintColor` | The color used for the track to the left of the button.<br/>Overrides the default blue gradient image on iOS. | [color](https://reactnative.dev/docs/colors) | No | |
 | `minimumValue` | Initial minimum value of the slider.<br/>Default value is 0. | number | No | |
+| `limit` | Slide limit. The user won't be able to slide past this limit.<br/>It is 0 when disabled. Default value is 0. | number | No | |
 | `onSlidingStart` | Callback that is called when the user picks up the slider.<br/>The initial value is passed as an argument to the callback handler. | function | No | |
 | `onSlidingComplete` | Callback that is called when the user releases the slider, regardless if the value has changed.<br/>The current value is passed as an argument to the callback handler. | function | No | |
 | `onValueChange` | Callback continuously called while the user is dragging the slider. | function | No | |
