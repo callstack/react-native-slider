@@ -19,7 +19,7 @@
     "prepare": "babel --extensions \".ts,.tsx\" --out-dir dist src",
     "lint": "npx eslint src",
     "test": "npx jest src",
-    "postinstall": "npx copyfiles \"./../README.md\" ./README.md"
+    "prepack": "npx copyfiles \"./../README.md\" ./README.md"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
