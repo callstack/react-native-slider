@@ -67,10 +67,16 @@ public class ReactSlider extends AppCompatSeekBar {
   private List<String> mAccessibilityIncrements;
 
   /** Real limit value based on min and max values. This comes from props */
-  private double mRealLimit = 0;
+  private double mRealLowerLimit = Long.MIN_VALUE;
 
   /** Limit based on progress from 0..100 */
-  private int mLimit = 0;
+  private int mLowerLimit = 0;
+
+  /** Real limit value based on min and max values. This comes from props */
+  private double mRealUpperLimit = Long.MAX_VALUE;
+
+  /** Limit based on progress from 0..100 */
+  private int mUpperLimit = 100;
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
@@ -108,13 +114,22 @@ public class ReactSlider extends AppCompatSeekBar {
     updateAll();
   }
 
-  /* package */ void setRealLimit(double value) {
-    mRealLimit = value;
-    updateAll();
+  /* package */ void setLowerLimit(double value) {
+    mRealLowerLimit = value;
+    updateLowerLimit();
   }
 
-  int getLimit() {
-    return this.mLimit;
+  /* package */ void setUpperLimit(double value) {
+    mRealUpperLimit = value;
+    updateUpperLimit();
+  }
+
+  int getLowerLimit() {
+    return this.mLowerLimit;
+  }
+
+  int getUpperLimit() {
+    return this.mUpperLimit;
   }
 
   boolean isSliding() {
@@ -200,14 +215,22 @@ public class ReactSlider extends AppCompatSeekBar {
     if (mStep == 0) {
       mStepCalculated = (mMaxValue - mMinValue) / (double) DEFAULT_TOTAL_STEPS;
     }
-    updateLimit();
     setMax(getTotalSteps());
+    updateLowerLimit();
+    updateUpperLimit();
     updateValue();
   }
 
   /** Update limit based on props limit, max and min */
-  private void updateLimit() {
-    mLimit = (int) Math.round((mRealLimit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
+  private void updateLowerLimit() {
+    double limit = Math.max(mRealLowerLimit, mMinValue);
+    mLowerLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
+  }
+
+  /** Update limit based on props limit, max and min */
+  private void updateUpperLimit() {
+    double limit = Math.min(mRealUpperLimit, mMaxValue);
+    mUpperLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
   }
 
   /** Update value only (optimization in case only value is set). */

@@ -18,7 +18,9 @@ typedef void (^RNCLoadImageFailureBlock)();
 @property (nonatomic, assign) float step;
 @property (nonatomic, assign) float lastValue;
 @property (nonatomic, assign) bool isSliding;
-@property (nonatomic, assign) float limit;
+
+@property (nonatomic, assign) float lowerLimit;
+@property (nonatomic, assign) float upperLimit;
 
 @property (nonatomic, strong) UIImage *trackImage;
 @property (nonatomic, strong) UIImage *minimumTrackImage;

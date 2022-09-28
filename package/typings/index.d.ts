@@ -77,10 +77,14 @@ export interface SliderProps
   maximumValue?: number;
 
   /**
-   * The limit value of the slider. The user won't be able to slide pass this limit.
-   * Default value is 0.
+   * The lower limit value of the slider. The user won't be able to slide below this limit.
    */
-  limit?: number;
+  lowerLimit?: number;
+
+  /**
+   * The upper limit value of the slider. The user won't be able to slide above this limit.
+   */
+  upperLimit?: number;
 
   /**
    * The color used for the track to the left of the button.

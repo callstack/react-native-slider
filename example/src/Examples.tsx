@@ -99,10 +99,32 @@ export const examples = [
     },
   },
   {
-    title: 'Limit to 70',
+    title: 'Limit on positive values [30, 80]',
     render() {
       return (
-        <SliderExample step={1} value={30} maximumValue={100} limit={70} />
+        <SliderExample
+          step={1}
+          value={40}
+          minimumValue={0}
+          maximumValue={120}
+          lowerLimit={30}
+          upperLimit={80}
+        />
+      );
+    },
+  },
+  {
+    title: 'Limit on negative values [-70, -20]',
+    render() {
+      return (
+        <SliderExample
+          step={1}
+          value={-30}
+          minimumValue={-80}
+          maximumValue={0}
+          lowerLimit={-70}
+          upperLimit={-20}
+        />
       );
     },
   },
