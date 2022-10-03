@@ -24,7 +24,7 @@ const SlidingStartExample = (props: SliderProps) => {
     <View>
       <SliderExample
         {...props}
-        onSlidingComplete={value => {
+        onSlidingStart={value => {
           setSlideStartingValue(value);
           setSlideStartingCount(prev => prev + 1);
         }}
