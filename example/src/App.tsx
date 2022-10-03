@@ -1,6 +1,6 @@
 import React from 'react';
 import {Platform, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {examples} from './SliderExample';
+import {examples} from './Examples';
 
 const App = () => {
   return (
