@@ -24,7 +24,7 @@ const SlidingStartExample = (props: SliderProps) => {
     <View>
       <SliderExample
         {...props}
-        onSlidingComplete={value => {
+        onSlidingStart={value => {
           setSlideStartingValue(value);
           setSlideStartingCount(prev => prev + 1);
         }}
@@ -130,7 +130,9 @@ export const examples = [
   {
     title: 'Custom thumb image',
     render() {
-      return <SliderExample thumbImage={require('./uie_thumb_big.png')} />;
+      return (
+        <SliderExample thumbImage={require('./resources/uie_thumb_big.png')} />
+      );
     },
   },
   {
@@ -150,7 +152,7 @@ export const examples = [
     title: 'Custom track image',
     platform: 'ios',
     render() {
-      return <SliderExample trackImage={require('./slider.png')} />;
+      return <SliderExample trackImage={require('./resources/slider.png')} />;
     },
   },
   {
@@ -159,8 +161,8 @@ export const examples = [
     render() {
       return (
         <SliderExample
-          minimumTrackImage={require('./slider-left.png')}
-          maximumTrackImage={require('./slider-right.png')}
+          minimumTrackImage={require('./resources/slider-left.png')}
+          maximumTrackImage={require('./resources/slider-right.png')}
         />
       );
     },
