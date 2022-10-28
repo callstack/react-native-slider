@@ -150,7 +150,7 @@ In order to use the new architecture some extra steps are needed.
 
 #### Android 
 - Set `newArchEnabled` to true inside `example/android/gradle.properties`
-- Run `npm run example-android` _(first run might fail, try to run it again)_
+- Run `npm run example-android`
 
 <details>
 <summary>
