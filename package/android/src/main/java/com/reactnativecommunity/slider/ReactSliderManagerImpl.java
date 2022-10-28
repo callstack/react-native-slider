@@ -56,8 +56,8 @@ public class ReactSliderManagerImpl {
         view.setStep(value);
     }
 
-    public static void setEnabled(ReactSlider view, boolean enabled) {
-        view.setEnabled(enabled);
+    public static void setDisabled(ReactSlider view, boolean disabled) {
+        view.setEnabled(!disabled);
     }
 
     public static void setThumbTintColor(ReactSlider view, Integer color) {

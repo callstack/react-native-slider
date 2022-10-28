@@ -146,11 +146,11 @@ You can also do this manually by:
 In order to use the new architecture some extra steps are needed. 
 #### iOS 
 - Install pods with new arch flag inside `example/ios` folder: `RCT_NEW_ARCH_ENABLED=1 pod install`
-- Run `npm run example-ios`
+- Run `npm run ios` in `example/ios` folder
 
 #### Android 
 - Set `newArchEnabled` to true inside `example/android/gradle.properties`
-- Run `npm run example-android`
+- Run `npm run example-android` (first run might fail, try to run it again)
 
 <details>
 <summary>

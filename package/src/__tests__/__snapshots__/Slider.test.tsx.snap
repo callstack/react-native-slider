@@ -8,7 +8,6 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
     }
   }
   disabled={true}
-  enabled={false}
   inverted={false}
   maximumValue={1}
   minimumValue={0}
@@ -38,7 +37,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
     }
   }
   disabled={true}
-  enabled={false}
   inverted={false}
   maximumValue={1}
   minimumValue={0}
@@ -68,7 +66,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
     }
   }
   disabled={false}
-  enabled={true}
   inverted={false}
   maximumValue={1}
   minimumValue={0}
@@ -93,7 +90,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
 exports[`<Slider /> renders a slider with custom props 1`] = `
 <RNCSlider
   disabled={false}
-  enabled={true}
   inverted={false}
   maximumTrackTintColor="red"
   maximumValue={2}
@@ -126,7 +122,6 @@ exports[`<Slider /> renders disabled slider 1`] = `
     }
   }
   disabled={true}
-  enabled={false}
   inverted={false}
   maximumValue={1}
   minimumValue={0}
@@ -151,7 +146,6 @@ exports[`<Slider /> renders disabled slider 1`] = `
 exports[`<Slider /> renders enabled slider 1`] = `
 <RNCSlider
   disabled={false}
-  enabled={true}
   inverted={false}
   maximumValue={1}
   minimumValue={0}

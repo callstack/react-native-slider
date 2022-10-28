@@ -89,9 +89,9 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
-  @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
-  public void setEnabled(ReactSlider view, boolean enabled) {
-    ReactSliderManagerImpl.setEnabled(view, enabled);
+  @ReactProp(name = "disabled", defaultBoolean = false)
+  public void setDisabled(ReactSlider view, boolean disabled) {
+    ReactSliderManagerImpl.setDisabled(view, disabled);
   }
 
   @Override
