@@ -159,9 +159,9 @@ RCT_EXPORT_VIEW_PROPERTY(accessibilityIncrements, NSArray);
 RCT_CUSTOM_VIEW_PROPERTY(disabled, BOOL, RNCSlider)
 {
   if (json) {
-    view.enabled = !([RCTConvert BOOL:json]);
+    [view setDisabled: [RCTConvert BOOL:json]];
   } else {
-    view.enabled = defaultView.enabled;
+    [view setDisabled: defaultView.enabled];
   }
 }
 

@@ -28,5 +28,6 @@
 @property (nonatomic, strong) NSArray *accessibilityIncrements;
 
 - (float) discreteValue:(float)value;
+- (void) setDisabled:(bool)disabled;
 
 @end

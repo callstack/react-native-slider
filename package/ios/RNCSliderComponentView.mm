@@ -152,7 +152,7 @@ using namespace facebook::react;
         }
     }
     if (oldScreenProps.disabled != newScreenProps.disabled) {
-        slider.enabled = !newScreenProps.disabled;
+        [view setDisabled: newScreenProps.disabled];
     }
     if (oldScreenProps.step != newScreenProps.step) {
         slider.step = newScreenProps.step;
