@@ -135,7 +135,6 @@
 - (void)setDisabled:(BOOL)disabled
 {
     self.enabled = !disabled;
-    // ISSUE:
     [self layoutSubviews];
 }
 
