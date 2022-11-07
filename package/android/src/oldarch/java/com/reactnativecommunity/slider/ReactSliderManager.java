@@ -116,9 +116,9 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     return ReactSliderManagerImpl.createViewInstance(context);
   }
 
-  @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
-  public void setEnabled(ReactSlider view, boolean enabled) {
-    ReactSliderManagerImpl.setEnabled(view, enabled);
+  @ReactProp(name = "disabled", defaultBoolean = false)
+  public void setDisabled(ReactSlider view, boolean disabled) {
+    ReactSliderManagerImpl.setDisabled(view, disabled);
   }
 
   @ReactProp(name = "value", defaultFloat = 0f)

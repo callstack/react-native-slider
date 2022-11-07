@@ -182,7 +182,6 @@ export const examples = [
   },
   {
     title: 'Disabled slider',
-    platform: 'android',
     render() {
       return <SliderExample disabled value={0.6} />;
     },

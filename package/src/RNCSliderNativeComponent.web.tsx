@@ -32,7 +32,7 @@ export interface Props {
   thumbStyle: ViewStyle;
   style: ViewStyle;
   inverted: boolean;
-  enabled: boolean;
+  disabled: boolean;
   trackHeight: number;
   thumbSize: number;
   onRNCSliderSlidingStart: (value: number) => void;
@@ -53,7 +53,7 @@ const RCTSliderWebComponent = React.forwardRef(
       thumbStyle = {},
       style = {},
       inverted = false,
-      enabled = true,
+      disabled = false,
       trackHeight = 4,
       thumbSize = 20,
       onRNCSliderSlidingStart = (_: number) => {},
@@ -273,8 +273,8 @@ const RCTSliderWebComponent = React.forwardRef(
         accessible={true}
         accessibilityRole={'adjustable'}
         style={containerStyle}
-        onStartShouldSetResponder={() => enabled}
-        onMoveShouldSetResponder={() => enabled}
+        onStartShouldSetResponder={() => !disabled}
+        onMoveShouldSetResponder={() => !disabled}
         onResponderGrant={() => onSlidingStart(value)}
         onResponderRelease={onTouchEnd}
         onResponderMove={onMove}

@@ -89,9 +89,9 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
-  @ReactProp(name = ViewProps.ENABLED, defaultBoolean = true)
-  public void setEnabled(ReactSlider view, boolean enabled) {
-    ReactSliderManagerImpl.setEnabled(view, enabled);
+  @ReactProp(name = "disabled", defaultBoolean = false)
+  public void setDisabled(ReactSlider view, boolean disabled) {
+    ReactSliderManagerImpl.setDisabled(view, disabled);
   }
 
   @Override
@@ -176,10 +176,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   // these props are not available on Android, however we must override their setters
-  @Override
-  @ReactProp(name = "disabled")
-  public void setDisabled(ReactSlider view, boolean disabled) {}
-
   @Override
   public void setMinimumTrackImage(ReactSlider view, @Nullable ReadableMap readableMap) {}
 

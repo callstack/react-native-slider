@@ -18,7 +18,6 @@ export interface NativeProps extends ViewProps {
   accessibilityUnits?: string;
   accessibilityIncrements?: ReadonlyArray<string>;
   disabled?: WithDefault<boolean, false>;
-  enabled?: WithDefault<boolean, true>;
   inverted?: WithDefault<boolean, false>;
   vertical?: WithDefault<boolean, false>;
   tapToSeek?: WithDefault<boolean, false>;
