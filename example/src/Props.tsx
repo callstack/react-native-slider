@@ -5,7 +5,6 @@ import Slider, {SliderProps} from '@react-native-community/slider';
 export interface Props {
   title: string;
   render(): JSX.Element;
-  platform?: string;
 }
 
 const SliderExample = (props: SliderProps) => {
@@ -13,12 +12,7 @@ const SliderExample = (props: SliderProps) => {
   return (
     <View>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
-      <Slider
-        step={0.5}
-        style={styles.slider}
-        {...props}
-        onValueChange={setValue}
-      />
+      <Slider style={styles.slider} {...props} onValueChange={setValue} />
     </View>
   );
 };
@@ -42,13 +36,12 @@ const SlidingStartExample = (props: SliderProps) => {
   );
 };
 
-const SlidingCompleteExample = (props: SliderProps) => {
+const SlidingCompleteExample = () => {
   const [slideCompletionValue, setSlideCompletionValue] = useState(0);
   const [slideCompletionCount, setSlideCompletionCount] = useState(0);
   return (
     <View>
       <SliderExample
-        {...props}
         onSlidingComplete={value => {
           setSlideCompletionValue(value);
           setSlideCompletionCount(prev => prev + 1);
@@ -78,7 +71,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export const examples: Props[] = [
+export const propsExamples: Props[] = [
   {
     title: 'Default settings',
     render() {
@@ -86,26 +79,32 @@ export const examples: Props[] = [
     },
   },
   {
-    title: 'Initial value: 0.5',
+    title: 'disabled',
     render() {
-      return <SliderExample value={0.5} />;
+      return <SliderExample disabled />;
     },
   },
   {
-    title: 'minimumValue: -1, maximumValue: 2',
-    render(): React.ReactElement {
-      return <SliderExample minimumValue={-1} maximumValue={2} />;
+    title: 'maximumValue',
+    render() {
+      return <SliderExample maximumValue={10} />;
     },
   },
   {
-    title: 'step: 0.25, tap to seek on iOS',
-    render(): React.ReactElement {
-      return <SliderExample step={0.25} tapToSeek={true} />;
+    title: 'minimumTrackTintColor',
+    render() {
+      return <SliderExample minimumTrackTintColor="#123456" />;
+    },
+  },
+  {
+    title: 'minimumValue',
+    render() {
+      return <SliderExample minimumValue={5} />;
     },
   },
   {
     title: 'onSlidingStart',
-    render(): React.ReactElement {
+    render() {
       return <SlidingStartExample />;
     },
   },
@@ -116,25 +115,75 @@ export const examples: Props[] = [
     },
   },
   {
-    title: 'Custom min/max track tint color',
+    title: 'onValueChange',
     render() {
-      return (
-        <SliderExample
-          minimumTrackTintColor={'#00FF00'}
-          maximumTrackTintColor={'red'}
-          value={0.5}
-        />
-      );
+      return <SliderExample />;
     },
   },
   {
-    title: 'Custom thumb tint color',
+    title: 'step',
+    render() {
+      return <SliderExample step={0.1} />;
+    },
+  },
+  {
+    title: 'maximumTrackTintColor',
+    render() {
+      return <SliderExample maximumTrackTintColor="#123456" />;
+    },
+  },
+  {
+    title: 'value',
+    render() {
+      return <SliderExample value={0.5} />;
+    },
+  },
+  {
+    title: 'tapToSeek',
+    render(): React.ReactElement {
+      return <SliderExample tapToSeek={true} />;
+    },
+  },
+  {
+    title: 'inverted',
+    render() {
+      return <SliderExample inverted />;
+    },
+  },
+  {
+    title: 'vertical',
+    render() {
+      return <SliderExample vertical />;
+    },
+  },
+  {
+    title: 'thumbTintColor',
     render() {
       return <SliderExample thumbTintColor={'magenta'} />;
     },
   },
   {
-    title: 'Custom thumb image',
+    title: 'maximumTrackImage',
+    render() {
+      return (
+        <SliderExample
+          maximumTrackImage={require('./resources/slider-right.png')}
+        />
+      );
+    },
+  },
+  {
+    title: 'minimumTrackImage',
+    render() {
+      return (
+        <SliderExample
+          minimumTrackImage={require('./resources/slider-left.png')}
+        />
+      );
+    },
+  },
+  {
+    title: 'thumbImage',
     render() {
       return (
         <SliderExample thumbImage={require('./resources/uie_thumb_big.png')} />
@@ -142,61 +191,9 @@ export const examples: Props[] = [
     },
   },
   {
-    title: 'Custom thumb (network image)',
-    platform: 'windows',
-    render() {
-      return (
-        <SliderExample
-          thumbImage={{
-            uri: 'https://img.icons8.com/windows/50/000000/bus.png',
-          }}
-        />
-      );
-    },
-  },
-  {
-    title: 'Custom track image',
-    platform: 'ios',
+    title: 'trackImage',
     render() {
       return <SliderExample trackImage={require('./resources/slider.png')} />;
-    },
-  },
-  {
-    title: 'Custom min/max track image',
-    platform: 'ios',
-    render() {
-      return (
-        <SliderExample
-          minimumTrackImage={require('./resources/slider-left.png')}
-          maximumTrackImage={require('./resources/slider-right.png')}
-        />
-      );
-    },
-  },
-  {
-    title: 'Inverted slider direction',
-    render() {
-      return <SliderExample value={0.6} inverted />;
-    },
-  },
-  {
-    title: 'Vertical slider',
-    platform: 'windows',
-    render() {
-      return <SliderExample value={0.6} vertical />;
-    },
-  },
-  {
-    title: 'Disabled slider',
-    render() {
-      return <SliderExample disabled value={0.6} />;
-    },
-  },
-  {
-    title: 'Slider with accessibilityState disabled',
-    platform: 'android',
-    render() {
-      return <SliderExample disabled value={0.6} />;
     },
   },
 ];
