@@ -52,11 +52,11 @@ public class ReactSliderManagerImpl {
         view.setMaxValue(value);
     }
 
-    public static void setLowerLimit(ReactSlider view, float value) {
+    public static void setLowerLimit(ReactSlider view, double value) {
         view.setLowerLimit(value);
     }
 
-    public static void setUpperLimit(ReactSlider view, float value) {
+    public static void setUpperLimit(ReactSlider view, double value) {
         view.setUpperLimit(value);
     }
 

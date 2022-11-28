@@ -45,9 +45,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
               if(progress < slider.getLowerLimit()) {
                 progress = slider.getLowerLimit();
                 seekbar.setProgress(progress);
-              }
-
-              if(progress > slider.getUpperLimit()) {
+              } else if (progress > slider.getUpperLimit()) {
                 progress = slider.getUpperLimit();
                 seekbar.setProgress(progress);
               }

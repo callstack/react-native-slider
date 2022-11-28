@@ -90,9 +90,7 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
   if (value < sender.lowerLimit) {
       value = sender.lowerLimit;
       [sender setValue:value animated:NO];
-  }
-    
-  if (value > sender.upperLimit) {
+  } else if (value > sender.upperLimit) {
       value = sender.upperLimit;
       [sender setValue:value animated:NO];
   }
