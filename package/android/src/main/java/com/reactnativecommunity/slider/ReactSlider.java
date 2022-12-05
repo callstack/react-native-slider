@@ -69,14 +69,14 @@ public class ReactSlider extends AppCompatSeekBar {
   /** Real limit value based on min and max values. This comes from props */
   private double mRealLowerLimit = Long.MIN_VALUE;
 
-  /** Limit based on progress from 0..100 */
-  private int mLowerLimit = 0;
+  /** Lower limit based on the SeekBar progress 0..total steps */
+  private int mLowerLimit;
 
   /** Real limit value based on min and max values. This comes from props */
   private double mRealUpperLimit = Long.MAX_VALUE;
 
-  /** Limit based on progress from 0..100 */
-  private int mUpperLimit = 100;
+  /** Upper limit based on the SeekBar progress 0..total steps */
+  private int mUpperLimit;
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
