@@ -6,20 +6,15 @@ import {
   StyleSheet,
   ColorValue,
   ViewStyle,
-  NativeSyntheticEvent,
   GestureResponderEvent,
   LayoutChangeEvent,
 } from 'react-native';
 
-type Event = NativeSyntheticEvent<
-  Readonly<{
+type Event = Readonly<{
+  nativeEvent: {
     value: number;
-    /**
-     * Android Only.
-     */
-    fromUser?: boolean;
-  }>
->;
+  };
+}>;
 
 export interface Props {
   value: number;
@@ -35,10 +30,12 @@ export interface Props {
   disabled: boolean;
   trackHeight: number;
   thumbSize: number;
-  onRNCSliderSlidingStart: (value: number) => void;
-  onRNCSliderSlidingComplete: (value: number) => void;
-  onRNCSliderValueChange: (value: number) => void;
+  onRNCSliderSlidingStart: (event: Event) => void;
+  onRNCSliderSlidingComplete: (event: Event) => void;
+  onRNCSliderValueChange: (event: Event) => void;
 }
+
+const valueToEvent = (value: number): Event => ({nativeEvent: {value}});
 
 const RCTSliderWebComponent = React.forwardRef(
   (
@@ -56,9 +53,9 @@ const RCTSliderWebComponent = React.forwardRef(
       disabled = false,
       trackHeight = 4,
       thumbSize = 20,
-      onRNCSliderSlidingStart = (_: number) => {},
-      onRNCSliderSlidingComplete = (_: number) => {},
-      onRNCSliderValueChange = (_: number) => {},
+      onRNCSliderSlidingStart = (_: Event) => {},
+      onRNCSliderSlidingComplete = (_: Event) => {},
+      onRNCSliderValueChange = (_: Event) => {},
       ...others
     }: Props,
     forwardedRef: any,
@@ -68,24 +65,26 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerRef = forwardedRef || React.createRef();
     const hasBeenResized = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
+    const lastInitialValue = React.useRef<number>();
 
     const onValueChange = useCallback(
       (value: number) => {
-        onRNCSliderValueChange && onRNCSliderValueChange(value);
+        onRNCSliderValueChange && onRNCSliderValueChange(valueToEvent(value));
       },
       [onRNCSliderValueChange],
     );
 
     const onSlidingStart = useCallback(
       (value: number) => {
-        onRNCSliderSlidingStart && onRNCSliderSlidingStart(value);
+        onRNCSliderSlidingStart && onRNCSliderSlidingStart(valueToEvent(value));
       },
       [onRNCSliderSlidingStart],
     );
 
     const onSlidingComplete = useCallback(
       (value: number) => {
-        onRNCSliderSlidingComplete && onRNCSliderSlidingComplete(value);
+        onRNCSliderSlidingComplete &&
+          onRNCSliderSlidingComplete(valueToEvent(value));
       },
       [onRNCSliderSlidingComplete],
     );
@@ -113,7 +112,15 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     React.useLayoutEffect(() => {
-      updateValue(initialValue);
+      // we have to do this check because `initialValue` gets default to `0` by
+      // Slider. If we don't this will get called every time `value` changes
+      // as `updateValue` is mutated when value changes. The result of not
+      // checking this is that the value constantly gets reset to `0` in
+      // contexts where `value` is not managed externally.
+      if (initialValue !== lastInitialValue.current) {
+        lastInitialValue.current = initialValue;
+        updateValue(initialValue);
+      }
     }, [initialValue, updateValue]);
 
     const percentageValue =
@@ -223,15 +230,13 @@ const RCTSliderWebComponent = React.forwardRef(
       }
     };
 
-    const onTouchEnd = (nativeEvent: GestureResponderEvent) => {
-      const newValue = updateValue(
-        getValueFromNativeEvent(nativeEvent.currentTarget),
-      );
+    const onTouchEnd = ({nativeEvent}: GestureResponderEvent) => {
+      const newValue = updateValue(getValueFromNativeEvent(nativeEvent.pageX));
       onSlidingComplete(newValue);
     };
 
-    const onMove = (nativeEvent: GestureResponderEvent) => {
-      updateValue(getValueFromNativeEvent(nativeEvent.currentTarget));
+    const onMove = ({nativeEvent}: GestureResponderEvent) => {
+      updateValue(getValueFromNativeEvent(nativeEvent.pageX));
     };
 
     const accessibilityActions = (event: any) => {
@@ -258,9 +263,10 @@ const RCTSliderWebComponent = React.forwardRef(
 
     return (
       <View
-        onLayout={(nativeEvent: LayoutChangeEvent) => {
-          containerSize.current.height = nativeEvent.currentTarget;
-          containerSize.current.width = nativeEvent.currentTarget;
+        ref={containerRef}
+        onLayout={({nativeEvent: {layout}}: LayoutChangeEvent) => {
+          containerSize.current.height = layout.height;
+          containerSize.current.width = layout.width;
           if ((containerRef as RefObject<View>).current) {
             updateContainerPositionX();
           }
