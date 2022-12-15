@@ -9,7 +9,9 @@ import {
   ViewStyle,
   GestureResponderEvent,
   LayoutChangeEvent,
+  Image,
 } from 'react-native';
+import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 type Event = Readonly<{
   nativeEvent: {
@@ -31,6 +33,7 @@ export interface Props {
   disabled: boolean;
   trackHeight: number;
   thumbSize: number;
+  thumbImage?: ImageSource;
   onRNCSliderSlidingStart: (event: Event) => void;
   onRNCSliderSlidingComplete: (event: Event) => void;
   onRNCSliderValueChange: (event: Event) => void;
@@ -54,6 +57,7 @@ const RCTSliderWebComponent = React.forwardRef(
       disabled = false,
       trackHeight = 4,
       thumbSize = 20,
+      thumbImage,
       onRNCSliderSlidingStart = (_: Event) => {},
       onRNCSliderSlidingComplete = (_: Event) => {},
       onRNCSliderValueChange = (_: Event) => {},
@@ -182,16 +186,10 @@ const RCTSliderWebComponent = React.forwardRef(
       flexGrow: maxPercent,
     };
 
-    // const width = (containerSize.current ? containerSize.current.width : 0)
-    // const valueOffset = (inverted ? (1 - percentageValue) : percentageValue) * width
-
     const thumbViewStyle = StyleSheet.compose(
       {
         width: thumbSize,
         height: thumbSize,
-        // left: valueOffset - thumbSize / 2,
-        // top: trackHeight / 2 - thumbSize / 2,
-        // position: absolute,
         backgroundColor: thumbTintColor,
         zIndex: 1,
         borderRadius: thumbSize / 2,
@@ -301,7 +299,14 @@ const RCTSliderWebComponent = React.forwardRef(
         onResponderMove={onMove}
         {...others}>
         <Animated.View pointerEvents="none" style={minimumTrackStyle} />
-        <View pointerEvents="none" style={thumbViewStyle} />
+        <View pointerEvents="none" style={thumbViewStyle}>
+          {thumbImage !== undefined ? (
+            <Image
+              source={thumbImage}
+              style={{width: '100%', height: '100%'}}
+            />
+          ) : null}
+        </View>
         <Animated.View pointerEvents="none" style={maximumTrackStyle} />
       </View>
     );
