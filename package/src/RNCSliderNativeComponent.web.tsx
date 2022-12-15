@@ -2,6 +2,7 @@
 import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
 import {
+  Animated,
   View,
   StyleSheet,
   ColorValue,
@@ -67,6 +68,21 @@ const RCTSliderWebComponent = React.forwardRef(
     const [value, setValue] = React.useState(initialValue || minimumValue);
     const lastInitialValue = React.useRef<number>();
 
+    // compute animated slider position based on animated value
+    const animatedValue = React.useRef(new Animated.Value(value)).current;
+    const minPercent = React.useRef(
+      Animated.multiply(
+        new Animated.Value(100),
+        Animated.divide(
+          Animated.subtract(animatedValue, new Animated.Value(minimumValue)),
+          new Animated.Value(maximumValue - minimumValue),
+        ),
+      ),
+    ).current;
+    const maxPercent = React.useRef(
+      Animated.subtract(new Animated.Value(100), minPercent),
+    ).current;
+
     const onValueChange = useCallback(
       (value: number) => {
         onRNCSliderValueChange && onRNCSliderValueChange(valueToEvent(value));
@@ -119,14 +135,10 @@ const RCTSliderWebComponent = React.forwardRef(
       // contexts where `value` is not managed externally.
       if (initialValue !== lastInitialValue.current) {
         lastInitialValue.current = initialValue;
-        updateValue(initialValue);
+        const newValue = updateValue(initialValue);
+        animatedValue.setValue(newValue);
       }
-    }, [initialValue, updateValue]);
-
-    const percentageValue =
-      (value - minimumValue) / (maximumValue - minimumValue);
-    const minPercent = percentageValue;
-    const maxPercent = 1 - percentageValue;
+    }, [initialValue, updateValue, animatedValue]);
 
     const onResize = () => {
       hasBeenResized.current = true;
@@ -161,13 +173,13 @@ const RCTSliderWebComponent = React.forwardRef(
     const minimumTrackStyle = {
       ...trackStyle,
       backgroundColor: minimumTrackTintColor,
-      flexGrow: minPercent * 100,
+      flexGrow: minPercent,
     };
 
     const maximumTrackStyle = {
       ...trackStyle,
       backgroundColor: maximumTrackTintColor,
-      flexGrow: maxPercent * 100,
+      flexGrow: maxPercent,
     };
 
     // const width = (containerSize.current ? containerSize.current.width : 0)
@@ -232,11 +244,14 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const onTouchEnd = ({nativeEvent}: GestureResponderEvent) => {
       const newValue = updateValue(getValueFromNativeEvent(nativeEvent.pageX));
+      animatedValue.setValue(newValue);
       onSlidingComplete(newValue);
     };
 
     const onMove = ({nativeEvent}: GestureResponderEvent) => {
-      updateValue(getValueFromNativeEvent(nativeEvent.pageX));
+      const newValue = getValueFromNativeEvent(nativeEvent.pageX);
+      animatedValue.setValue(newValue);
+      updateValue(newValue);
     };
 
     const accessibilityActions = (event: any) => {
@@ -285,9 +300,9 @@ const RCTSliderWebComponent = React.forwardRef(
         onResponderRelease={onTouchEnd}
         onResponderMove={onMove}
         {...others}>
-        <View pointerEvents="none" style={minimumTrackStyle} />
+        <Animated.View pointerEvents="none" style={minimumTrackStyle} />
         <View pointerEvents="none" style={thumbViewStyle} />
-        <View pointerEvents="none" style={maximumTrackStyle} />
+        <Animated.View pointerEvents="none" style={maximumTrackStyle} />
       </View>
     );
   },
