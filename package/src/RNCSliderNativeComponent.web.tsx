@@ -292,12 +292,14 @@ const RCTSliderWebComponent = React.forwardRef(
         accessible={true}
         accessibilityRole={'adjustable'}
         style={containerStyle}
+        {...others}
+        // NOTE: gesture responders should all fall _after_ the {...others}
+        // spread operator, or they may not work appropriately.
         onStartShouldSetResponder={() => !disabled}
         onMoveShouldSetResponder={() => !disabled}
         onResponderGrant={() => onSlidingStart(value)}
         onResponderRelease={onTouchEnd}
-        onResponderMove={onMove}
-        {...others}>
+        onResponderMove={onMove}>
         <Animated.View pointerEvents="none" style={minimumTrackStyle} />
         <View pointerEvents="none" style={thumbViewStyle}>
           {thumbImage !== undefined ? (
