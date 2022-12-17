@@ -2,24 +2,23 @@
 import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
 import {
+  Animated,
   View,
   StyleSheet,
   ColorValue,
   ViewStyle,
-  NativeSyntheticEvent,
   GestureResponderEvent,
   LayoutChangeEvent,
+  Image,
 } from 'react-native';
+//@ts-ignore
+import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
-type Event = NativeSyntheticEvent<
-  Readonly<{
+type Event = Readonly<{
+  nativeEvent: {
     value: number;
-    /**
-     * Android Only.
-     */
-    fromUser?: boolean;
-  }>
->;
+  };
+}>;
 
 export interface Props {
   value: number;
@@ -35,10 +34,13 @@ export interface Props {
   disabled: boolean;
   trackHeight: number;
   thumbSize: number;
-  onRNCSliderSlidingStart: (value: number) => void;
-  onRNCSliderSlidingComplete: (value: number) => void;
-  onRNCSliderValueChange: (value: number) => void;
+  thumbImage?: ImageSource;
+  onRNCSliderSlidingStart: (event: Event) => void;
+  onRNCSliderSlidingComplete: (event: Event) => void;
+  onRNCSliderValueChange: (event: Event) => void;
 }
+
+const valueToEvent = (value: number): Event => ({nativeEvent: {value}});
 
 const RCTSliderWebComponent = React.forwardRef(
   (
@@ -56,9 +58,10 @@ const RCTSliderWebComponent = React.forwardRef(
       disabled = false,
       trackHeight = 4,
       thumbSize = 20,
-      onRNCSliderSlidingStart = (_: number) => {},
-      onRNCSliderSlidingComplete = (_: number) => {},
-      onRNCSliderValueChange = (_: number) => {},
+      thumbImage,
+      onRNCSliderSlidingStart = (_: Event) => {},
+      onRNCSliderSlidingComplete = (_: Event) => {},
+      onRNCSliderValueChange = (_: Event) => {},
       ...others
     }: Props,
     forwardedRef: any,
@@ -68,24 +71,41 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerRef = forwardedRef || React.createRef();
     const hasBeenResized = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
+    const lastInitialValue = React.useRef<number>();
+
+    // compute animated slider position based on animated value
+    const animatedValue = React.useRef(new Animated.Value(value)).current;
+    const minPercent = React.useRef(
+      Animated.multiply(
+        new Animated.Value(100),
+        Animated.divide(
+          Animated.subtract(animatedValue, new Animated.Value(minimumValue)),
+          new Animated.Value(maximumValue - minimumValue),
+        ),
+      ),
+    ).current;
+    const maxPercent = React.useRef(
+      Animated.subtract(new Animated.Value(100), minPercent),
+    ).current;
 
     const onValueChange = useCallback(
       (value: number) => {
-        onRNCSliderValueChange && onRNCSliderValueChange(value);
+        onRNCSliderValueChange && onRNCSliderValueChange(valueToEvent(value));
       },
       [onRNCSliderValueChange],
     );
 
     const onSlidingStart = useCallback(
       (value: number) => {
-        onRNCSliderSlidingStart && onRNCSliderSlidingStart(value);
+        onRNCSliderSlidingStart && onRNCSliderSlidingStart(valueToEvent(value));
       },
       [onRNCSliderSlidingStart],
     );
 
     const onSlidingComplete = useCallback(
       (value: number) => {
-        onRNCSliderSlidingComplete && onRNCSliderSlidingComplete(value);
+        onRNCSliderSlidingComplete &&
+          onRNCSliderSlidingComplete(valueToEvent(value));
       },
       [onRNCSliderSlidingComplete],
     );
@@ -113,13 +133,17 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     React.useLayoutEffect(() => {
-      updateValue(initialValue);
-    }, [initialValue, updateValue]);
-
-    const percentageValue =
-      (value - minimumValue) / (maximumValue - minimumValue);
-    const minPercent = percentageValue;
-    const maxPercent = 1 - percentageValue;
+      // we have to do this check because `initialValue` gets default to `0` by
+      // Slider. If we don't this will get called every time `value` changes
+      // as `updateValue` is mutated when value changes. The result of not
+      // checking this is that the value constantly gets reset to `0` in
+      // contexts where `value` is not managed externally.
+      if (initialValue !== lastInitialValue.current) {
+        lastInitialValue.current = initialValue;
+        const newValue = updateValue(initialValue);
+        animatedValue.setValue(newValue);
+      }
+    }, [initialValue, updateValue, animatedValue]);
 
     const onResize = () => {
       hasBeenResized.current = true;
@@ -154,25 +178,19 @@ const RCTSliderWebComponent = React.forwardRef(
     const minimumTrackStyle = {
       ...trackStyle,
       backgroundColor: minimumTrackTintColor,
-      flexGrow: minPercent * 100,
+      flexGrow: minPercent,
     };
 
     const maximumTrackStyle = {
       ...trackStyle,
       backgroundColor: maximumTrackTintColor,
-      flexGrow: maxPercent * 100,
+      flexGrow: maxPercent,
     };
-
-    // const width = (containerSize.current ? containerSize.current.width : 0)
-    // const valueOffset = (inverted ? (1 - percentageValue) : percentageValue) * width
 
     const thumbViewStyle = StyleSheet.compose(
       {
         width: thumbSize,
         height: thumbSize,
-        // left: valueOffset - thumbSize / 2,
-        // top: trackHeight / 2 - thumbSize / 2,
-        // position: absolute,
         backgroundColor: thumbTintColor,
         zIndex: 1,
         borderRadius: thumbSize / 2,
@@ -223,15 +241,16 @@ const RCTSliderWebComponent = React.forwardRef(
       }
     };
 
-    const onTouchEnd = (nativeEvent: GestureResponderEvent) => {
-      const newValue = updateValue(
-        getValueFromNativeEvent(nativeEvent.currentTarget),
-      );
+    const onTouchEnd = ({nativeEvent}: GestureResponderEvent) => {
+      const newValue = updateValue(getValueFromNativeEvent(nativeEvent.pageX));
+      animatedValue.setValue(newValue);
       onSlidingComplete(newValue);
     };
 
-    const onMove = (nativeEvent: GestureResponderEvent) => {
-      updateValue(getValueFromNativeEvent(nativeEvent.currentTarget));
+    const onMove = ({nativeEvent}: GestureResponderEvent) => {
+      const newValue = getValueFromNativeEvent(nativeEvent.pageX);
+      animatedValue.setValue(newValue);
+      updateValue(newValue);
     };
 
     const accessibilityActions = (event: any) => {
@@ -258,9 +277,10 @@ const RCTSliderWebComponent = React.forwardRef(
 
     return (
       <View
-        onLayout={(nativeEvent: LayoutChangeEvent) => {
-          containerSize.current.height = nativeEvent.currentTarget;
-          containerSize.current.width = nativeEvent.currentTarget;
+        ref={containerRef}
+        onLayout={({nativeEvent: {layout}}: LayoutChangeEvent) => {
+          containerSize.current.height = layout.height;
+          containerSize.current.width = layout.width;
           if ((containerRef as RefObject<View>).current) {
             updateContainerPositionX();
           }
@@ -273,15 +293,24 @@ const RCTSliderWebComponent = React.forwardRef(
         accessible={true}
         accessibilityRole={'adjustable'}
         style={containerStyle}
+        {...others}
+        // NOTE: gesture responders should all fall _after_ the {...others}
+        // spread operator, or they may not work appropriately.
         onStartShouldSetResponder={() => !disabled}
         onMoveShouldSetResponder={() => !disabled}
         onResponderGrant={() => onSlidingStart(value)}
         onResponderRelease={onTouchEnd}
-        onResponderMove={onMove}
-        {...others}>
-        <View pointerEvents="none" style={minimumTrackStyle} />
-        <View pointerEvents="none" style={thumbViewStyle} />
-        <View pointerEvents="none" style={maximumTrackStyle} />
+        onResponderMove={onMove}>
+        <Animated.View pointerEvents="none" style={minimumTrackStyle} />
+        <View pointerEvents="none" style={thumbViewStyle}>
+          {thumbImage !== undefined ? (
+            <Image
+              source={thumbImage}
+              style={{width: '100%', height: '100%'}}
+            />
+          ) : null}
+        </View>
+        <Animated.View pointerEvents="none" style={maximumTrackStyle} />
       </View>
     );
   },
