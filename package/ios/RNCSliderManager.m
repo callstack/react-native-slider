@@ -87,6 +87,14 @@ static void RNCSendSliderEvent(RNCSlider *sender, BOOL continuous, BOOL isSlidin
 {
   float value = [sender discreteValue:sender.value];
 
+  if (value < sender.lowerLimit) {
+      value = sender.lowerLimit;
+      [sender setValue:value animated:NO];
+  } else if (value > sender.upperLimit) {
+      value = sender.upperLimit;
+      [sender setValue:value animated:NO];
+  }
+
   if(!sender.isSliding) {
     [sender setValue:value animated:NO];
   }
@@ -144,6 +152,8 @@ RCT_EXPORT_VIEW_PROPERTY(minimumTrackImage, UIImage);
 RCT_EXPORT_VIEW_PROPERTY(maximumTrackImage, UIImage);
 RCT_EXPORT_VIEW_PROPERTY(minimumValue, float);
 RCT_EXPORT_VIEW_PROPERTY(maximumValue, float);
+RCT_EXPORT_VIEW_PROPERTY(lowerLimit, float);
+RCT_EXPORT_VIEW_PROPERTY(upperLimit, float);
 RCT_EXPORT_VIEW_PROPERTY(minimumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(maximumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(onRNCSliderValueChange, RCTBubblingEventBlock);

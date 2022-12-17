@@ -16,6 +16,9 @@ import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 import type {Ref} from 'react';
 
+const LIMIT_MIN_VALUE = Number.MIN_SAFE_INTEGER;
+const LIMIT_MAX_VALUE = Number.MAX_SAFE_INTEGER;
+
 type Event = NativeSyntheticEvent<
   Readonly<{
     value: number;
@@ -99,6 +102,16 @@ type Props = ViewProps &
      * Initial maximum value of the slider. Default value is 1.
      */
     maximumValue?: number;
+
+    /**
+     * The lower limit value of the slider. The user won't be able to slide below this limit.
+     */
+    lowerLimit?: number;
+
+    /**
+     * The upper limit value of the slider. The user won't be able to slide above this limit.
+     */
+    upperLimit?: number;
 
     /**
      * The color used for the track to the left of the button.
@@ -221,9 +234,21 @@ const SliderComponent = (
       }
     : null;
 
+  const lowerLimit =
+    !!localProps.lowerLimit || localProps.lowerLimit === 0
+      ? localProps.lowerLimit
+      : LIMIT_MIN_VALUE;
+
+  const upperLimit =
+    !!localProps.upperLimit || localProps.upperLimit === 0
+      ? localProps.upperLimit
+      : LIMIT_MAX_VALUE;
+
   return (
     <RCTSliderNativeComponent
       {...localProps}
+      lowerLimit={lowerLimit}
+      upperLimit={upperLimit}
       accessibilityState={_accessibilityState}
       thumbImage={
         Platform.OS === 'web'
@@ -255,6 +280,8 @@ SliderWithRef.defaultProps = {
   step: 0,
   inverted: false,
   tapToSeek: false,
+  lowerLimit: LIMIT_MIN_VALUE,
+  upperLimit: LIMIT_MAX_VALUE,
 };
 
 let styles = StyleSheet.create(

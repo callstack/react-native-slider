@@ -52,6 +52,8 @@ describe('<Slider />', () => {
           thumbTintColor={'green'}
           onSlidingComplete={() => {}}
           onValueChange={() => {}}
+          lowerLimit={0}
+          upperLimit={1}
         />,
       )
       .toJSON();

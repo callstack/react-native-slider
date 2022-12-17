@@ -14,7 +14,6 @@
 #import "RCTFabricComponentsPlugins.h"
 #import "RNCSlider.h"
 
-
 using namespace facebook::react;
 
 @interface RNCSliderComponentView () <RCTRNCSliderViewProtocol>
@@ -118,6 +117,14 @@ using namespace facebook::react;
 {
     float value = [sender discreteValue:sender.value];
     
+    if (value < sender.lowerLimit) {
+        value = sender.lowerLimit;
+        [sender setValue:value animated:NO];
+    } else if (value > sender.upperLimit) {
+        value = sender.upperLimit;
+        [sender setValue:value animated:NO];
+    }
+
     if(!sender.isSliding) {
         [sender setValue:value animated:NO];
     }
@@ -162,6 +169,12 @@ using namespace facebook::react;
     }
     if (oldScreenProps.maximumValue != newScreenProps.maximumValue) {
         [slider setMaximumValue:newScreenProps.maximumValue];
+    }
+    if (oldScreenProps.lowerLimit != newScreenProps.lowerLimit) {
+        slider.lowerLimit = newScreenProps.lowerLimit;
+    }
+    if (oldScreenProps.upperLimit != newScreenProps.upperLimit) {
+        slider.upperLimit = newScreenProps.upperLimit;
     }
     if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
         slider.tapToSeek = newScreenProps.tapToSeek;

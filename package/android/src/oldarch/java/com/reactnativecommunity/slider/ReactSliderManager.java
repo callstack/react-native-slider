@@ -28,11 +28,21 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
           new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+              ReactSlider slider = (ReactSlider)seekbar;
+
+              if(progress < slider.getLowerLimit()) {
+                progress = slider.getLowerLimit();
+                seekbar.setProgress(progress);
+              } else if(progress > slider.getUpperLimit()) {
+                progress = slider.getUpperLimit();
+                seekbar.setProgress(progress);
+              }
+
               ReactContext reactContext = (ReactContext) seekbar.getContext();
               reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
                       new ReactSliderEvent(
                               seekbar.getId(),
-                              ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
+                              slider.toRealProgress(progress), fromUser));
             }
 
             @Override
@@ -134,6 +144,16 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   @ReactProp(name = "maximumValue", defaultFloat = 1f)
   public void setMaximumValue(ReactSlider view, float value) {
     ReactSliderManagerImpl.setMaximumValue(view, value);
+  }
+
+  @ReactProp(name = "lowerLimit")
+  public void setLowerLimit(ReactSlider view, float value) {
+    ReactSliderManagerImpl.setLowerLimit(view, value);
+  }
+
+  @ReactProp(name = "upperLimit")
+  public void setUpperLimit(ReactSlider view, float value) {
+    ReactSliderManagerImpl.setUpperLimit(view, value);
   }
 
   @ReactProp(name = "step", defaultFloat = 0f)

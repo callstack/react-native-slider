@@ -9,7 +9,7 @@ export interface Props {
 }
 
 const SliderExample = (props: SliderProps) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(props.value ?? 0);
   return (
     <View>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
@@ -17,6 +17,7 @@ const SliderExample = (props: SliderProps) => {
         step={0.5}
         style={styles.slider}
         {...props}
+        value={value}
         onValueChange={setValue}
       />
     </View>
@@ -101,6 +102,36 @@ export const examples: Props[] = [
     title: 'step: 0.25, tap to seek on iOS',
     render(): React.ReactElement {
       return <SliderExample step={0.25} tapToSeek={true} />;
+    },
+  },
+  {
+    title: 'Limit on positive values [30, 80]',
+    render() {
+      return (
+        <SliderExample
+          step={1}
+          value={40}
+          minimumValue={0}
+          maximumValue={120}
+          lowerLimit={30}
+          upperLimit={80}
+        />
+      );
+    },
+  },
+  {
+    title: 'Limit on negative values [-70, -20]',
+    render() {
+      return (
+        <SliderExample
+          step={1}
+          value={-30}
+          minimumValue={-80}
+          maximumValue={0}
+          lowerLimit={-70}
+          upperLimit={-20}
+        />
+      );
     },
   },
   {

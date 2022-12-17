@@ -40,10 +40,20 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
           new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+              ReactSlider slider = (ReactSlider)seekbar;
+
+              if(progress < slider.getLowerLimit()) {
+                progress = slider.getLowerLimit();
+                seekbar.setProgress(progress);
+              } else if (progress > slider.getUpperLimit()) {
+                progress = slider.getUpperLimit();
+                seekbar.setProgress(progress);
+              }
+
               ReactContext reactContext = (ReactContext) seekbar.getContext();
               int reactTag = seekbar.getId();
               UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-                      .dispatchEvent(new ReactSliderEvent(reactTag, ((ReactSlider)seekbar).toRealProgress(progress), fromUser));
+                      .dispatchEvent(new ReactSliderEvent(reactTag, slider.toRealProgress(progress), fromUser));
             }
 
             @Override
@@ -152,6 +162,16 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   @ReactProp(name = "accessibilityIncrements")
   public void setAccessibilityIncrements(ReactSlider view, ReadableArray accessibilityIncrements) {
     ReactSliderManagerImpl.setAccessibilityIncrements(view, accessibilityIncrements);
+  }
+
+  @ReactProp(name = "lowerLimit")
+  public void setLowerLimit(ReactSlider view, float value) {
+    ReactSliderManagerImpl.setLowerLimit(view, value);
+  }
+
+  @ReactProp(name = "upperLimit")
+  public void setUpperLimit(ReactSlider view, float value) {
+    ReactSliderManagerImpl.setUpperLimit(view, value);
   }
 
   @Override
