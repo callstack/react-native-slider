@@ -11,6 +11,7 @@ import {
   LayoutChangeEvent,
   Image,
 } from 'react-native';
+//@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 type Event = Readonly<{
