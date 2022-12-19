@@ -20,9 +20,9 @@
   <br>Currently supported on following platforms:
 </p>
 
-|iOS|Android|Windows|
-|:-:|:-:|:-:|
-|![iOS Screenshot](.github/Examples/Slider-iOS-Example.gif)|![Android Screenshot](.github/Examples/Slider-Android-Example.gif)|![Windows Screenshot](.github/Examples/Slider-Windows-Example.gif)|
+|iOS|Android|Windows|Web|
+|:-:|:-:|:-:|:-:|
+|![iOS Screenshot](.github/Examples/Slider-iOS-Example.gif)|![Android Screenshot](.github/Examples/Slider-Android-Example.gif)|![Windows Screenshot](.github/Examples/Slider-Windows-Example.gif)|![Web Screenshot](.github/Examples/Slider-Web-Example.gif)|
 
 ## Installation & Usage
 
@@ -35,7 +35,6 @@ or
 npm install @react-native-community/slider --save
 ```
 If using iOS please remember to install cocoapods by running: `npx pod-install`
-<br/>For web support please use `@react-native-community/slider@next`
 
 The following code presents the basic usage scenario of this library:
 ```javascript
