@@ -83,14 +83,16 @@ const RCTSliderWebComponent = React.forwardRef(
       val: new Animated.Value(value),
       min: new Animated.Value(minimumValue),
       max: new Animated.Value(maximumValue),
-      diff: new Animated.Value(maximumValue - minimumValue),
+      // make sure we never divide by 0
+      diff: new Animated.Value(maximumValue - minimumValue || 1),
     }).current;
 
     // update minimumValue & maximumValue animations
     React.useEffect(() => {
       animationValues.min.setValue(minimumValue);
       animationValues.max.setValue(maximumValue);
-      animationValues.diff.setValue(maximumValue - minimumValue);
+      // make sure we never divide by 0
+      animationValues.diff.setValue(maximumValue - minimumValue || 1);
     }, [animationValues, minimumValue, maximumValue]);
 
     // compute animated slider position based on animated value
