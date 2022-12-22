@@ -285,7 +285,7 @@ SliderWithRef.defaultProps = {
 };
 
 let styles = StyleSheet.create(
-  slider: {},
+  Platform.OS === 'ios' ? {slider: {}} : {slider: {}},
 );
 
 export default SliderWithRef;
