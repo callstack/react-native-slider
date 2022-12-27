@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 // @ts-ignore
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, ScrollView} from 'react-native';
 // @ts-ignore
 import Slider, {SliderProps} from '@react-native-community/slider';
 
@@ -199,6 +199,31 @@ export const examples: Props[] = [
     platform: 'android',
     render() {
       return <SliderExample disabled value={0.6} />;
+    },
+  },
+  {
+    title: 'Slider in horizontal scroll view',
+    render() {
+      return (
+        <ScrollView
+          horizontal
+          style={{
+            paddingVertical: 50,
+            borderStyle: 'dotted',
+            borderWidth: 1,
+            flexDirection: 'row',
+            width: 300,
+          }}
+          contentContainerStyle={{ overflowX: 'scroll' }}
+        >
+          <View style={{ width: 400, paddingLeft: 100 }}>
+            <SliderExample maximumValue={100} />
+            <Text style={{ textAlign: 'right', width: 200 }}>
+              Scroll right, then slide ➔
+            </Text>
+          </View>
+        </ScrollView>
+      );
     },
   },
 ];
