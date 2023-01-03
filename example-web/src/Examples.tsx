@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-// @ts-expect-error
 import Slider, {SliderProps} from '@react-native-community/slider';
 
 export interface Props {
