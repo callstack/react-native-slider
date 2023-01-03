@@ -1,4 +1,5 @@
-//@ts-expect-error
+/// <reference lib="dom" />
+
 import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
 import {
@@ -149,11 +150,9 @@ const RCTSliderWebComponent = React.forwardRef(
       hasBeenResized.current = true;
     };
     React.useEffect(() => {
-      //@ts-expect-error
       window.addEventListener('resize', onResize);
 
       return () => {
-        //@ts-expect-error
         window.removeEventListener('resize', onResize);
       };
     }, []);
@@ -211,9 +210,13 @@ const RCTSliderWebComponent = React.forwardRef(
     }, [maximumValue, minimumValue, step]);
 
     const updateContainerPositionX = () => {
-      const positionX = ReactDOM.findDOMNode(
+      const element = ReactDOM.findDOMNode(
+        // TODO: Unsafe casting of a forwarded ref
         (containerRef as RefObject<any>).current,
-      ).getBoundingClientRect()?.x;
+        // findDOMNode is not generic and always includes Text as a possible type.
+        // Here we know the ref is always an Element.
+      ) as unknown as Element | null;
+      const positionX = element?.getBoundingClientRect()?.x;
       containerPositionX.current = positionX ?? 0;
     };
 
