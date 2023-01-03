@@ -5,7 +5,6 @@ import {
   ScrollView,
   Platform,
   StyleSheet,
-// @ts-expect-error
 } from 'react-native';
 
 import {examples, Props as ExamplesTabProperties} from './Examples';

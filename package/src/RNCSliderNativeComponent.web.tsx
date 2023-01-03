@@ -11,8 +11,8 @@ import {
   LayoutChangeEvent,
   Image,
 } from 'react-native';
-//@ts-expect-error
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+
+import type {ImageSourcePropType} from 'react-native';
 
 type Event = Readonly<{
   nativeEvent: {
@@ -34,7 +34,7 @@ export interface Props {
   disabled: boolean;
   trackHeight: number;
   thumbSize: number;
-  thumbImage?: ImageSource;
+  thumbImage?: ImageSourcePropType;
   onRNCSliderSlidingStart: (event: Event) => void;
   onRNCSliderSlidingComplete: (event: Event) => void;
   onRNCSliderValueChange: (event: Event) => void;

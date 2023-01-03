@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-// @ts-expect-error
 import {Text, View, StyleSheet} from 'react-native';
 // @ts-expect-error
 import Slider, {SliderProps} from '@react-native-community/slider';
