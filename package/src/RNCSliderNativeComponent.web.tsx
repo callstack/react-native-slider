@@ -11,6 +11,7 @@ import {
   GestureResponderEvent,
   LayoutChangeEvent,
   Image,
+  AccessibilityActionEvent,
 } from 'react-native';
 
 import type {ImageSourcePropType} from 'react-native';
@@ -255,7 +256,7 @@ const RCTSliderWebComponent = React.forwardRef(
       updateValue(newValue);
     };
 
-    const accessibilityActions = (event: any) => {
+    const accessibilityActions = (event: AccessibilityActionEvent) => {
       const tenth = (maximumValue - minimumValue) / 10;
       switch (event.nativeEvent.actionName) {
         case 'increment':
