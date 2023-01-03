@@ -11,7 +11,7 @@ import {
   StyleProp,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
-//@ts-ignore
+//@ts-expect-error
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 import type {Ref} from 'react';

@@ -1,4 +1,4 @@
-//@ts-ignore
+//@ts-expect-error
 import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
 import {
@@ -11,7 +11,7 @@ import {
   LayoutChangeEvent,
   Image,
 } from 'react-native';
-//@ts-ignore
+//@ts-expect-error
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 type Event = Readonly<{
@@ -149,11 +149,11 @@ const RCTSliderWebComponent = React.forwardRef(
       hasBeenResized.current = true;
     };
     React.useEffect(() => {
-      //@ts-ignore
+      //@ts-expect-error
       window.addEventListener('resize', onResize);
 
       return () => {
-        //@ts-ignore
+        //@ts-expect-error
         window.removeEventListener('resize', onResize);
       };
     }, []);
@@ -211,7 +211,6 @@ const RCTSliderWebComponent = React.forwardRef(
     }, [maximumValue, minimumValue, step]);
 
     const updateContainerPositionX = () => {
-      //@ts-ignore
       const positionX = ReactDOM.findDOMNode(
         (containerRef as RefObject<any>).current,
       ).getBoundingClientRect()?.x;
