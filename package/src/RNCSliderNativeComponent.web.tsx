@@ -20,6 +20,13 @@ type Event = Readonly<{
   };
 }>;
 
+type AnimationValues = {
+  val: Animated.Value;
+  min: Animated.Value;
+  max: Animated.Value;
+  diff: Animated.Value;
+};
+
 export interface Props {
   value: number;
   minimumValue: number;
@@ -72,15 +79,29 @@ const RCTSliderWebComponent = React.forwardRef(
     const hasBeenResized = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
     const lastInitialValue = React.useRef<number>();
+    const animationValues = React.useRef<AnimationValues>({
+      val: new Animated.Value(value),
+      min: new Animated.Value(minimumValue),
+      max: new Animated.Value(maximumValue),
+      // make sure we never divide by 0
+      diff: new Animated.Value(maximumValue - minimumValue || 1),
+    }).current;
+
+    // update minimumValue & maximumValue animations
+    React.useEffect(() => {
+      animationValues.min.setValue(minimumValue);
+      animationValues.max.setValue(maximumValue);
+      // make sure we never divide by 0
+      animationValues.diff.setValue(maximumValue - minimumValue || 1);
+    }, [animationValues, minimumValue, maximumValue]);
 
     // compute animated slider position based on animated value
-    const animatedValue = React.useRef(new Animated.Value(value)).current;
     const minPercent = React.useRef(
       Animated.multiply(
         new Animated.Value(100),
         Animated.divide(
-          Animated.subtract(animatedValue, new Animated.Value(minimumValue)),
-          new Animated.Value(maximumValue - minimumValue),
+          Animated.subtract(animationValues.val, animationValues.min),
+          animationValues.diff,
         ),
       ),
     ).current;
@@ -141,9 +162,9 @@ const RCTSliderWebComponent = React.forwardRef(
       if (initialValue !== lastInitialValue.current) {
         lastInitialValue.current = initialValue;
         const newValue = updateValue(initialValue);
-        animatedValue.setValue(newValue);
+        animationValues.val.setValue(newValue);
       }
-    }, [initialValue, updateValue, animatedValue]);
+    }, [initialValue, updateValue, animationValues]);
 
     const onResize = () => {
       hasBeenResized.current = true;
@@ -243,13 +264,13 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const onTouchEnd = ({nativeEvent}: GestureResponderEvent) => {
       const newValue = updateValue(getValueFromNativeEvent(nativeEvent.pageX));
-      animatedValue.setValue(newValue);
+      animationValues.val.setValue(newValue);
       onSlidingComplete(newValue);
     };
 
     const onMove = ({nativeEvent}: GestureResponderEvent) => {
       const newValue = getValueFromNativeEvent(nativeEvent.pageX);
-      animatedValue.setValue(newValue);
+      animationValues.val.setValue(newValue);
       updateValue(newValue);
     };
 
