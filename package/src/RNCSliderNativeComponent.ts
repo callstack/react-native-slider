@@ -1,7 +1,6 @@
 import type {ColorValue, HostComponent, ViewProps} from 'react-native';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import type {ImageSourcePropType} from 'react-native';
 import type {
   Float,
   WithDefault,
@@ -21,10 +20,10 @@ export interface NativeProps extends ViewProps {
   inverted?: WithDefault<boolean, false>;
   vertical?: WithDefault<boolean, false>;
   tapToSeek?: WithDefault<boolean, false>;
-  maximumTrackImage?: ImageSource;
+  maximumTrackImage?: ImageSourcePropType;
   maximumTrackTintColor?: ColorValue;
   maximumValue?: Float;
-  minimumTrackImage?: ImageSource;
+  minimumTrackImage?: ImageSourcePropType;
   minimumTrackTintColor?: ColorValue;
   minimumValue?: Float;
   onChange?: BubblingEventHandler<Event>;
@@ -33,9 +32,9 @@ export interface NativeProps extends ViewProps {
   onRNCSliderValueChange?: BubblingEventHandler<Event>;
   step?: Float;
   testID?: string;
-  thumbImage?: ImageSource;
+  thumbImage?: ImageSourcePropType;
   thumbTintColor?: ColorValue;
-  trackImage?: ImageSource;
+  trackImage?: ImageSourcePropType;
   value?: Float;
   lowerLimit?: Float;
   upperLimit?: Float;

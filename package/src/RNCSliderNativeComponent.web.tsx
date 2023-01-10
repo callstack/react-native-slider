@@ -1,4 +1,5 @@
-//@ts-ignore
+/// <reference lib="dom" />
+
 import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
 import {
@@ -10,9 +11,10 @@ import {
   GestureResponderEvent,
   LayoutChangeEvent,
   Image,
+  AccessibilityActionEvent,
 } from 'react-native';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+
+import type {ImageSourcePropType} from 'react-native';
 
 type Event = Readonly<{
   nativeEvent: {
@@ -41,7 +43,7 @@ export interface Props {
   disabled: boolean;
   trackHeight: number;
   thumbSize: number;
-  thumbImage?: ImageSource;
+  thumbImage?: ImageSourcePropType;
   onRNCSliderSlidingStart: (event: Event) => void;
   onRNCSliderSlidingComplete: (event: Event) => void;
   onRNCSliderValueChange: (event: Event) => void;
@@ -170,11 +172,9 @@ const RCTSliderWebComponent = React.forwardRef(
       hasBeenResized.current = true;
     };
     React.useEffect(() => {
-      //@ts-ignore
       window.addEventListener('resize', onResize);
 
       return () => {
-        //@ts-ignore
         window.removeEventListener('resize', onResize);
       };
     }, []);
@@ -232,10 +232,13 @@ const RCTSliderWebComponent = React.forwardRef(
     }, [maximumValue, minimumValue, step]);
 
     const updateContainerPositionX = () => {
-      //@ts-ignore
-      const positionX = ReactDOM.findDOMNode(
+      const element = ReactDOM.findDOMNode(
+        // TODO: Unsafe casting of a forwarded ref
         (containerRef as RefObject<any>).current,
-      ).getBoundingClientRect()?.x;
+        // findDOMNode is not generic and always includes Text as a possible type.
+        // Here we know the ref is always an Element.
+      ) as unknown as Element | null;
+      const positionX = element?.getBoundingClientRect()?.x;
       containerPositionX.current = positionX ?? 0;
     };
 
@@ -274,7 +277,7 @@ const RCTSliderWebComponent = React.forwardRef(
       updateValue(newValue);
     };
 
-    const accessibilityActions = (event: any) => {
+    const accessibilityActions = (event: AccessibilityActionEvent) => {
       const tenth = (maximumValue - minimumValue) / 10;
       switch (event.nativeEvent.actionName) {
         case 'increment':

@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
-// @ts-ignore
 import {Text, View, StyleSheet} from 'react-native';
-// @ts-ignore
 import Slider, {SliderProps} from '@react-native-community/slider';
 
 export interface Props {
