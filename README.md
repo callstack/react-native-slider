@@ -103,7 +103,7 @@ To use this library you need to ensure you are using the correct version of Reac
 | `thumbTintColor` | Color of the foreground switch grip. | [color](https://reactnative.dev/docs/colors) | No | Android |
 | `thumbStyle` | Used to style the thumb component. | View.style | No | |
 | `thumbSize` | The size (Height/width) of the thumb component | number | No | |
-| `trackHeight` | Define the height of the track component (px). | number | No | |
+| `trackHeight` | Defines the height of the track component (px). | number | No | |
 | `maximumTrackImage` | Assigns a maximum track image. Only static images are supported. The leftmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | No | iOS |
 | `minimumTrackImage` | Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | No | iOS |
 | `thumbImage` | Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported. | Image<br/>.propTypes<br/>.source | No | |
