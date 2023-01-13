@@ -76,7 +76,7 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerSize = React.useRef({width: 0, height: 0});
     const containerPositionX = React.useRef(0);
     const containerRef = forwardedRef || React.createRef();
-    const hasBeenResized = React.useRef(false);
+    const containerPositionInvalidated = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
     const lastInitialValue = React.useRef<number>();
     const animationValues = React.useRef<AnimationValues>({
@@ -166,18 +166,36 @@ const RCTSliderWebComponent = React.forwardRef(
       }
     }, [initialValue, updateValue, animationValues]);
 
-    const onResize = () => {
-      hasBeenResized.current = true;
-    };
     React.useEffect(() => {
+      const invalidateContainerPosition = () => {
+        containerPositionInvalidated.current = true;
+      };
+      const onDocumentScroll = (e: Event) => {
+        const isAlreadyInvalidated = !containerPositionInvalidated.current;
+        if (
+          isAlreadyInvalidated &&
+          containerRef.current &&
+          // @ts-ignore
+          e.target.contains(containerRef.current)
+        ) {
+          invalidateContainerPosition();
+        }
+      };
       //@ts-ignore
-      window.addEventListener('resize', onResize);
+      window.addEventListener('resize', invalidateContainerPosition);
+      //@ts-ignore
+      document.addEventListener('scroll', onDocumentScroll, {capture: true});
 
       return () => {
         //@ts-ignore
-        window.removeEventListener('resize', onResize);
+        window.removeEventListener('resize', invalidateContainerPosition);
+
+        //@ts-ignore
+        document.removeEventListener('scroll', onDocumentScroll, {
+          capture: true,
+        });
       };
-    }, []);
+    }, [containerRef]);
 
     const containerStyle = StyleSheet.compose(
       {
@@ -242,8 +260,8 @@ const RCTSliderWebComponent = React.forwardRef(
     const getValueFromNativeEvent = (pageX: number) => {
       const {width = 1} = containerSize.current;
 
-      if (hasBeenResized.current) {
-        hasBeenResized.current = false;
+      if (containerPositionInvalidated.current) {
+        containerPositionInvalidated.current = false;
         updateContainerPositionX();
       }
       const containerX = containerPositionX.current;
