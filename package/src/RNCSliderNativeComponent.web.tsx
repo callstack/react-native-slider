@@ -150,9 +150,9 @@ const RCTSliderWebComponent = React.forwardRef(
         containerPositionInvalidated.current = true;
       };
       const onDocumentScroll = (e: Event) => {
+        const isAlreadyInvalidated = !containerPositionInvalidated.current;
         if (
-          // Avoid all other checks if already invalidated
-          !containerPositionInvalidated.current &&
+          isAlreadyInvalidated &&
           containerRef.current &&
           // @ts-ignore
           e.target.contains(containerRef.current)
