@@ -235,12 +235,12 @@ const SliderComponent = (
     : null;
 
   const lowerLimit =
-    !!localProps.lowerLimit || localProps.lowerLimit === 0
+    Boolean(localProps.lowerLimit) || localProps.lowerLimit === 0
       ? localProps.lowerLimit
       : LIMIT_MIN_VALUE;
 
   const upperLimit =
-    !!localProps.upperLimit || localProps.upperLimit === 0
+    Boolean(localProps.upperLimit) || localProps.upperLimit === 0
       ? localProps.upperLimit
       : LIMIT_MAX_VALUE;
 
