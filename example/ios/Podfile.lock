@@ -304,7 +304,7 @@ PODS:
     - glog
   - react-native-pager-view (6.1.1):
     - React-Core
-  - react-native-slider (4.4.0):
+  - react-native-slider (4.4.1):
     - React-Core
   - React-perflogger (0.70.1)
   - React-RCTActionSheet (0.70.1):
@@ -568,7 +568,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 1363be638eccfe1aea1b10dd42e632b0397e5ec8
   React-logger: 7bd569e3857d74ed412ce0a5c51f421ff7d4ca7f
   react-native-pager-view: 3c66c4e2f3ab423643d07b2c7041f8ac48395f72
-  react-native-slider: d2938a12c4e439a227c70eec65d119136eb4aeb5
+  react-native-slider: a0d45ce5ea1be39f149954cae4367afff44d5a32
   React-perflogger: 48c6b363e867d64b682e84f80ca45636bd65e19c
   React-RCTActionSheet: 33c74fe5c754835e3715c300618da9aa2f7203fa
   React-RCTAnimation: 2dbf0120d4d1ab7716079b4180f2ca89c465e46b
