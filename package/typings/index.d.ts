@@ -1,6 +1,8 @@
 import * as React from 'react';
 import * as ReactNative from 'react-native';
 
+type Constructor<T> = new (...args: any[]) => T;
+
 type SliderReferenceType =
   | (React.MutableRefObject<SliderRef> & React.LegacyRef<Slider>)
   | undefined;
@@ -172,7 +174,7 @@ export interface SliderProps
  * A component used to select a single value from a range of values.
  */
 declare class SliderComponent extends React.Component<SliderProps> {}
-declare const SliderBase: ReactNative.Constructor<ReactNative.NativeMethods> &
+declare const SliderBase: Constructor<ReactNative.NativeMethods> &
   typeof SliderComponent;
 export default class Slider extends SliderBase {}
 export type SliderIOS = Slider;
