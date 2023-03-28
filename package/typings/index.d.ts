@@ -109,6 +109,12 @@ export interface SliderProps
   minimumTrackTintColor?: string;
 
   /**
+   * The color used for the buffered track (secondaryProgress)
+   * Overrides the default grey gradient image.
+   */
+  bufferedTrackTintColor?: string;
+
+  /**
    * Initial minimum value of the slider. Default value is 0.
    */
   minimumValue?: number;
@@ -156,6 +162,15 @@ export interface SliderProps
    * value during dragging.
    */
   value?: number;
+
+  /**
+   * Write-only property representing the bufferedValue of the slider.
+   * Entered once at the beginning still acts as an initial value.
+   * The value should be between minimumValue and maximumValue,
+   * which default to 0 and 1 respectively.
+   * Default value is 0.
+   */
+  bufferedValue?: number;
 
   /**
    * Reverses the direction of the slider.

@@ -88,6 +88,15 @@ type Props = ViewProps &
     value?: number;
 
     /**
+     * Write-only property representing the secondaryProgress of the slider.
+     * Entered once at the beginning still acts as an initial value.
+     * The value should be between minimumValue and maximumValue,
+     * which default to 0 and 1 respectively.
+     * Default value is 0.
+     */
+    bufferedValue?: number;
+
+    /**
      * Step value of the slider. The value should be
      * between 0 and (maximumValue - minimumValue).
      * Default value is 0.
@@ -119,6 +128,8 @@ type Props = ViewProps &
      * Overrides the default blue gradient image on iOS.
      */
     minimumTrackTintColor?: ColorValue;
+
+    bufferedTrackTintColor?: ColorValue;
 
     /**
      * The color used for the track to the right of the button.
@@ -351,6 +362,7 @@ const SliderWithRef = React.forwardRef(SliderComponent);
 
 SliderWithRef.defaultProps = {
   value: 0,
+  bufferedValue: 0,
   minimumValue: 0,
   maximumValue: 1,
   step: 0,
