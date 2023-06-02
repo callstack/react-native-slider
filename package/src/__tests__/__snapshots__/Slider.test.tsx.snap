@@ -27,7 +27,6 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
   }
   tapToSeek={false}
   upperLimit={9007199254740991}
-  value={0}
 />
 `;
 
@@ -58,7 +57,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
   }
   tapToSeek={false}
   upperLimit={9007199254740991}
-  value={0}
 />
 `;
 
@@ -89,7 +87,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
   }
   tapToSeek={false}
   upperLimit={9007199254740991}
-  value={0}
 />
 `;
 
@@ -149,7 +146,6 @@ exports[`<Slider /> renders disabled slider 1`] = `
   }
   tapToSeek={false}
   upperLimit={9007199254740991}
-  value={0}
 />
 `;
 
@@ -175,6 +171,5 @@ exports[`<Slider /> renders enabled slider 1`] = `
   }
   tapToSeek={false}
   upperLimit={9007199254740991}
-  value={0}
 />
 `;

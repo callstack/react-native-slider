@@ -234,7 +234,8 @@ const SliderComponent = (
       }
     : null;
 
-  const value = Number.isNaN(props.value) || !props.value ? undefined : props.value;
+  const value =
+    Number.isNaN(props.value) || !props.value ? undefined : props.value;
 
   const lowerLimit =
     !!localProps.lowerLimit || localProps.lowerLimit === 0
