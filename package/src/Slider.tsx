@@ -234,6 +234,9 @@ const SliderComponent = (
       }
     : null;
 
+  const value =
+    Number.isNaN(props.value) || !props.value ? undefined : props.value;
+
   const lowerLimit =
     !!localProps.lowerLimit || localProps.lowerLimit === 0
       ? localProps.lowerLimit
@@ -247,6 +250,7 @@ const SliderComponent = (
   return (
     <RCTSliderNativeComponent
       {...localProps}
+      value={value}
       lowerLimit={lowerLimit}
       upperLimit={upperLimit}
       accessibilityState={_accessibilityState}
