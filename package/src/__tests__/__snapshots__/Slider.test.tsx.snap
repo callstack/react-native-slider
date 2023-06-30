@@ -3,7 +3,7 @@
 exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
 <RNCSlider
   accessibilityState={
-    Object {
+    {
       "disabled": true,
     }
   }
@@ -21,7 +21,7 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
   onStartShouldSetResponder={[Function]}
   step={0}
   style={
-    Object {
+    {
       "height": 40,
     }
   }
@@ -33,7 +33,7 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
 exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
 <RNCSlider
   accessibilityState={
-    Object {
+    {
       "disabled": true,
     }
   }
@@ -51,7 +51,7 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
   onStartShouldSetResponder={[Function]}
   step={0}
   style={
-    Object {
+    {
       "height": 40,
     }
   }
@@ -63,7 +63,7 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
 exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
 <RNCSlider
   accessibilityState={
-    Object {
+    {
       "disabled": false,
     }
   }
@@ -81,7 +81,7 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
   onStartShouldSetResponder={[Function]}
   step={0}
   style={
-    Object {
+    {
       "height": 40,
     }
   }
@@ -108,7 +108,7 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
   onStartShouldSetResponder={[Function]}
   step={0.25}
   style={
-    Object {
+    {
       "height": 40,
     }
   }
@@ -122,7 +122,7 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
 exports[`<Slider /> renders disabled slider 1`] = `
 <RNCSlider
   accessibilityState={
-    Object {
+    {
       "disabled": true,
     }
   }
@@ -140,7 +140,7 @@ exports[`<Slider /> renders disabled slider 1`] = `
   onStartShouldSetResponder={[Function]}
   step={0}
   style={
-    Object {
+    {
       "height": 40,
     }
   }
@@ -165,7 +165,7 @@ exports[`<Slider /> renders enabled slider 1`] = `
   onStartShouldSetResponder={[Function]}
   step={0}
   style={
-    Object {
+    {
       "height": 40,
     }
   }
