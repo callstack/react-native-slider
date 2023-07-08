@@ -240,12 +240,12 @@ const SliderComponent = (
   const lowerLimit =
     !!localProps.lowerLimit || localProps.lowerLimit === 0
       ? localProps.lowerLimit
-      : LIMIT_MIN_VALUE;
+      : Platform.select({ web: localProps.minimumValue, default: LIMIT_MIN_VALUE });
 
   const upperLimit =
     !!localProps.upperLimit || localProps.upperLimit === 0
       ? localProps.upperLimit
-      : LIMIT_MAX_VALUE;
+      : Platform.select({ web: localProps.maximumValue, default: LIMIT_MAX_VALUE });
 
   return (
     <RCTSliderNativeComponent
@@ -284,8 +284,8 @@ SliderWithRef.defaultProps = {
   step: 0,
   inverted: false,
   tapToSeek: false,
-  lowerLimit: LIMIT_MIN_VALUE,
-  upperLimit: LIMIT_MAX_VALUE,
+  lowerLimit: Platform.select({ web: undefined, default: LIMIT_MIN_VALUE }),
+  upperLimit: Platform.select({ web: undefined, default: LIMIT_MAX_VALUE }),
 };
 
 let styles = StyleSheet.create(

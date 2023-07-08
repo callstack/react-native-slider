@@ -89,8 +89,8 @@ To use this library you need to ensure you are using the correct version of Reac
 | `maximumValue` | Initial maximum value of the slider.<br/>Default value is 1. | number | No | |
 | `minimumTrackTintColor` | The color used for the track to the left of the button.<br/>Overrides the default blue gradient image on iOS. | [color](https://reactnative.dev/docs/colors) | No | |
 | `minimumValue` | Initial minimum value of the slider.<br/>Default value is 0. | number | No | |
-| `lowerLimit` | Slide lower limit. The user won't be able to slide below this limit. | number | No | Android, iOS |
-| `upperLimit` | Slide upper limit. The user won't be able to slide above this limit. | number | No | Android, iOS |
+| `lowerLimit` | Slide lower limit. The user won't be able to slide below this limit. | number | No | Android, iOS, Web |
+| `upperLimit` | Slide upper limit. The user won't be able to slide above this limit. | number | No | Android, iOS, Web |
 | `onSlidingStart` | Callback that is called when the user picks up the slider.<br/>The initial value is passed as an argument to the callback handler. | function | No | |
 | `onSlidingComplete` | Callback that is called when the user releases the slider, regardless if the value has changed.<br/>The current value is passed as an argument to the callback handler. | function | No | |
 | `onValueChange` | Callback continuously called while the user is dragging the slider. | function | No | |
@@ -129,7 +129,7 @@ npm run test
 
 When [creating an issue](https://github.com/callstack/react-native-slider/issues/new/choose) please remember to specify the platform which the issue occurs on.
 
-## Running the example app 
+## Running the example app
 While developing, you can run the example app to test your changes.
 
 ### Setup
@@ -145,12 +145,12 @@ You can also do this manually by:
 
 ### New architecture setup (Fabric)
 
-In order to use the new architecture some extra steps are needed. 
-#### iOS 
+In order to use the new architecture some extra steps are needed.
+#### iOS
 - Install pods with new arch flag inside `example/ios` folder: `RCT_NEW_ARCH_ENABLED=1 pod install`
 - Run `npm run example-ios`
 
-#### Android 
+#### Android
 - Set `newArchEnabled` to true inside `example/android/gradle.properties`
 - Run `npm run example-android`
 
@@ -159,7 +159,7 @@ In order to use the new architecture some extra steps are needed.
 If you are using React Native version lower than 0.70, you need to setup manual linking for Android to work.
 </summary>
 
-Inside `example/android/app/src/main/jni/Android.mk` add these lines: 
+Inside `example/android/app/src/main/jni/Android.mk` add these lines:
 
 ```diff
 + include $(NODE_MODULES_DIR)/@react-native-community/slider/android/build/generated/source/codegen/jni/Android.mk
@@ -172,7 +172,7 @@ include $(CLEAR_VARS)
     libreact_debug \
 ```
 
-Inside `example/android/app/src/main/jni/MainComponentsRegistry.cpp` update these lines: 
+Inside `example/android/app/src/main/jni/MainComponentsRegistry.cpp` update these lines:
 
 ```diff
 #include <react/renderer/components/rncore/ComponentDescriptors.h>
