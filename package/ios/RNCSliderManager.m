@@ -61,6 +61,12 @@ RCT_EXPORT_MODULE()
   slider.lastValue = slider.value;
   float value = slider.minimumValue + (rangeWidth * sliderPercent);
 
+  if (value < slider.lowerLimit) {
+      value = slider.lowerLimit;
+  } else if (value > slider.upperLimit) {
+      value = slider.upperLimit;
+  }
+
   [slider setValue:[slider discreteValue:value] animated: YES];
 
   if (slider.onRNCSliderSlidingStart) {
