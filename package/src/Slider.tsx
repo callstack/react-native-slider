@@ -234,11 +234,10 @@ const SliderComponent = (
     (_, index) => index
   );
 
-  const onValueChangeEvent = onValueChange
-    ? (event: Event) => {
-        onValueChange(event.nativeEvent.value);
-      }
-    : null;
+  const onValueChangeEvent = (event: Event) => {
+    onValueChange && onValueChange(event.nativeEvent.value);
+    setCurrentValue(event.nativeEvent.value);
+  };
 
   const _disabled =
     typeof props.disabled === 'boolean'
@@ -307,13 +306,7 @@ const SliderComponent = (
       }
       ref={forwardedRef}
       style={[{ zIndex: 1, width: width }, styles.slider]}
-      onChange={(event: Event) => {
-        onValueChangeEvent && onValueChangeEvent(event);
-        setCurrentValue(event.nativeEvent.value);
-        if (onValueChange) {
-          onValueChange(event.nativeEvent.value);
-        }
-      }}
+      onChange={onValueChangeEvent}
       onRNCSliderSlidingStart={onSlidingStartEvent}
       onRNCSliderSlidingComplete={onSlidingCompleteEvent}
       onRNCSliderValueChange={onValueChangeEvent}
@@ -349,7 +342,7 @@ const SliderComponent = (
                   <SliderTrackMark
                     key={`${index}-SliderTrackMark`}
                     isTrue={currentValue === i}
-                    thumbImage={props.thumbImage}
+                    thumbImage={localProps.thumbImage}
                     StepMarker={props.stepMarker}
                   />
                   {props.renderStepNumber ? (
@@ -364,24 +357,26 @@ const SliderComponent = (
   );
 };
 
-function SliderTrackMark({ isTrue, thumbImage, StepMarker }: TrackMarksProps) {
-  if (StepMarker && typeof StepMarker !== "boolean") {
-    return <StepMarker stepMarked={isTrue} />;
-  }
+function SliderTrackMark({isTrue, thumbImage, StepMarker}: TrackMarksProps) {
   return isTrue ? (
     <>
       {thumbImage ? (
         <View style={customizingStyles.outerTrue}>
-          <Image source={thumbImage} accessibilityIgnoresInvertColors />
+          <Image source={thumbImage} />
         </View>
+      ) : StepMarker && typeof StepMarker !== 'boolean' ? (
+        <StepMarker stepMarked={true} />
       ) : (
         <View style={customizingStyles.innerTrue} />
       )}
     </>
+  ) : StepMarker && typeof StepMarker !== 'boolean' ? (
+    <StepMarker stepMarked={false} />
   ) : (
     <View style={customizingStyles.inner} />
   );
 }
+
 
 function Paragraph({ i, style }: { i: number, style: StyleProp<TextStyle> }) {
   return (
