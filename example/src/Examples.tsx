@@ -126,7 +126,7 @@ const SlidingStepsThumbImageExample = (props: SliderProps) => {
         maximumValue={15}
         step={1}
         tapToSeek
-        thumbImage={require('./resources/twitter-small.png')}
+        thumbImage={require('./resources/ck-icon.png')}
         stepMarker
         minimumTrackTintColor={"#123456"}
         maximumTrackTintColor={"#00FF00"}
@@ -144,7 +144,7 @@ const SlidingCustomStepsThumbImageExample = (props: SliderProps) => {
         maximumValue={15}
         step={1}
         tapToSeek
-        thumbImage={require('./resources/twitter-small.png')}
+        thumbImage={require('./resources/ck-icon.png')}
         stepMarker={(isMarked) => {
           return isMarked ? (
             <View style={styles.outerTrue}>
@@ -173,7 +173,7 @@ const SlidingCustomStepsThumbImageNumbersExample = (props: SliderProps) => {
         step={1}
         tapToSeek
         renderStepNumber
-        thumbImage={require('./resources/twitter-small.png')}
+        thumbImage={require('./resources/ck-icon.png')}
         stepMarker={(isMarked) => {
           return isMarked ? (
             <View style={styles.outerTrue}>
