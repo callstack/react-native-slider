@@ -324,6 +324,7 @@ const SliderComponent = (
         <View
           pointerEvents="none"
           style={{
+            flex: 1,
             marginHorizontal: width * 0.033,
             flexDirection: "row",
             justifyContent: "space-between",
@@ -361,7 +362,7 @@ function SliderTrackMark({isTrue, thumbImage, StepMarker}: TrackMarksProps) {
   return isTrue ? (
     <>
       {thumbImage ? (
-        <View style={customizingStyles.outerTrue}>
+        <View style={[customizingStyles.outerTrue, {position: "absolute"}]}>
           <Image source={thumbImage} />
         </View>
       ) : StepMarker && typeof StepMarker !== 'boolean' ? (
@@ -380,7 +381,7 @@ function SliderTrackMark({isTrue, thumbImage, StepMarker}: TrackMarksProps) {
 
 function Paragraph({ i, style }: { i: number, style: StyleProp<TextStyle> }) {
   return (
-    <View style={{ marginTop: 20, alignItems: "center" }}>
+    <View style={{ marginTop: 20, alignItems: "center", position: "absolute" }}>
       <Text style={style}>{i}</Text>
     </View>
   );
