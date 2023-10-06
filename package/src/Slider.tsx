@@ -359,22 +359,21 @@ const SliderComponent = (
 };
 
 function SliderTrackMark({isTrue, thumbImage, StepMarker}: TrackMarksProps) {
-  return isTrue ? (
-    <>
-      {thumbImage ? (
-        <View style={[customizingStyles.outerTrue, {position: "absolute"}]}>
-          <Image source={thumbImage} />
-        </View>
-      ) : StepMarker && typeof StepMarker !== 'boolean' ? (
-        <StepMarker stepMarked={true} />
+  return ( 
+    <View style={{alignContent: "center", justifyContent: "center"}}>
+      {StepMarker && typeof StepMarker !== 'boolean' ? (
+        <StepMarker stepMarked={isTrue} />
       ) : (
-        <View style={customizingStyles.innerTrue} />
+        <View
+          style={isTrue ? customizingStyles.outerTrue : customizingStyles.outer}
+        />
       )}
-    </>
-  ) : StepMarker && typeof StepMarker !== 'boolean' ? (
-    <StepMarker stepMarked={false} />
-  ) : (
-    <View style={customizingStyles.inner} />
+      {thumbImage && isTrue ? (
+        <View style={[customizingStyles.outerTrue, {position: "absolute"}]}>
+          <Image source={thumbImage} style={{position: 'absolute'}} />
+        </View>
+      ) : null}
+    </View>
   );
 }
 
