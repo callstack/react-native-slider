@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   Platform,
@@ -10,15 +10,14 @@ import {
   NativeSyntheticEvent,
   StyleProp,
   View,
-  ImageURISource,
-  Text,
-  TextStyle,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 //@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 import type {FC, Ref} from 'react';
+import {MarkerProps} from './components/TrackMark';
+import {StepsIndicator} from './components/StepsIndicator';
 
 const LIMIT_MIN_VALUE = Number.MIN_SAFE_INTEGER;
 const LIMIT_MAX_VALUE = Number.MAX_SAFE_INTEGER;
@@ -32,16 +31,6 @@ type Event = NativeSyntheticEvent<
     fromUser?: boolean;
   }>
 >;
-
-type TrackMarksProps = {
-  isTrue: boolean;
-  thumbImage?: ImageURISource;
-  StepMarker?: FC<MarkerProps> | boolean;
-}
-
-type MarkerProps = {
-  stepMarked: boolean;
-}
 
 type WindowsProps = Readonly<{
   /**
@@ -191,7 +180,7 @@ type Props = ViewProps &
     stepMarker?: FC<MarkerProps> | boolean;
 
     /**
-     * 
+     *
      */
     renderStepNumber?: boolean;
 
@@ -226,12 +215,17 @@ const SliderComponent = (
     ...localProps
   } = props;
   const [currentValue, setCurrentValue] = useState(
-    props.value ?? props.minimumValue
+    props.value ?? props.minimumValue,
   );
   const [width, setWidth] = useState(0);
   const options = Array.from(
-    { length: ((localProps.maximumValue! - localProps.minimumValue!) / (!!localProps.step ? localProps.step : 100) + 1) },
-    (_, index) => index
+    {
+      length:
+        (localProps.maximumValue! - localProps.minimumValue!) /
+          (localProps.step ? localProps.step : 100) +
+        1,
+    },
+    (_, index) => index,
   );
 
   const onValueChangeEvent = (event: Event) => {
@@ -289,102 +283,49 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[{ zIndex: 1, width: "100%" }, style]}
-    >
-    <RCTSliderNativeComponent
-      {...localProps}
-      value={value}
-      lowerLimit={lowerLimit}
-      upperLimit={upperLimit}
-      accessibilityState={_accessibilityState}
-      thumbImage={
-        Platform.OS === 'web'
-          ? props.thumbImage
-          : props.stepMarker
-          ? undefined
-          : Image.resolveAssetSource(props.thumbImage)
-      }
-      ref={forwardedRef}
-      style={[{ zIndex: 1, width: width }, styles.slider]}
-      onChange={onValueChangeEvent}
-      onRNCSliderSlidingStart={onSlidingStartEvent}
-      onRNCSliderSlidingComplete={onSlidingCompleteEvent}
-      onRNCSliderValueChange={onValueChangeEvent}
-      disabled={_disabled}
-      onStartShouldSetResponder={() => true}
-      onResponderTerminationRequest={() => false}
-      onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
-      thumbTintColor={
-        props.thumbImage && !!props.stepMarker
-          ? "transparent"
-          : props.thumbTintColor
-      }
-    />
+      style={[{zIndex: 1, width: '100%'}, style]}>
+      <RCTSliderNativeComponent
+        {...localProps}
+        value={value}
+        lowerLimit={lowerLimit}
+        upperLimit={upperLimit}
+        accessibilityState={_accessibilityState}
+        thumbImage={
+          Platform.OS === 'web'
+            ? props.thumbImage
+            : props.stepMarker
+            ? undefined
+            : Image.resolveAssetSource(props.thumbImage)
+        }
+        ref={forwardedRef}
+        style={[{zIndex: 1, width: width}, styles.slider]}
+        onChange={onValueChangeEvent}
+        onRNCSliderSlidingStart={onSlidingStartEvent}
+        onRNCSliderSlidingComplete={onSlidingCompleteEvent}
+        onRNCSliderValueChange={onValueChangeEvent}
+        disabled={_disabled}
+        onStartShouldSetResponder={() => true}
+        onResponderTerminationRequest={() => false}
+        onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
+        thumbTintColor={
+          props.thumbImage && !!props.stepMarker
+            ? 'transparent'
+            : props.thumbTintColor
+        }
+      />
       {props.stepMarker || !!props.renderStepNumber ? (
-        <View
-          pointerEvents="none"
-          style={{
-            flex: 1,
-            marginHorizontal: width * 0.033,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            top: Platform.OS === "ios" ? -25 : -15,
-            zIndex: 2,
-          }}
-        >
-          {options.map((i, index) => {
-            return (
-              <Fragment key={index}>
-                <View
-                  style={{
-                    alignItems: "center",
-                  }}
-                >
-                  <SliderTrackMark
-                    key={`${index}-SliderTrackMark`}
-                    isTrue={currentValue === i}
-                    thumbImage={localProps.thumbImage}
-                    StepMarker={props.stepMarker}
-                  />
-                  {props.renderStepNumber ? (
-                    <Paragraph i={i} style={{fontSize: options.length > 9 ? 8 : 12}} key={`${index}-Paragraph`}  />
-                  ) : null}
-                </View>
-              </Fragment>
-            );
-          })}
-          </View>) : null}
-    </View>
-  );
-};
-
-function SliderTrackMark({isTrue, thumbImage, StepMarker}: TrackMarksProps) {
-  return ( 
-    <View style={{alignContent: "center", justifyContent: "center"}}>
-      {StepMarker && typeof StepMarker !== 'boolean' ? (
-        <StepMarker stepMarked={isTrue} />
-      ) : (
-        <View
-          style={isTrue ? customizingStyles.outerTrue : customizingStyles.outer}
+        <StepsIndicator
+          options={options}
+          sliderWidth={width}
+          currentValue={currentValue}
+          renderStepNumber={localProps.renderStepNumber}
+          thumbImage={localProps.thumbImage}
+          customStepMarker={localProps.stepMarker}
         />
-      )}
-      {thumbImage && isTrue ? (
-        <View style={[customizingStyles.outerTrue, {position: "absolute"}]}>
-          <Image source={thumbImage} style={{position: 'absolute'}} />
-        </View>
       ) : null}
     </View>
   );
-}
-
-
-function Paragraph({ i, style }: { i: number, style: StyleProp<TextStyle> }) {
-  return (
-    <View style={{ marginTop: 20, alignItems: "center", position: "absolute" }}>
-      <Text style={style}>{i}</Text>
-    </View>
-  );
-}
+};
 
 const SliderWithRef = React.forwardRef(SliderComponent);
 
@@ -398,37 +339,6 @@ SliderWithRef.defaultProps = {
   lowerLimit: Platform.select({web: undefined, default: LIMIT_MIN_VALUE}),
   upperLimit: Platform.select({web: undefined, default: LIMIT_MAX_VALUE}),
 };
-
-const customizingStyles = StyleSheet.create({
-  outer: {
-    width: 3,
-    height: 3,
-    borderRadius: 3,
-    backgroundColor: "#11FF11",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  outerTrue: {
-    width: 3,
-    height: 3,
-    borderRadius: 3,
-    backgroundColor: "#0F0FFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  inner: {
-    width: 1,
-    height: 1,
-    borderRadius: 1,
-    backgroundColor: "#111111",
-  },
-  innerTrue: {
-    width: 1,
-    height: 1,
-    borderRadius: 1,
-    backgroundColor: "#0F0FFF",
-  },
-})
 
 let styles = StyleSheet.create(
   Platform.OS === 'ios' ? {slider: {height: 40}} : {slider: {}},
