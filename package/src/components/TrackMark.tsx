@@ -17,7 +17,7 @@ export const SliderTrackMark = ({
   StepMarker,
 }: TrackMarksProps) => {
   return (
-    <View style={{alignContent: 'center', justifyContent: 'center'}}>
+    <View style={{alignItems: 'center', justifyContent: 'center'}}>
       {StepMarker && typeof StepMarker !== 'boolean' ? (
         <StepMarker stepMarked={isTrue} />
       ) : (
@@ -26,7 +26,13 @@ export const SliderTrackMark = ({
         />
       )}
       {thumbImage && isTrue ? (
-        <View style={[customizingStyles.outerTrue, {position: 'absolute'}]}>
+        <View
+          style={{
+            position: 'absolute',
+            zIndex: 3,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Image source={thumbImage} style={{position: 'absolute'}} />
         </View>
       ) : null}

@@ -28,7 +28,7 @@ export const StepsIndicator = ({
         marginHorizontal: sliderWidth * 0.033,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        top: Platform.OS === 'ios' ? -25 : -15,
+        top: Platform.OS === 'ios' ? -20 : -15,
         zIndex: 2,
       }}>
       {options.map((i, index) => {
