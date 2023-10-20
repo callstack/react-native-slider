@@ -18,9 +18,8 @@ import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {FC, Ref} from 'react';
 import {MarkerProps} from './components/TrackMark';
 import {StepsIndicator} from './components/StepsIndicator';
-
-const LIMIT_MIN_VALUE = Number.MIN_SAFE_INTEGER;
-const LIMIT_MAX_VALUE = Number.MAX_SAFE_INTEGER;
+import {styles} from './utils/styles';
+import {constants} from './utils/constants';
 
 type Event = NativeSyntheticEvent<
   Readonly<{
@@ -205,8 +204,6 @@ const SliderComponent = (
   props: Props,
   forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
 ) => {
-  const style = props.style ? [props.style, styles.slider] : styles.slider;
-
   const {
     onValueChange,
     onSlidingStart,
@@ -218,15 +215,23 @@ const SliderComponent = (
     props.value ?? props.minimumValue,
   );
   const [width, setWidth] = useState(0);
+
   const options = Array.from(
     {
       length:
         (localProps.maximumValue! - localProps.minimumValue!) /
-          (localProps.step ? localProps.step : 100) +
+          (localProps.step
+            ? localProps.step
+            : constants.DEFAULT_STEP_RESOLUTION) +
         1,
     },
     (_, index) => index,
   );
+
+  const defaultStyle =
+    Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
+  const sliderStyle = {zIndex: 1, width: width};
+  const style = StyleSheet.compose(props.style, defaultStyle);
 
   const onValueChangeEvent = (event: Event) => {
     onValueChange && onValueChange(event.nativeEvent.value);
@@ -267,7 +272,7 @@ const SliderComponent = (
       ? localProps.lowerLimit
       : Platform.select({
           web: localProps.minimumValue,
-          default: LIMIT_MIN_VALUE,
+          default: constants.LIMIT_MIN_VALUE,
         });
 
   const upperLimit =
@@ -275,7 +280,7 @@ const SliderComponent = (
       ? localProps.upperLimit
       : Platform.select({
           web: localProps.maximumValue,
-          default: LIMIT_MAX_VALUE,
+          default: constants.LIMIT_MAX_VALUE,
         });
 
   return (
@@ -283,7 +288,7 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[{zIndex: 1, width: '100%'}, style]}>
+      style={[styles, style]}>
       <RCTSliderNativeComponent
         {...localProps}
         value={value}
@@ -298,7 +303,7 @@ const SliderComponent = (
             : Image.resolveAssetSource(props.thumbImage)
         }
         ref={forwardedRef}
-        style={[{zIndex: 1, width: width}, styles.slider]}
+        style={[sliderStyle, defaultStyle]}
         onChange={onValueChangeEvent}
         onRNCSliderSlidingStart={onSlidingStartEvent}
         onRNCSliderSlidingComplete={onSlidingCompleteEvent}
@@ -336,12 +341,8 @@ SliderWithRef.defaultProps = {
   step: 0,
   inverted: false,
   tapToSeek: false,
-  lowerLimit: Platform.select({web: undefined, default: LIMIT_MIN_VALUE}),
-  upperLimit: Platform.select({web: undefined, default: LIMIT_MAX_VALUE}),
+  lowerLimit: Platform.select({web: undefined, default: constants.LIMIT_MIN_VALUE}),
+  upperLimit: Platform.select({web: undefined, default: constants.LIMIT_MAX_VALUE}),
 };
-
-let styles = StyleSheet.create(
-  Platform.OS === 'ios' ? {slider: {height: 40}} : {slider: {}},
-);
 
 export default SliderWithRef;

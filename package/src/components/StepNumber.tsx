@@ -1,5 +1,6 @@
 import React from 'react';
 import {StyleProp, Text, TextStyle, View} from 'react-native';
+import {styles} from '../utils/styles';
 
 export const StepNumber = ({
   i,
@@ -9,7 +10,7 @@ export const StepNumber = ({
   style: StyleProp<TextStyle>;
 }) => {
   return (
-    <View style={{marginTop: 20, alignItems: 'center', position: 'absolute'}}>
+    <View style={styles.stepNumber}>
       <Text style={style}>{i}</Text>
     </View>
   );

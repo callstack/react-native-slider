@@ -1,9 +1,11 @@
 import React, {FC, Fragment} from 'react';
-import {View, Platform} from 'react-native';
+import {View} from 'react-native';
 import {StepNumber} from './StepNumber';
 import {MarkerProps, SliderTrackMark} from './TrackMark';
 //@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import {styles} from '../utils/styles';
+import {constants} from '../utils/constants';
 
 export const StepsIndicator = ({
   options,
@@ -20,24 +22,23 @@ export const StepsIndicator = ({
   renderStepNumber?: boolean;
   thumbImage?: ImageSource;
 }) => {
+  const stepNumberFontStyle = {
+    fontSize:
+      options.length > 9
+        ? constants.STEP_NUMBER_TEXT_FONT_SMALL
+        : constants.STEP_NUMBER_TEXT_FONT_BIG,
+  };
   return (
     <View
       pointerEvents="none"
-      style={{
-        flex: 1,
-        marginHorizontal: sliderWidth * 0.033,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        top: Platform.OS === 'ios' ? -20 : -15,
-        zIndex: 2,
-      }}>
+      style={[
+        styles.stepsIndicator,
+        {marginHorizontal: sliderWidth * constants.MARGIN_HORIZONTAL_PADDING},
+      ]}>
       {options.map((i, index) => {
         return (
           <Fragment key={index}>
-            <View
-              style={{
-                alignItems: 'center',
-              }}>
+            <View style={styles.stepIndicatorElement}>
               <SliderTrackMark
                 key={`${index}-SliderTrackMark`}
                 isTrue={currentValue === i}
@@ -47,7 +48,7 @@ export const StepsIndicator = ({
               {renderStepNumber ? (
                 <StepNumber
                   i={i}
-                  style={{fontSize: options.length > 9 ? 8 : 12}}
+                  style={stepNumberFontStyle}
                   key={`${index}th-step`}
                 />
               ) : null}
