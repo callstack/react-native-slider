@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {Image, ImageURISource, StyleSheet, View} from 'react-native';
+import {Image, ImageURISource, View} from 'react-native';
 import {styles} from '../utils/styles';
 
 export type MarkerProps = {
@@ -23,7 +23,9 @@ export const SliderTrackMark = ({
         <StepMarker stepMarked={isTrue} />
       ) : (
         <View
-          style={isTrue ? customizingStyles.outerTrue : customizingStyles.outer}
+          style={
+            isTrue ? styles.defaultIndicatorMarked : styles.defaultIndicatorIdle
+          }
         />
       )}
       {thumbImage && isTrue ? (
@@ -34,34 +36,3 @@ export const SliderTrackMark = ({
     </View>
   );
 };
-
-const customizingStyles = StyleSheet.create({
-  outer: {
-    width: 3,
-    height: 3,
-    borderRadius: 3,
-    backgroundColor: '#11FF11',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  outerTrue: {
-    width: 3,
-    height: 3,
-    borderRadius: 3,
-    backgroundColor: '#0F0FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  inner: {
-    width: 1,
-    height: 1,
-    borderRadius: 1,
-    backgroundColor: '#111111',
-  },
-  innerTrue: {
-    width: 1,
-    height: 1,
-    borderRadius: 1,
-    backgroundColor: '#0F0FFF',
-  },
-});
