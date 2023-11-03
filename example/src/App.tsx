@@ -48,7 +48,7 @@ const App = () => {
           step={1}
           maximumValue={3}
           minimumValue={0}
-          style={pageViewPositionSlider.style}
+          style={styles.slider}
           value={currentPage + 1}
           thumbTintColor={pageViewPositionSlider.thumbColor}
           disabled
@@ -83,6 +83,9 @@ const pageViewPositionSlider = {
 };
 
 const styles = StyleSheet.create({
+  slider: {
+    width: '100%',
+  },
   pagerViewContainer: {
     flex: 1,
   },
