@@ -73,6 +73,7 @@ To use this library you need to ensure you are using the correct version of Reac
 
 | `@react-native-community/slider` version | Required React Native Version |
 | ---------------------------------------- | ----------------------------- |
+| `4.3.0`                                  | `>=0.64`                      |
 | `4.x.x`                                  | `>=0.60`; `>=0.62` (on Windows);  |
 | `3.1.x`                                  | `>=0.60`                      |
 | `2.x.x`                                  | `>= 0.60`                     |

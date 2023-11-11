@@ -74,13 +74,19 @@ using namespace facebook::react;
     if (!slider.tapToSeek) {
         return;
     }
-    
+
     CGPoint touchPoint = [gesture locationInView:slider];
     float rangeWidth = slider.maximumValue - slider.minimumValue;
     float sliderPercent = touchPoint.x / slider.bounds.size.width;
     slider.lastValue = slider.value;
     float value = slider.minimumValue + (rangeWidth * sliderPercent);
-    
+
+    if (value < slider.lowerLimit) {
+        value = slider.lowerLimit;
+    } else if (value > slider.upperLimit) {
+        value = slider.upperLimit;
+    }
+
     [slider setValue:[slider discreteValue:value] animated: YES];
     
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
