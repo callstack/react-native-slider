@@ -113,9 +113,11 @@
   return [self thumbImageForState:UIControlStateNormal];
 }
 
-- (void)setThumbImage:(UIImage *)thumbImage
-{
-  [self setThumbImage:thumbImage forState:UIControlStateNormal];
+- (void)setThumbImage:(UIImage *)thumbImage {
+    if (!CGSizeEqualToSize(self.thumbSize, CGSizeZero)) {
+        thumbImage = [self resizeImage:thumbImage toSize:self.thumbSize];
+    }
+    [super setThumbImage:thumbImage forState:UIControlStateNormal];
 }
 
 - (UIImage *)thumbImage
@@ -130,6 +132,14 @@
   } else {
     self.transform = CGAffineTransformMakeScale(1, 1);
   }
+}
+
+- (UIImage *)resizeImage:(UIImage *)image toSize:(CGSize)newSize {
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
 }
 
 - (void)setDisabled:(BOOL)disabled

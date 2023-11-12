@@ -1,14 +1,14 @@
 import React from 'react';
 import {
-  Image,
-  Platform,
-  StyleSheet,
   AccessibilityActionEvent,
+  ColorValue,
+  Image,
+  NativeSyntheticEvent,
+  Platform,
+  StyleProp,
+  StyleSheet,
   ViewProps,
   ViewStyle,
-  ColorValue,
-  NativeSyntheticEvent,
-  StyleProp,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 //@ts-ignore
@@ -164,6 +164,7 @@ type Props = ViewProps &
      * Sets an image for the thumb. Only static images are supported.
      */
     thumbImage?: ImageSource;
+    thumbSize?: {width: number; height: number};
 
     /**
      * If true the slider will be inverted.
@@ -261,6 +262,7 @@ const SliderComponent = (
           ? Image.resolveAssetSource(props.thumbImage)
           : undefined
       }
+      thumbSize={props.thumbSize}
       ref={forwardedRef}
       style={style}
       onChange={onValueChangeEvent}

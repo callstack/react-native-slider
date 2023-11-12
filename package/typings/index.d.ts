@@ -41,6 +41,7 @@ export interface SliderPropsIOS extends ReactNative.ViewProps {
    * Sets an image for the thumb. Only static images are supported.
    */
   thumbImage?: ReactNative.ImageURISource;
+  thumbSize?: {width: number; height: number};
 
   /**
    * Assigns a single image for the track. Only static images

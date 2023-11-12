@@ -3,10 +3,10 @@ import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNati
 //@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import type {
+  BubblingEventHandler,
+  DirectEventHandler,
   Float,
   WithDefault,
-  DirectEventHandler,
-  BubblingEventHandler,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
 type Event = Readonly<{
@@ -34,6 +34,7 @@ export interface NativeProps extends ViewProps {
   step?: Float;
   testID?: string;
   thumbImage?: ImageSource;
+  thumbSize?: {width: number; height: number};
   thumbTintColor?: ColorValue;
   trackImage?: ImageSource;
   value?: Float;

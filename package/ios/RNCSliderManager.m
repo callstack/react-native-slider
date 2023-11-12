@@ -167,6 +167,7 @@ RCT_EXPORT_VIEW_PROPERTY(onRNCSliderSlidingStart, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRNCSliderSlidingComplete, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(thumbTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(thumbImage, UIImage);
+RCT_EXPORT_VIEW_PROPERTY(thumbSize, CGSize);
 RCT_EXPORT_VIEW_PROPERTY(inverted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(tapToSeek, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(accessibilityUnits, NSString);

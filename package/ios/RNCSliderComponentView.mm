@@ -159,6 +159,19 @@ using namespace facebook::react;
     const auto &oldScreenProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
     const auto &newScreenProps = *std::static_pointer_cast<const RNCSliderProps>(props);
     
+    if (oldScreenProps.thumbSize != newScreenProps.thumbSize) {
+        slider.thumbSize = CGSizeMake(newScreenProps.thumbSize.width, newScreenProps.thumbSize.height);
+    }
+    if (oldScreenProps.thumbImage != newScreenProps.thumbImage || oldScreenProps.thumbSize != newScreenProps.thumbSize) {
+        [self loadImageFromImageSource:newScreenProps.thumbImage completionBlock:^(NSError *error, UIImage *image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->slider setThumbImage:image withSize:self->slider.thumbSize];
+            });
+        }
+        failureBlock:^{
+            [self->slider setThumbImage:nil];
+        }];
+    }   
     if (oldScreenProps.value != newScreenProps.value) {
         if (!slider.isSliding) {
             slider.value = newScreenProps.value;
