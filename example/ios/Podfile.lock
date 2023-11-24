@@ -375,7 +375,7 @@ PODS:
   - React-jsinspector (0.72.6)
   - React-logger (0.72.6):
     - glog
-  - react-native-pager-view (6.2.0):
+  - react-native-pager-view (6.2.2):
     - React-Core
   - react-native-slider (4.5.0):
     - RCT-Folly (= 2021.07.22.00)
