@@ -377,7 +377,8 @@ PODS:
     - glog
   - react-native-pager-view (6.2.0):
     - React-Core
-  - react-native-slider (4.4.3):
+  - react-native-slider (4.4.4):
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - React-NativeModulesApple (0.72.6):
     - hermes-engine
@@ -698,7 +699,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 194e32c6aab382d88713ad3dd0025c5f5c4ee072
   React-logger: cebf22b6cf43434e471dc561e5911b40ac01d289
   react-native-pager-view: 0ccb8bf60e2ebd38b1f3669fa3650ecce81db2df
-  react-native-slider: 1cdd6ba29675df21f30544253bf7351d3c2d68c4
+  react-native-slider: ae9441a884f8465762f1f68d31eafad42663adb4
   React-NativeModulesApple: 02e35e9a51e10c6422f04f5e4076a7c02243fff2
   React-perflogger: e3596db7e753f51766bceadc061936ef1472edc3
   React-RCTActionSheet: 17ab132c748b4471012abbcdcf5befe860660485
