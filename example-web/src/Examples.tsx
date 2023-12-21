@@ -100,6 +100,12 @@ export const examples: Props[] = [
     },
   },
   {
+    title: 'lowerLimit: 2, upperLimit: 7',
+    render(): React.ReactElement {
+      return <SliderExample minimumValue={0} maximumValue={10}  lowerLimit={2} upperLimit={7} />;
+    },
+  },
+  {
     title: 'step: 0.25, tap to seek on iOS',
     render(): React.ReactElement {
       return <SliderExample step={0.25} tapToSeek={true} />;
