@@ -31,8 +31,8 @@ export interface Props {
   value: number;
   minimumValue: number;
   maximumValue: number;
-  lowerLimit: number;
-  upperLimit: number;
+  lowerLimit?: number;
+  upperLimit?: number;
   step: number;
   minimumTrackTintColor: ColorValue;
   maximumTrackTintColor: ColorValue;
@@ -279,10 +279,17 @@ const RCTSliderWebComponent = React.forwardRef(
       } else {
         const x = pageX - containerX;
         const newValue = inverted
-          ? upperValue - ((upperValue - lowerValue) * x) / width
-          : lowerValue + ((upperValue - lowerValue) * x) / width;
+          ? maximumValue - ((maximumValue - minimumValue) * x) / width
+          : minimumValue + ((maximumValue - minimumValue) * x) / width;
 
-        return step ? Math.round(newValue / step) * step : newValue;
+        const valueAfterStep = step
+          ? Math.round(newValue / step) * step
+          : newValue;
+        const valueAfterLowerLimit =
+          valueAfterStep < lowerLimit ? lowerLimit : valueAfterStep;
+        const valueAfterUpperLimit =
+          valueAfterLowerLimit > upperLimit ? upperLimit : valueAfterLowerLimit;
+        return valueAfterUpperLimit;
       }
     };
 
@@ -324,10 +331,8 @@ const RCTSliderWebComponent = React.forwardRef(
       <View
         ref={containerRef}
         onLayout={({nativeEvent: {layout}}: LayoutChangeEvent) => {
-          const lowerValue = lowerLimit === minimumValue ? 0 : lowerLimit;
-          const multiplier = (upperLimit - lowerValue) / maximumValue;
           containerSize.current.height = layout.height;
-          containerSize.current.width = layout.width * multiplier;
+          containerSize.current.width = layout.width;
           if ((containerRef as RefObject<View>).current) {
             updateContainerPositionX();
           }
