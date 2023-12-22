@@ -290,8 +290,8 @@ SliderWithRef.defaultProps = {
   step: 0,
   inverted: false,
   tapToSeek: false,
-  lowerLimit: Platform.select({ web: undefined, default: LIMIT_MIN_VALUE }),
-  upperLimit: Platform.select({ web: undefined, default: LIMIT_MAX_VALUE }),
+  lowerLimit: Platform.select({web: undefined, default: LIMIT_MIN_VALUE}),
+  upperLimit: Platform.select({web: undefined, default: LIMIT_MAX_VALUE}),
 };
 
 let styles = StyleSheet.create(
