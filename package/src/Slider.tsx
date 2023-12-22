@@ -240,7 +240,10 @@ const SliderComponent = (
   const lowerLimit =
     !!localProps.lowerLimit || localProps.lowerLimit === 0
       ? localProps.lowerLimit
-      : Platform.select({ web: localProps.minimumValue, default: LIMIT_MIN_VALUE });
+      : Platform.select({
+          web: localProps.minimumValue,
+          default: LIMIT_MIN_VALUE,
+        });
 
   const upperLimit =
     !!localProps.upperLimit || localProps.upperLimit === 0
