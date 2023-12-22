@@ -4,7 +4,6 @@ import React, {RefObject, useCallback} from 'react';
 import {
   Animated,
   View,
-  StyleSheet,
   ColorValue,
   ViewStyle,
   GestureResponderEvent,
@@ -118,6 +117,7 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const onSlidingStart = useCallback(
       (value: number) => {
+        isUserInteracting.current = true;
         onRNCSliderSlidingStart && onRNCSliderSlidingStart(valueToEvent(value));
       },
       [onRNCSliderSlidingStart],
@@ -125,11 +125,14 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const onSlidingComplete = useCallback(
       (value: number) => {
+        isUserInteracting.current = false;
         onRNCSliderSlidingComplete &&
           onRNCSliderSlidingComplete(valueToEvent(value));
       },
       [onRNCSliderSlidingComplete],
     );
+    // Add a ref to track user interaction
+    const isUserInteracting = React.useRef(false);
     const updateValue = useCallback(
       (newValue: number) => {
         // Ensure that the value is correctly rounded
@@ -145,7 +148,9 @@ const RCTSliderWebComponent = React.forwardRef(
         );
         if (value !== withinBounds) {
           setValue(withinBounds);
-          onValueChange(withinBounds);
+          if (isUserInteracting.current) {
+            onValueChange(withinBounds);
+          }
           return withinBounds;
         }
         return hardRounded;
@@ -197,7 +202,7 @@ const RCTSliderWebComponent = React.forwardRef(
       };
     }, [containerRef]);
 
-    const containerStyle = StyleSheet.compose(
+    const containerStyle = [
       {
         flexGrow: 1,
         flexShrink: 1,
@@ -206,7 +211,7 @@ const RCTSliderWebComponent = React.forwardRef(
         alignItems: 'center',
       },
       style,
-    );
+    ] as ViewStyle[];
 
     const trackStyle = {
       height: trackHeight,
@@ -226,7 +231,7 @@ const RCTSliderWebComponent = React.forwardRef(
       flexGrow: maxPercent,
     };
 
-    const thumbViewStyle = StyleSheet.compose(
+    const thumbViewStyle = [
       {
         width: thumbSize,
         height: thumbSize,
@@ -236,7 +241,7 @@ const RCTSliderWebComponent = React.forwardRef(
         overflow: 'hidden',
       },
       thumbStyle,
-    );
+    ] as ViewStyle[];
 
     const decimalPrecision = React.useRef(
       calculatePrecision(minimumValue, maximumValue, step),
