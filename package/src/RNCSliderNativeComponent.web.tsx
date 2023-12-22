@@ -287,9 +287,9 @@ const RCTSliderWebComponent = React.forwardRef(
           : newValue;
         const valueAfterLowerLimit =
           valueAfterStep < lowerLimit ? lowerLimit : valueAfterStep;
-        const valueAfterUpperLimit =
+        const valueInLimitRange =
           valueAfterLowerLimit > upperLimit ? upperLimit : valueAfterLowerLimit;
-        return valueAfterUpperLimit;
+        return valueInLimitRange;
       }
     };
 
