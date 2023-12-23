@@ -251,7 +251,7 @@ const SliderComponent = (
       : Platform.select({
           web: localProps.maximumValue,
           default: LIMIT_MAX_VALUE,
-      });
+        });
 
   return (
     <RCTSliderNativeComponent
