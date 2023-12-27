@@ -263,13 +263,17 @@ const RCTSliderWebComponent = React.forwardRef(
     };
 
     const getValueFromNativeEvent = (pageX: number) => {
-      const {width = 1} = containerSize.current;
+      const adjustForThumbSize = (containerSize.current.width || 1) > thumbSize;
+      const width =
+        (containerSize.current.width || 1) -
+        (adjustForThumbSize ? thumbSize : 0);
 
       if (containerPositionInvalidated.current) {
         containerPositionInvalidated.current = false;
         updateContainerPositionX();
       }
-      const containerX = containerPositionX.current;
+      const containerX =
+        containerPositionX.current + (adjustForThumbSize ? thumbSize / 2 : 0);
 
       if (pageX < containerX) {
         return inverted ? maximumValue : minimumValue;
