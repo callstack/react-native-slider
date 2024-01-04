@@ -30,6 +30,8 @@ export interface Props {
   value: number;
   minimumValue: number;
   maximumValue: number;
+  lowerLimit?: number;
+  upperLimit?: number;
   step: number;
   minimumTrackTintColor: ColorValue;
   maximumTrackTintColor: ColorValue;
@@ -54,6 +56,8 @@ const RCTSliderWebComponent = React.forwardRef(
       value: initialValue,
       minimumValue = 0,
       maximumValue = 0,
+      lowerLimit = 0,
+      upperLimit = 0,
       step = 1,
       minimumTrackTintColor = '#009688',
       maximumTrackTintColor = '#939393',
@@ -270,18 +274,27 @@ const RCTSliderWebComponent = React.forwardRef(
         updateContainerPositionX();
       }
       const containerX = containerPositionX.current;
+      const lowerValue = minimumValue < lowerLimit ? lowerLimit : minimumValue;
+      const upperValue = maximumValue > upperLimit ? upperLimit : maximumValue;
 
       if (pageX < containerX) {
-        return inverted ? maximumValue : minimumValue;
+        return inverted ? upperValue : lowerValue;
       } else if (pageX > containerX + width) {
-        return inverted ? minimumValue : maximumValue;
+        return inverted ? lowerValue : upperValue;
       } else {
         const x = pageX - containerX;
         const newValue = inverted
           ? maximumValue - ((maximumValue - minimumValue) * x) / width
           : minimumValue + ((maximumValue - minimumValue) * x) / width;
 
-        return step ? Math.round(newValue / step) * step : newValue;
+        const valueAfterStep = step
+          ? Math.round(newValue / step) * step
+          : newValue;
+        const valueAfterLowerLimit =
+          valueAfterStep < lowerLimit ? lowerLimit : valueAfterStep;
+        const valueInLimitRange =
+          valueAfterLowerLimit > upperLimit ? upperLimit : valueAfterLowerLimit;
+        return valueInLimitRange;
       }
     };
 
