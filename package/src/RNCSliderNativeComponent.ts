@@ -26,6 +26,7 @@ export interface NativeProps extends ViewProps {
   maximumValue?: Float;
   minimumTrackImage?: ImageSource;
   minimumTrackTintColor?: ColorValue;
+  bufferedTrackTintColor?: ColorValue;
   minimumValue?: Float;
   onChange?: BubblingEventHandler<Event>;
   onRNCSliderSlidingStart?: DirectEventHandler<Event>;
@@ -37,6 +38,7 @@ export interface NativeProps extends ViewProps {
   thumbTintColor?: ColorValue;
   trackImage?: ImageSource;
   value?: Float;
+  bufferedValue?: Float;
   lowerLimit?: Float;
   upperLimit?: Float;
 }

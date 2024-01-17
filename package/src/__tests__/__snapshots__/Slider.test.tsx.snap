@@ -7,6 +7,7 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
       "disabled": true,
     }
   }
+  bufferedValue={0}
   disabled={true}
   inverted={false}
   lowerLimit={-9007199254740991}
@@ -37,6 +38,7 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
       "disabled": true,
     }
   }
+  bufferedValue={0}
   disabled={true}
   inverted={false}
   lowerLimit={-9007199254740991}
@@ -67,6 +69,7 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
       "disabled": false,
     }
   }
+  bufferedValue={0}
   disabled={false}
   inverted={false}
   lowerLimit={-9007199254740991}
@@ -92,6 +95,7 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
 
 exports[`<Slider /> renders a slider with custom props 1`] = `
 <RNCSlider
+  bufferedValue={0}
   disabled={false}
   inverted={false}
   lowerLimit={0}
@@ -126,6 +130,7 @@ exports[`<Slider /> renders disabled slider 1`] = `
       "disabled": true,
     }
   }
+  bufferedValue={0}
   disabled={true}
   inverted={false}
   lowerLimit={-9007199254740991}
@@ -151,6 +156,7 @@ exports[`<Slider /> renders disabled slider 1`] = `
 
 exports[`<Slider /> renders enabled slider 1`] = `
 <RNCSlider
+  bufferedValue={0}
   disabled={false}
   inverted={false}
   lowerLimit={-9007199254740991}
