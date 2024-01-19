@@ -297,6 +297,7 @@ const SliderComponent = (
           renderStepNumber={localProps.renderStepNumber}
           thumbImage={localProps.thumbImage}
           StepMarker={localProps.StepMarker}
+          isLTR={localProps.inverted}
         />
       ) : null}
       <RCTSliderNativeComponent

@@ -14,6 +14,7 @@ export const StepsIndicator = ({
   StepMarker,
   renderStepNumber,
   thumbImage,
+  isLTR,
 }: {
   options: number[];
   sliderWidth: number;
@@ -21,6 +22,7 @@ export const StepsIndicator = ({
   StepMarker?: FC<MarkerProps>;
   renderStepNumber?: boolean;
   thumbImage?: ImageSource;
+  isLTR?: boolean;
 }) => {
   const stepNumberFontStyle = {
     fontSize:
@@ -28,6 +30,7 @@ export const StepsIndicator = ({
         ? constants.STEP_NUMBER_TEXT_FONT_SMALL
         : constants.STEP_NUMBER_TEXT_FONT_BIG,
   };
+  const values = isLTR ? options.reverse() : options;
   return (
     <View
       pointerEvents="none"
@@ -35,7 +38,7 @@ export const StepsIndicator = ({
         styles.stepsIndicator,
         {marginHorizontal: sliderWidth * constants.MARGIN_HORIZONTAL_PADDING},
       ]}>
-      {options.map((i, index) => {
+      {values.map((i, index) => {
         return (
           <Fragment key={index}>
             <View style={styles.stepIndicatorElement}>

@@ -205,6 +205,36 @@ const SlidingCustomStepsAnotherThumbImageNumbersExample = (
   );
 };
 
+const InvertedSliderWithStepMarker = (props: SliderProps) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={15}
+        step={1}
+        tapToSeek
+        renderStepNumber
+        thumbImage={require('./resources/twitter-small.png')}
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrueSmall}>
+              <View style={styles.innerTrueSmall} />
+            </View>
+          ) : (
+            <View style={styles.outerSmall}>
+              <View style={styles.innerSmall} />
+            </View>
+          );
+        }}
+        inverted
+        minimumTrackTintColor={'#123456'}
+        maximumTrackTintColor={'#654321'}
+      />
+    </View>
+  );
+};
+
 const SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth = (
   props: SliderProps,
 ) => {
@@ -464,6 +494,12 @@ export const examples: Props[] = [
     title: 'Slider with custom steps, different width and thumbImage',
     render() {
       return <SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth />;
+    },
+  },
+  {
+    title: 'Inverted slider direction with steps number and thumbImage',
+    render() {
+      return <InvertedSliderWithStepMarker />;
     },
   },
   {
