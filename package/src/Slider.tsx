@@ -176,7 +176,7 @@ type Props = ViewProps &
     /**
      * Component to be rendered for each step indicator.
      */
-    stepMarker?: FC<MarkerProps> | boolean;
+    StepMarker?: FC<MarkerProps>;
 
     /**
      *
@@ -289,14 +289,14 @@ const SliderComponent = (
         setWidth(event.nativeEvent.layout.width);
       }}
       style={[styles, style, {justifyContent: 'center'}]}>
-      {props.stepMarker || !!props.renderStepNumber ? (
+      {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
           sliderWidth={width}
           currentValue={currentValue}
           renderStepNumber={localProps.renderStepNumber}
           thumbImage={localProps.thumbImage}
-          customStepMarker={localProps.stepMarker}
+          StepMarker={localProps.StepMarker}
         />
       ) : null}
       <RCTSliderNativeComponent
@@ -308,7 +308,7 @@ const SliderComponent = (
         thumbImage={
           Platform.OS === 'web'
             ? props.thumbImage
-            : props.stepMarker
+            : props.StepMarker
             ? undefined
             : Image.resolveAssetSource(props.thumbImage)
         }
@@ -327,7 +327,7 @@ const SliderComponent = (
         onResponderTerminationRequest={() => false}
         onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
         thumbTintColor={
-          props.thumbImage && !!props.stepMarker
+          props.thumbImage && !!props.StepMarker
             ? 'transparent'
             : props.thumbTintColor
         }
@@ -345,8 +345,14 @@ SliderWithRef.defaultProps = {
   step: 0,
   inverted: false,
   tapToSeek: false,
-  lowerLimit: Platform.select({web: undefined, default: constants.LIMIT_MIN_VALUE}),
-  upperLimit: Platform.select({web: undefined, default: constants.LIMIT_MAX_VALUE}),
+  lowerLimit: Platform.select({
+    web: undefined,
+    default: constants.LIMIT_MIN_VALUE,
+  }),
+  upperLimit: Platform.select({
+    web: undefined,
+    default: constants.LIMIT_MAX_VALUE,
+  }),
 };
 
 export default SliderWithRef;

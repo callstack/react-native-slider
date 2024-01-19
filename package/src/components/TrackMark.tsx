@@ -9,7 +9,7 @@ export type MarkerProps = {
 export type TrackMarksProps = {
   isTrue: boolean;
   thumbImage?: ImageURISource;
-  StepMarker?: FC<MarkerProps> | boolean;
+  StepMarker?: FC<MarkerProps>;
 };
 
 export const SliderTrackMark = ({
@@ -19,15 +19,7 @@ export const SliderTrackMark = ({
 }: TrackMarksProps) => {
   return (
     <View style={styles.trackMarkContainer}>
-      {StepMarker && typeof StepMarker !== 'boolean' ? (
-        <StepMarker stepMarked={isTrue} />
-      ) : (
-        <View
-          style={
-            isTrue ? styles.defaultIndicatorMarked : styles.defaultIndicatorIdle
-          }
-        />
-      )}
+      {StepMarker ? <StepMarker stepMarked={isTrue} /> : null}
       {thumbImage && isTrue ? (
         <View style={styles.thumbImageContainer}>
           <Image source={thumbImage} style={styles.thumbImage} />

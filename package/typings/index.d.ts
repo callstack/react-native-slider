@@ -163,7 +163,7 @@ export interface SliderProps
   /**
    * Component to be rendered for each step indicator.
    */
-  stepMarker?: FC<MarkerProps> | boolean;
+  StepMarker?: FC<MarkerProps>;
 
   /**
    * 

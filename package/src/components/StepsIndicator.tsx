@@ -11,14 +11,14 @@ export const StepsIndicator = ({
   options,
   sliderWidth,
   currentValue,
-  customStepMarker,
+  StepMarker,
   renderStepNumber,
   thumbImage,
 }: {
   options: number[];
   sliderWidth: number;
   currentValue?: number;
-  customStepMarker?: FC<MarkerProps> | boolean;
+  StepMarker?: FC<MarkerProps>;
   renderStepNumber?: boolean;
   thumbImage?: ImageSource;
 }) => {
@@ -43,7 +43,7 @@ export const StepsIndicator = ({
                 key={`${index}-SliderTrackMark`}
                 isTrue={currentValue === i}
                 thumbImage={thumbImage}
-                StepMarker={customStepMarker}
+                StepMarker={StepMarker}
               />
               {renderStepNumber ? (
                 <StepNumber

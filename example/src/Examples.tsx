@@ -71,7 +71,7 @@ const SlidingStepsExample = (props: SliderProps) => {
         maximumValue={4}
         step={1}
         tapToSeek
-        stepMarker={({stepMarked}) => {
+        StepMarker={({stepMarked}) => {
           return stepMarked ? (
             <View style={styles.outerTrue}>
               <View style={styles.innerTrue} />
@@ -99,7 +99,7 @@ const SlidingStepsNumbersExample = (props: SliderProps) => {
         step={1}
         tapToSeek
         renderStepNumber
-        stepMarker={({stepMarked}) => {
+        StepMarker={({stepMarked}) => {
           return stepMarked ? (
             <View style={styles.outerTrue}>
               <View style={styles.innerTrue} />
@@ -127,7 +127,7 @@ const SlidingStepsSmallNumbersExample = (props: SliderProps) => {
         step={1}
         tapToSeek
         renderStepNumber
-        stepMarker={({stepMarked}) => {
+        StepMarker={({stepMarked}) => {
           return stepMarked ? (
             <View style={styles.outerTrueSmall}>
               <View style={styles.innerTrueSmall} />
@@ -145,22 +145,6 @@ const SlidingStepsSmallNumbersExample = (props: SliderProps) => {
   );
 };
 
-const SlidingStepsThumbImageExample = (props: SliderProps) => {
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={6}
-        step={1}
-        tapToSeek
-        stepMarker
-        renderStepNumber
-      />
-    </View>
-  );
-};
-
 const SlidingCustomStepsThumbImageNumbersExample = (props: SliderProps) => {
   return (
     <View>
@@ -172,7 +156,7 @@ const SlidingCustomStepsThumbImageNumbersExample = (props: SliderProps) => {
         tapToSeek
         renderStepNumber
         thumbImage={require('./resources/ck-icon.png')}
-        stepMarker={({stepMarked}) => {
+        StepMarker={({stepMarked}) => {
           return stepMarked ? (
             <View style={styles.outerTrue}>
               <View style={styles.innerTrue} />
@@ -203,7 +187,7 @@ const SlidingCustomStepsAnotherThumbImageNumbersExample = (
         tapToSeek
         renderStepNumber
         thumbImage={require('./resources/twitter-small.png')}
-        stepMarker={({stepMarked}) => {
+        StepMarker={({stepMarked}) => {
           return stepMarked ? (
             <View style={styles.outerTrueSmall}>
               <View style={styles.innerTrueSmall} />
@@ -234,7 +218,7 @@ const SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth = (
         style={{width: 200}}
         tapToSeek
         renderStepNumber
-        stepMarker={({stepMarked}) => {
+        StepMarker={({stepMarked}) => {
           return stepMarked ? (
             <View style={[styles.innerTrue, {top: 3}]} />
           ) : (
@@ -462,12 +446,6 @@ export const examples: Props[] = [
     title: 'Slider with smaller customized indicator and default numbers',
     render() {
       return <SlidingStepsSmallNumbersExample />;
-    },
-  },
-  {
-    title: 'Slider with default indicator and thumbImage',
-    render() {
-      return <SlidingStepsThumbImageExample />;
     },
   },
   {
