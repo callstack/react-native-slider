@@ -216,6 +216,11 @@ public class ReactSlider extends AppCompatSeekBar {
       mStepCalculated = (mMaxValue - mMinValue) / (double) DEFAULT_TOTAL_STEPS;
     }
     setMax(getTotalSteps());
+
+    // setMax updates the internal "mKeyProgressIncrement" and on initial load the value will be set to
+    // 6 due to Math.round(DEFAULT_TOTAL_STEPS (128) / 20). And its hard to get it out of 6 if the range
+    // is not high enough so lets revert it back to 1 to respect mStep
+    setKeyProgressIncrement(1);
     updateLowerLimit();
     updateUpperLimit();
     updateValue();
