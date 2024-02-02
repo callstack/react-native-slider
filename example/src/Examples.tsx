@@ -11,11 +11,11 @@ export interface Props {
 const SliderExample = (props: SliderProps) => {
   const [value, setValue] = useState(props.value ?? 0);
   return (
-    <View>
+    <View style={{alignItems: 'center'}}>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
       <Slider
         step={0.5}
-        style={styles.slider}
+        style={[styles.slider, props.style]}
         {...props}
         value={value}
         onValueChange={setValue}
@@ -62,13 +62,212 @@ const SlidingCompleteExample = (props: SliderProps) => {
   );
 };
 
+const SlidingStepsExample = (props: SliderProps) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={4}
+        step={1}
+        tapToSeek
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrue}>
+              <View style={styles.innerTrue} />
+            </View>
+          ) : (
+            <View style={styles.outer}>
+              <View style={styles.inner} />
+            </View>
+          );
+        }}
+        minimumTrackTintColor={'#112233'}
+        maximumTrackTintColor={'#00FF00'}
+      />
+    </View>
+  );
+};
+
+const SlidingStepsNumbersExample = (props: SliderProps) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={5}
+        step={1}
+        tapToSeek
+        renderStepNumber
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrue}>
+              <View style={styles.innerTrue} />
+            </View>
+          ) : (
+            <View style={styles.outer}>
+              <View style={styles.inner} />
+            </View>
+          );
+        }}
+        minimumTrackTintColor={'#123456'}
+        maximumTrackTintColor={'#00FF00'}
+      />
+    </View>
+  );
+};
+
+const SlidingStepsSmallNumbersExample = (props: SliderProps) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={5}
+        step={1}
+        tapToSeek
+        renderStepNumber
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrueSmall}>
+              <View style={styles.innerTrueSmall} />
+            </View>
+          ) : (
+            <View style={styles.outerSmall}>
+              <View style={styles.innerSmall} />
+            </View>
+          );
+        }}
+        minimumTrackTintColor={'#123456'}
+        maximumTrackTintColor={'#00FF00'}
+      />
+    </View>
+  );
+};
+
+const SlidingCustomStepsThumbImageNumbersExample = (props: SliderProps) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={4}
+        step={1}
+        tapToSeek
+        renderStepNumber
+        thumbImage={require('./resources/ck-icon.png')}
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrue}>
+              <View style={styles.innerTrue} />
+            </View>
+          ) : (
+            <View style={styles.outer}>
+              <View style={styles.inner} />
+            </View>
+          );
+        }}
+        minimumTrackTintColor={'#123456'}
+        maximumTrackTintColor={'#654321'}
+      />
+    </View>
+  );
+};
+
+const SlidingCustomStepsAnotherThumbImageNumbersExample = (
+  props: SliderProps,
+) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={15}
+        step={1}
+        tapToSeek
+        renderStepNumber
+        thumbImage={require('./resources/twitter-small.png')}
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrueSmall}>
+              <View style={styles.innerTrueSmall} />
+            </View>
+          ) : (
+            <View style={styles.outerSmall}>
+              <View style={styles.innerSmall} />
+            </View>
+          );
+        }}
+        minimumTrackTintColor={'#123456'}
+        maximumTrackTintColor={'#654321'}
+      />
+    </View>
+  );
+};
+
+const InvertedSliderWithStepMarker = (props: SliderProps) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={15}
+        step={1}
+        tapToSeek
+        renderStepNumber
+        thumbImage={require('./resources/twitter-small.png')}
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={styles.outerTrueSmall}>
+              <View style={styles.innerTrueSmall} />
+            </View>
+          ) : (
+            <View style={styles.outerSmall}>
+              <View style={styles.innerSmall} />
+            </View>
+          );
+        }}
+        inverted
+        minimumTrackTintColor={'#123456'}
+        maximumTrackTintColor={'#654321'}
+      />
+    </View>
+  );
+};
+
+const SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth = (
+  props: SliderProps,
+) => {
+  return (
+    <View>
+      <SliderExample
+        {...props}
+        minimumValue={0}
+        maximumValue={3}
+        step={1}
+        style={{width: 200}}
+        tapToSeek
+        renderStepNumber
+        StepMarker={({stepMarked}) => {
+          return stepMarked ? (
+            <View style={[styles.innerTrue, {top: 3}]} />
+          ) : (
+            <View style={[styles.inner, {top: 3}]} />
+          );
+        }}
+        minimumTrackTintColor={'#ABCDEF'}
+        maximumTrackTintColor={'#001122'}
+      />
+    </View>
+  );
+};
+
 export default SliderExample;
 
 const styles = StyleSheet.create({
   slider: {
     width: 300,
     opacity: 1,
-    height: 50,
     marginTop: 10,
   },
   text: {
@@ -76,6 +275,63 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
     margin: 0,
+  },
+  outer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#11FF11',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  outerTrue: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#0F0FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#111111',
+  },
+  innerTrue: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#0F0FFF',
+  },
+  outerSmall: {
+    width: 4,
+    height: 4,
+    top: 6,
+    borderRadius: 2,
+    backgroundColor: '#003366',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  outerTrueSmall: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+    backgroundColor: '#ABCDEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerSmall: {
+    width: 7,
+    height: 7,
+    borderRadius: 1,
+    backgroundColor: '#223366',
+  },
+  innerTrueSmall: {
+    width: 7,
+    height: 7,
+    borderRadius: 1,
+    backgroundColor: '#334488',
   },
 });
 
@@ -202,6 +458,48 @@ export const examples: Props[] = [
           maximumTrackImage={require('./resources/slider-right.png')}
         />
       );
+    },
+  },
+  {
+    title: 'Slider with customized indicator and no numbers',
+    render() {
+      return <SlidingStepsExample />;
+    },
+  },
+  {
+    title: 'Slider with customized indicator and default numbers',
+    render() {
+      return <SlidingStepsNumbersExample />;
+    },
+  },
+  {
+    title: 'Slider with smaller customized indicator and default numbers',
+    render() {
+      return <SlidingStepsSmallNumbersExample />;
+    },
+  },
+  {
+    title: 'Slider with custom steps, thumbImage and steps numbers',
+    render() {
+      return <SlidingCustomStepsThumbImageNumbersExample />;
+    },
+  },
+  {
+    title: 'Slider with custom steps, different thumbImage and steps numbers',
+    render() {
+      return <SlidingCustomStepsAnotherThumbImageNumbersExample />;
+    },
+  },
+  {
+    title: 'Slider with custom steps, different width and thumbImage',
+    render() {
+      return <SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth />;
+    },
+  },
+  {
+    title: 'Inverted slider direction with steps number and thumbImage',
+    render() {
+      return <InvertedSliderWithStepMarker />;
     },
   },
   {

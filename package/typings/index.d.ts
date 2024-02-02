@@ -1,5 +1,7 @@
 import * as React from 'react';
+import { FC } from 'react';
 import * as ReactNative from 'react-native';
+import { ImageURISource } from 'react-native';
 
 type Constructor<T> = new (...args: any[]) => T;
 
@@ -16,6 +18,16 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
 
 export interface SliderRef {
   updateValue(value: number): void;
+}
+
+export type TrackMarksProps = {
+  isTrue: boolean;
+  thumbImage?: ImageURISource;
+  StepMarker?: FC<MarkerProps> | boolean;
+}
+
+export type MarkerProps = {
+  stepMarked: boolean;
 }
 
 export interface SliderPropsIOS extends ReactNative.ViewProps {
@@ -147,6 +159,16 @@ export interface SliderProps
    * Reverses the direction of the slider.
    */
   inverted?: boolean;
+
+  /**
+   * Component to be rendered for each step indicator.
+   */
+  StepMarker?: FC<MarkerProps>;
+
+  /**
+   * 
+   */
+  renderStepNumber?: boolean;
 
   /**
    * A string of one or more words to be announced by the screen reader.
