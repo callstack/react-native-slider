@@ -227,5 +227,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Restore NuGet packages
+        run: nuget restore .\example\windows\example.sln
+
+      - name: Restore .NET dependencies
+        run: msbuild -t:restore .\example\windows\example.sln
+
       - name: Build the Windows OS app
         run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging
