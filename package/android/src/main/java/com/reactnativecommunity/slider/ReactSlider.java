@@ -216,6 +216,7 @@ public class ReactSlider extends AppCompatSeekBar {
       mStepCalculated = (mMaxValue - mMinValue) / (double) DEFAULT_TOTAL_STEPS;
     }
     setMax(getTotalSteps());
+    setKeyProgressIncrement(1);
     updateLowerLimit();
     updateUpperLimit();
     updateValue();
