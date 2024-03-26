@@ -19,7 +19,8 @@
     "babel-preset-expo": "^9.2.0",
     "react": "18.2.0",
     "react-native": "0.73.5",
-    "react-native-pager-view": "^6.2.3"
+    "react-native-pager-view": "^6.2.3",
+    "react-native-windows": "0.73.11"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -38,7 +39,8 @@
     "prettier": "2.8.8",
     "react-test-renderer": "18.2.0",
     "rimraf": "^5.0.5",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "metro-config": "^0.80.7"
   },
   "engines": {
     "node": ">=18"
