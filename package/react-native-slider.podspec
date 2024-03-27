@@ -16,6 +16,13 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/callstack/react-native-slider.git", :tag => "v#{s.version}" }
   s.source_files = "ios/**/*.{h,m,mm}"
+
+  s.subspec "common" do |ss|
+    ss.source_files         = "common/cpp/**/*.{cpp,h}"
+    ss.header_dir           = "RNCSlider"
+    ss.pod_target_xcconfig  = { "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/common/cpp\"" }
+  end
+
   if defined?(install_modules_dependencies)
     install_modules_dependencies(s)
   else
