@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="daffc25c-edea-44b9-a7d6-92f59f3fe086"
+    Name="349b26ae-7877-4b4b-9579-442449918c4b"
     Publisher="CN=Bartosz Klonowski"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="daffc25c-edea-44b9-a7d6-92f59f3fe086" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="349b26ae-7877-4b4b-9579-442449918c4b" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>example</DisplayName>
