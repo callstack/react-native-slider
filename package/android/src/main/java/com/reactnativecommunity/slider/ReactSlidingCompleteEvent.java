@@ -17,7 +17,7 @@ import com.facebook.react.uimanager.events.Event;
  */
 public class ReactSlidingCompleteEvent extends Event<ReactSlidingCompleteEvent> {
 
-    public static final String EVENT_NAME = "topSlidingComplete";
+    public static final String EVENT_NAME = "onRNCSliderSlidingComplete";
 
     private final double mValue;
 

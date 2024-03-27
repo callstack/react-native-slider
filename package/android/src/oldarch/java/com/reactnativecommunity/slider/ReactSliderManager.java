@@ -200,8 +200,15 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER);
   }
 
-  @Override
-  public Map getExportedCustomDirectEventTypeConstants() {
-    return ReactSliderManagerImpl.getExportedCustomDirectEventTypeConstants();
-  }
+    @Nullable
+    @Override
+    public Map<String, Object> getExportedCustomBubblingEventTypeConstants() {
+        return ReactSliderManagerImpl.getExportedCustomBubblingEventTypeConstants();
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+        return ReactSliderManagerImpl.getExportedCustomDirectEventTypeConstants();
+    }
 }
