@@ -55,7 +55,7 @@ android {
   sourceSets {
     main {
       if (isNewArchitectureEnabled()) {
-          java.srcDirs += ['src/newarch']
+          java.srcDirs += ['src/newarch', "${project.buildDir}/generated/source/codegen/java", "src/main/jni"]
       } else {
           java.srcDirs += ['src/oldarch']
       }
@@ -76,7 +76,7 @@ dependencies {
 if (isNewArchitectureEnabled()) {
     react {
         jsRootDir = file("../src")
-        libraryName = "ReactSlider"
+        libraryName = "RNCSlider"
         codegenJavaPackageName = "com.reactnativecommunity.slider"
     }
 }
