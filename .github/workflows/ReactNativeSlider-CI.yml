@@ -191,6 +191,9 @@ jobs:
           path: example/ios/Pods
           key: new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
 
+      - name: Use the current package sources in build
+        run: cd example && npm run refresh-package
+
       - name: Install required dependencies on cache miss (Pods)
         if: steps.cache-pods.outputs.cache-hit != 'true'
         run: |
@@ -199,9 +202,6 @@ jobs:
       - name: Reinstall Pods only if using cached ones
         if: steps.cache-pods.outputs.cache-hit == 'true'
         run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
-
-      - name: Use the current package sources in build
-        run: cd example && npm run refresh-package
 
       - name: Build iOS - Fabric
         run: |
