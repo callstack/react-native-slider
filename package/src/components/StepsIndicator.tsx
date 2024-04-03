@@ -47,6 +47,7 @@ export const StepsIndicator = ({
                 isTrue={currentValue === i}
                 thumbImage={thumbImage}
                 StepMarker={StepMarker}
+                currentValue={currentValue}
               />
               {renderStepNumber ? (
                 <StepNumber

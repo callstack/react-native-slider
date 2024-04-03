@@ -1,6 +1,7 @@
 import * as React from 'react';
 import renderer from 'react-test-renderer';
 import Slider from '../Slider';
+import {View} from 'react-native';
 
 describe('<Slider />', () => {
   it('renders enabled slider', () => {
@@ -54,6 +55,31 @@ describe('<Slider />', () => {
           onValueChange={() => {}}
           lowerLimit={0}
           upperLimit={1}
+        />,
+      )
+      .toJSON();
+
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('renders a slider with custom stepMaker', () => {
+    const tree = renderer
+      .create(
+        <Slider
+          value={2}
+          minimumValue={0}
+          maximumValue={4}
+          StepMarker={({stepMarked}) => {
+            return stepMarked ? (
+              <View>
+                <View style={{width: '10px', backgroundColor: 'red'}} />
+              </View>
+            ) : (
+              <View>
+                <View style={{width: '10px', backgroundColor: 'green'}} />
+              </View>
+            );
+          }}
         />,
       )
       .toJSON();
