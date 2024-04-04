@@ -157,7 +157,7 @@ jobs:
           device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
           re='\(([-0-9A-Fa-f]+)\)'
           [[ $device =~ $re ]] || exit 1
-          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+          set -o pipefail && xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build | xcbeautify --renderer github-actions
         working-directory: example/ios
 
 
@@ -191,6 +191,9 @@ jobs:
           path: example/ios/Pods
           key: new-arch-${{ hashFiles('./example/ios/Podfile.lock') }}
 
+      - name: Use the current package sources in build
+        run: cd example && npm run refresh-package
+
       - name: Install required dependencies on cache miss (Pods)
         if: steps.cache-pods.outputs.cache-hit != 'true'
         run: |
@@ -200,16 +203,13 @@ jobs:
         if: steps.cache-pods.outputs.cache-hit == 'true'
         run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
 
-      - name: Use the current package sources in build
-        run: cd example && npm run refresh-package
-
       - name: Build iOS - Fabric
         run: |
           device_name='iPhone 13'
           device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
           re='\(([-0-9A-Fa-f]+)\)'
           [[ $device =~ $re ]] || exit 1
-          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+          set -o pipefail && xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build | xcbeautify --renderer github-actions
         working-directory: example/ios
 
 

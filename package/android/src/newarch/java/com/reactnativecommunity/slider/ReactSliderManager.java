@@ -1,11 +1,15 @@
 package com.reactnativecommunity.slider;
 
+import android.content.Context;
+import android.view.View;
 import android.widget.SeekBar;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerHelper;
@@ -17,6 +21,8 @@ import java.util.Map;
 import com.facebook.react.viewmanagers.RNCSliderManagerInterface;
 import com.facebook.react.viewmanagers.RNCSliderManagerDelegate;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.yoga.YogaMeasureMode;
+import com.facebook.yoga.YogaMeasureOutput;
 
 /**
  * Manages instances of {@code ReactSlider}.
@@ -190,11 +196,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
     view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER);
   }
 
-  @Override
-  public Map getExportedCustomDirectEventTypeConstants() {
-    return ReactSliderManagerImpl.getExportedCustomDirectEventTypeConstants();
-  }
-
   // these props are not available on Android, however we must override their setters
   @Override
   public void setMinimumTrackImage(ReactSlider view, @Nullable ReadableMap readableMap) {}
@@ -210,4 +211,35 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   @Override
   public void setVertical(ReactSlider view, boolean value) {}
+
+  @Override
+  public long measure(
+          Context context,
+          ReadableMap localData,
+          ReadableMap props,
+          ReadableMap state,
+          float width,
+          YogaMeasureMode widthMode,
+          float height,
+          YogaMeasureMode heightMode,
+          @Nullable float[] attachmentsPositions) {
+    ReactSlider view = new ReactSlider(context, null);
+    int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+    view.measure(measureSpec, measureSpec);
+    return YogaMeasureOutput.make(
+            PixelUtil.toDIPFromPixel(view.getMeasuredWidth()),
+            PixelUtil.toDIPFromPixel(view.getMeasuredHeight()));
+  }
+
+    @Nullable
+    @Override
+    public Map<String, Object> getExportedCustomBubblingEventTypeConstants() {
+        return ReactSliderManagerImpl.getExportedCustomBubblingEventTypeConstants();
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+        return ReactSliderManagerImpl.getExportedCustomDirectEventTypeConstants();
+    }
 }

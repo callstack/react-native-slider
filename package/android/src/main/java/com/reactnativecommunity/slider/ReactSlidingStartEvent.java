@@ -17,7 +17,7 @@ import com.facebook.react.uimanager.events.Event;
  */
 
 public class ReactSlidingStartEvent extends Event<ReactSlidingStartEvent> {
-    public static final String EVENT_NAME = "topSlidingStart";
+    public static final String EVENT_NAME = "onRNCSliderSlidingStart";
 
     private final double mValue;
 

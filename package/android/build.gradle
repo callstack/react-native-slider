@@ -55,7 +55,7 @@ android {
   sourceSets {
     main {
       if (isNewArchitectureEnabled()) {
-          java.srcDirs += ['src/newarch']
+          java.srcDirs += ['src/newarch', "${project.buildDir}/generated/source/codegen/java"]
       } else {
           java.srcDirs += ['src/oldarch']
       }
@@ -73,10 +73,3 @@ dependencies {
   api 'com.facebook.react:react-native:+'
 }
 
-if (isNewArchitectureEnabled()) {
-    react {
-        jsRootDir = file("../src")
-        libraryName = "ReactSlider"
-        codegenJavaPackageName = "com.reactnativecommunity.slider"
-    }
-}

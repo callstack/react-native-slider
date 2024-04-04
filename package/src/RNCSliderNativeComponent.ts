@@ -41,6 +41,6 @@ export interface NativeProps extends ViewProps {
   upperLimit?: Float;
 }
 
-export default codegenNativeComponent<NativeProps>(
-  'RNCSlider',
-) as HostComponent<NativeProps>;
+export default codegenNativeComponent<NativeProps>('RNCSlider', {
+  interfaceOnly: true,
+}) as HostComponent<NativeProps>;

@@ -4,7 +4,7 @@
 
 #import <React/RCTConversions.h>
 
-#import <react/renderer/components/RNCSlider/ComponentDescriptors.h>
+#import <react/renderer/components/RNCSlider/RNCSliderComponentDescriptor.h>
 #import <react/renderer/components/RNCSlider/EventEmitters.h>
 #import <react/renderer/components/RNCSlider/Props.h>
 #import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>

@@ -134,8 +134,16 @@ public class ReactSliderManagerImpl {
         view.setAccessibilityIncrements(stringList);
     }
 
-    public static Map getExportedCustomDirectEventTypeConstants() {
-        return MapBuilder.of(ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingComplete"),
-                ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onRNCSliderSlidingStart"));
+    public static Map<String, Object> getExportedCustomBubblingEventTypeConstants() {
+        return MapBuilder.of(
+                ReactSliderEvent.EVENT_NAME, MapBuilder.of("registrationName", ReactSliderEvent.EVENT_NAME)
+        );
+    }
+
+    public static Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.of(
+                ReactSlidingStartEvent.EVENT_NAME, MapBuilder.of("registrationName", ReactSlidingStartEvent.EVENT_NAME),
+                ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", ReactSlidingCompleteEvent.EVENT_NAME)
+        );
     }
 }
