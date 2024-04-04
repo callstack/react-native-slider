@@ -42,5 +42,5 @@ namespace facebook {
 
         };
 
-    } // namespace react
-} // namespace facebook
+    }
+}

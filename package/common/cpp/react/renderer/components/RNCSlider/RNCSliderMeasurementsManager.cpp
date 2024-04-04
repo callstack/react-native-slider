@@ -58,5 +58,5 @@ Size RNCSliderMeasurementsManager::measure(
   return measurement;
 }
 
-} // namespace facebook::react
+}
 #endif

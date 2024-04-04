@@ -23,5 +23,5 @@ namespace facebook {
         }
 #endif
 
-    } // namespace react
-} // namespace facebook
+    }
+}

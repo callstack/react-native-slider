@@ -1,6 +1,4 @@
 #ifdef ANDROID
-#pragma once
-
 #include <react/renderer/core/ConcreteComponentDescriptor.h>
 #include <react/renderer/core/LayoutConstraints.h>
 #include <react/utils/ContextContainer.h>
@@ -21,6 +19,6 @@ namespace facebook::react {
         mutable bool hasBeenMeasured_ = false;
         mutable Size cachedMeasurement_{};
 
-    }; // namespace facebook::react
+    };
 }
 #endif

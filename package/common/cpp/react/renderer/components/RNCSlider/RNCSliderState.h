@@ -24,5 +24,5 @@ public:
 #endif
 };
 
-} // namespace react
-} // namespace facebook
+}
+}
