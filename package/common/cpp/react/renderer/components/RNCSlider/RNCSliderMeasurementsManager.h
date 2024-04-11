@@ -1,4 +1,6 @@
 #ifdef ANDROID
+#pragma once
+
 #include <react/renderer/core/ConcreteComponentDescriptor.h>
 #include <react/renderer/core/LayoutConstraints.h>
 #include <react/utils/ContextContainer.h>
