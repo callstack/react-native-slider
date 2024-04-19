@@ -131,7 +131,7 @@ jobs:
           cache-name: cached-gradle-new-arch-prop
         with:
           path: example/android/gradle.properties
-          key: ${{ hashFiles('./example/android/gradle.properties') }}
+          key: gradle-prop-new-arch-config
 
       - name: Build the Android OS app
         run: cd example/android && ./gradlew assembleDebug
