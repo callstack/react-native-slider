@@ -108,6 +108,33 @@ jobs:
       - name: Build the Android OS app
         run: cd example/android && ./gradlew assembleDebug
 
+  build-android-app-new-arch:
+    name: Build example app Android (Fabric)
+    runs-on: ubuntu-latest
+    needs: [build-android-app]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull the npm dependencies
+        run: npm install
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Use new arch config
+        id: cache-new-arch-gradle
+        uses: actions/cache@v4
+        env:
+          cache-name: cached-gradle-new-arch-prop
+        with:
+          path: example/android/gradle.properties
+          key: gradle-prop-new-arch-config
+
+      - name: Build the Android OS app
+        run: cd example/android && ./gradlew assembleDebug
 
   build-iOS-app:
     name: Build example app iOS
