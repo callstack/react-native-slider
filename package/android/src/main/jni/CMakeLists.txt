@@ -51,13 +51,10 @@ target_link_libraries(
   react_render_graphics
   react_render_imagemanager
   react_render_mapbuffer
-  react_render_textlayoutmanager
   react_utils
   react_nativemodule_core
   rrc_image
   turbomodulejsijni
-  rrc_text
-  rrc_textinput
   rrc_view
   yoga
 )
