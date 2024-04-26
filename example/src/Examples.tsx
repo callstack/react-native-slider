@@ -275,7 +275,7 @@ const MyStepMarker: FC<MarkerProps> = ({stepMarked, currentValue}) => {
       <View style={styles.separator} />
       <View style={styles.label}>
         {currentValue !== undefined ? (
-          <Text>{currentValue}</Text>
+          <Text>{currentValue % 1 === 0 ? currentValue : currentValue.toFixed(2)}</Text>
         ) : (
           <Text>{'-'}</Text>
         )}
@@ -299,16 +299,36 @@ const SliderExampleWithCustomMarker = (props: SliderProps) => {
     <View>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
       <Slider
-        step={CONSTANTS.STEP}
+        step={1}
         style={[styles.slider, props.style]}
-        minimumValue={CONSTANTS.MIN_VALUE}
-        maximumValue={CONSTANTS.MAX_VALUE}
+        minimumValue={0}
+        maximumValue={13}
         thumbImage={require('./resources/empty.png')}
         tapToSeek
         {...props}
         value={value}
         onValueChange={setValue}
-        lowerLimit={1}
+        StepMarker={MyStepMarker}
+        minimumTrackTintColor={'#00629A'}
+        maximumTrackTintColor={'#979EA4'}
+      />
+    </View>
+  );
+};
+
+const SliderExampleWithCustomMarkerWithDefaultProps = (props: SliderProps) => {
+  const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
+
+  return (
+    <View>
+      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
+      <Slider
+        style={[styles.slider, props.style]}
+        thumbImage={require('./resources/empty.png')}
+        tapToSeek
+        {...props}
+        value={value}
+        onValueChange={setValue}
         StepMarker={MyStepMarker}
         minimumTrackTintColor={'#00629A'}
         maximumTrackTintColor={'#979EA4'}
@@ -342,7 +362,7 @@ const styles = StyleSheet.create({
   },
   label: {
     marginTop: 10,
-    width: 45,
+    width: 55,
     paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: '#ffffff',
@@ -361,7 +381,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tinyLogo: {
-    marginVertical: 5,
+    marginVertical: 2,
     aspectRatio: 1,
     flex: 1,
     height: '100%',
@@ -606,6 +626,12 @@ export const examples: Props[] = [
     title: 'Custom step marker settings',
     render() {
       return <SliderExampleWithCustomMarker />;
+    },
+  },
+  {
+    title: 'Custom step marker but default step and min/max values',
+    render() {
+      return <SliderExampleWithCustomMarkerWithDefaultProps />;
     },
   },
   {

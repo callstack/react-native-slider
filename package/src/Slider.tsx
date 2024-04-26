@@ -216,15 +216,17 @@ const SliderComponent = (
   );
   const [width, setWidth] = useState(0);
 
-  const step = localProps.step
+  const stepResolution = localProps.step
     ? localProps.step
     : constants.DEFAULT_STEP_RESOLUTION;
 
+  const defaultStep = (localProps.maximumValue! - localProps.minimumValue!) / stepResolution;
+  const stepLength = localProps.step || defaultStep;
   const options = Array.from(
     {
-      length: (localProps.maximumValue! - localProps.minimumValue!) / step + 1,
+      length: (localProps.step ? defaultStep : stepResolution) + 1,
     },
-    (_, index) => localProps.minimumValue! + index * step,
+    (_, index) => localProps.minimumValue! + index * stepLength
   );
 
   const defaultStyle =
