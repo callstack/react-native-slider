@@ -180,11 +180,7 @@ jobs:
 
       - name: Build iOS
         run: |
-          device_name='iPhone 13'
-          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
-          re='\(([-0-9A-Fa-f]+)\)'
-          [[ $device =~ $re ]] || exit 1
-          set -o pipefail && xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build | xcbeautify --renderer github-actions
+          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO SKIP_BUNDLING=TRUE build | xcbeautify --renderer github-actions
         working-directory: example/ios
 
 
@@ -232,11 +228,7 @@ jobs:
 
       - name: Build iOS - Fabric
         run: |
-          device_name='iPhone 13'
-          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
-          re='\(([-0-9A-Fa-f]+)\)'
-          [[ $device =~ $re ]] || exit 1
-          set -o pipefail && xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build | xcbeautify --renderer github-actions
+          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO SKIP_BUNDLING=TRUE build | xcbeautify --renderer github-actions
         working-directory: example/ios
 
 
