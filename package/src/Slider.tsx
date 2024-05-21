@@ -230,7 +230,7 @@ const SliderComponent = (
 
   const defaultStyle =
     Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
-  const sliderStyle = {zIndex: 1, width: width};
+  const sliderStyle = {zIndex: 1, ...(width !== 0 && {width})};
   const style = StyleSheet.compose(props.style, defaultStyle);
 
   const onValueChangeEvent = (event: Event) => {
