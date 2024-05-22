@@ -44,6 +44,7 @@ export const StepsIndicator = ({
             <View style={styles.stepIndicatorElement}>
               <SliderTrackMark
                 key={`${index}-SliderTrackMark`}
+                value={i}
                 isTrue={currentValue === i}
                 thumbImage={thumbImage}
                 StepMarker={StepMarker}
