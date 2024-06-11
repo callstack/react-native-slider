@@ -1,12 +1,19 @@
-import React, {useState} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import Slider, {SliderProps} from '@react-native-community/slider';
+import React, {FC, useState} from 'react';
+import {Text, View, StyleSheet, Image} from 'react-native';
+import Slider, {MarkerProps, SliderProps} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
   render(): JSX.Element;
   platform?: string;
 }
+
+const CONSTANTS = {
+  MAX_VALUE: 100,
+  MIN_VALUE: 10,
+  STEP: 10,
+  DEFAULT_STEP_RESOLUTION: 100,
+} as const;
 
 const SliderExample = (props: SliderProps) => {
   const [value, setValue] = useState(props.value ?? 0);
@@ -262,19 +269,112 @@ const SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth = (
   );
 };
 
+const MyStepMarker: FC<MarkerProps> = ({stepMarked, currentValue}) => {
+  return stepMarked ? (
+    <View style={styles.background}>
+      <View style={styles.separator} />
+      <View style={styles.label}>
+        {currentValue !== undefined ? (
+          <Text>{currentValue}</Text>
+        ) : (
+          <Text>{'-'}</Text>
+        )}
+        <Image
+          style={styles.tinyLogo}
+          source={Image.resolveAssetSource(
+            require('./resources/twitter-small.png'),
+          )}
+        />
+      </View>
+    </View>
+  ) : (
+    <View style={styles.divider} />
+  );
+};
+
+const SliderExampleWithCustomMarker = (props: SliderProps) => {
+  const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
+
+  return (
+    <View>
+      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
+      <Slider
+        step={CONSTANTS.STEP}
+        style={[styles.slider, props.style]}
+        minimumValue={CONSTANTS.MIN_VALUE}
+        maximumValue={CONSTANTS.MAX_VALUE}
+        thumbImage={require('./resources/empty.png')}
+        tapToSeek
+        {...props}
+        value={value}
+        onValueChange={setValue}
+        lowerLimit={1}
+        StepMarker={MyStepMarker}
+        minimumTrackTintColor={'#00629A'}
+        maximumTrackTintColor={'#979EA4'}
+      />
+    </View>
+  );
+};
+
 export default SliderExample;
 
 const styles = StyleSheet.create({
-  slider: {
-    width: 300,
-    opacity: 1,
-    marginTop: 10,
-  },
   text: {
     fontSize: 14,
     textAlign: 'center',
     fontWeight: '500',
     margin: 0,
+  },
+  divider: {
+    width: 2,
+    height: 20,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  separator: {
+    width: 2,
+    height: 20,
+    backgroundColor: '#00629A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  label: {
+    marginTop: 10,
+    width: 45,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  background: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tinyLogo: {
+    marginVertical: 5,
+    aspectRatio: 1,
+    flex: 1,
+    height: '100%',
+    width: '100%',
+  },
+  minMaxLabel: {
+    flexDirection: 'row',
+    zIndex: -1,
+  },
+  slider: {
+    width: 300,
+    opacity: 1,
+    marginTop: 10,
   },
   outer: {
     width: 20,
@@ -500,6 +600,12 @@ export const examples: Props[] = [
     title: 'Inverted slider direction with steps number and thumbImage',
     render() {
       return <InvertedSliderWithStepMarker />;
+    },
+  },
+  {
+    title: 'Custom step marker settings',
+    render() {
+      return <SliderExampleWithCustomMarker />;
     },
   },
   {

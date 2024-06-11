@@ -24,11 +24,13 @@ export type TrackMarksProps = {
   isTrue: boolean;
   thumbImage?: ImageURISource;
   StepMarker?: FC<MarkerProps> | boolean;
-}
+  currentValue?: number;
+};
 
 export type MarkerProps = {
   stepMarked: boolean;
-}
+  currentValue?: number;
+};
 
 export interface SliderPropsIOS extends ReactNative.ViewProps {
   /**

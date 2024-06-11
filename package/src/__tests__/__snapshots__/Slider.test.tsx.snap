@@ -443,6 +443,163 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
 </View>
 `;
 
+exports[`<Slider /> renders a slider with custom stepMaker 1`] = `
+<View
+  onLayout={[Function]}
+  style={
+    [
+      {
+        "defaultIndicatorIdle": {
+          "backgroundColor": "#C0C0C0",
+          "height": 10,
+          "width": 2,
+        },
+        "defaultIndicatorMarked": {
+          "backgroundColor": "#CCCCCC",
+          "height": 20,
+          "width": 5,
+        },
+        "defaultSlider": {},
+        "defaultSlideriOS": {
+          "height": 40,
+        },
+        "sliderMainContainer": {
+          "width": "100%",
+          "zIndex": 1,
+        },
+        "stepIndicatorElement": {
+          "alignContent": "center",
+          "alignItems": "center",
+        },
+        "stepNumber": {
+          "alignItems": "center",
+          "marginTop": 20,
+          "position": "absolute",
+        },
+        "stepsIndicator": {
+          "flex": 1,
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "top": 10,
+          "zIndex": 2,
+        },
+        "thumbImage": {
+          "alignContent": "center",
+          "alignItems": "center",
+          "position": "absolute",
+        },
+        "thumbImageContainer": {
+          "alignContent": "center",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+          "zIndex": 3,
+        },
+        "trackMarkContainer": {
+          "alignContent": "center",
+          "alignItems": "center",
+          "alignSelf": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+          "zIndex": 3,
+        },
+      },
+      {
+        "height": 40,
+      },
+      {
+        "justifyContent": "center",
+      },
+    ]
+  }
+>
+  <View
+    pointerEvents="none"
+    style={
+      [
+        {
+          "flex": 1,
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "top": 10,
+          "zIndex": 2,
+        },
+        {
+          "marginHorizontal": 0,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignContent": "center",
+          "alignItems": "center",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignContent": "center",
+            "alignItems": "center",
+            "alignSelf": "center",
+            "justifyContent": "center",
+            "position": "absolute",
+            "zIndex": 3,
+          }
+        }
+      >
+        <View>
+          <View
+            style={
+              {
+                "backgroundColor": "green",
+                "width": "10px",
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+  </View>
+  <RNCSlider
+    StepMarker={[Function]}
+    disabled={false}
+    inverted={false}
+    lowerLimit={-9007199254740991}
+    maximumValue={4}
+    minimumValue={0}
+    onChange={[Function]}
+    onRNCSliderAccessibilityAction={null}
+    onRNCSliderSlidingComplete={null}
+    onRNCSliderSlidingStart={null}
+    onRNCSliderValueChange={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    step={0}
+    style={
+      [
+        {
+          "width": 0,
+          "zIndex": 1,
+        },
+        {
+          "height": 40,
+        },
+        {
+          "alignContent": "center",
+          "alignItems": "center",
+        },
+      ]
+    }
+    tapToSeek={false}
+    upperLimit={9007199254740991}
+    value={2}
+  />
+</View>
+`;
+
 exports[`<Slider /> renders disabled slider 1`] = `
 <View
   onLayout={[Function]}
