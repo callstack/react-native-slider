@@ -1,43 +1,20 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
-
-const fs = require('fs');
+const { makeMetroConfig } = require('@rnx-kit/metro-config');
 const path = require('path');
+const escape = require('escape-string-regexp');
 const exclusionList = require('metro-config/src/defaults/exclusionList');
+const pak = require('../package/package.json');
 
-const rnwPath = fs.realpathSync(
-  path.resolve(require.resolve('react-native-windows/package.json'), '..'),
-);
+const root = path.resolve(__dirname, '..', 'package');
+console.log(root)
 
-/**
- * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
- *
- * @type {import('metro-config').MetroConfig}
- */
-
-const config = {
-  resolver: {
-    blockList: exclusionList([
-      // This stops "react-native run-windows" from causing the metro server to crash if its already running
-      new RegExp(
-        `${path.resolve(__dirname, 'windows').replace(/[/\\]/g, '/')}.*`,
-      ),
-      // This prevents "react-native run-windows" from hitting: EBUSY: resource busy or locked, open msbuild.ProjectImports.zip or other files produced by msbuild
-      new RegExp(`${rnwPath}/build/.*`),
-      new RegExp(`${rnwPath}/target/.*`),
-      /.*\.ProjectImports\.zip/,
-    ]),
-  },
+module.exports = makeMetroConfig({
   transformer: {
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
-        inlineRequires: true,
+        inlineRequires: false,
       },
     }),
-    // This fixes the 'missing-asset-registry-path` error (see https://github.com/microsoft/react-native-windows/issues/11437)
-    assetRegistryPath: 'react-native/Libraries/Image/AssetRegistry',
   },
-};
-
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+  watchFolders: [root],
+});
