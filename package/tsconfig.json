@@ -1,22 +1,28 @@
 {
-  "include": ["./src/**/*"],
-
   "compilerOptions": {
-    "jsx": "react",
-
-    /* Language and Environment */
-    "target": "ESNext",
-    "lib": ["ESNext"],
-
-    /* Modules */
-    "module": "esnext",
-
-    /* Interop Constraints */
+    "rootDir": ".",
+    "paths": {
+      "@react-native-community/slider": ["./src/index"]
+    },
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-
-    /* Type Checking */
+    "jsx": "react",
+    "lib": ["esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noStrictGenericChecks": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "strict": true,
-    "skipLibCheck": true
+    "target": "esnext",
+    "verbatimModuleSyntax": true
   }
 }
