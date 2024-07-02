@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {
   Image,
   Platform,
-  StyleSheet,
   AccessibilityActionEvent,
   ViewProps,
   ViewStyle,
@@ -309,11 +308,7 @@ const SliderComponent = (
             : Image.resolveAssetSource(props.thumbImage)
         }
         ref={forwardedRef}
-        style={[
-          styles.sliderStyle,
-          {width: width},
-          props.sliderStyle
-        ]}
+        style={[styles.sliderStyle, {width: width}, props.sliderStyle]}
         onChange={onValueChangeEvent}
         onRNCSliderSlidingStart={onSlidingStartEvent}
         onRNCSliderSlidingComplete={onSlidingCompleteEvent}
