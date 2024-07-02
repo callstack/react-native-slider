@@ -6,7 +6,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
   },
-  sliderMainContainer: {zIndex: 1, width: '100%'},
   defaultSlideriOS: {
     height: 40,
   },
@@ -41,15 +40,5 @@ export const styles = StyleSheet.create({
   stepIndicatorElement: {
     alignItems: 'center',
     alignContent: 'center',
-  },
-  defaultIndicatorMarked: {
-    height: 20,
-    width: 5,
-    backgroundColor: '#CCCCCC',
-  },
-  defaultIndicatorIdle: {
-    height: 10,
-    width: 2,
-    backgroundColor: '#C0C0C0',
   },
 });
