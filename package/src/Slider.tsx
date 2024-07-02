@@ -73,7 +73,8 @@ type Props = ViewProps &
      * Used to style and layout the `Slider`.  See `StyleSheet.js` and
      * `DeprecatedViewStylePropTypes.js` for more info.
      */
-    style?: StyleProp<ViewStyle>;
+    containerStyle?: StyleProp<ViewStyle>;
+    sliderStyle?: StyleProp<ViewStyle>;
 
     /**
      * Write-only property representing the value of the slider.
@@ -230,7 +231,7 @@ const SliderComponent = (
   const defaultStyle =
     Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
   const sliderStyle = {zIndex: 1, width: width};
-  const style = StyleSheet.compose(props.style, defaultStyle);
+  const style = StyleSheet.compose(props.sliderStyle, defaultStyle);
 
   const onValueChangeEvent = (event: Event) => {
     onValueChange && onValueChange(event.nativeEvent.value);
@@ -287,7 +288,7 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[styles, style, {justifyContent: 'center'}]}>
+      style={[styles.containerStyle, props.containerStyle]}>
       {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
@@ -314,9 +315,9 @@ const SliderComponent = (
         }
         ref={forwardedRef}
         style={[
-          sliderStyle,
-          defaultStyle,
-          {alignContent: 'center', alignItems: 'center'},
+          styles.sliderStyle,
+          {width: width},
+          props.sliderStyle
         ]}
         onChange={onValueChangeEvent}
         onRNCSliderSlidingStart={onSlidingStartEvent}

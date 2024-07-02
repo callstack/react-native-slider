@@ -1,15 +1,21 @@
 import {Platform, StyleSheet} from 'react-native';
 
 export const styles = StyleSheet.create({
+  containerStyle: {
+    justifyContent: 'center',
+    height: Platform.OS === 'ios' ? 40 : undefined
+  },
+  sliderStyle: {
+    alignContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    height: Platform.OS === 'ios' ? 40 : undefined
+  },
   stepNumber: {
     marginTop: 20,
     alignItems: 'center',
     position: 'absolute',
   },
-  defaultSlideriOS: {
-    height: 40,
-  },
-  defaultSlider: {},
   stepsIndicator: {
     flex: 1,
     flexDirection: 'row',
@@ -41,4 +47,5 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     alignContent: 'center',
   },
+
 });
