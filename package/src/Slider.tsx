@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {
   Image,
   Platform,
-  StyleSheet,
   AccessibilityActionEvent,
   ViewProps,
   ViewStyle,
@@ -73,7 +72,8 @@ type Props = ViewProps &
      * Used to style and layout the `Slider`.  See `StyleSheet.js` and
      * `DeprecatedViewStylePropTypes.js` for more info.
      */
-    style?: StyleProp<ViewStyle>;
+    containerStyle?: StyleProp<ViewStyle>;
+    sliderStyle?: StyleProp<ViewStyle>;
 
     /**
      * Write-only property representing the value of the slider.
@@ -227,11 +227,6 @@ const SliderComponent = (
     (_, index) => localProps.minimumValue! + index * step,
   );
 
-  const defaultStyle =
-    Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
-  const sliderStyle = {zIndex: 1, width: width};
-  const style = StyleSheet.compose(props.style, defaultStyle);
-
   const onValueChangeEvent = (event: Event) => {
     onValueChange && onValueChange(event.nativeEvent.value);
     setCurrentValue(event.nativeEvent.value);
@@ -287,7 +282,7 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[styles, style, {justifyContent: 'center'}]}>
+      style={[styles.containerStyle, props.containerStyle]}>
       {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
@@ -313,11 +308,7 @@ const SliderComponent = (
             : Image.resolveAssetSource(props.thumbImage)
         }
         ref={forwardedRef}
-        style={[
-          sliderStyle,
-          defaultStyle,
-          {alignContent: 'center', alignItems: 'center'},
-        ]}
+        style={[styles.sliderStyle, {width: width}, props.sliderStyle]}
         onChange={onValueChangeEvent}
         onRNCSliderSlidingStart={onSlidingStartEvent}
         onRNCSliderSlidingComplete={onSlidingCompleteEvent}

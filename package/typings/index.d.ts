@@ -137,7 +137,8 @@ export interface SliderProps
   /**
    * Used to style and layout the Slider. See StyleSheet.js and ViewStylePropTypes.js for more info.
    */
-  style?: ReactNative.StyleProp<ReactNative.ViewStyle>;
+  containerStyle?: ReactNative.StyleProp<ReactNative.ViewStyle>;
+  sliderStyle?: ReactNative.StyleProp<ReactNative.ViewStyle>;
 
   /**
    * Used to locate this view in UI automation tests.
