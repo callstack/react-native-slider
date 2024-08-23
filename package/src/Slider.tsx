@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {
   Image,
   Platform,
-  StyleSheet,
   AccessibilityActionEvent,
   ViewProps,
   ViewStyle,
@@ -230,7 +229,7 @@ const SliderComponent = (
   const defaultStyle =
     Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
   const sliderStyle = {zIndex: 1, width: width};
-  const style = StyleSheet.compose(props.style, defaultStyle);
+  const style = [props.style, defaultStyle];
 
   const onValueChangeEvent = (event: Event) => {
     onValueChange && onValueChange(event.nativeEvent.value);
@@ -287,7 +286,7 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[styles, style, {justifyContent: 'center'}]}>
+      style={[style, {justifyContent: 'center'}]}>
       {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
