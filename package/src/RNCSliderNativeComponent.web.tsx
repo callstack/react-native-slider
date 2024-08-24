@@ -53,7 +53,7 @@ const valueToEvent = (value: number): Event => ({nativeEvent: {value}});
 const RCTSliderWebComponent = React.forwardRef(
   (
     {
-      value: initialValue,
+      value: initialValue = 0,
       minimumValue = 0,
       maximumValue = 0,
       lowerLimit = 0,
