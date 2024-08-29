@@ -65,11 +65,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
                       new ReactSlidingCompleteEvent(
                               seekbar.getId(),
                               ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress())));
-              reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
-                      new ReactSliderEvent(
-                              seekbar.getId(),
-                              ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
-                              !((ReactSlider)seekbar).isSliding()));
             }
           };
 
@@ -77,7 +72,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
   public String getName() {
     return ReactSliderManagerImpl.REACT_CLASS;
   }
-  
+
   static class ReactSliderShadowNode extends LayoutShadowNode implements
       YogaMeasureFunction {
 
