@@ -86,11 +86,6 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
                               reactTag,
                               ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()))
               );
-              eventDispatcher.dispatchEvent(
-                      new ReactSliderEvent(
-                              reactTag,
-                              ((ReactSlider)seekbar).toRealProgress(seekbar.getProgress()),
-                              !((ReactSlider)seekbar).isSliding()));
             }
           };
 
