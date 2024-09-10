@@ -104,6 +104,17 @@ public class ReactSlider extends AppCompatSeekBar {
     updateAll();
   }
 
+  /*package*/ int getValidProgressValue(int progress) {
+      if (getLowerLimit() <= getUpperLimit()) {
+        if (progress < getLowerLimit()) {
+          progress = getLowerLimit();
+        } else if (progress > getUpperLimit()) {
+          progress = getUpperLimit();
+        }
+      }
+      return progress;
+    }
+
   /* package */ void setValue(double value) {
     mValue = value;
     updateValue();
