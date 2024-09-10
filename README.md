@@ -201,8 +201,8 @@ MainComponentsRegistry::sharedProviderRegistry() {
 
 ## Maintainers
 
-- [Michał Chudziak](https://github.com/michalchudziak) - [Callstack](https://callstack.com/)
 - [Bartosz Klonowski](https://github.com/BartoszKlonowski) - [Callstack](https://callstack.com/)
+- [Maciej Łodygowski](https://github.com/draggie) - [Callstack](https://callstack.com/)
 
 ## Contributors
 
