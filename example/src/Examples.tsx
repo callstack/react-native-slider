@@ -275,7 +275,9 @@ const MyStepMarker: FC<MarkerProps> = ({stepMarked, currentValue}) => {
       <View style={styles.separator} />
       <View style={styles.label}>
         {currentValue !== undefined ? (
-          <Text>{currentValue % 1 === 0 ? currentValue : currentValue.toFixed(2)}</Text>
+          <Text>
+            {currentValue % 1 === 0 ? currentValue : currentValue.toFixed(2)}
+          </Text>
         ) : (
           <Text>{'-'}</Text>
         )}
