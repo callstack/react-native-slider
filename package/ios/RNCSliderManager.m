@@ -158,8 +158,26 @@ RCT_EXPORT_VIEW_PROPERTY(minimumTrackImage, UIImage);
 RCT_EXPORT_VIEW_PROPERTY(maximumTrackImage, UIImage);
 RCT_EXPORT_VIEW_PROPERTY(minimumValue, float);
 RCT_EXPORT_VIEW_PROPERTY(maximumValue, float);
-RCT_EXPORT_VIEW_PROPERTY(lowerLimit, float);
-RCT_EXPORT_VIEW_PROPERTY(upperLimit, float);
+RCT_CUSTOM_VIEW_PROPERTY(lowerLimit, float, RNCSlider) {
+  float lowerLimit = [RCTConvert float:json];
+
+  if (lowerLimit > view.upperLimit) {
+    lowerLimit = view.upperLimit;
+    NSLog(@"Invalid configuration: reverting upper limit to equal to lower limit")
+  }
+
+  view.lowerLimit = lowerLimit;
+}
+RCT_CUSTOM_VIEW_PROPERTY(upperLimit, float, RNCSlider) {
+  float upperLimit = [RCTConvert float:json];
+
+  if (upperLimit < view.lowerLimit) {
+    upperLimit = view.lowerLimit;
+    NSLog(@"Invalid configuration: reverting lower limit to equal to upper limit")
+  }
+
+  view.upperLimit = upperLimit;
+}
 RCT_EXPORT_VIEW_PROPERTY(minimumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(maximumTrackTintColor, UIColor);
 RCT_EXPORT_VIEW_PROPERTY(onRNCSliderValueChange, RCTBubblingEventBlock);
