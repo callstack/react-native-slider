@@ -197,6 +197,17 @@ type Props = ViewProps &
      * The number of elements must be the same as `maximumValue`.
      */
     accessibilityIncrements?: Array<string>;
+
+    /**
+     * Android Only.
+     * Custom padding configuration
+     */
+    padding?: {
+      left?: number;
+      top?: number;
+      right?: number;
+      bottom?: number;
+    };
   }>;
 
 const SliderComponent = (

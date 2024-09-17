@@ -140,6 +140,18 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     ReactSliderManagerImpl.setMaximumValue(view, value);
   }
 
+   @ReactProp(name = "padding")
+    public void setPadding(ReactSlider view, ReadableMap paddingMap) {
+        if (paddingMap != null) {
+            int left = paddingMap.hasKey("left") ? paddingMap.getInt("left") : view.getPaddingLeft();
+            int top = paddingMap.hasKey("top") ? paddingMap.getInt("top") : view.getPaddingTop();
+            int right = paddingMap.hasKey("right") ? paddingMap.getInt("right") : view.getPaddingRight();
+            int bottom = paddingMap.hasKey("bottom") ? paddingMap.getInt("bottom") : view.getPaddingBottom();
+
+            ReactSliderManagerImpl.setPadding(view, left, top, right, bottom);
+        }
+    }
+
   @ReactProp(name = "lowerLimit")
   public void setLowerLimit(ReactSlider view, float value) {
     ReactSliderManagerImpl.setLowerLimit(view, value);

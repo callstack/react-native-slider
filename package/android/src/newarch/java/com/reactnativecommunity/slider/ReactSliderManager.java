@@ -105,6 +105,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
     ReactSliderManagerImpl.setDisabled(view, disabled);
   }
 
+
   @Override
   @ReactProp(name = "value", defaultFloat = 0f)
   public void setValue(ReactSlider view, float value) {
@@ -163,6 +164,18 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   @ReactProp(name = "accessibilityIncrements")
   public void setAccessibilityIncrements(ReactSlider view, ReadableArray accessibilityIncrements) {
     ReactSliderManagerImpl.setAccessibilityIncrements(view, accessibilityIncrements);
+  }
+
+  @ReactProp(name = "padding")
+  public void setPadding(ReactSlider view, ReadableMap paddingMap) {
+      if (paddingMap != null) {
+          int left = paddingMap.hasKey("left") ? paddingMap.getInt("left") : view.getPaddingLeft();
+          int top = paddingMap.hasKey("top") ? paddingMap.getInt("top") : view.getPaddingTop();
+          int right = paddingMap.hasKey("right") ? paddingMap.getInt("right") : view.getPaddingRight();
+          int bottom = paddingMap.hasKey("bottom") ? paddingMap.getInt("bottom") : view.getPaddingBottom();
+
+          ReactSliderManagerImpl.setPadding(view, left, top, right, bottom);
+      }
   }
 
   @ReactProp(name = "lowerLimit")
