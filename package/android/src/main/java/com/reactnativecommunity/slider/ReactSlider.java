@@ -15,6 +15,9 @@ import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import androidx.appcompat.widget.AppCompatSeekBar;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.List;
 import java.util.Timer;
@@ -239,12 +242,16 @@ public class ReactSlider extends AppCompatSeekBar {
     setProgress((int) Math.round((mValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
   }
 
+  private double roundToSafeValue(double value) {
+    return new BigDecimal(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
+  }
+
   private int getTotalSteps() {
-    return (int) Math.ceil((mMaxValue - mMinValue) / getStepValue());
+    return (int) Math.ceil((roundToSafeValue(mMaxValue) - roundToSafeValue(mMinValue)) / getStepValue());
   }
 
   private double getStepValue() {
-    return mStep > 0 ? mStep : mStepCalculated;
+    return roundToSafeValue(mStep > 0 ? mStep : mStepCalculated);
   }
 
   private BitmapDrawable getBitmapDrawable(final String uri) {
