@@ -239,9 +239,10 @@ public class ReactSlider extends AppCompatSeekBar {
     double limit = Math.max(mRealLowerLimit, mMinValue);
     int lowerLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
     if(lowerLimit > mUpperLimit) {
-      Log.w("Invalid configuration", "reverting lower limit to upper limit");
+      Log.d("Invalid configuration", "upperLimit < lowerLimit; lowerLimit not set");
+    }else {
+      mLowerLimit = Math.min(lowerLimit, mUpperLimit);
     }
-    mLowerLimit = Math.min(lowerLimit, mUpperLimit);
   }
 
   /** Update limit based on props limit, max and min
@@ -250,10 +251,11 @@ public class ReactSlider extends AppCompatSeekBar {
   private void updateUpperLimit() {
     double limit = Math.min(mRealUpperLimit, mMaxValue);
     int upperLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
-    if(mLowerLimit > upperLimit) {
-      Log.w("Invalid configuration", "reverting upper limit to equal to lower limit");
+    if (mLowerLimit > upperLimit) {
+          Log.d("Invalid configuration", "upperLimit < lowerLimit; upperLimit not set");
+    } else {
+          mUpperLimit = upperLimit;
     }
-    mUpperLimit = Math.max(upperLimit, mLowerLimit);
   }
 
   /** Update value only (optimization in case only value is set). */

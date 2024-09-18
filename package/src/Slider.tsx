@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   Platform,
@@ -281,17 +281,13 @@ const SliderComponent = (
           default: constants.LIMIT_MAX_VALUE,
         });
 
-  const limitCheck = useCallback(() => {
+  useEffect(() => {
     if (lowerLimit >= upperLimit) {
       console.warn(
         'Invalid configuration: lower limit is supposed to me smaller than upper limit',
       );
     }
   }, [lowerLimit, upperLimit]);
-
-  useEffect(() => {
-    limitCheck();
-  }, [limitCheck, localProps]);
 
   return (
     <View
