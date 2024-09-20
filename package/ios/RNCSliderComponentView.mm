@@ -176,7 +176,20 @@ using namespace facebook::react;
     if (oldScreenProps.maximumValue != newScreenProps.maximumValue) {
         [slider setMaximumValue:newScreenProps.maximumValue];
     }
-    updateLimits(slider, newScreenProps.lowerLimit, newScreenProps.upperLimit);
+    if (slider.lowerLimit != newScreenProps.lowerLimit) {
+        if(newScreenProps.lowerLimit > slider.upperLimit){
+            NSLog(@"Invalid configuration: upperLimit < lowerLimit; lowerLimit not set");
+        } else {
+            slider.lowerLimit = newScreenProps.lowerLimit;
+        }
+    }
+    if (slider.upperLimit != newScreenProps.upperLimit) {
+        if(newScreenProps.upperLimit < slider.lowerLimit){
+            NSLog(@"Invalid configuration: upperLimit < lowerLimit; upperLimit not set");
+        } else {
+            slider.upperLimit = newScreenProps.upperLimit;
+        }
+    }
     if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
         slider.tapToSeek = newScreenProps.tapToSeek;
     }
@@ -264,21 +277,6 @@ using namespace facebook::react;
         completionBlock:completionBlock];
     } else {
         failureBlock();
-    }
-}
-
-void updateLimits(RNCSlider *slider, float newLowerLimit, float newUpperLimit) {
-    if (slider.lowerLimit != newLowerLimit) {
-        slider.lowerLimit = newLowerLimit;
-    }
-
-    if (slider.upperLimit != newUpperLimit) {
-        slider.upperLimit = newUpperLimit;
-    }
-
-    if (slider.lowerLimit > slider.upperLimit) {
-        NSLog(@"Invalid configuration: lowerLimit > upperLimit, reverting lowerLimit to upperLimit.");
-        slider.lowerLimit = slider.upperLimit;
     }
 }
 

@@ -162,7 +162,7 @@ RCT_CUSTOM_VIEW_PROPERTY(lowerLimit, float, RNCSlider) {
   float lowerLimit = [RCTConvert float:json];
 
   if (lowerLimit > view.upperLimit) {
-      NSLog(@"Invalid configuration: upperLimit < lowerLimit; lowerLimit not set")
+      NSLog(@"Invalid configuration: upperLimit < lowerLimit; lowerLimit not set");
     } else {
       view.lowerLimit = lowerLimit;
     }
@@ -171,7 +171,7 @@ RCT_CUSTOM_VIEW_PROPERTY(upperLimit, float, RNCSlider) {
   float upperLimit = [RCTConvert float:json];
 
   if (upperLimit < view.lowerLimit) {
-      NSLog(@"Invalid configuration: upperLimit < lowerLimit; upperLimit not set")
+      NSLog(@"Invalid configuration: upperLimit < lowerLimit; upperLimit not set");
     } else {
       view.upperLimit = upperLimit;
     }
