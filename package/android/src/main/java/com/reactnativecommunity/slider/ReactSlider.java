@@ -242,16 +242,12 @@ public class ReactSlider extends AppCompatSeekBar {
     setProgress((int) Math.round((mValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
   }
 
-  private double roundToSafeValue(double value) {
-    return new BigDecimal(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
-  }
-
   private int getTotalSteps() {
-    return (int) Math.ceil((roundToSafeValue(mMaxValue) - roundToSafeValue(mMinValue)) / getStepValue());
+    return (int) Math.ceil((mMaxValue - mMinValue) / getStepValue());
   }
 
   private double getStepValue() {
-    return roundToSafeValue(mStep > 0 ? mStep : mStepCalculated);
+    return mStep > 0 ? mStep : mStepCalculated;
   }
 
   private BitmapDrawable getBitmapDrawable(final String uri) {

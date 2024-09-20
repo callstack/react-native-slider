@@ -113,19 +113,19 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   @Override
   @ReactProp(name = "minimumValue", defaultFloat = 0f)
-  public void setMinimumValue(ReactSlider view, float value) {
+  public void setMinimumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMinimumValue(view, value);
   }
 
   @Override
   @ReactProp(name = "maximumValue", defaultFloat = 0f)
-  public void setMaximumValue(ReactSlider view, float value) {
+  public void setMaximumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMaximumValue(view, value);
   }
 
   @Override
   @ReactProp(name = "step", defaultFloat = 0f)
-  public void setStep(ReactSlider view, float value) {
+  public void setStep(ReactSlider view, double value) {
     ReactSliderManagerImpl.setStep(view, value);
   }
 
