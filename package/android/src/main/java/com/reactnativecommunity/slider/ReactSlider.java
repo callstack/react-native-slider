@@ -16,8 +16,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import androidx.appcompat.widget.AppCompatSeekBar;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.util.List;
 import java.util.Timer;
