@@ -47,12 +47,12 @@ using namespace facebook::react;
          forControlEvents:(UIControlEventTouchUpInside |
                            UIControlEventTouchUpOutside |
                            UIControlEventTouchCancel)];
-        
+
         UITapGestureRecognizer *tapGesturer;
         tapGesturer = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(tapHandler:)];
         [tapGesturer setNumberOfTapsRequired: 1];
         [slider addGestureRecognizer:tapGesturer];
-        
+
         slider.value = (float)defaultProps->value;
         self.contentView = slider;
     }
@@ -65,12 +65,12 @@ using namespace facebook::react;
     }
     RNCSlider *slider = (RNCSlider *)gesture.view;
     slider.isSliding = _isSliding;
-    
+
     // Ignore this tap if in the middle of a slide.
     if (_isSliding) {
         return;
     }
-    
+
     if (!slider.tapToSeek) {
         return;
     }
@@ -88,14 +88,14 @@ using namespace facebook::react;
     }
 
     [slider setValue:[slider discreteValue:value] animated: YES];
-    
+
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
     ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(slider.lastValue)});
-    
+
     // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
     ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(slider.value)});
-    
+
     std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
     ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(slider.value)});
 }
@@ -122,7 +122,7 @@ using namespace facebook::react;
 - (void)RNCSendSliderEvent:(RNCSlider *)sender withContinuous:(BOOL)continuous isSlidingStart:(BOOL)isSlidingStart
 {
     float value = [sender discreteValue:sender.value];
-    
+
     if (value < sender.lowerLimit) {
         value = sender.lowerLimit;
         [sender setValue:value animated:NO];
@@ -134,7 +134,7 @@ using namespace facebook::react;
     if(!sender.isSliding) {
         [sender setValue:value animated:NO];
     }
-    
+
     if (continuous) {
         if (sender.lastValue != value)  {
             std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
@@ -150,7 +150,7 @@ using namespace facebook::react;
             ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
         }
     }
-    
+
     sender.lastValue = value;
 }
 
@@ -158,7 +158,7 @@ using namespace facebook::react;
 {
     const auto &oldScreenProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
     const auto &newScreenProps = *std::static_pointer_cast<const RNCSliderProps>(props);
-    
+
     if (oldScreenProps.value != newScreenProps.value) {
         if (!slider.isSliding) {
             slider.value = newScreenProps.value;
@@ -176,11 +176,19 @@ using namespace facebook::react;
     if (oldScreenProps.maximumValue != newScreenProps.maximumValue) {
         [slider setMaximumValue:newScreenProps.maximumValue];
     }
-    if (oldScreenProps.lowerLimit != newScreenProps.lowerLimit) {
-        slider.lowerLimit = newScreenProps.lowerLimit;
+    if (slider.lowerLimit != newScreenProps.lowerLimit) {
+        if(newScreenProps.lowerLimit > slider.upperLimit){
+            NSLog(@"Invalid configuration: upperLimit < lowerLimit; lowerLimit not set");
+        } else {
+            slider.lowerLimit = newScreenProps.lowerLimit;
+        }
     }
-    if (oldScreenProps.upperLimit != newScreenProps.upperLimit) {
-        slider.upperLimit = newScreenProps.upperLimit;
+    if (slider.upperLimit != newScreenProps.upperLimit) {
+        if(newScreenProps.upperLimit < slider.lowerLimit){
+            NSLog(@"Invalid configuration: upperLimit < lowerLimit; upperLimit not set");
+        } else {
+            slider.upperLimit = newScreenProps.upperLimit;
+        }
     }
     if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
         slider.tapToSeek = newScreenProps.tapToSeek;

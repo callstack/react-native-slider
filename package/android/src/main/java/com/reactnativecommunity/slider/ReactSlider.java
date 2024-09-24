@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -102,6 +103,15 @@ public class ReactSlider extends AppCompatSeekBar {
   /* package */ void setMinValue(double min) {
     mMinValue = min;
     updateAll();
+  }
+
+  /*package*/ int getValidProgressValue(int progress) {
+      if (progress < getLowerLimit()) {
+        progress = getLowerLimit();
+      } else if (progress > getUpperLimit()) {
+        progress = getUpperLimit();
+      }
+      return progress;
   }
 
   /* package */ void setValue(double value) {
@@ -222,16 +232,29 @@ public class ReactSlider extends AppCompatSeekBar {
     updateValue();
   }
 
-  /** Update limit based on props limit, max and min */
+  /** Update limit based on props limit, max and min
+   * Fallback to upper limit if invalid configuration provided
+  */
   private void updateLowerLimit() {
     double limit = Math.max(mRealLowerLimit, mMinValue);
-    mLowerLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
+    int lowerLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
+    if(lowerLimit > mUpperLimit) {
+      Log.d("Invalid configuration", "upperLimit < lowerLimit; lowerLimit not set");
+    }else {
+      mLowerLimit = Math.min(lowerLimit, mUpperLimit);
+    }
   }
 
-  /** Update limit based on props limit, max and min */
+  /** Update limit based on props limit, max and min
+  */
   private void updateUpperLimit() {
     double limit = Math.min(mRealUpperLimit, mMaxValue);
-    mUpperLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
+    int upperLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
+    if (mLowerLimit > upperLimit) {
+          Log.d("Invalid configuration", "upperLimit < lowerLimit; upperLimit not set");
+    } else {
+          mUpperLimit = upperLimit;
+    }
   }
 
   /** Update value only (optimization in case only value is set). */

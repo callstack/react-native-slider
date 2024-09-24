@@ -14,6 +14,14 @@
   bool _maximumTrackImageSet;
 }
 
+- (instancetype)init {
+  if (self = [super init]) {
+      _upperLimit = FLT_MAX;
+      _lowerLimit = FLT_MIN;
+  }
+  return self;
+}
+
 - (instancetype)initWithFrame:(CGRect)frame
 {
     return [super initWithFrame:frame];
@@ -46,7 +54,7 @@
     if (sliderValue && [sliderValue intValue] == 1) {
       spokenUnits = [spokenUnits substringToIndex:stringLength-1];
     }
-    
+
     self.accessibilityValue = [NSString stringWithFormat:@"%@ %@", sliderValue, spokenUnits];
   }
 }
