@@ -284,7 +284,7 @@ const SliderComponent = (
   useEffect(() => {
     if (lowerLimit >= upperLimit) {
       console.warn(
-        'Invalid configuration: lower limit is supposed to me smaller than upper limit',
+        'Invalid configuration: lower limit is supposed to be smaller than upper limit',
       );
     }
   }, [lowerLimit, upperLimit]);
