@@ -246,7 +246,6 @@ public class ReactSlider extends AppCompatSeekBar {
   }
 
   /** Update limit based on props limit, max and min
-    * Fallback to lower limit if invalid configuration provided
   */
   private void updateUpperLimit() {
     double limit = Math.min(mRealUpperLimit, mMaxValue);
