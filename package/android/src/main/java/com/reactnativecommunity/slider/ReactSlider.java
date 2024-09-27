@@ -16,6 +16,7 @@ import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import androidx.appcompat.widget.AppCompatSeekBar;
+
 import java.net.URL;
 import java.util.List;
 import java.util.Timer;
