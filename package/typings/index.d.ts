@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { FC } from 'react';
+import {FC} from 'react';
 import * as ReactNative from 'react-native';
-import { ImageURISource } from 'react-native';
+import {ImageURISource} from 'react-native';
 
 type Constructor<T> = new (...args: any[]) => T;
 
@@ -14,6 +14,21 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
    * Color of the foreground switch grip.
    */
   thumbTintColor?: string;
+
+  /**
+   * Write-only property representing the bufferedValue of the slider.
+   * Entered once at the beginning still acts as an initial value.
+   * The value should be between minimumValue and maximumValue,
+   * which default to 0 and 1 respectively.
+   * Default value is 0.
+   */
+  bufferedValue?: number;
+
+  /**
+   * The color used for the buffered track (secondaryProgress)
+   * Overrides the default grey gradient image.
+   */
+  bufferedTrackTintColor?: string;
 }
 
 export interface SliderRef {
@@ -109,12 +124,6 @@ export interface SliderProps
   minimumTrackTintColor?: string;
 
   /**
-   * The color used for the buffered track (secondaryProgress)
-   * Overrides the default grey gradient image.
-   */
-  bufferedTrackTintColor?: string;
-
-  /**
    * Initial minimum value of the slider. Default value is 0.
    */
   minimumValue?: number;
@@ -164,15 +173,6 @@ export interface SliderProps
   value?: number;
 
   /**
-   * Write-only property representing the bufferedValue of the slider.
-   * Entered once at the beginning still acts as an initial value.
-   * The value should be between minimumValue and maximumValue,
-   * which default to 0 and 1 respectively.
-   * Default value is 0.
-   */
-  bufferedValue?: number;
-
-  /**
    * Reverses the direction of the slider.
    */
   inverted?: boolean;
@@ -183,7 +183,7 @@ export interface SliderProps
   StepMarker?: FC<MarkerProps>;
 
   /**
-   * 
+   *
    */
   renderStepNumber?: boolean;
 

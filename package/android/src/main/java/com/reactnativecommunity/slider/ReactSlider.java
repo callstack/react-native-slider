@@ -124,7 +124,7 @@ public class ReactSlider extends AppCompatSeekBar {
 
   /* package */ void setBufferedValue(double value) {
     mBufferedValue = value;
-    updateBufferedValue();
+    updateAll();
   }
 
   /* package */ void setStep(double step) {
@@ -238,6 +238,7 @@ public class ReactSlider extends AppCompatSeekBar {
     updateLowerLimit();
     updateUpperLimit();
     updateValue();
+    updateBufferedValue();
   }
 
   /** Update limit based on props limit, max and min
