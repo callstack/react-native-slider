@@ -69,3 +69,6 @@ src/dist
 # Expo
 .expo
 web-build
+
+# VS Code
+.vscode
