@@ -211,7 +211,7 @@ const SliderComponent = (
     ...localProps
   } = props;
   const [currentValue, setCurrentValue] = useState(
-    props.value ?? props.minimumValue,
+    props.value || props.minimumValue || constants.SLIDER_DEFAULT_INITIAL_VALUE,
   );
   const [width, setWidth] = useState(0);
 
@@ -350,7 +350,7 @@ const SliderComponent = (
 const SliderWithRef = React.forwardRef(SliderComponent);
 
 SliderWithRef.defaultProps = {
-  value: 0,
+  value: constants.SLIDER_DEFAULT_INITIAL_VALUE,
   minimumValue: 0,
   maximumValue: 1,
   step: 0,
