@@ -232,7 +232,7 @@ const SliderComponent = (
 
   const defaultStyle =
     Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
-  const sliderStyle = {zIndex: 1, width: width, height: 1};
+  const sliderStyle = {zIndex: 1, width: width};
   const style = [props.style, defaultStyle];
 
   const onValueChangeEvent = (event: Event) => {
