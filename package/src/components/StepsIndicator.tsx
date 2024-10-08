@@ -18,7 +18,7 @@ export const StepsIndicator = ({
 }: {
   options: number[];
   sliderWidth: number;
-  currentValue?: number;
+  currentValue: number;
   StepMarker?: FC<MarkerProps>;
   renderStepNumber?: boolean;
   thumbImage?: ImageSource;
@@ -41,13 +41,16 @@ export const StepsIndicator = ({
       {values.map((i, index) => {
         return (
           <Fragment key={index}>
-            <View style={styles.stepIndicatorElement}>
+            <View style={styles.stepIndicatorElement} key={`${index}-View`}>
               <SliderTrackMark
                 key={`${index}-SliderTrackMark`}
                 isTrue={currentValue === i}
+                index={i}
                 thumbImage={thumbImage}
                 StepMarker={StepMarker}
                 currentValue={currentValue}
+                min={options[0]}
+                max={options[options.length - 1]}
               />
               {renderStepNumber ? (
                 <StepNumber
