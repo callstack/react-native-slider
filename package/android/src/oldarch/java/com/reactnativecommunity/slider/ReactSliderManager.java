@@ -145,7 +145,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     ReactSliderManagerImpl.setUpperLimit(view, value);
   }
 
-  @ReactProp(name = "step", defaultDouble = 0f)
+  @ReactProp(name = "step", defaultDouble = 0d)
   public void setStep(ReactSlider view, double value) {
     ReactSliderManagerImpl.setStep(view, value);
   }
