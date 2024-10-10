@@ -125,7 +125,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     ReactSliderManagerImpl.setValue(view, value);
   }
 
-  @ReactProp(name = "minimumValue", defaultDouble = 0f)
+  @ReactProp(name = "minimumValue", defaultDouble = 0d)
   public void setMinimumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMinimumValue(view, value);
   }
