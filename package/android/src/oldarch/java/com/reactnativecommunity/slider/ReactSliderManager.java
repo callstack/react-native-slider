@@ -130,7 +130,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     ReactSliderManagerImpl.setMinimumValue(view, value);
   }
 
-  @ReactProp(name = "maximumValue", defaultDouble = 1f)
+  @ReactProp(name = "maximumValue", defaultDouble = 1d)
   public void setMaximumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMaximumValue(view, value);
   }
