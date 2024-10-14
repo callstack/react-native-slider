@@ -125,12 +125,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     ReactSliderManagerImpl.setValue(view, value);
   }
 
-  @ReactProp(name = "minimumValue", defaultFloat = 0f)
+  @ReactProp(name = "minimumValue", defaultDouble = 0d)
   public void setMinimumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMinimumValue(view, value);
   }
 
-  @ReactProp(name = "maximumValue", defaultFloat = 1f)
+  @ReactProp(name = "maximumValue", defaultDouble = 1d)
   public void setMaximumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMaximumValue(view, value);
   }
@@ -145,8 +145,8 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
     ReactSliderManagerImpl.setUpperLimit(view, value);
   }
 
-  @ReactProp(name = "step", defaultFloat = 0f)
-  public void setStep(ReactSlider view, float value) {
+  @ReactProp(name = "step", defaultDouble = 0d)
+  public void setStep(ReactSlider view, double value) {
     ReactSliderManagerImpl.setStep(view, value);
   }
 

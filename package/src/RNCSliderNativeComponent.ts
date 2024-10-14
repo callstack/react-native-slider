@@ -7,6 +7,7 @@ import type {
   WithDefault,
   DirectEventHandler,
   BubblingEventHandler,
+  Double,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
 type Event = Readonly<{
@@ -23,15 +24,15 @@ export interface NativeProps extends ViewProps {
   tapToSeek?: WithDefault<boolean, false>;
   maximumTrackImage?: ImageSource;
   maximumTrackTintColor?: ColorValue;
-  maximumValue?: Float;
+  maximumValue?: Double;
   minimumTrackImage?: ImageSource;
   minimumTrackTintColor?: ColorValue;
-  minimumValue?: Float;
+  minimumValue?: Double;
   onChange?: BubblingEventHandler<Event>;
   onRNCSliderSlidingStart?: DirectEventHandler<Event>;
   onRNCSliderSlidingComplete?: DirectEventHandler<Event>;
   onRNCSliderValueChange?: BubblingEventHandler<Event>;
-  step?: Float;
+  step?: Double;
   testID?: string;
   thumbImage?: ImageSource;
   thumbTintColor?: ColorValue;
