@@ -944,11 +944,11 @@ PODS:
   - React-Mapbuffer (0.73.5):
     - glog
     - React-debug
-  - react-native-pager-view (6.2.3):
+  - react-native-pager-view (6.4.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - react-native-slider (4.5.3):
+  - react-native-slider (4.5.4):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1358,8 +1358,8 @@ SPEC CHECKSUMS:
   React-jsinspector: 32db5e364bcae8fca8cdf8891830636275add0c5
   React-logger: 0331362115f0f5b392bd7ed14636d1a3ea612479
   React-Mapbuffer: 7c35cd53a22d0be04d3f26f7881c7fb7dd230216
-  react-native-pager-view: d5f3adb58a4e6e0d200055e9a4afdcda9b9022ce
-  react-native-slider: 5166a537d6f3e851732f5fe2e84aef0ff6ed733d
+  react-native-pager-view: 7c45504fe805a954ebabd005d369937ea1c04de1
+  react-native-slider: f9eeb20064a15f9b3b5307e18a711880ea66d080
   React-nativeconfig: 1166714a4f7ea57a0df5c2cb44fbc70f98d580f9
   React-NativeModulesApple: 726664e9829eb5eed8170241000e46ead269a05f
   React-perflogger: 0dd9f1725d55f8264b81efadd373fe1d9cca7dc2
