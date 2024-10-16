@@ -37,27 +37,38 @@ target_include_directories(
   ${LIB_ANDROID_GENERATED_COMPONENTS_DIR}
 )
 
-target_link_libraries(
-  ${LIB_TARGET_NAME}
-  fbjni
-  folly_runtime
-  glog
-  jsi
-  react_codegen_rncore
-  react_debug
-  react_render_componentregistry
-  react_render_core
-  react_render_debug
-  react_render_graphics
-  react_render_imagemanager
-  react_render_mapbuffer
-  react_utils
-  react_nativemodule_core
-  rrc_image
-  turbomodulejsijni
-  rrc_view
-  yoga
-)
+# https://github.com/react-native-community/discussions-and-proposals/discussions/816
+# This if-then-else can be removed once this library does not support version below 0.76
+if (REACTNATIVE_MERGED_SO)
+  target_link_libraries(
+    ${LIB_TARGET_NAME}
+    fbjni
+    jsi
+    reactnative
+  )
+else()
+  target_link_libraries(
+    ${LIB_TARGET_NAME}
+    fbjni
+    folly_runtime
+    glog
+    jsi
+    react_codegen_rncore
+    react_debug
+    react_render_componentregistry
+    react_render_core
+    react_render_debug
+    react_render_graphics
+    react_render_imagemanager
+    react_render_mapbuffer
+    react_utils
+    react_nativemodule_core
+    rrc_image
+    turbomodulejsijni
+    rrc_view
+    yoga
+  )
+endif()
 
 target_compile_options(
   ${LIB_TARGET_NAME}
