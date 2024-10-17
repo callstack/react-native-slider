@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { FC } from 'react';
+import {FC} from 'react';
 import * as ReactNative from 'react-native';
-import { ImageURISource } from 'react-native';
+import {ImageURISource} from 'react-native';
 
 type Constructor<T> = new (...args: any[]) => T;
 
@@ -114,6 +114,16 @@ export interface SliderProps
   minimumValue?: number;
 
   /**
+   * Custom padding on android
+   */
+  padding?: {
+    left?: number;
+    top?: number;
+    right?: number;
+    bottom?: number;
+  };
+
+  /**
    * Callback that is called when the user picks up the slider.
    * The initial value is passed as an argument to the callback handler.
    */
@@ -168,7 +178,7 @@ export interface SliderProps
   StepMarker?: FC<MarkerProps>;
 
   /**
-   * 
+   *
    */
   renderStepNumber?: boolean;
 
