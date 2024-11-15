@@ -18,7 +18,7 @@
     "@react-native-community/slider": "file:../package",
     "babel-preset-expo": "^9.2.0",
     "react": "18.2.0",
-    "react-native": "0.73.5",
+    "react-native": "^0.73.5",
     "react-native-pager-view": "^6.4.1",
     "react-native-windows": "0.73.11"
   },
@@ -31,7 +31,7 @@
     "@react-native/metro-config": "0.73.5",
     "@react-native/typescript-config": "0.73.1",
     "@types/react": "^18.2.6",
-    "@types/react-test-renderer": "^18.0.0",
+    "@types/react-test-renderer": "^18.2.6",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "babel-jest": "^29.6.3",
