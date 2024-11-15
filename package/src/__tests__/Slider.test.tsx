@@ -72,11 +72,11 @@ describe('<Slider />', () => {
           StepMarker={({stepMarked}) => {
             return stepMarked ? (
               <View>
-                <View style={{width: '10px', backgroundColor: 'red'}} />
+                <View style={{width: 10, backgroundColor: 'red'}} />
               </View>
             ) : (
               <View>
-                <View style={{width: '10px', backgroundColor: 'green'}} />
+                <View style={{width: 10, backgroundColor: 'green'}} />
               </View>
             );
           }}
