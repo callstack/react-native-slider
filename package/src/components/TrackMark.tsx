@@ -5,6 +5,7 @@ import {styles} from '../utils/styles';
 export type MarkerProps = {
   stepMarked: boolean;
   currentValue?: number;
+  index: number;
 };
 
 export type TrackMarksProps = {
@@ -12,6 +13,7 @@ export type TrackMarksProps = {
   thumbImage?: ImageURISource;
   StepMarker?: FC<MarkerProps>;
   currentValue?: number;
+  index: number;
 };
 
 export const SliderTrackMark = ({
@@ -19,11 +21,16 @@ export const SliderTrackMark = ({
   thumbImage,
   StepMarker,
   currentValue,
+  index,
 }: TrackMarksProps) => {
   return (
     <View style={styles.trackMarkContainer}>
       {StepMarker ? (
-        <StepMarker stepMarked={isTrue} currentValue={currentValue} />
+        <StepMarker
+          index={index}
+          stepMarked={isTrue}
+          currentValue={currentValue}
+        />
       ) : null}
       {thumbImage && isTrue ? (
         <View style={styles.thumbImageContainer}>
