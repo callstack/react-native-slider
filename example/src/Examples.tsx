@@ -298,7 +298,7 @@ const SliderExampleWithCustomMarker = (props: SliderProps) => {
   const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
 
   return (
-    <View>
+    <View style={styles.container}>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
       <Slider
         step={CONSTANTS.STEP}
@@ -323,7 +323,7 @@ const SliderExampleWithCustomMarkerWithDefaultProps = (props: SliderProps) => {
   const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
 
   return (
-    <View>
+    <View style={styles.container}>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
       <Slider
         style={[styles.slider, props.style]}
@@ -426,6 +426,9 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     backgroundColor: '#0F0FFF',
+  },
+  container: {
+    alignItems: 'center',
   },
   outerSmall: {
     width: 4,
