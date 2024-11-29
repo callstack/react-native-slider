@@ -295,7 +295,7 @@ const SliderComponent = (
 
   return (
     <View
-      onLayout={(event: Event) => {
+      onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
       style={[style, {justifyContent: 'center'}]}>
