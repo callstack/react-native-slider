@@ -9,7 +9,7 @@
     "lib": ["ESNext"],
 
     /* Modules */
-    "module": "esnext",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
     /* Interop Constraints */
