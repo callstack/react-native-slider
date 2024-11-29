@@ -52,7 +52,6 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
       ]
     }
     tapToSeek={false}
-    thumbImage={null}
     upperLimit={9007199254740991}
   />
 </View>
@@ -110,7 +109,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
       ]
     }
     tapToSeek={false}
-    thumbImage={null}
     upperLimit={9007199254740991}
   />
 </View>
@@ -168,7 +166,6 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
       ]
     }
     tapToSeek={false}
-    thumbImage={null}
     upperLimit={9007199254740991}
   />
 </View>
@@ -223,7 +220,6 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
       ]
     }
     tapToSeek={false}
-    thumbImage={null}
     thumbTintColor="green"
     upperLimit={1}
     value={0.5}
@@ -32387,7 +32383,6 @@ exports[`<Slider /> renders disabled slider 1`] = `
       ]
     }
     tapToSeek={false}
-    thumbImage={null}
     upperLimit={9007199254740991}
   />
 </View>
@@ -32440,7 +32435,6 @@ exports[`<Slider /> renders enabled slider 1`] = `
       ]
     }
     tapToSeek={false}
-    thumbImage={null}
     upperLimit={9007199254740991}
   />
 </View>

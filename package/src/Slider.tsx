@@ -140,21 +140,21 @@ type Props = ViewProps &
     /**
      * Callback continuously called while the user is dragging the slider.
      */
-    onValueChange?: (value: number) => void;
+    onValueChange?: (_value: number) => void;
 
     /**
      * Callback that is called when the user touches the slider,
      * regardless if the value has changed. The current value is passed
      * as an argument to the callback handler.
      */
-    onSlidingStart?: (value: number) => void;
+    onSlidingStart?: (_value: number) => void;
 
     /**
      * Callback that is called when the user releases the slider,
      * regardless if the value has changed. The current value is passed
      * as an argument to the callback handler.
      */
-    onSlidingComplete?: (value: number) => void;
+    onSlidingComplete?: (_value: number) => void;
 
     /**
      * Used to locate this view in UI automation tests.
@@ -295,7 +295,7 @@ const SliderComponent = (
 
   return (
     <View
-      onLayout={(event) => {
+      onLayout={(event: Event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
       style={[style, {justifyContent: 'center'}]}>
