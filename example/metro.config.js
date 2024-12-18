@@ -8,6 +8,8 @@ const rnwPath = fs.realpathSync(
   path.resolve(require.resolve('react-native-windows/package.json'), '..'),
 );
 
+//
+
 /**
  * Metro configuration
  * https://facebook.github.io/metro/docs/configuration
@@ -16,17 +18,19 @@ const rnwPath = fs.realpathSync(
  */
 
 const config = {
+  //
   resolver: {
     blockList: exclusionList([
-      // This stops "react-native run-windows" from causing the metro server to crash if its already running
+      // This stops "npx @react-native-community/cli run-windows" from causing the metro server to crash if its already running
       new RegExp(
         `${path.resolve(__dirname, 'windows').replace(/[/\\]/g, '/')}.*`,
       ),
-      // This prevents "react-native run-windows" from hitting: EBUSY: resource busy or locked, open msbuild.ProjectImports.zip or other files produced by msbuild
+      // This prevents "npx @react-native-community/cli run-windows" from hitting: EBUSY: resource busy or locked, open msbuild.ProjectImports.zip or other files produced by msbuild
       new RegExp(`${rnwPath}/build/.*`),
       new RegExp(`${rnwPath}/target/.*`),
       /.*\.ProjectImports\.zip/,
     ]),
+    //
   },
   transformer: {
     getTransformOptions: async () => ({
@@ -35,8 +39,6 @@ const config = {
         inlineRequires: true,
       },
     }),
-    // This fixes the 'missing-asset-registry-path` error (see https://github.com/microsoft/react-native-windows/issues/11437)
-    assetRegistryPath: 'react-native/Libraries/Image/AssetRegistry',
   },
 };
 
