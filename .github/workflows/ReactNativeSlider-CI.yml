@@ -120,7 +120,7 @@ jobs:
   build-android-app-new-arch:
     name: Build example app Android (Fabric)
     runs-on: ubuntu-latest
-    needs: [build-android-app]
+    needs: [build-android-app-old-arch]
 
     steps:
       - uses: actions/checkout@v4
