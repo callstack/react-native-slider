@@ -77,7 +77,14 @@ using namespace facebook::react;
 
     CGPoint touchPoint = [gesture locationInView:slider];
     float rangeWidth = slider.maximumValue - slider.minimumValue;
-    float sliderPercent = touchPoint.x / slider.bounds.size.width;
+    
+    float sliderPercent;
+    if ([UIView userInterfaceLayoutDirectionForSemanticContentAttribute:slider.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft) {
+        sliderPercent = 1.0 - (touchPoint.x / slider.bounds.size.width);
+    } else {
+        sliderPercent = touchPoint.x / slider.bounds.size.width;
+    }
+
     slider.lastValue = slider.value;
     float value = slider.minimumValue + (rangeWidth * sliderPercent);
 
