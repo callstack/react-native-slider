@@ -97,8 +97,10 @@ To use this library you need to ensure you are using the correct version of Reac
 | `onValueChange` | Callback continuously called while the user is dragging the slider. | function | No | |
 | `step` | Step value of the slider. The value should be between 0 and (maximumValue - minimumValue). Default value is 0.<br/>On Windows OS the default value is 1% of slider's range (from `minimumValue` to `maximumValue`). | number | No | |
 | `maximumTrackTintColor` | The color used for the track to the right of the button.<br/>Overrides the default gray gradient image on iOS. | [color](https://reactnative.dev/docs/colors) | No | |
+| `bufferedTrackTintColor` | The color used for the track for the secondaryProgress of the slider component. | [color](https://reactnative.dev/docs/colors) | No | Android |
 | `testID` | Used to locate this view in UI automation tests. | string | No | |
 | `value` | Write-only property representing the value of the slider. Can be used to programmatically control the position of the thumb. Entered once at the beginning still acts as an initial value. Changing the value programmatically does not trigger any event.<br/>The value should be between minimumValue and maximumValue, which default to 0 and 1 respectively. Default value is 0.<br/>_This is not a controlled component_, you don't need to update the value during dragging. | number | No | |
+| `bufferedValue` | Write-only property representing the secondaryProgress of the slider. Entered once at the beginning still acts as an initial value.<br/>The value should be between minimumValue and maximumValue, which default to 0 and 1 respectively. Default value is 0.<br/>_This is not a controlled component_ | number | No | Android |
 | `tapToSeek` | Permits tapping on the slider track to set the thumb position.<br/>Defaults to false on iOS. No effect on Android or Windows. | bool | No | iOS |
 | `inverted` | Reverses the direction of the slider.<br/>Default value is false. | bool | No | |
 | `vertical` | Changes the orientation of the slider to vertical, if set to `true`.<br/>Default value is false. | bool | No | Windows |

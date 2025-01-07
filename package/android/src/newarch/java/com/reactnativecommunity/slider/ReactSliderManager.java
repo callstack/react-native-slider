@@ -107,6 +107,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
+  @ReactProp(name = "bufferedValue", defaultFloat = 0f)
+  public void setBufferedValue(ReactSlider view, float value) {
+    ReactSliderManagerImpl.setBufferedValue(view, value);
+  }
+
+  @Override
   @ReactProp(name = "minimumValue", defaultFloat = 0f)
   public void setMinimumValue(ReactSlider view, double value) {
     ReactSliderManagerImpl.setMinimumValue(view, value);
@@ -134,6 +140,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   @ReactProp(name = "minimumTrackTintColor", customType = "Color")
   public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
     ReactSliderManagerImpl.setMinimumTrackTintColor(view, color);
+  }
+
+  @Override
+  @ReactProp(name = "bufferedTrackTintColor", customType = "Color")
+  public void setBufferedTrackTintColor(ReactSlider view, Integer color) {
+    ReactSliderManagerImpl.setBufferedTrackTintColor(view, color);
   }
 
   @Override

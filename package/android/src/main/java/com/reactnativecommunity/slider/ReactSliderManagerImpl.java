@@ -44,6 +44,10 @@ public class ReactSliderManagerImpl {
         }
     }
 
+    public static void setBufferedValue(ReactSlider view, double value) {
+            view.setBufferedValue(value);
+    }
+
     public static void setMinimumValue(ReactSlider view, double value) {
         view.setMinValue(value);
     }
@@ -112,6 +116,21 @@ public class ReactSliderManagerImpl {
             }
             else {
                 background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            }
+        }
+    }
+
+    public static void setBufferedTrackTintColor(ReactSlider view, Integer color) {
+        LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
+        Drawable secondaryProgress = drawable.findDrawableByLayerId(android.R.id.secondaryProgress);
+        if (color == null) {
+            secondaryProgress.clearColorFilter();
+        } else {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                secondaryProgress.setColorFilter(new PorterDuffColorFilter((int)color, PorterDuff.Mode.SRC_IN));
+            }
+            else {
+                secondaryProgress.setColorFilter(color, PorterDuff.Mode.SRC_IN);
             }
         }
     }

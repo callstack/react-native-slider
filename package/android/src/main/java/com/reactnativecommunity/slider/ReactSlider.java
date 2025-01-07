@@ -57,6 +57,8 @@ public class ReactSlider extends AppCompatSeekBar {
    */
   private double mValue = 0;
 
+  private double mBufferedValue = 0;
+
   private boolean isSliding = false;
 
   /** If zero it's determined automatically. */
@@ -118,6 +120,11 @@ public class ReactSlider extends AppCompatSeekBar {
   /* package */ void setValue(double value) {
     mValue = value;
     updateValue();
+  }
+
+  /* package */ void setBufferedValue(double value) {
+    mBufferedValue = value;
+    updateAll();
   }
 
   /* package */ void setStep(double step) {
@@ -231,6 +238,7 @@ public class ReactSlider extends AppCompatSeekBar {
     updateLowerLimit();
     updateUpperLimit();
     updateValue();
+    updateBufferedValue();
   }
 
   /** Update limit based on props limit, max and min
@@ -261,6 +269,10 @@ public class ReactSlider extends AppCompatSeekBar {
   /** Update value only (optimization in case only value is set). */
   private void updateValue() {
     setProgress((int) Math.round((mValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
+  }
+
+  private void updateBufferedValue() {
+    setSecondaryProgress((int) Math.round((mBufferedValue - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps()));
   }
 
   private int getTotalSteps() {

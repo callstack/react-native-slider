@@ -517,6 +517,20 @@ export const examples: Props[] = [
     },
   },
   {
+    title: 'Buffer value on Android',
+    render() {
+      return (
+        <SliderExample
+          step={1}
+          minimumValue={0}
+          maximumValue={100}
+          bufferedValue={75}
+          bufferedTrackTintColor="red"
+        />
+      );
+    },
+  },
+  {
     title: 'onSlidingStart',
     render(): React.ReactElement {
       return <SlidingStartExample />;
