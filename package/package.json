@@ -77,6 +77,11 @@
     "jsSrcsDir": "src",
     "android": {
       "javaPackageName": "com.reactnativecommunity.slider"
+    },
+    "ios": {
+      "componentProvider": {
+        "RNCSlider": "RNCSliderComponentView"
+      }
     }
   }
 }
