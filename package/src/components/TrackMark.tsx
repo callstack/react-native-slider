@@ -4,26 +4,41 @@ import {styles} from '../utils/styles';
 
 export type MarkerProps = {
   stepMarked: boolean;
-  currentValue?: number;
+  currentValue: number;
+  index: number;
+  min: number;
+  max: number;
 };
 
 export type TrackMarksProps = {
   isTrue: boolean;
+  index: number;
   thumbImage?: ImageURISource;
   StepMarker?: FC<MarkerProps>;
-  currentValue?: number;
+  currentValue: number;
+  min: number;
+  max: number;
 };
 
 export const SliderTrackMark = ({
   isTrue,
+  index,
   thumbImage,
   StepMarker,
   currentValue,
+  min,
+  max,
 }: TrackMarksProps) => {
   return (
     <View style={styles.trackMarkContainer}>
       {StepMarker ? (
-        <StepMarker stepMarked={isTrue} currentValue={currentValue} />
+        <StepMarker
+          stepMarked={isTrue}
+          index={index}
+          currentValue={currentValue}
+          min={min}
+          max={max}
+        />
       ) : null}
       {thumbImage && isTrue ? (
         <View style={styles.thumbImageContainer}>
