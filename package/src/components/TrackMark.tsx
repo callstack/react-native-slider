@@ -4,10 +4,10 @@ import {styles} from '../utils/styles';
 
 export type MarkerProps = {
   stepMarked: boolean;
-  currentValue?: number;
-  index?: number;
-  min?: number;
-  max?: number;
+  currentValue: number;
+  index: number;
+  min: number;
+  max: number;
 };
 
 export type TrackMarksProps = {

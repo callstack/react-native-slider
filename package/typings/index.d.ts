@@ -30,10 +30,10 @@ export type TrackMarksProps = {
 
 export type MarkerProps = {
   stepMarked: boolean;
-  currentValue?: number;
-  index?: number;
-  min?: number;
-  max?: number;
+  currentValue: number;
+  index: number;
+  min: number;
+  max: number;
 };
 
 export interface SliderPropsIOS extends ReactNative.ViewProps {
