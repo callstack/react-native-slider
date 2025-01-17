@@ -10,6 +10,26 @@ export interface Props {
   platform?: string;
 }
 
+const StepMarker = ({
+  stepMarked,
+  currentValue,
+  index,
+}: {
+  stepMarked: boolean;
+  currentValue: number;
+  index: number;
+}) => (
+  <View
+    style={{
+      marginTop: '24px',
+      height: '16px',
+      width: '3px',
+      backgroundColor:
+        currentValue < index ? 'rgb(147, 147, 147)' : 'rgb(0, 150, 136)',
+    }}
+  />
+)
+
 const SliderExample = (props: SliderProps) => {
   const [value, setValue] = useState(0);
   return (
@@ -232,4 +252,17 @@ export const examples: Props[] = [
       );
     },
   },
+  {
+    title: 'Slider with StepMarker',
+    render() {
+      return (
+        <SliderExample
+          StepMarker={StepMarker}
+          step={1}
+          minimumValue={0}
+          maximumValue={10}
+        />
+      );
+    },
+  }
 ];
