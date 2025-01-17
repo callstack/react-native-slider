@@ -381,27 +381,6 @@ const SliderExampleWithCustomComponentAndFilledSteps = (props: SliderProps) => {
   );
 };
 
-const SliderExampleWithCustomMarkerWithDefaultProps = (props: SliderProps) => {
-  const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
-      <Slider
-        style={[styles.slider, props.style]}
-        thumbImage={require('./resources/empty.png')}
-        tapToSeek
-        {...props}
-        value={value}
-        onValueChange={setValue}
-        StepMarker={MyStepMarker}
-        minimumTrackTintColor={'#00629A'}
-        maximumTrackTintColor={'#979EA4'}
-      />
-    </View>
-  );
-};
-
 export default SliderExample;
 
 const styles = StyleSheet.create({
@@ -731,12 +710,6 @@ export const examples: Props[] = [
     title: 'Custom step marker settings',
     render() {
       return <SliderExampleWithCustomMarker />;
-    },
-  },
-  {
-    title: 'Custom step marker but default step and min/max values',
-    render() {
-      return <SliderExampleWithCustomMarkerWithDefaultProps />;
     },
   },
   {
