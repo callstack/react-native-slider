@@ -114,22 +114,18 @@ To use this library you need to ensure you are using the correct version of Reac
 
 ## Custom step marker and step numbers
 
-| | |
-| - | - |
-| It is possible to render default step numbers under your slider and to render custom step component and step marker.<br/>This can be achieved by using: | <img width="350" height="auto" src="./.github/Examples/resources/CustomStepMarker-Default.png" alt="default" /> |
+It is possible to render default step numbers under your slider and to render custom step component and step marker.
+<br/>This can be achieved by using:
 
 ### `renderStepNumber`
 
-| | |
-| - | - |
-|Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track.<br/>Two font sizes are available and they will be selected automatically depending on the overall number of steps. | <img width="350" height="auto" src="./.github/Examples/resources/CustomStepMarker-StepnNumber.png" alt="renderStepNumber" /> |
+Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track.
+<br/>Two font sizes are available and they will be selected automatically depending on the overall number of steps.
 
 ### `StepMarker`
 
-| | |
-| - | - |
-| Your custom component rendered for every step on the Slider, both the thumb and the rest of steps along the Slider's whole length. <br/>This `StepMarker` prop accepts your custom component and provides it with the following parameters: |  <img width="350" height="auto" src="./.github/Examples/resources/CustomStepMarker-Component.png" alt="stepMarker" /> |
-
+Your custom component rendered for every step on the Slider, both the thumb and the rest of steps along the Slider's whole length.
+<br/>This `StepMarker` prop accepts your custom component and provides it with the following parameters:
 
 <table>
 <tr>
