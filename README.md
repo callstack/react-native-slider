@@ -107,10 +107,105 @@ To use this library you need to ensure you are using the correct version of Reac
 | `minimumTrackImage` | Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | No | iOS |
 | `thumbImage` | Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported. | Image<br/>.propTypes<br/>.source | No | |
 | `trackImage` | Assigns a single image for the track. Only static images are supported. The center pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | No | iOS | |
-| ⚠️ **Experimental:**</br> `StepMarker` | Component to be rendered for each step on the track,<br/>with the possibility to change the styling, when thumb is at that given step | `FC<MarkerProps>`, <br/> where <br/> `MarkerProps`: `{stepMarked: boolean}` | No | iOS, Android, Windows |
-| ⚠️ **Experimental:**</br> `renderStepNumber` | Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track | bool | No | iOS, Android, Windows |
+| [`StepMarker`](#stepmarker) | Component to be rendered for each step on the track,<br/>with the possibility to change the styling, when thumb is at that given step | `FC<MarkerProps>` | No | iOS, Android, Windows |
+| [`renderStepNumber`](#renderstepnumber) | Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track | bool | No | iOS, Android, Windows |
 | `ref` | Reference object. | MutableRefObject | No | web |
 | `View` | [Inherited `View` props...](https://github.com/facebook/react-native-website/blob/master/docs/view.md#props) | | | |
+
+## Custom step marker and step numbers
+
+| | |
+| - | - |
+| It is possible to render default step numbers under your slider and to render custom step component and step marker.<br/>This can be achieved by using: | <img width="350" height="auto" src="./.github/Examples/resources/CustomStepMarker-Default.png" alt="default" /> |
+
+### `renderStepNumber`
+
+| | |
+| - | - |
+|Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track.<br/>Two font sizes are available and they will be selected automatically depending on the overall number of steps. | <img width="350" height="auto" src="./.github/Examples/resources/CustomStepMarker-StepnNumber.png" alt="renderStepNumber" /> |
+
+### `StepMarker`
+
+| | |
+| - | - |
+| Your custom component rendered for every step on the Slider, both the thumb and the rest of steps along the Slider's whole length. <br/>This `StepMarker` prop accepts your custom component and provides it with the following parameters: |  <img width="350" height="auto" src="./.github/Examples/resources/CustomStepMarker-Component.png" alt="stepMarker" /> |
+
+
+<table>
+<tr>
+<td>
+
+```typescript
+  stepMarked: boolean;
+```
+
+</td>
+<td>
+
+Indicates whether that custom step is the one that the thum is currently on.
+<br/>If user drags or clicks on that step, thumb will be moved there and the `stepMarked` parameter will be set to `true`.
+<br/>Use it, to differentiate between rendering your custom thumb component, or your custom step marker.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```typescript
+  currentValue: number;
+```
+
+</td>
+<td>
+Contains the `number` type saying at which value of the Slider the thumb currently is.
+<br/>Use it, for example, to render the Slider value on every step marker, or to render different step marker's variant depending on the Thumb position.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```typescript
+  index: number;
+```
+
+</td>
+<td>
+
+Contains the index at which this exact instantiation of your custom step marker was rendered at.
+<br/>Use it if you would like to render step number within the step marker, or, for example, if you want to render many variants of step marker depending on their positions along the Slider's width.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```typescript
+  min: number;
+```
+
+</td>
+<td>
+
+Minimum value of the Slider. It is equal to `minimumValue` and has the same default if not set.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```typescript
+  max: number;
+```
+
+</td>
+<td>
+
+Maximum value of the Slider. It is equal to `maximumValue` and has the same default if not set.
+
+</td>
+</tr>
+</table>
 
 ## Roadmap and Progress
 
