@@ -218,7 +218,7 @@ using namespace facebook::react;
         slider.accessibilityUnits = convertedAccessibilityUnits;
     }
     if (oldScreenProps.accessibilityIncrements != newScreenProps.accessibilityIncrements) {
-        id accessibilityIncrements = [NSArray new];
+        id accessibilityIncrements = [NSMutableArray new];
         for (auto str : newScreenProps.accessibilityIncrements) {
             [accessibilityIncrements addObject:[NSString stringWithUTF8String:str.c_str()]];
         }
