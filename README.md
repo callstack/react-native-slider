@@ -51,22 +51,10 @@ import Slider from '@react-native-community/slider';
 
 Check out the [example project](example) for more examples.
 
----
+### Reach out on Discord
 
-**Migrating from the core `react-native` module**
-
-This module was created when the Slider was split out from the core of React Native.
-<br/>To migrate to this module you need to follow the installation instructions above and then change you imports from:
-
-```javascript
-import { Slider } from 'react-native';
-```
-
-to:
-
-```javascript
-import Slider from '@react-native-community/slider';
-```
+If you have any questions, issues or any other topic that you need an advise in, reach out to us on our channel on Discord under this 👉 [link](https://discord.com/channels/426714625279524876/1339942689524678737).
+<br/>See you there!
 
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
