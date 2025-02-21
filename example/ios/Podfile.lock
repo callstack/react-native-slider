@@ -1285,7 +1285,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-slider (4.5.5):
+  - react-native-slider (4.5.6):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1298,7 +1298,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-slider/common (= 4.5.5)
+    - react-native-slider/common (= 4.5.6)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1307,7 +1307,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-slider/common (4.5.5):
+  - react-native-slider/common (4.5.6):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1841,7 +1841,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: ad1ba0205205a16dbff11b8ade6d1b3959451658
   React-microtasksnativemodule: e771eb9eb6ace5884ee40a293a0e14a9d7a4343c
   react-native-pager-view: ef50f5798b5932134eeec2e5c349bd867b86cdec
-  react-native-slider: 124ce99f9cd2d04c79f020da6dee9f8d38a6b8c7
+  react-native-slider: fe195f81408470a07952f75beabc215de65507d3
   React-nativeconfig: aeed6e2a8ac02b2df54476afcc7c663416c12bf7
   React-NativeModulesApple: c5b7813da94136f50ef084fa1ac077332dcfc658
   React-perflogger: 6afb7eebf7d9521cc70481688ccddf212970e9d3
