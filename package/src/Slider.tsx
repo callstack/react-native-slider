@@ -211,7 +211,7 @@ const SliderComponent = (
     ...localProps
   } = props;
   const [currentValue, setCurrentValue] = useState(
-    props.value || props.minimumValue || constants.SLIDER_DEFAULT_INITIAL_VALUE,
+    props.value ?? props.minimumValue ?? constants.SLIDER_DEFAULT_INITIAL_VALUE,
   );
   const [width, setWidth] = useState(0);
 
