@@ -35,6 +35,10 @@ public class ReactSliderManagerImpl {
         return slider;
     }
 
+    public static void setPadding(ReactSlider view, int left, int top, int right, int bottom) {
+       view.setPadding(left, top, right, bottom);
+    }
+
     public static void setValue(ReactSlider view, double value) {
         if (view.isSliding() == false) {
             view.setValue(value);
