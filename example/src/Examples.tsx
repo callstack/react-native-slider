@@ -1,6 +1,6 @@
 import React, {FC, useCallback, useState} from 'react';
 import {Text, View, StyleSheet, Image} from 'react-native';
-import Slider, {MarkerProps, SliderProps} from '@react-native-community/slider';
+import Slider, {MarkerProps, SliderProps} from '@callstack/slider';
 
 export interface Props {
   title: string;

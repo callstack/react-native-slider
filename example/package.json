@@ -9,13 +9,13 @@
     "start": "react-native start",
     "test": "jest",
     "windows": "npx @react-native-community/cli run-windows",
-    "postinstall": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules",
-    "refresh-package": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules",
+    "postinstall": "rimraf ./node_modules/@callstack/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@callstack/slider && rimraf ./node_modules/@callstack/slider/node_modules",
+    "refresh-package": "rimraf ./node_modules/@callstack/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@callstack/slider && rimraf ./node_modules/@callstack/slider/node_modules",
     "clean-android": "rm -rf android/app/build",
     "clean-ios": "rm -rf ios/build/generated/ios && rm -rf ios/Pods && rm ios/Podfile.lock"
   },
   "dependencies": {
-    "@react-native-community/slider": "file:../package",
+    "@callstack/slider": "file:../package",
     "babel-preset-expo": "^9.2.0",
     "react": "^18.3.1",
     "react-native": "^0.76.3",

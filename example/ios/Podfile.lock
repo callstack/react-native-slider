@@ -1637,7 +1637,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
-  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - "react-native-slider (from `../node_modules/@callstack/slider`)"
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1746,7 +1746,7 @@ EXTERNAL SOURCES:
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-slider:
-    :path: "../node_modules/@react-native-community/slider"
+    :path: "../node_modules/@callstack/slider"
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:

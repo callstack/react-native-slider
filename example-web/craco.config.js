@@ -8,7 +8,7 @@ module.exports = {
   webpack: {
     alias: {
       'react-native$': 'react-native-web',
-      '@react-native-community/slider': path.resolve(__dirname, LIB_PATH),
+      '@callstack/slider': path.resolve(__dirname, LIB_PATH),
       // make sure we don't include multiple versions of react
       'react': path.resolve(__dirname, './node_modules/react'),
     },

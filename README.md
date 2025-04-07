@@ -1,9 +1,9 @@
 <p align="center">
-  <h1 align="center"> <code>@react-native-community/slider</code> </h1>
+  <h1 align="center"> <code>@callstack/slider</code> </h1>
 </p>
 <p align="center">
-    <a href="https://www.npmjs.com/package/@react-native-community/slider">
-        <img src="https://img.shields.io/npm/v/@react-native-community/slider.svg" alt="Latest version released on npmjs" />
+    <a href="https://www.npmjs.com/package/@callstack/slider">
+        <img src="https://img.shields.io/npm/v/@callstack/slider.svg" alt="Latest version released on npmjs" />
     </a>
     <a href="https://github.com/callstack/react-native-slider/actions/workflows/ReactNativeSlider-CI.yml">
         <img src="https://github.com/callstack/react-native-slider/actions/workflows/ReactNativeSlider-CI.yml/badge.svg?branch=main" alt="Build on GitHub Actions" />
@@ -12,7 +12,7 @@
         <img src="https://img.shields.io/badge/platforms-android%20|%20ios%20|%20windows%20|%20web-lightgrey.svg" alt="Supported platforms" />
     </a>
     <a href="https://github.com/callstack/react-native-slider/blob/main/LICENSE.md">
-        <img src="https://img.shields.io/npm/l/@react-native-community/slider.svg" alt="License" />
+        <img src="https://img.shields.io/npm/l/@callstack/slider.svg" alt="License" />
     </a>
 </p>
 <p align="center">
@@ -28,17 +28,17 @@
 
 To install this module `cd` to your project directory and enter the following command:
 ```
-yarn add @react-native-community/slider
+yarn add @callstack/slider
 ```
 or
 ```
-npm install @react-native-community/slider --save
+npm install @callstack/slider --save
 ```
 If using iOS please remember to install cocoapods by running: `npx pod-install`
 
 The following code presents the basic usage scenario of this library:
 ```javascript
-import Slider from '@react-native-community/slider';
+import Slider from '@callstack/slider';
 
 <Slider
   style={{width: 200, height: 40}}
@@ -59,14 +59,14 @@ If you have any questions, issues or any other topic that you need an advise in,
 ## React Native Compatibility
 To use this library you need to ensure you are using the correct version of React Native.
 
-| `@react-native-community/slider` version | Required React Native Version |
+| `@callstack/slider` version | Required React Native Version |
 | ---------------------------------------- | ---------------------------- |
 | `4.5.1`                                  | `>=0.69`                     |
 | `4.3.0`                                  | `>=0.64`                     |
 | `4.x.x`                                  | `>=0.60`; `>=0.62` (on Windows); |
 | `3.1.x`                                  | `>=0.60`                     |
 | `2.x.x`                                  | `>= 0.60`                    |
-| [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0) | `<= 0.59` |
+| [`1.x.x`](https://github.com/callstack/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0) | `<= 0.59` |
 
 
 ## Properties
@@ -244,7 +244,7 @@ If you are using React Native version lower than 0.70, you need to setup manual 
 Inside `example/android/app/src/main/jni/Android.mk` add these lines:
 
 ```diff
-+ include $(NODE_MODULES_DIR)/@react-native-community/slider/android/build/generated/source/codegen/jni/Android.mk
++ include $(NODE_MODULES_DIR)/@callstack/slider/android/build/generated/source/codegen/jni/Android.mk
 include $(CLEAR_VARS)
 ```
 
@@ -285,7 +285,7 @@ MainComponentsRegistry::sharedProviderRegistry() {
 
 ## Contributors
 
-This module was extracted from `react-native` core. Please, refer to [contributors graph](https://github.com/react-native-community/react-native-slider/graphs/contributors) for the complete list of contributors.
+This module was extracted from `react-native` core. Please, refer to [contributors graph](https://github.com/callstack/react-native-slider/graphs/contributors) for the complete list of contributors.
 
 ---
 

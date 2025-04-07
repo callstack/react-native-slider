@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 // @ts-ignore
 import {Text, View, StyleSheet, ScrollView} from 'react-native';
 // @ts-ignore
-import Slider, {SliderProps} from '@react-native-community/slider';
+import Slider, {SliderProps} from '@callstack/slider';
 
 export interface Props {
   title: string;

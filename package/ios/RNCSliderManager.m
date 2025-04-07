@@ -82,7 +82,7 @@ RCT_EXPORT_MODULE()
     });
   }
 
-  // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
+  // Trigger onValueChange to address https://github.com/callstack/react-native-slider/issues/212
   if (slider.onRNCSliderValueChange) {
     slider.onRNCSliderValueChange(@{
       @"value": @(slider.value),

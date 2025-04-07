@@ -10,7 +10,7 @@ import {
 import {examples, Props as ExamplesTabProperties} from './Examples';
 import {propsExamples, Props as PropsTabProperties} from './Props';
 import PagerView from 'react-native-pager-view';
-import Slider from '@react-native-community/slider';
+import Slider from '@callstack/slider';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState(0);
