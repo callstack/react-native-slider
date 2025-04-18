@@ -1,26 +1,19 @@
-def isNewArchitectureEnabled() {
-  return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
-}
 
-if (isNewArchitectureEnabled()) {
-  buildscript {
-    repositories {
-      mavenCentral()
-      google()
-    }
+buildscript {
+  repositories {
+    mavenCentral()
+    google()
+  }
 
-    dependencies {
-      classpath("com.android.tools.build:gradle:7.1.1")
-      classpath("com.facebook.react:react-native-gradle-plugin")
-      classpath("de.undercouch:gradle-download-task:5.0.1")
-    }
+  dependencies {
+    classpath("com.android.tools.build:gradle:7.1.1")
+    classpath("com.facebook.react:react-native-gradle-plugin")
+    classpath("de.undercouch:gradle-download-task:5.0.1")
   }
 }
 
 apply plugin: 'com.android.library'
-if (isNewArchitectureEnabled()) {
-  apply plugin: 'com.facebook.react'
-}
+apply plugin: 'com.facebook.react'
 
 def getExtOrDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ReactNativeSlider_' + name]
@@ -49,16 +42,11 @@ android {
   defaultConfig {
     minSdkVersion getExtOrIntegerDefault('minSdkVersion')
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
-    buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
   }
 
   sourceSets {
     main {
-      if (isNewArchitectureEnabled()) {
-          java.srcDirs += ['src/newarch', "${project.buildDir}/generated/source/codegen/java"]
-      } else {
-          java.srcDirs += ['src/oldarch']
-      }
+      java.srcDirs += ['src', "${project.buildDir}/generated/source/codegen/java"]
     }
   }
 }
