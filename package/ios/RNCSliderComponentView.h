@@ -1,5 +1,3 @@
-#ifdef RCT_NEW_ARCH_ENABLED
-
 #import <UIKit/UIKit.h>
 #import <React/RCTViewComponentView.h>
 #import "RNCSlider.h"
@@ -35,5 +33,3 @@ typedef void (^RNCLoadImageFailureBlock)();
 @end
 
 NS_ASSUME_NONNULL_END
-
-#endif
