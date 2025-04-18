@@ -1,5 +1,3 @@
-#ifdef RCT_NEW_ARCH_ENABLED
-
 #import "RNCSliderComponentView.h"
 
 #import <React/RCTConversions.h>
@@ -302,5 +300,3 @@ Class<RCTComponentViewProtocol> RNCSliderCls(void)
 {
     return RNCSliderComponentView.class;
 }
-
-#endif
