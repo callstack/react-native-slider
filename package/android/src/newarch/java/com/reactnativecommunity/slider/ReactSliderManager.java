@@ -52,10 +52,10 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
               seekbar.setProgress(progress);
 
               ReactContext reactContext = (ReactContext) seekbar.getContext();
-              if(fromUser){
+              if (fromUser) {
                 int reactTag = seekbar.getId();
                 UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-                        .dispatchEvent(new ReactSliderEvent(reactTag, slider.toRealProgress(progress), true));
+                      .dispatchEvent(new ReactSliderEvent(reactTag, slider.toRealProgress(progress), true));
               }
             }
 
