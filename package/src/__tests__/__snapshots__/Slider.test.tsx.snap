@@ -6,10 +6,10 @@ exports[`<Slider /> accessibilityState disabled sets disabled={true} 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
@@ -63,10 +63,10 @@ exports[`<Slider /> disabled prop overrides accessibilityState.disabled 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
@@ -120,10 +120,10 @@ exports[`<Slider /> disabled prop overrides accessibilityState.enabled 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
@@ -177,10 +177,10 @@ exports[`<Slider /> renders a slider with custom props 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
@@ -233,10 +233,10 @@ exports[`<Slider /> renders a slider with custom stepMaker 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
@@ -32337,10 +32337,10 @@ exports[`<Slider /> renders disabled slider 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
@@ -32394,10 +32394,10 @@ exports[`<Slider /> renders enabled slider 1`] = `
   style={
     [
       [
-        undefined,
         {
           "height": 40,
         },
+        undefined,
       ],
       {
         "justifyContent": "center",
