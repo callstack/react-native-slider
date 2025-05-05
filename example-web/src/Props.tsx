@@ -101,7 +101,7 @@ export const propsExamples: Props[] = [
   {
     title: 'minimumValue',
     render() {
-      return <SliderExample minimumValue={5} />;
+      return <SliderExample minimumValue={-5} />;
     },
   },
   {
