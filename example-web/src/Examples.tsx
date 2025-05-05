@@ -6,7 +6,7 @@ import Slider, {SliderProps} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
-  render(): JSX.Element;
+  render(): React.ReactElement;
   platform?: string;
 }
 
@@ -108,7 +108,7 @@ export const examples: Props[] = [
   {
     title: 'step: 0.25, tap to seek on iOS',
     render(): React.ReactElement {
-      return <SliderExample step={0.25} tapToSeek={true} />;
+      return <SliderExample step={0.25} maximumValue={1} tapToSeek={true} />;
     },
   },
   {
