@@ -74,9 +74,6 @@ const RCTSliderWebComponent = React.forwardRef(
     }: Props,
     forwardedRef: any,
   ) => {
-    console.log('maximum value', maximumValue);
-    console.log('step', step);
-
     const containerSize = React.useRef({width: 0, height: 0});
     const containerPositionX = React.useRef(0);
     const containerRef = forwardedRef || React.createRef();
