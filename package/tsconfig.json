@@ -6,7 +6,7 @@
 
     /* Language and Environment */
     "target": "ESNext",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "dom"],
 
     /* Modules */
     "module": "NodeNext",

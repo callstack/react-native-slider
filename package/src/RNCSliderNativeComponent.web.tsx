@@ -1,5 +1,3 @@
-//@ts-ignore
-import ReactDOM from 'react-dom';
 import React, {RefObject, useCallback} from 'react';
 import {
   Animated,
@@ -76,6 +74,9 @@ const RCTSliderWebComponent = React.forwardRef(
     }: Props,
     forwardedRef: any,
   ) => {
+    console.log('maximum value', maximumValue);
+    console.log('step', step);
+
     const containerSize = React.useRef({width: 0, height: 0});
     const containerPositionX = React.useRef(0);
     const containerRef = forwardedRef || React.createRef();
@@ -259,10 +260,9 @@ const RCTSliderWebComponent = React.forwardRef(
     }, [maximumValue, minimumValue, step]);
 
     const updateContainerPositionX = () => {
-      //@ts-ignore
-      const positionX = ReactDOM.findDOMNode(
-        (containerRef as RefObject<any>).current,
-      ).getBoundingClientRect()?.x;
+      const positionX = (
+        containerRef as RefObject<HTMLElement | undefined>
+      ).current?.getBoundingClientRect().x;
       containerPositionX.current = positionX ?? 0;
     };
 
