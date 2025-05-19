@@ -211,6 +211,14 @@ const SliderComponent = (
     step = 0,
     inverted = false,
     tapToSeek = false,
+    lowerLimit = Platform.select({
+      web: minimumValue,
+      default: constants.LIMIT_MIN_VALUE,
+    }),
+    upperLimit = Platform.select({
+      web: maximumValue,
+      default: constants.LIMIT_MAX_VALUE,
+    }),
     ...props
   }: Props,
   forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
@@ -270,22 +278,6 @@ const SliderComponent = (
 
   const passedValue = Number.isNaN(value) || !value ? undefined : value;
 
-  const lowerLimit =
-    !!props.lowerLimit || props.lowerLimit === 0
-      ? props.lowerLimit
-      : Platform.select({
-          web: minimumValue,
-          default: constants.LIMIT_MIN_VALUE,
-        });
-
-  const upperLimit =
-    !!props.upperLimit || props.upperLimit === 0
-      ? props.upperLimit
-      : Platform.select({
-          web: maximumValue,
-          default: constants.LIMIT_MAX_VALUE,
-        });
-
   useEffect(() => {
     if (lowerLimit >= upperLimit) {
       console.warn(
@@ -299,7 +291,8 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[style, {justifyContent: 'center'}]}>
+      style={[style, {justifyContent: 'center'}]}
+    >
       {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
@@ -326,8 +319,8 @@ const SliderComponent = (
           Platform.OS === 'web'
             ? props.thumbImage
             : props.StepMarker
-            ? undefined
-            : Image.resolveAssetSource(props.thumbImage)
+              ? undefined
+              : Image.resolveAssetSource(props.thumbImage)
         }
         ref={forwardedRef}
         style={[
