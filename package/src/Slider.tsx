@@ -291,8 +291,7 @@ const SliderComponent = (
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[style, {justifyContent: 'center'}]}
-    >
+      style={[style, {justifyContent: 'center'}]}>
       {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
@@ -319,8 +318,8 @@ const SliderComponent = (
           Platform.OS === 'web'
             ? props.thumbImage
             : props.StepMarker
-              ? undefined
-              : Image.resolveAssetSource(props.thumbImage)
+            ? undefined
+            : Image.resolveAssetSource(props.thumbImage)
         }
         ref={forwardedRef}
         style={[

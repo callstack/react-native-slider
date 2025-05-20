@@ -359,8 +359,7 @@ const RCTSliderWebComponent = React.forwardRef(
         onMoveShouldSetResponder={() => !disabled}
         onResponderGrant={() => onSlidingStart(value)}
         onResponderRelease={onTouchEnd}
-        onResponderMove={onMove}
-      >
+        onResponderMove={onMove}>
         <Animated.View pointerEvents="none" style={minimumTrackStyle} />
         <View pointerEvents="none" style={thumbViewStyle}>
           {thumbImage !== undefined ? (
