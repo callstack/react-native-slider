@@ -6,7 +6,7 @@ import Slider, {SliderProps} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
-  render(): JSX.Element;
+  render(): React.ReactElement;
   platform?: string;
 }
 
