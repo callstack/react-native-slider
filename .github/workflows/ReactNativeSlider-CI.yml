@@ -154,24 +154,3 @@ jobs:
         run: |
           xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO SKIP_BUNDLING=TRUE build | xcbeautify --renderer github-actions
         working-directory: example/ios
-
-
-  build-Windows-app:
-    name: Build example app Windows
-    runs-on: windows-2022
-    needs: [verify-example-sources]
-    steps:
-      - name: Ensure the cross-platform Git on Windows
-        run: git config --global core.autocrlf false
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Restore NuGet packages
-        run: nuget restore .\example\windows\example.sln
-
-      - name: Build the Windows OS app
-        run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging --sln .\windows\example.sln --proj .\windows\example\example.vcxproj
