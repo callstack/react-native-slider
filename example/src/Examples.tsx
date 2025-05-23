@@ -537,6 +537,11 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: '#334488',
   },
+  noPaddingContainer: {
+    backgroundColor: '#645f5f',
+    borderRadius: 4,
+    paddingVertical: 8,
+  },
 });
 
 export const examples: Props[] = [
@@ -562,6 +567,23 @@ export const examples: Props[] = [
     title: 'step: 0.25, tap to seek on iOS',
     render(): React.ReactElement {
       return <SliderExample step={0.25} tapToSeek={true} />;
+    },
+  },
+  {
+    title: 'Custom padding on Android',
+    render(): React.ReactElement {
+      return (
+        <View style={styles.noPaddingContainer}>
+          <SliderExample
+            padding={{
+              left: 0,
+              right: 0,
+            }}
+            step={0.25}
+            tapToSeek={true}
+          />
+        </View>
+      );
     },
   },
   {
