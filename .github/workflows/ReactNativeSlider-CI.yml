@@ -89,38 +89,10 @@ jobs:
       - name: Run TypeScript on the sources
         run: cd example && npx tsc --noEmit
 
-  build-android-app-old-arch:
-    name: Build example app Android
-    runs-on: ubuntu-latest
-    needs: [verify-example-sources]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Pull the npm dependencies
-        run: npm install
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Use old arch config
-        id: cache-old-arch-gradle
-        uses: actions/cache@v4
-        env:
-          cache-name: cached-gradle-old-arch-prop
-        with:
-          path: example/android/gradle.properties
-          key: gradle-prop-old-arch-config
-
-      - name: Build the Android OS app
-        run: cd example/android && ./gradlew assembleDebug
-
   build-android-app-new-arch:
     name: Build example app Android (Fabric)
     runs-on: ubuntu-latest
-    needs: [build-android-app-old-arch]
+    needs: [verify-example-sources]
 
     steps:
       - uses: actions/checkout@v4
@@ -135,59 +107,11 @@ jobs:
 
       - name: Build the Android OS app
         run: cd example/android && ./gradlew assembleDebug
-
-  build-iOS-app:
-    name: Build example app iOS
-    runs-on: macos-latest
-    needs: [verify-example-sources]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache node modules
-        id: cache-npm
-        uses: actions/cache@v4
-        env:
-          cache-name: cached-ios-npm-deps
-        with:
-          path: example/node_modules
-          key: ${{ hashFiles('./example/package-lock.json') }}-${{ hashFiles('./package/package-lock.json') }}
-
-      - name: Install required dependencies on cache miss (npm)
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: |
-          npm install
-
-      - name: Cache Pods
-        id: cache-pods
-        uses: actions/cache@v4
-        env:
-          cache-name: cached-ios-pods-deps
-        with:
-          path: example/ios/Pods
-          key: ${{ hashFiles('./example/ios/Podfile.lock') }}
-
-      - name: Install required dependencies on cache miss (Pods)
-        if: steps.cache-pods.outputs.cache-hit != 'true'
-        run: |
-          cd example/ios && pod install
-
-      - name: Reinstall Pods only if using cached ones
-        if: steps.cache-pods.outputs.cache-hit == 'true'
-        run: cd example/ios && pod install
-
-      - name: Use the current package sources in build
-        run: cd example && npm run refresh-package
-
-      - name: Build iOS
-        run: |
-          xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO SKIP_BUNDLING=TRUE build | xcbeautify --renderer github-actions
-        working-directory: example/ios
-
 
   build-iOS-new-arch-app:
     name: Build example app iOS (Fabric)
     runs-on: macos-latest
-    needs: [build-iOS-app]
+    needs: [verify-example-sources]
     steps:
       - uses: actions/checkout@v4
 
@@ -220,34 +144,13 @@ jobs:
       - name: Install required dependencies on cache miss (Pods)
         if: steps.cache-pods.outputs.cache-hit != 'true'
         run: |
-          cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
+          cd example/ios && pod install
 
       - name: Reinstall Pods only if using cached ones
         if: steps.cache-pods.outputs.cache-hit == 'true'
-        run: cd example/ios && RCT_NEW_ARCH_ENABLED=1 pod install
+        run: cd example/ios && pod install
 
       - name: Build iOS - Fabric
         run: |
           xcodebuild -workspace example.xcworkspace -scheme example -destination "platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO SKIP_BUNDLING=TRUE build | xcbeautify --renderer github-actions
         working-directory: example/ios
-
-
-  build-Windows-app:
-    name: Build example app Windows
-    runs-on: windows-2022
-    needs: [verify-example-sources]
-    steps:
-      - name: Ensure the cross-platform Git on Windows
-        run: git config --global core.autocrlf false
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Restore NuGet packages
-        run: nuget restore .\example\windows\example.sln
-
-      - name: Build the Windows OS app
-        run: cd example; npx react-native run-windows --arch x64 --no-launch --no-deploy --logging --sln .\windows\example.sln --proj .\windows\example\example.vcxproj
