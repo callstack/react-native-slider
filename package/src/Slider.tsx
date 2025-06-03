@@ -10,9 +10,8 @@ import {
   StyleProp,
   View,
 } from 'react-native';
-import RCTSliderNativeComponent from './index';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import RNCSlider from '.';
+import { ImageURISource } from './RNCSliderNativeComponent';
 
 import type {FC, Ref} from 'react';
 import {MarkerProps} from './components/TrackMark';
@@ -43,19 +42,19 @@ type IOSProps = Readonly<{
    * Assigns a single image for the track. Only static images are supported.
    * The center pixel of the image will be stretched to fill the track.
    */
-  trackImage?: ImageSource;
+  trackImage?: ImageURISource;
 
   /**
    * Assigns a minimum track image. Only static images are supported. The
    * rightmost pixel of the image will be stretched to fill the track.
    */
-  minimumTrackImage?: ImageSource;
+  minimumTrackImage?: ImageURISource;
 
   /**
    * Assigns a maximum track image. Only static images are supported. The
    * leftmost pixel of the image will be stretched to fill the track.
    */
-  maximumTrackImage?: ImageSource;
+  maximumTrackImage?: ImageURISource;
 
   /**
    * Permits tapping on the slider track to set the thumb position.
@@ -164,7 +163,7 @@ type Props = ViewProps &
     /**
      * Sets an image for the thumb. Only static images are supported.
      */
-    thumbImage?: ImageSource;
+    thumbImage?: ImageURISource;
 
     /**
      * If true the slider will be inverted.
@@ -221,7 +220,7 @@ const SliderComponent = (
     }),
     ...props
   }: Props,
-  forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
+  forwardedRef?: Ref<typeof RNCSlider>,
 ) => {
   const [currentValue, setCurrentValue] = useState(
     value ?? minimumValue ?? constants.SLIDER_DEFAULT_INITIAL_VALUE,
@@ -286,6 +285,9 @@ const SliderComponent = (
     }
   }, [lowerLimit, upperLimit]);
 
+  if (!!props.thumbImage)
+    {  console.log(Image.resolveAssetSource(props.thumbImage));
+}
   return (
     <View
       onLayout={(event) => {
@@ -303,7 +305,7 @@ const SliderComponent = (
           isLTR={inverted}
         />
       ) : null}
-      <RCTSliderNativeComponent
+      <RNCSlider
         {...props}
         minimumValue={minimumValue}
         maximumValue={maximumValue}
@@ -317,7 +319,7 @@ const SliderComponent = (
         thumbImage={
           Platform.OS === 'web'
             ? props.thumbImage
-            : props.StepMarker
+            : props.StepMarker || !props.thumbImage
             ? undefined
             : Image.resolveAssetSource(props.thumbImage)
         }

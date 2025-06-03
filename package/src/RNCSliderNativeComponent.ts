@@ -1,7 +1,6 @@
 import type {ColorValue, HostComponent, ViewProps} from 'react-native';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+
 import type {
   Float,
   WithDefault,
@@ -15,6 +14,43 @@ type Event = Readonly<{
   fromUser?: boolean;
 }>;
 
+export interface ImageURISource {
+  /**
+   * `uri` is a string representing the resource identifier for the image, which
+   * could be an http address, a local file path, or the name of a static image
+   * resource (which should be wrapped in the `require('./path/to/image.png')`
+   * function).
+   */
+  uri?: string | undefined;
+  /**
+   * `bundle` is the iOS asset bundle which the image is included in. This
+   * will default to [NSBundle mainBundle] if not set.
+   * @platform ios
+   */
+  bundle?: string | undefined;
+  /**
+   * `method` is the HTTP Method to use. Defaults to GET if not specified.
+   */
+  method?: string | undefined;
+  /**
+   * `body` is the HTTP body to send with the request. This must be a valid
+   * UTF-8 string, and will be sent exactly as specified, with no
+   * additional encoding (e.g. URL-escaping or base64) applied.
+   */
+  body?: string | undefined;
+  /**
+   * `width` and `height` can be specified if known at build time, in which case
+   * these will be used to set the default `<Image/>` component dimensions.
+   */
+  width?: Float | undefined;
+  height?: Float | undefined;
+  /**
+   * `scale` is used to indicate the scale factor of the image. Defaults to 1.0 if
+   * unspecified, meaning that one image pixel equates to one display point / DIP.
+   */
+  scale?: Float | undefined;
+}
+
 export interface NativeProps extends ViewProps {
   accessibilityUnits?: string;
   accessibilityIncrements?: ReadonlyArray<string>;
@@ -22,10 +58,10 @@ export interface NativeProps extends ViewProps {
   inverted?: WithDefault<boolean, false>;
   vertical?: WithDefault<boolean, false>;
   tapToSeek?: WithDefault<boolean, false>;
-  maximumTrackImage?: ImageSource;
+  maximumTrackImage?: ImageURISource;
   maximumTrackTintColor?: ColorValue;
   maximumValue?: Double;
-  minimumTrackImage?: ImageSource;
+  minimumTrackImage?: ImageURISource;
   minimumTrackTintColor?: ColorValue;
   minimumValue?: Double;
   onChange?: BubblingEventHandler<Event>;
@@ -34,9 +70,9 @@ export interface NativeProps extends ViewProps {
   onRNCSliderValueChange?: BubblingEventHandler<Event>;
   step?: Double;
   testID?: string;
-  thumbImage?: ImageSource;
+  thumbImage?: ImageURISource;
   thumbTintColor?: ColorValue;
-  trackImage?: ImageSource;
+  trackImage?: ImageURISource;
   value?: Float;
   lowerLimit?: Float;
   upperLimit?: Float;
