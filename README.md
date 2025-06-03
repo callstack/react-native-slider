@@ -1,5 +1,6 @@
 <p align="center">
-  <h1 align="center"> <code>@react-native-community/slider</code> </h1>
+  <a href="https://www.callstack.com/open-source" align="center">
+    <img alt="React Native Slider" src="https://github.com/user-attachments/assets/1a42c57e-b7c1-4bda-bd02-39c903f42d57">
 </p>
 <p align="center">
     <a href="https://www.npmjs.com/package/@react-native-community/slider">
