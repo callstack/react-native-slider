@@ -285,9 +285,6 @@ const SliderComponent = (
     }
   }, [lowerLimit, upperLimit]);
 
-  if (!!props.thumbImage)
-    {  console.log(Image.resolveAssetSource(props.thumbImage));
-}
   return (
     <View
       onLayout={(event) => {
@@ -329,6 +326,9 @@ const SliderComponent = (
           defaultStyle,
           {alignContent: 'center', alignItems: 'center'},
         ]}
+        trackImage={props.trackImage ? Image.resolveAssetSource(props.trackImage) : undefined}
+        minimumTrackImage={props.minimumTrackImage ? Image.resolveAssetSource(props.minimumTrackImage) : undefined}
+        maximumTrackImage={props.maximumTrackImage ? Image.resolveAssetSource(props.maximumTrackImage) : undefined}
         onChange={onValueChangeEvent}
         onRNCSliderSlidingStart={onSlidingStartEvent}
         onRNCSliderSlidingComplete={onSlidingCompleteEvent}

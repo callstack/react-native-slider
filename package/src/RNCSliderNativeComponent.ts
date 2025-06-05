@@ -42,13 +42,13 @@ export interface ImageURISource {
    * `width` and `height` can be specified if known at build time, in which case
    * these will be used to set the default `<Image/>` component dimensions.
    */
-  width?: Float | undefined;
-  height?: Float | undefined;
+  width?: Double | undefined;
+  height?: Double | undefined;
   /**
    * `scale` is used to indicate the scale factor of the image. Defaults to 1.0 if
    * unspecified, meaning that one image pixel equates to one display point / DIP.
    */
-  scale?: Float | undefined;
+  scale?: Double | undefined;
 }
 
 export interface NativeProps extends ViewProps {
