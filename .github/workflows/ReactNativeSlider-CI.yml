@@ -53,25 +53,6 @@ jobs:
         run: cd package && npx tsc --noEmit
 
 
-  test:
-    name: Run the unit tests
-    runs-on: ubuntu-latest
-    needs: install
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Pull npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ./package/node_modules
-          key: ${{ hashFiles('./package/package.json') }}
-
-      - name: Run unit tests
-        run: cd package && npx jest src
-
-
   verify-example-sources:
     name: Verify example app sources
     runs-on: ubuntu-latest

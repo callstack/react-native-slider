@@ -15,9 +15,7 @@
 using namespace facebook::react;
 
 @interface RNCSliderComponentView () <RCTRNCSliderViewProtocol>
-
 @end
-
 
 @implementation RNCSliderComponentView
 {
@@ -222,8 +220,16 @@ using namespace facebook::react;
         }
         [slider setAccessibilityIncrements:accessibilityIncrements];
     }
-    if (oldScreenProps.thumbImage != newScreenProps.thumbImage) {
-        [self loadImageFromImageSource:newScreenProps.thumbImage completionBlock:^(NSError *error, UIImage *image) {
+
+    if (oldScreenProps.thumbImage.uri != newScreenProps.thumbImage.uri) {
+        ImageSource *img = new ImageSource;
+        img->size.width = newScreenProps.thumbImage.width;
+        img->size.height = newScreenProps.thumbImage.height;
+        img->scale = newScreenProps.thumbImage.scale;
+        img->bundle = newScreenProps.thumbImage.bundle;
+        img->uri = newScreenProps.thumbImage.uri;
+
+        [self loadImageFromImageSource:*img completionBlock:^(NSError *error, UIImage *image) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setThumbImage:image];
             });
@@ -232,8 +238,16 @@ using namespace facebook::react;
             [self->slider setThumbImage:nil];
         }];
     }
-    if (oldScreenProps.trackImage != newScreenProps.trackImage) {
-        [self loadImageFromImageSource:newScreenProps.trackImage completionBlock:^(NSError *error, UIImage *image) {
+
+    if (oldScreenProps.trackImage.uri != newScreenProps.trackImage.uri) {
+        ImageSource *img = new ImageSource;
+        img->size.width = newScreenProps.trackImage.width;
+        img->size.height = newScreenProps.trackImage.height;
+        img->scale = newScreenProps.trackImage.scale;
+        img->bundle = newScreenProps.trackImage.bundle;
+        img->uri = newScreenProps.trackImage.uri;
+
+        [self loadImageFromImageSource:*img completionBlock:^(NSError *error, UIImage *image) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setTrackImage:image];
             });
@@ -242,8 +256,16 @@ using namespace facebook::react;
             [self->slider setTrackImage:nil];
         }];
     }
-    if (oldScreenProps.minimumTrackImage != newScreenProps.minimumTrackImage) {
-        [self loadImageFromImageSource:newScreenProps.minimumTrackImage completionBlock:^(NSError *error, UIImage *image) {
+
+    if (oldScreenProps.minimumTrackImage.uri != newScreenProps.minimumTrackImage.uri) {
+        ImageSource *img = new ImageSource;
+        img->size.width = newScreenProps.minimumTrackImage.width;
+        img->size.height = newScreenProps.minimumTrackImage.height;
+        img->scale = newScreenProps.minimumTrackImage.scale;
+        img->bundle = newScreenProps.minimumTrackImage.bundle;
+        img->uri = newScreenProps.minimumTrackImage.uri;
+
+        [self loadImageFromImageSource:*img completionBlock:^(NSError *error, UIImage *image) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setMinimumTrackImage:image];
             });
@@ -252,8 +274,16 @@ using namespace facebook::react;
             [self->slider setMinimumTrackImage:nil];
         }];
     }
-    if (oldScreenProps.maximumTrackImage != newScreenProps.maximumTrackImage) {
-        [self loadImageFromImageSource:newScreenProps.maximumTrackImage completionBlock:^(NSError *error, UIImage *image) {
+
+    if (oldScreenProps.maximumTrackImage.uri != newScreenProps.maximumTrackImage.uri) {
+        ImageSource *img = new ImageSource;
+        img->size.width = newScreenProps.maximumTrackImage.width;
+        img->size.height = newScreenProps.maximumTrackImage.height;
+        img->scale = newScreenProps.maximumTrackImage.scale;
+        img->bundle = newScreenProps.maximumTrackImage.bundle;
+        img->uri = newScreenProps.maximumTrackImage.uri;
+
+        [self loadImageFromImageSource:*img completionBlock:^(NSError *error, UIImage *image) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->slider setMaximumTrackImage:image];
             });

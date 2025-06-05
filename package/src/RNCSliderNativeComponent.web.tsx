@@ -79,7 +79,7 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerRef = forwardedRef || React.createRef();
     const containerPositionInvalidated = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
-    const lastInitialValue = React.useRef<number>();
+    const lastInitialValue = React.useRef<number>(initialValue);
     const animationValues = React.useRef<AnimationValues>({
       val: new Animated.Value(value),
       min: new Animated.Value(minimumValue),
