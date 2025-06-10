@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react-native';
 import * as React from 'react';
-import renderer from 'react-test-renderer';
+import {MarkerProps} from '../../typings';
 import Slider from '../Slider';
-import {View} from 'react-native';
+import {Text, View} from 'react-native';
 
 describe('<Slider />', () => {
   it('renders enabled slider', () => {
@@ -78,6 +78,35 @@ describe('<Slider />', () => {
     expect(screen).toMatchSnapshot();
   });
 
-    expect(tree).toMatchSnapshot();
+  it('Set custom thumbImage and stepMarker when value is changed', () => {
+    const {rerender} = render(<TestSlider value={2} />);
+    expect(screen.getByTestId('marked')).toHaveTextContent('C:2 I:2');
+
+    rerender(<TestSlider value={0} />);
+    expect(screen.getByTestId('marked')).toHaveTextContent('C:0 I:0');
+
+    expect(screen).toMatchSnapshot();
+
+    function TestSlider({value}: {value: number}) {
+      return (
+        <Slider
+          value={value}
+          minimumValue={0}
+          maximumValue={4}
+          StepMarker={TestStepMarker}
+        />
+      );
+    }
+
+    function TestStepMarker({index, currentValue, stepMarked}: MarkerProps) {
+      return (
+        <View>
+          <Text
+            testID={
+              stepMarked ? 'marked' : `marker_${index}`
+            }>{`C:${currentValue} I:${index}`}</Text>
+        </View>
+      );
+    }
   });
 });
