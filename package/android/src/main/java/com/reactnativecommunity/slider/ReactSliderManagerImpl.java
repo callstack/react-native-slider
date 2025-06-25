@@ -167,6 +167,9 @@ public class ReactSliderManagerImpl {
             drawable.setDrawable(i, newDrawable);
         }
     }
-
+    public static void setThumbSize(ReactSlider view, double w, double h) {
+        ThumbDrawable drawable = (ThumbDrawable) view.getThumb();
+        drawable.setDimension(w, h);
+    }
 
 }

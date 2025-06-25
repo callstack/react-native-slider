@@ -183,8 +183,8 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
-  public void setThumbnailSize(ReactSlider view, double value) {
-
+  public void setThumbSize(ReactSlider view, double value) {
+    ReactSliderManagerImpl.setThumbSize(view, value, value);
   }
 
   @Override

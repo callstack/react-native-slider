@@ -25,7 +25,7 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
    * modifies thumb size. Android only.
    */
-  thumbnailSize?: number;
+  thumbSize?: number;
 }
 
 export interface SliderRef {

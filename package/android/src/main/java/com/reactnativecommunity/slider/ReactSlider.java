@@ -76,6 +76,7 @@ public class ReactSlider extends AppCompatSeekBar {
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
+    setThumb(new ThumbDrawable(getThumb()));
     I18nUtil sharedI18nUtilInstance = I18nUtil.getInstance();
     super.setLayoutDirection(sharedI18nUtilInstance.isRTL(context) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR);
     disableStateListAnimatorIfNeeded();

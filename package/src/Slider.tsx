@@ -51,7 +51,7 @@ type AndroidProps = Readonly<{
   /**
    * modifies thumb size. Android only.
    */
-  thumbnailSize?: number;
+  thumbSize?: number;
 }>;
 
 type IOSProps = Readonly<{
