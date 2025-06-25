@@ -8,7 +8,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "dist/Slider.js",
+  "main": "src/Slider.tsx",
   "types": "typings/index.d.ts",
   "keywords": [
     "react-native",
