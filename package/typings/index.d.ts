@@ -14,6 +14,18 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
    * Color of the foreground switch grip.
    */
   thumbTintColor?: string;
+  /**
+   * modifies slider height. Android only.
+   */
+  sliderHeight?: number;
+  /**
+   * modifies slider corner roundness. Android only.
+   */
+  sliderCornerRoundness?: number;
+  /**
+   * modifies thumb size. Android only.
+   */
+  thumbnailSize?: number;
 }
 
 export interface SliderRef {

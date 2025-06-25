@@ -173,6 +173,21 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
+  public void setSliderHeight(ReactSlider view, double value) {
+    ReactSliderManagerImpl.setSliderHeight(view, value);
+  }
+
+  @Override
+  public void setSliderCornerRoundness(ReactSlider view, double value) {
+    ReactSliderManagerImpl.setSliderCornerRoundness(view, value);
+  }
+
+  @Override
+  public void setThumbnailSize(ReactSlider view, double value) {
+
+  }
+
+  @Override
   @ReactProp(name = "thumbImage")
   public void setThumbImage(ReactSlider view, @androidx.annotation.Nullable ReadableMap source) {
     ReactSliderManagerImpl.setThumbImage(view, source);

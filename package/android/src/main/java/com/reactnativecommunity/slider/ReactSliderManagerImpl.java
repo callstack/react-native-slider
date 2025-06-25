@@ -1,11 +1,14 @@
 package com.reactnativecommunity.slider;
 
+import static com.facebook.drawee.drawable.RoundedCornersDrawable.Type.CLIPPING;
+
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 
+import com.facebook.drawee.drawable.RoundedCornersDrawable;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -146,4 +149,24 @@ public class ReactSliderManagerImpl {
                 ReactSlidingCompleteEvent.EVENT_NAME, MapBuilder.of("registrationName", ReactSlidingCompleteEvent.EVENT_NAME)
         );
     }
+
+    public static void setSliderHeight(ReactSlider view, double value) {
+        LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
+        for (int i = 0; i < drawable.getNumberOfLayers(); i ++ ) {
+            // 0 is max/background progress; 1 is ???; 2 is min/current progress
+            drawable.setLayerHeight(i, (int) value);
+        }
+    }
+
+    public static void setSliderCornerRoundness(ReactSlider view, double value) {
+        LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
+        for (int i = 0; i < drawable.getNumberOfLayers(); i ++ ) {
+            RoundedCornersDrawable newDrawable = new RoundedCornersDrawable(drawable.getDrawable(i));
+            newDrawable.setRadius((float) value);
+            newDrawable.setType(CLIPPING);
+            drawable.setDrawable(i, newDrawable);
+        }
+    }
+
+
 }
