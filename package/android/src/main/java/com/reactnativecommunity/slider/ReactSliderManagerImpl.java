@@ -150,7 +150,7 @@ public class ReactSliderManagerImpl {
         );
     }
 
-    public static void setSliderHeight(ReactSlider view, double value) {
+    public static void setSliderThickness(ReactSlider view, double value) {
         LayerDrawable drawable = (LayerDrawable) view.getProgressDrawable().getCurrent();
         for (int i = 0; i < drawable.getNumberOfLayers(); i ++ ) {
             // 0 is max/background progress; 1 is ???; 2 is min/current progress

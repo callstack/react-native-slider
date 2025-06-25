@@ -40,7 +40,7 @@ export interface NativeProps extends ViewProps {
   value?: Float;
   lowerLimit?: Float;
   upperLimit?: Float;
-  sliderHeight?: Double;
+  sliderThickness?: Double;
   sliderCornerRoundness?: Double;
   thumbSize?: Double;
 }

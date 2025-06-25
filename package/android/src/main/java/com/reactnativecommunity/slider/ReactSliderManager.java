@@ -173,8 +173,8 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
-  public void setSliderHeight(ReactSlider view, double value) {
-    ReactSliderManagerImpl.setSliderHeight(view, value);
+  public void setSliderThickness(ReactSlider view, double value) {
+    ReactSliderManagerImpl.setSliderThickness(view, value);
   }
 
   @Override

@@ -15,9 +15,9 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
    */
   thumbTintColor?: string;
   /**
-   * modifies slider height. Android only.
+   * modifies slider thickness. Android only.
    */
-  sliderHeight?: number;
+  sliderThickness?: number;
   /**
    * modifies slider corner roundness. Android only.
    */

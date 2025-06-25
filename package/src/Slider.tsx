@@ -41,9 +41,9 @@ type WindowsProps = Readonly<{
 
 type AndroidProps = Readonly<{
   /**
-   * modifies slider height. Android only.
+   * modifies slider thickness. Android only.
    */
-  sliderHeight?: number;
+  sliderThickness?: number;
   /**
    * modifies slider corner roundness. Android only.
    */
@@ -110,11 +110,6 @@ type Props = ViewProps &
      * Default value is 0.
      */
     step?: number;
-
-    /**
-     * Initial minimum value of the slider. Default value is 0.
-     */
-    sliderHeight?: number;
 
     /**
      * Initial minimum value of the slider. Default value is 0.
