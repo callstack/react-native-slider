@@ -74,9 +74,12 @@ public class ReactSlider extends AppCompatSeekBar {
   /** Upper limit based on the SeekBar progress 0..total steps */
   private int mUpperLimit;
 
+  public ThumbDrawable thumbDrawable;
+
   public ReactSlider(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
-    setThumb(new ThumbDrawable(getThumb()));
+    thumbDrawable = new ThumbDrawable(getThumb());
+    setThumb(thumbDrawable);
     I18nUtil sharedI18nUtilInstance = I18nUtil.getInstance();
     super.setLayoutDirection(sharedI18nUtilInstance.isRTL(context) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR);
     disableStateListAnimatorIfNeeded();
@@ -308,7 +311,7 @@ public class ReactSlider extends AppCompatSeekBar {
         setSplitTrack(false);
       }
     } else {
-      setThumb(getThumb());
+      setThumb(thumbDrawable);
     }
   }
 }
