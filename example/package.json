@@ -17,7 +17,7 @@
   "dependencies": {
     "@react-native-community/slider": "file:../package",
     "babel-preset-expo": "^9.2.0",
-    "react": "^19.0.0",
+    "react": "19.0.0",
     "react-native": "^0.79.2",
     "react-native-pager-view": "^6.6.0"
   },
