@@ -9,15 +9,6 @@ set(LIB_COMMON_DIR ${LIB_ANDROID_DIR}/../common/cpp)
 set(LIB_ANDROID_GENERATED_JNI_DIR ${LIB_ANDROID_DIR}/build/generated/source/codegen/jni)
 set(LIB_ANDROID_GENERATED_COMPONENTS_DIR ${LIB_ANDROID_GENERATED_JNI_DIR}/react/renderer/components/${LIB_LITERAL})
 
-add_compile_options(
-  -fexceptions
-  -frtti
-  -std=c++20
-  -Wall
-  -Wpedantic
-  -Wno-gnu-zero-variadic-macro-arguments
-)
-
 file(GLOB LIB_CUSTOM_SRCS CONFIGURE_DEPENDS *.cpp ${LIB_COMMON_DIR}/react/renderer/components/${LIB_LITERAL}/*.cpp)
 file(GLOB LIB_CODEGEN_SRCS CONFIGURE_DEPENDS ${LIB_ANDROID_GENERATED_JNI_DIR}/*.cpp ${LIB_ANDROID_GENERATED_COMPONENTS_DIR}/*.cpp)
 
@@ -67,6 +58,21 @@ else()
     turbomodulejsijni
     rrc_view
     yoga
+  )
+endif()
+
+if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 81)
+  target_compile_reactnative_options(${LIB_TARGET_NAME} PUBLIC)
+else()
+  target_compile_options(
+    ${LIB_TARGET_NAME}
+    PRIVATE
+    -fexceptions
+    -frtti
+    -std=c++20
+    -Wall
+    -Wpedantic
+    -Wno-gnu-zero-variadic-macro-arguments
   )
 endif()
 
