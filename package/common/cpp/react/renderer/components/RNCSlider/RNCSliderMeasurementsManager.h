@@ -10,13 +10,13 @@ namespace facebook::react {
     class RNCSliderMeasurementsManager {
     public:
         RNCSliderMeasurementsManager(
-                const ContextContainer::Shared &contextContainer)
+                const std::shared_ptr<const ContextContainer> &contextContainer)
                 : contextContainer_(contextContainer) {}
 
         Size measure(SurfaceId surfaceId, LayoutConstraints layoutConstraints) const;
 
     private:
-        const ContextContainer::Shared contextContainer_;
+        const std::shared_ptr<const ContextContainer> contextContainer_;
         mutable std::mutex mutex_;
         mutable bool hasBeenMeasured_ = false;
         mutable Size cachedMeasurement_{};
