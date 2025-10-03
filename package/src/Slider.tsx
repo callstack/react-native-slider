@@ -9,10 +9,9 @@ import {
   NativeSyntheticEvent,
   StyleProp,
   View,
+  ImageSource
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 import type {FC, Ref} from 'react';
 import {MarkerProps} from './components/TrackMark';
@@ -317,7 +316,7 @@ const SliderComponent = (
         thumbImage={
           Platform.OS === 'web'
             ? props.thumbImage
-            : props.StepMarker
+            : props.StepMarker || !props.thumbImage
             ? undefined
             : Image.resolveAssetSource(props.thumbImage)
         }

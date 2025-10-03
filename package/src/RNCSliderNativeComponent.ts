@@ -1,7 +1,5 @@
 import type {ColorValue, HostComponent, ViewProps} from 'react-native';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import {ImageSource, codegenNativeComponent} from 'react-native';
 import type {
   Float,
   WithDefault,

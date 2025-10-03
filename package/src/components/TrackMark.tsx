@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {Image, ImageURISource, View} from 'react-native';
+import {Image, ImageSource, View} from 'react-native';
 import {styles} from '../utils/styles';
 
 export type MarkerProps = {
@@ -13,7 +13,7 @@ export type MarkerProps = {
 export type TrackMarksProps = {
   isTrue: boolean;
   index: number;
-  thumbImage?: ImageURISource;
+  thumbImage?: ImageSource;
   StepMarker?: FC<MarkerProps>;
   currentValue: number;
   min: number;
