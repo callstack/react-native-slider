@@ -40,6 +40,9 @@ export interface NativeProps extends ViewProps {
   value?: Float;
   lowerLimit?: Float;
   upperLimit?: Float;
+  sliderThickness?: Double;
+  sliderCornerRoundness?: Double;
+  thumbSize?: Double;
 }
 
 export default codegenNativeComponent<NativeProps>('RNCSlider', {
