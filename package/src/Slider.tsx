@@ -279,6 +279,10 @@ const SliderComponent = (
   const passedValue = Number.isNaN(value) || !value ? undefined : value;
 
   useEffect(() => {
+    setCurrentValue(value);
+  }, [value]);
+
+  useEffect(() => {
     if (lowerLimit >= upperLimit) {
       console.warn(
         'Invalid configuration: lower limit is supposed to be smaller than upper limit',
