@@ -21,7 +21,8 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "craco eject"
+    "eject": "craco eject",
+    "refresh-package": "rimraf ./node_modules/@react-native-community/slider && npx copyfiles -u 2 \"./../package/**/*\" ./node_modules/@react-native-community/slider && rimraf ./node_modules/@react-native-community/slider/node_modules"
   },
   "eslintConfig": {
     "extends": [
@@ -43,7 +44,9 @@
   },
   "devDependencies": {
     "@craco/craco": "^5.9.0",
-    "@dealmore/craco-plugin-babel-include": "^1.0.0"
+    "@dealmore/craco-plugin-babel-include": "^1.0.0",
+    "copyfiles": "^2.4.1",
+    "rimraf": "^6.0.1"
   },
   "overrides": {
     "react-scripts": {

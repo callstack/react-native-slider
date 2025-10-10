@@ -7,6 +7,7 @@ import {
   GestureResponderEvent,
   LayoutChangeEvent,
   Image,
+  ImageSourcePropType,
 } from 'react-native';
 //@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
@@ -79,7 +80,7 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerRef = forwardedRef || React.createRef();
     const containerPositionInvalidated = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
-    const lastInitialValue = React.useRef<number>();
+    const lastInitialValue = React.useRef<number>(0);
     const animationValues = React.useRef<AnimationValues>({
       val: new Animated.Value(value),
       min: new Animated.Value(minimumValue),
@@ -364,7 +365,7 @@ const RCTSliderWebComponent = React.forwardRef(
         <View pointerEvents="none" style={thumbViewStyle}>
           {thumbImage !== undefined ? (
             <Image
-              source={thumbImage}
+              source={thumbImage as ImageSourcePropType}
               style={{width: '100%', height: '100%'}}
             />
           ) : null}
