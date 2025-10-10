@@ -9,7 +9,8 @@ import {
   NativeSyntheticEvent,
   StyleProp,
   View,
-  ImageSource
+  ImageSource,
+  ImageSourcePropType
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 
@@ -318,7 +319,7 @@ const SliderComponent = (
             ? props.thumbImage
             : props.StepMarker || !props.thumbImage
             ? undefined
-            : Image.resolveAssetSource(props.thumbImage)
+            : Image.resolveAssetSource(props.thumbImage as ImageSourcePropType)
         }
         ref={forwardedRef}
         style={[

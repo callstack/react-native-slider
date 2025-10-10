@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {Image, ImageSource, View} from 'react-native';
+import {Image, ImageSource, ImageSourcePropType, View} from 'react-native';
 import {styles} from '../utils/styles';
 
 export type MarkerProps = {
@@ -42,7 +42,7 @@ export const SliderTrackMark = ({
       ) : null}
       {thumbImage && isTrue ? (
         <View style={styles.thumbImageContainer}>
-          <Image source={thumbImage} style={styles.thumbImage} />
+          <Image source={thumbImage as ImageSourcePropType} style={styles.thumbImage} />
         </View>
       ) : null}
     </View>
