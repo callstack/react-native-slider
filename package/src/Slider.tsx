@@ -10,7 +10,7 @@ import {
   StyleProp,
   View,
   ImageSource,
-  ImageSourcePropType
+  ImageSourcePropType,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
 

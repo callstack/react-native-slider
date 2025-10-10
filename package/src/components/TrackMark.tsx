@@ -42,7 +42,10 @@ export const SliderTrackMark = ({
       ) : null}
       {thumbImage && isTrue ? (
         <View style={styles.thumbImageContainer}>
-          <Image source={thumbImage as ImageSourcePropType} style={styles.thumbImage} />
+          <Image
+            source={thumbImage as ImageSourcePropType}
+            style={styles.thumbImage}
+          />
         </View>
       ) : null}
     </View>
