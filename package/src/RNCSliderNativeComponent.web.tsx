@@ -136,7 +136,7 @@ const RCTSliderWebComponent = React.forwardRef(
     // Add a ref to track user interaction
     const isUserInteracting = React.useRef(false);
     const updateValue = useCallback(
-      (newValue: number) => {
+      (newValue: number, forceUpdate = false) => {
         // Ensure that the value is correctly rounded
         const hardRounded =
           decimalPrecision.current < 20
@@ -150,7 +150,7 @@ const RCTSliderWebComponent = React.forwardRef(
         );
         if (value !== withinBounds) {
           setValue(withinBounds);
-          if (isUserInteracting.current) {
+          if (isUserInteracting.current || forceUpdate) {
             onValueChange(withinBounds);
           }
           return withinBounds;
@@ -326,7 +326,7 @@ const RCTSliderWebComponent = React.forwardRef(
       forwardedRef,
       () => ({
         updateValue: (val: number) => {
-          updateValue(val);
+          updateValue(val, true);
         },
       }),
       [updateValue],
