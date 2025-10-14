@@ -1,4 +1,4 @@
-import React, {RefObject, useCallback} from 'react';
+import React, {useCallback, useRef} from 'react';
 import {
   Animated,
   View,
@@ -76,7 +76,7 @@ const RCTSliderWebComponent = React.forwardRef(
   ) => {
     const containerSize = React.useRef({width: 0, height: 0});
     const containerPositionX = React.useRef(0);
-    const containerRef = forwardedRef || React.createRef();
+    const containerRef = useRef<HTMLElement>(null);
     const containerPositionInvalidated = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
     const lastInitialValue = React.useRef<number>();
@@ -257,9 +257,7 @@ const RCTSliderWebComponent = React.forwardRef(
     }, [maximumValue, minimumValue, step]);
 
     const updateContainerPositionX = () => {
-      const positionX = (
-        containerRef as RefObject<HTMLElement | undefined>
-      ).current?.getBoundingClientRect().x;
+      const positionX = containerRef.current?.getBoundingClientRect().x;
       containerPositionX.current = positionX ?? 0;
     };
 
@@ -336,11 +334,11 @@ const RCTSliderWebComponent = React.forwardRef(
 
     return (
       <View
-        ref={containerRef}
+        ref={containerRef as any}
         onLayout={({nativeEvent: {layout}}: LayoutChangeEvent) => {
           containerSize.current.height = layout.height;
           containerSize.current.width = layout.width;
-          if ((containerRef as RefObject<View>).current) {
+          if (containerRef.current) {
             updateContainerPositionX();
           }
         }}
