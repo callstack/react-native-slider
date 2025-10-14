@@ -1,4 +1,4 @@
-import React, {RefObject, useCallback} from 'react';
+import React, {useCallback, useRef} from 'react';
 import {
   Animated,
   View,
@@ -76,7 +76,7 @@ const RCTSliderWebComponent = React.forwardRef(
   ) => {
     const containerSize = React.useRef({width: 0, height: 0});
     const containerPositionX = React.useRef(0);
-    const containerRef = forwardedRef || React.createRef();
+    const containerRef = useRef<HTMLElement>(null);
     const containerPositionInvalidated = React.useRef(false);
     const [value, setValue] = React.useState(initialValue || minimumValue);
     const lastInitialValue = React.useRef<number>();
@@ -136,7 +136,7 @@ const RCTSliderWebComponent = React.forwardRef(
     // Add a ref to track user interaction
     const isUserInteracting = React.useRef(false);
     const updateValue = useCallback(
-      (newValue: number) => {
+      (newValue: number, forceUpdate = false) => {
         // Ensure that the value is correctly rounded
         const hardRounded =
           decimalPrecision.current < 20
@@ -150,7 +150,7 @@ const RCTSliderWebComponent = React.forwardRef(
         );
         if (value !== withinBounds) {
           setValue(withinBounds);
-          if (isUserInteracting.current) {
+          if (isUserInteracting.current || forceUpdate) {
             onValueChange(withinBounds);
           }
           return withinBounds;
@@ -257,9 +257,7 @@ const RCTSliderWebComponent = React.forwardRef(
     }, [maximumValue, minimumValue, step]);
 
     const updateContainerPositionX = () => {
-      const positionX = (
-        containerRef as RefObject<HTMLElement | undefined>
-      ).current?.getBoundingClientRect().x;
+      const positionX = containerRef.current?.getBoundingClientRect().x;
       containerPositionX.current = positionX ?? 0;
     };
 
@@ -328,7 +326,7 @@ const RCTSliderWebComponent = React.forwardRef(
       forwardedRef,
       () => ({
         updateValue: (val: number) => {
-          updateValue(val);
+          updateValue(val, true);
         },
       }),
       [updateValue],
@@ -336,11 +334,11 @@ const RCTSliderWebComponent = React.forwardRef(
 
     return (
       <View
-        ref={containerRef}
+        ref={containerRef as any}
         onLayout={({nativeEvent: {layout}}: LayoutChangeEvent) => {
           containerSize.current.height = layout.height;
           containerSize.current.width = layout.width;
-          if ((containerRef as RefObject<View>).current) {
+          if (containerRef.current) {
             updateContainerPositionX();
           }
         }}
