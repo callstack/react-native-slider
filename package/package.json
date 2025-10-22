@@ -49,6 +49,7 @@
     "prettier": "2.8.8",
     "react": "^19.2.0",
     "react-native": "^0.81.4",
+    "react-native-windows": "^0.79.4",
     "react-test-renderer": "^19.2.0",
     "typescript": "^5.0.4"
   },
@@ -71,7 +72,7 @@
   },
   "codegenConfig": {
     "name": "RNCSlider",
-    "type": "components",
+    "type": "all",
     "jsSrcsDir": "src",
     "android": {
       "javaPackageName": "com.reactnativecommunity.slider"
@@ -80,6 +81,14 @@
       "componentProvider": {
         "RNCSlider": "RNCSliderComponentView"
       }
+    },
+    "windows": {
+      "namespace": "SliderCodegen",
+      "outputDirectory": "windows/SliderWindows/codegen",
+      "generators": [
+        "componentsWindows"
+      ],
+      "separateDataTypes": true
     }
   }
 }
