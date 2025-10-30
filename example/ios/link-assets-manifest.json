@@ -1,0 +1,61 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/resources/fonts/AllianceNo2-Black.ttf",
+      "sha1": "db977eb5896cf8940a12c5f4ed120ee2a35b75e2"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-BlackItalic.ttf",
+      "sha1": "3494ebadb2ba90c219e7f20602ed42f6b44e4a7f"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-Bold.ttf",
+      "sha1": "56801286f0d87c670b5067c62a306d93eba25cdd"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-BoldItalic.ttf",
+      "sha1": "b6247a99ae1f73dd06dd141c51bc7aa1e7dddbb8"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-ExtraBold.ttf",
+      "sha1": "eaf68f78f4ee569c2a3de6d4c4adcef647c04104"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-ExtraBoldItalic.ttf",
+      "sha1": "16b168eab763ba46b0bbfc3dcc93a0e531e7c233"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-Light.ttf",
+      "sha1": "58295c54d675101fb02d34924ce151c2d1007c04"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-LightItalic.ttf",
+      "sha1": "dd78b3a0b02b6bba9bee874374522b49db58a215"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-Medium.ttf",
+      "sha1": "42b02da199b23ea70a49fe5a29f17495b6aba92f"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-MediumItalic.ttf",
+      "sha1": "88e46741a99bfe06b6e6e9a070b5d7682cab7d81"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-Regular.ttf",
+      "sha1": "af378928419257ce37829c78dafcd811b14aa4a3"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-RegularItalic.ttf",
+      "sha1": "0d97bb9778d47fef183f1250bc583122e18b0811"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-SemiBold.ttf",
+      "sha1": "e0cfbc74219757a41f034065c9a5ecae9e904aae"
+    },
+    {
+      "path": "src/resources/fonts/AllianceNo2-SemiBoldItalic.ttf",
+      "sha1": "f8dd9730a165646af8c2f8bbdca84acba64e8dee"
+    }
+  ]
+}

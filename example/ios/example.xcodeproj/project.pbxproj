@@ -12,6 +12,20 @@
 		50C9C2155AEAD56B5C244777 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		78852A1AA0DB4E36B00A0C9B /* AllianceNo2-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B907E8A5167B435D8FB37913 /* AllianceNo2-Black.ttf */; };
+		23C36D388BEB4DDB9ABC09F7 /* AllianceNo2-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1682519B8C05440B8F24B520 /* AllianceNo2-BlackItalic.ttf */; };
+		951F5FBD12E64A99B889713F /* AllianceNo2-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1EF15354CB814734AC672693 /* AllianceNo2-Bold.ttf */; };
+		B70D85744B824704AC0F8A29 /* AllianceNo2-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3DD25A7221E94F9FA66783FD /* AllianceNo2-BoldItalic.ttf */; };
+		18584C8BD9E74F90A063B3B0 /* AllianceNo2-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D59E53C6C99A4FCFAC2087AA /* AllianceNo2-ExtraBold.ttf */; };
+		6C5FB72335674C55BC17AA4C /* AllianceNo2-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0394BBB49BCA4F6EB63FA5E5 /* AllianceNo2-ExtraBoldItalic.ttf */; };
+		AFCFDADAED8A4108B3D33C50 /* AllianceNo2-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A57D7F13CFA1431AB3BE1838 /* AllianceNo2-Light.ttf */; };
+		D1EA7CB4CF444F02B3617F08 /* AllianceNo2-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 51546D90AA404835B7F6AD6C /* AllianceNo2-LightItalic.ttf */; };
+		06A5B12B4BCF455EBEE191E2 /* AllianceNo2-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 91A6AD06A1B14977932F83B4 /* AllianceNo2-Medium.ttf */; };
+		DDE8C48DA06B4F36867F800A /* AllianceNo2-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DDF5BAF3D8C54032BA8DF424 /* AllianceNo2-MediumItalic.ttf */; };
+		9BBED76A09FB406E8C2151AA /* AllianceNo2-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1117D6C42415466AA553CA22 /* AllianceNo2-Regular.ttf */; };
+		2804171F972E424F8F27C8D3 /* AllianceNo2-RegularItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA3E8EAC95A6458E87189564 /* AllianceNo2-RegularItalic.ttf */; };
+		618593B9E6B740178F54C219 /* AllianceNo2-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 078AC895328E41C4862AA535 /* AllianceNo2-SemiBold.ttf */; };
+		52B7ADFD13A74ED0B1A6B875 /* AllianceNo2-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F23662A7C5C047B49AB82DFA /* AllianceNo2-SemiBoldItalic.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +39,20 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = example/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = example/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		B907E8A5167B435D8FB37913 /* AllianceNo2-Black.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-Black.ttf"; path = "../src/resources/fonts/AllianceNo2-Black.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1682519B8C05440B8F24B520 /* AllianceNo2-BlackItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-BlackItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-BlackItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1EF15354CB814734AC672693 /* AllianceNo2-Bold.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-Bold.ttf"; path = "../src/resources/fonts/AllianceNo2-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		3DD25A7221E94F9FA66783FD /* AllianceNo2-BoldItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-BoldItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-BoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		D59E53C6C99A4FCFAC2087AA /* AllianceNo2-ExtraBold.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-ExtraBold.ttf"; path = "../src/resources/fonts/AllianceNo2-ExtraBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0394BBB49BCA4F6EB63FA5E5 /* AllianceNo2-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-ExtraBoldItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-ExtraBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A57D7F13CFA1431AB3BE1838 /* AllianceNo2-Light.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-Light.ttf"; path = "../src/resources/fonts/AllianceNo2-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		51546D90AA404835B7F6AD6C /* AllianceNo2-LightItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-LightItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-LightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		91A6AD06A1B14977932F83B4 /* AllianceNo2-Medium.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-Medium.ttf"; path = "../src/resources/fonts/AllianceNo2-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DDF5BAF3D8C54032BA8DF424 /* AllianceNo2-MediumItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-MediumItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-MediumItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1117D6C42415466AA553CA22 /* AllianceNo2-Regular.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-Regular.ttf"; path = "../src/resources/fonts/AllianceNo2-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DA3E8EAC95A6458E87189564 /* AllianceNo2-RegularItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-RegularItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-RegularItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		078AC895328E41C4862AA535 /* AllianceNo2-SemiBold.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-SemiBold.ttf"; path = "../src/resources/fonts/AllianceNo2-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F23662A7C5C047B49AB82DFA /* AllianceNo2-SemiBoldItalic.ttf */ = {isa = PBXFileReference; name = "AllianceNo2-SemiBoldItalic.ttf"; path = "../src/resources/fonts/AllianceNo2-SemiBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +103,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				C46E0D37EE874E3490DEE7D0 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -97,6 +126,28 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		C46E0D37EE874E3490DEE7D0 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				B907E8A5167B435D8FB37913 /* AllianceNo2-Black.ttf */,
+				1682519B8C05440B8F24B520 /* AllianceNo2-BlackItalic.ttf */,
+				1EF15354CB814734AC672693 /* AllianceNo2-Bold.ttf */,
+				3DD25A7221E94F9FA66783FD /* AllianceNo2-BoldItalic.ttf */,
+				D59E53C6C99A4FCFAC2087AA /* AllianceNo2-ExtraBold.ttf */,
+				0394BBB49BCA4F6EB63FA5E5 /* AllianceNo2-ExtraBoldItalic.ttf */,
+				A57D7F13CFA1431AB3BE1838 /* AllianceNo2-Light.ttf */,
+				51546D90AA404835B7F6AD6C /* AllianceNo2-LightItalic.ttf */,
+				91A6AD06A1B14977932F83B4 /* AllianceNo2-Medium.ttf */,
+				DDF5BAF3D8C54032BA8DF424 /* AllianceNo2-MediumItalic.ttf */,
+				1117D6C42415466AA553CA22 /* AllianceNo2-Regular.ttf */,
+				DA3E8EAC95A6458E87189564 /* AllianceNo2-RegularItalic.ttf */,
+				078AC895328E41C4862AA535 /* AllianceNo2-SemiBold.ttf */,
+				F23662A7C5C047B49AB82DFA /* AllianceNo2-SemiBoldItalic.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -161,6 +212,20 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				50C9C2155AEAD56B5C244777 /* PrivacyInfo.xcprivacy in Resources */,
+				78852A1AA0DB4E36B00A0C9B /* AllianceNo2-Black.ttf in Resources */,
+				23C36D388BEB4DDB9ABC09F7 /* AllianceNo2-BlackItalic.ttf in Resources */,
+				951F5FBD12E64A99B889713F /* AllianceNo2-Bold.ttf in Resources */,
+				B70D85744B824704AC0F8A29 /* AllianceNo2-BoldItalic.ttf in Resources */,
+				18584C8BD9E74F90A063B3B0 /* AllianceNo2-ExtraBold.ttf in Resources */,
+				6C5FB72335674C55BC17AA4C /* AllianceNo2-ExtraBoldItalic.ttf in Resources */,
+				AFCFDADAED8A4108B3D33C50 /* AllianceNo2-Light.ttf in Resources */,
+				D1EA7CB4CF444F02B3617F08 /* AllianceNo2-LightItalic.ttf in Resources */,
+				06A5B12B4BCF455EBEE191E2 /* AllianceNo2-Medium.ttf in Resources */,
+				DDE8C48DA06B4F36867F800A /* AllianceNo2-MediumItalic.ttf in Resources */,
+				9BBED76A09FB406E8C2151AA /* AllianceNo2-Regular.ttf in Resources */,
+				2804171F972E424F8F27C8D3 /* AllianceNo2-RegularItalic.ttf in Resources */,
+				618593B9E6B740178F54C219 /* AllianceNo2-SemiBold.ttf in Resources */,
+				52B7ADFD13A74ED0B1A6B875 /* AllianceNo2-SemiBoldItalic.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
