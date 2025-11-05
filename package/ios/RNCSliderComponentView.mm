@@ -31,6 +31,10 @@ using namespace facebook::react;
     return concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>();
 }
 
++ (BOOL)shouldBeRecycled {
+  return NO;
+}
+
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
