@@ -145,6 +145,12 @@ export const propsExamples: Props[] = [
     },
   },
   {
+    title: 'swipeToSeek',
+    render(): React.ReactElement {
+      return <SliderExample swipeToSeek={true} />;
+    },
+  },
+  {
     title: 'inverted',
     render() {
       return <SliderExample inverted />;

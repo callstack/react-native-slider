@@ -565,6 +565,12 @@ export const examples: Props[] = [
     },
   },
   {
+    title: 'step: 0.25, tap & swipe to seek on iOS',
+    render(): React.ReactElement {
+      return <SliderExample step={0.25} tapToSeek={true} swipeToSeek={true} />;
+    },
+  },
+  {
     title: 'Limit on positive values [30, 80]',
     render() {
       return (
