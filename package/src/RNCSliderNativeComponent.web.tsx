@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 //@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import {constants} from './utils/constants';
 
 type Event = Readonly<{
   nativeEvent: {
@@ -66,7 +67,7 @@ const RCTSliderWebComponent = React.forwardRef(
       inverted = false,
       disabled = false,
       trackHeight = 4,
-      thumbSize = 20,
+      thumbSize = constants.THUMB_SIZE,
       thumbImage,
       onRNCSliderSlidingStart = (_: Event) => {},
       onRNCSliderSlidingComplete = (_: Event) => {},

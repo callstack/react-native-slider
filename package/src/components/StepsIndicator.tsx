@@ -1,5 +1,5 @@
 import React, {FC, Fragment, useCallback, useMemo} from 'react';
-import {View} from 'react-native';
+import {Platform, View, ViewStyle} from 'react-native';
 import {StepNumber} from './StepNumber';
 import {MarkerProps, SliderTrackMark} from './TrackMark';
 //@ts-ignore
@@ -15,6 +15,7 @@ export const StepsIndicator = ({
   renderStepNumber,
   thumbImage,
   isLTR,
+  thumbSize = constants.THUMB_SIZE,
 }: {
   options: number[];
   sliderWidth: number;
@@ -23,6 +24,7 @@ export const StepsIndicator = ({
   renderStepNumber?: boolean;
   thumbImage?: ImageSource;
   isLTR?: boolean;
+  thumbSize?: number;
 }) => {
   const stepNumberFontStyle = useMemo(() => {
     return {
@@ -32,13 +34,33 @@ export const StepsIndicator = ({
           : constants.STEP_NUMBER_TEXT_FONT_BIG,
     };
   }, [options.length]);
+  const platformDependentStyles = useMemo(() => {
+    const isWeb = Platform.OS === 'web';
+    return {
+      stepIndicatorContainerStyle: isWeb
+        ? styles.stepsIndicator
+        : {
+            ...styles.stepsIndicator,
+            marginHorizontal: sliderWidth * constants.MARGIN_HORIZONTAL_PADDING,
+          },
+      stepIndicatorElementStyle: isWeb
+        ? {
+            ...styles.stepIndicatorElement,
+            width: thumbSize,
+            justifyContent: 'space-between' as const,
+          }
+        : styles.stepIndicatorElement,
+    };
+  }, [sliderWidth, thumbSize]);
   const values = isLTR ? options.reverse() : options;
 
   const renderStepIndicator = useCallback(
     (i: number, index: number) => {
       return (
         <Fragment key={index}>
-          <View style={styles.stepIndicatorElement} key={`${index}-View`}>
+          <View
+            style={platformDependentStyles.stepIndicatorElementStyle}
+            key={`${index}-View`}>
             <SliderTrackMark
               key={`${index}-SliderTrackMark`}
               isTrue={currentValue === i}
@@ -67,16 +89,14 @@ export const StepsIndicator = ({
       thumbImage,
       renderStepNumber,
       stepNumberFontStyle,
+      platformDependentStyles.stepIndicatorElementStyle,
     ],
   );
 
   return (
     <View
       pointerEvents="none"
-      style={[
-        styles.stepsIndicator,
-        {marginHorizontal: sliderWidth * constants.MARGIN_HORIZONTAL_PADDING},
-      ]}>
+      style={platformDependentStyles.stepIndicatorContainerStyle}>
       {values.map((i, index) => renderStepIndicator(i, index))}
     </View>
   );
