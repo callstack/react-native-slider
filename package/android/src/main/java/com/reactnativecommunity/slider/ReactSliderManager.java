@@ -133,6 +133,12 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
   }
 
   @Override
+  @ReactProp(name = "thumbSize", defaultFloat = 0f)
+  public void setThumbSize(ReactSlider view, double size) {
+    ReactSliderManagerImpl.setThumbSize(view, size);
+  }
+
+  @Override
   @ReactProp(name = "minimumTrackTintColor", customType = "Color")
   public void setMinimumTrackTintColor(ReactSlider view, Integer color) {
     ReactSliderManagerImpl.setMinimumTrackTintColor(view, color);

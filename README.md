@@ -47,6 +47,7 @@ import Slider from '@react-native-community/slider';
   maximumValue={1}
   minimumTrackTintColor="#FFFFFF"
   maximumTrackTintColor="#000000"
+  thumbSize={32}
 />
 ```
 
@@ -93,6 +94,7 @@ To use this library you need to ensure you are using the correct version of Reac
 | `inverted` | Reverses the direction of the slider.<br/>Default value is false. | bool | |
 | `vertical` | Changes the orientation of the slider to vertical, if set to `true`.<br/>Default value is false. | bool | Windows |
 | `thumbTintColor` | Color of the foreground switch grip.<br/>**NOTE:** This prop will override the `thumbImage` prop set, meaning that if both `thumbImage` and `thumbTintColor` will be set, image used for the thumb may not be displayed correctly! | [color](https://reactnative.dev/docs/colors) | Android |
+| `thumbSize` | Sets the size (width and height) of the thumb.<br/>If `thumbImage` is provided, it will be scaled to this size.<br/>Units: points on iOS, dp on Android. | number | Android, iOS, Web |
 | `maximumTrackImage` | Assigns a maximum track image. Only static images are supported. The leftmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
 | `minimumTrackImage` | Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
 | `thumbImage` | Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported. | Image<br/>.propTypes<br/>.source | |

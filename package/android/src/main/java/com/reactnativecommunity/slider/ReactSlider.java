@@ -3,6 +3,9 @@ package com.reactnativecommunity.slider;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.Log;
@@ -73,6 +76,15 @@ public class ReactSlider extends AppCompatSeekBar {
 
   /** Upper limit based on the SeekBar progress 0..total steps */
   private int mUpperLimit;
+
+  /** Thumb size in pixels (0 = default) */
+  private int mThumbSizePx = 0;
+
+  /** Original thumb drawable URI */
+  @Nullable private String mThumbImageUri = null;
+
+  /** Cached thumb tint color */
+  @Nullable private Integer mThumbTintColor = null;
 
   public ReactSlider(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
@@ -299,15 +311,88 @@ public class ReactSlider extends AppCompatSeekBar {
     return bitmapDrawable;
   }
 
-  public void setThumbImage(final String uri) {
-    if (uri != null) {
-      setThumb(getBitmapDrawable(uri));
-      // Enable alpha channel for the thumbImage
+  public void setThumbImage(@Nullable final String uri) {
+    mThumbImageUri = uri;
+    updateThumbImage();
+  }
+
+  public void setThumbSize(final double size) {
+    float density = getResources().getDisplayMetrics().density;
+    mThumbSizePx = size > 0 ? Math.round((float) size * density) : 0;
+    updateThumbImage();
+  }
+
+  public void setThumbTintColor(@Nullable final Integer color) {
+    mThumbTintColor = color;
+    if (mThumbImageUri != null || mThumbSizePx > 0) {
+      updateThumbImage();
+    } else {
+      applyThumbTintColorFilter();
+    }
+  }
+
+  private void applyThumbTintColorFilter() {
+    if (getThumb() == null) {
+      return;
+    }
+
+    if (mThumbTintColor != null) {
+      getThumb().setColorFilter(mThumbTintColor, PorterDuff.Mode.SRC_IN);
+    } else {
+      getThumb().clearColorFilter();
+    }
+  }
+
+  private void updateThumbImage() {
+    if (mThumbImageUri != null) {
+      BitmapDrawable drawable = getBitmapDrawable(mThumbImageUri);
+      if (drawable != null) {
+        if (mThumbSizePx > 0) {
+          Bitmap originalBitmap = drawable.getBitmap();
+          Bitmap scaledBitmap =
+              Bitmap.createScaledBitmap(originalBitmap, mThumbSizePx, mThumbSizePx, true);
+          setThumb(new BitmapDrawable(getResources(), scaledBitmap));
+        } else {
+          setThumb(drawable);
+        }
+        applyThumbTintColorFilter();
+        // Enable alpha channel for the thumbImage
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          setSplitTrack(false);
+        }
+        return;
+      }
+    }
+
+    if (mThumbSizePx > 0) {
+      Bitmap bitmap = Bitmap.createBitmap(mThumbSizePx, mThumbSizePx, Bitmap.Config.ARGB_8888);
+      Canvas canvas = new Canvas(bitmap);
+
+      int fillColor =
+          mThumbTintColor != null
+              ? mThumbTintColor
+              : (getThumbTintList() != null ? getThumbTintList().getDefaultColor() : 0xFFFFFFFF);
+
+      Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+      fillPaint.setStyle(Paint.Style.FILL);
+      fillPaint.setColor(fillColor);
+      float radius = mThumbSizePx / 2f;
+      canvas.drawCircle(radius, radius, radius, fillPaint);
+
+      Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+      strokePaint.setStyle(Paint.Style.STROKE);
+      strokePaint.setStrokeWidth(1);
+      strokePaint.setColor(0x1A000000);
+      canvas.drawCircle(radius, radius, radius - 0.5f, strokePaint);
+
+      setThumb(new BitmapDrawable(getResources(), bitmap));
+      applyThumbTintColorFilter();
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         setSplitTrack(false);
       }
     } else {
-      setThumb(getThumb());
+      // No special sizing; keep existing thumb, only apply tint if needed.
+      applyThumbTintColorFilter();
     }
   }
 }
