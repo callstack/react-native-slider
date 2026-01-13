@@ -64,17 +64,8 @@ type IOSProps = Readonly<{
   tapToSeek?: boolean;
 }>;
 
-type WebProps = Readonly<{
-  /**
-   * The size of the thumb on the web platform.
-   * Default value is 20px.
-   */
-  thumbSize?: number;
-}>;
-
 type Props = ViewProps &
   IOSProps &
-  WebProps &
   WindowsProps &
   Readonly<{
     /**
@@ -310,7 +301,6 @@ const SliderComponent = (
           thumbImage={props.thumbImage}
           StepMarker={props.StepMarker}
           isLTR={inverted}
-          thumbSize={props.thumbSize}
         />
       ) : null}
       <RCTSliderNativeComponent

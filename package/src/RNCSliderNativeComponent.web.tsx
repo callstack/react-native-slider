@@ -41,7 +41,6 @@ export interface Props {
   inverted: boolean;
   disabled: boolean;
   trackHeight: number;
-  thumbSize: number;
   thumbImage?: ImageSource;
   onRNCSliderSlidingStart: (event: Event) => void;
   onRNCSliderSlidingComplete: (event: Event) => void;
@@ -67,7 +66,6 @@ const RCTSliderWebComponent = React.forwardRef(
       inverted = false,
       disabled = false,
       trackHeight = 4,
-      thumbSize = constants.THUMB_SIZE,
       thumbImage,
       onRNCSliderSlidingStart = (_: Event) => {},
       onRNCSliderSlidingComplete = (_: Event) => {},
@@ -235,6 +233,7 @@ const RCTSliderWebComponent = React.forwardRef(
       flexGrow: maxPercent,
     };
 
+    const thumbSize = constants.THUMB_SIZE;
     const thumbViewStyle = [
       {
         width: thumbSize,

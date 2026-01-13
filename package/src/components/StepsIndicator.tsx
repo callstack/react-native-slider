@@ -1,5 +1,5 @@
 import React, {FC, Fragment, useCallback, useMemo} from 'react';
-import {Platform, View, ViewStyle} from 'react-native';
+import {Platform, View} from 'react-native';
 import {StepNumber} from './StepNumber';
 import {MarkerProps, SliderTrackMark} from './TrackMark';
 //@ts-ignore
@@ -34,6 +34,7 @@ export const StepsIndicator = ({
           : constants.STEP_NUMBER_TEXT_FONT_BIG,
     };
   }, [options.length]);
+
   const platformDependentStyles = useMemo(() => {
     const isWeb = Platform.OS === 'web';
     return {
@@ -52,6 +53,7 @@ export const StepsIndicator = ({
         : styles.stepIndicatorElement,
     };
   }, [sliderWidth, thumbSize]);
+
   const values = isLTR ? options.reverse() : options;
 
   const renderStepIndicator = useCallback(
