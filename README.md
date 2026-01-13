@@ -97,7 +97,7 @@ To use this library you need to ensure you are using the correct version of Reac
 | `minimumTrackImage` | Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
 | `thumbImage` | Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported. | Image<br/>.propTypes<br/>.source | |
 | `trackImage` | Assigns a single image for the track. Only static images are supported. The center pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
-| [`StepMarker`](#stepmarker) | Component to be rendered for each step on the track,<br/>with the possibility to change the styling, when thumb is at that given step | `FC<MarkerProps>` | |
+| [`StepMarker`](#stepmarker) | Component to be rendered for each step on the track,<br/>with the possibility to change the styling, when thumb is at that given step | `FC<MarkerProps>` | iOS, Android, Windows |
 | [`renderStepNumber`](#renderstepnumber) | Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track | bool | iOS, Android, Windows |
 | `ref` | Reference object. | MutableRefObject | web |
 | `View` | [Inherited `View` props...](https://github.com/facebook/react-native-website/blob/master/docs/view.md#props) | | |
