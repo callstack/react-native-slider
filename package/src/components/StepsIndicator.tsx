@@ -23,7 +23,6 @@ export const StepsIndicator = ({
   renderStepNumber?: boolean;
   thumbImage?: ImageSource;
   isLTR?: boolean;
-  thumbSize?: number;
 }) => {
   const stepNumberFontStyle = useMemo(() => {
     return {
