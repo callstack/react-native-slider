@@ -1,10 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 #import "RNCSlider.h"
 
 @implementation RNCSlider
@@ -12,6 +5,14 @@
   float _unclippedValue;
   bool _minimumTrackImageSet;
   bool _maximumTrackImageSet;
+}
+
+- (instancetype)init {
+  if (self = [super init]) {
+      _upperLimit = FLT_MAX;
+      _lowerLimit = FLT_MIN;
+  }
+  return self;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -46,7 +47,7 @@
     if (sliderValue && [sliderValue intValue] == 1) {
       spokenUnits = [spokenUnits substringToIndex:stringLength-1];
     }
-    
+
     self.accessibilityValue = [NSString stringWithFormat:@"%@ %@", sliderValue, spokenUnits];
   }
 }

@@ -1,8 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   Platform,
-  StyleSheet,
   AccessibilityActionEvent,
   ViewProps,
   ViewStyle,
@@ -10,10 +9,10 @@ import {
   NativeSyntheticEvent,
   StyleProp,
   View,
+  ImageSource,
+  ImageSourcePropType,
 } from 'react-native';
 import RCTSliderNativeComponent from './index';
-//@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 
 import type {FC, Ref} from 'react';
 import {MarkerProps} from './components/TrackMark';
@@ -141,21 +140,21 @@ type Props = ViewProps &
     /**
      * Callback continuously called while the user is dragging the slider.
      */
-    onValueChange?: (value: number) => void;
+    onValueChange?: (_value: number) => void;
 
     /**
      * Callback that is called when the user touches the slider,
      * regardless if the value has changed. The current value is passed
      * as an argument to the callback handler.
      */
-    onSlidingStart?: (value: number) => void;
+    onSlidingStart?: (_value: number) => void;
 
     /**
      * Callback that is called when the user releases the slider,
      * regardless if the value has changed. The current value is passed
      * as an argument to the callback handler.
      */
-    onSlidingComplete?: (value: number) => void;
+    onSlidingComplete?: (_value: number) => void;
 
     /**
      * Used to locate this view in UI automation tests.
@@ -201,37 +200,50 @@ type Props = ViewProps &
   }>;
 
 const SliderComponent = (
-  props: Props,
-  forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
-) => {
-  const {
+  {
     onValueChange,
     onSlidingStart,
     onSlidingComplete,
     onAccessibilityAction,
-    ...localProps
-  } = props;
+    value = constants.SLIDER_DEFAULT_INITIAL_VALUE,
+    minimumValue = 0,
+    maximumValue = 1,
+    step = 0,
+    inverted = false,
+    tapToSeek = false,
+    lowerLimit = Platform.select({
+      web: minimumValue,
+      default: constants.LIMIT_MIN_VALUE,
+    }),
+    upperLimit = Platform.select({
+      web: maximumValue,
+      default: constants.LIMIT_MAX_VALUE,
+    }),
+    ...props
+  }: Props,
+  forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
+) => {
   const [currentValue, setCurrentValue] = useState(
-    props.value ?? props.minimumValue,
+    value ?? minimumValue ?? constants.SLIDER_DEFAULT_INITIAL_VALUE,
   );
   const [width, setWidth] = useState(0);
 
+  const stepResolution = step ? step : constants.DEFAULT_STEP_RESOLUTION;
+
+  const defaultStep = (maximumValue - minimumValue) / stepResolution;
+  const stepLength = step || defaultStep;
+
   const options = Array.from(
     {
-      length:
-        (localProps.maximumValue! - localProps.minimumValue!) /
-          (localProps.step
-            ? localProps.step
-            : constants.DEFAULT_STEP_RESOLUTION) +
-        1,
+      length: (step ? defaultStep : stepResolution) + 1,
     },
-    (_, index) => index,
+    (_, index) => minimumValue + index * stepLength,
   );
 
   const defaultStyle =
     Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
   const sliderStyle = {zIndex: 1, ...(width !== 0 && {width})};
-  const style = StyleSheet.compose(props.style, defaultStyle);
+  const style = [defaultStyle, props.style];
 
   const onValueChangeEvent = (event: Event) => {
     onValueChange && onValueChange(event.nativeEvent.value);
@@ -264,54 +276,50 @@ const SliderComponent = (
       }
     : null;
 
-  const value =
-    Number.isNaN(props.value) || !props.value ? undefined : props.value;
+  const passedValue = Number.isNaN(value) || !value ? undefined : value;
 
-  const lowerLimit =
-    !!localProps.lowerLimit || localProps.lowerLimit === 0
-      ? localProps.lowerLimit
-      : Platform.select({
-          web: localProps.minimumValue,
-          default: constants.LIMIT_MIN_VALUE,
-        });
-
-  const upperLimit =
-    !!localProps.upperLimit || localProps.upperLimit === 0
-      ? localProps.upperLimit
-      : Platform.select({
-          web: localProps.maximumValue,
-          default: constants.LIMIT_MAX_VALUE,
-        });
+  useEffect(() => {
+    if (lowerLimit >= upperLimit) {
+      console.warn(
+        'Invalid configuration: lower limit is supposed to be smaller than upper limit',
+      );
+    }
+  }, [lowerLimit, upperLimit]);
 
   return (
     <View
       onLayout={(event) => {
         setWidth(event.nativeEvent.layout.width);
       }}
-      style={[styles, style, {justifyContent: 'center'}]}>
+      style={[style, {justifyContent: 'center'}]}>
       {props.StepMarker || !!props.renderStepNumber ? (
         <StepsIndicator
           options={options}
           sliderWidth={width}
           currentValue={currentValue}
-          renderStepNumber={localProps.renderStepNumber}
-          thumbImage={localProps.thumbImage}
-          StepMarker={localProps.StepMarker}
-          isLTR={localProps.inverted}
+          renderStepNumber={props.renderStepNumber}
+          thumbImage={props.thumbImage}
+          StepMarker={props.StepMarker}
+          isLTR={inverted}
         />
       ) : null}
       <RCTSliderNativeComponent
-        {...localProps}
-        value={value}
+        {...props}
+        minimumValue={minimumValue}
+        maximumValue={maximumValue}
+        step={step}
+        inverted={inverted}
+        tapToSeek={tapToSeek}
+        value={passedValue}
         lowerLimit={lowerLimit}
         upperLimit={upperLimit}
         accessibilityState={_accessibilityState}
         thumbImage={
           Platform.OS === 'web'
             ? props.thumbImage
-            : props.StepMarker
+            : props.StepMarker || !props.thumbImage
             ? undefined
-            : Image.resolveAssetSource(props.thumbImage)
+            : Image.resolveAssetSource(props.thumbImage as ImageSourcePropType)
         }
         ref={forwardedRef}
         style={[
@@ -338,22 +346,5 @@ const SliderComponent = (
 };
 
 const SliderWithRef = React.forwardRef(SliderComponent);
-
-SliderWithRef.defaultProps = {
-  value: 0,
-  minimumValue: 0,
-  maximumValue: 1,
-  step: 0,
-  inverted: false,
-  tapToSeek: false,
-  lowerLimit: Platform.select({
-    web: undefined,
-    default: constants.LIMIT_MIN_VALUE,
-  }),
-  upperLimit: Platform.select({
-    web: undefined,
-    default: constants.LIMIT_MAX_VALUE,
-  }),
-};
 
 export default SliderWithRef;

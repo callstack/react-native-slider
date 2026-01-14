@@ -6,7 +6,7 @@ import Slider, {SliderProps} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
-  render(): JSX.Element;
+  render(): React.ReactElement;
 }
 
 const SliderExample = (props: SliderProps) => {
@@ -101,7 +101,7 @@ export const propsExamples: Props[] = [
   {
     title: 'minimumValue',
     render() {
-      return <SliderExample minimumValue={5} />;
+      return <SliderExample minimumValue={-5} />;
     },
   },
   {

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		28C79A22220DC7760061DE82 /* RNCSliderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C79A1F220DC7760061DE82 /* RNCSliderManager.m */; };
 		28C79A23220DC7760061DE82 /* RNCSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C79A21220DC7760061DE82 /* RNCSlider.m */; };
 		7682E5172887E3AB00642F2D /* RNCSliderComponentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7682E5162887E3AB00642F2D /* RNCSliderComponentView.mm */; };
 /* End PBXBuildFile section */
@@ -27,8 +26,6 @@
 /* Begin PBXFileReference section */
 		28C79A09220DC4CC0061DE82 /* libRNCSlider.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCSlider.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		28C79A1E220DC7760061DE82 /* RNCSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSlider.h; sourceTree = "<group>"; };
-		28C79A1F220DC7760061DE82 /* RNCSliderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSliderManager.m; sourceTree = "<group>"; };
-		28C79A20220DC7760061DE82 /* RNCSliderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSliderManager.h; sourceTree = "<group>"; };
 		28C79A21220DC7760061DE82 /* RNCSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSlider.m; sourceTree = "<group>"; };
 		7682E5152887E39900642F2D /* RNCSliderComponentView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCSliderComponentView.h; sourceTree = "<group>"; };
 		7682E5162887E3AB00642F2D /* RNCSliderComponentView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RNCSliderComponentView.mm; sourceTree = "<group>"; };
@@ -52,8 +49,6 @@
 				7682E5152887E39900642F2D /* RNCSliderComponentView.h */,
 				28C79A1E220DC7760061DE82 /* RNCSlider.h */,
 				28C79A21220DC7760061DE82 /* RNCSlider.m */,
-				28C79A20220DC7760061DE82 /* RNCSliderManager.h */,
-				28C79A1F220DC7760061DE82 /* RNCSliderManager.m */,
 				28C79A0A220DC4CC0061DE82 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -124,7 +119,6 @@
 			files = (
 				7682E5172887E3AB00642F2D /* RNCSliderComponentView.mm in Sources */,
 				28C79A23220DC7760061DE82 /* RNCSlider.m in Sources */,
-				28C79A22220DC7760061DE82 /* RNCSliderManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

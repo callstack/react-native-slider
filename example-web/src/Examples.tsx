@@ -6,7 +6,7 @@ import Slider, {SliderProps} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
-  render(): JSX.Element;
+  render(): React.ReactElement;
   platform?: string;
 }
 
@@ -229,6 +229,21 @@ export const examples: Props[] = [
             </Text>
           </View>
         </ScrollView>
+      );
+    },
+  },
+  // Check the fix for the issue #743
+  {
+    title: 'With step numbers',
+    render() {
+      return (
+        <SliderExample
+          minimumValue={1}
+          maximumValue={5}
+          step={1}
+          renderStepNumber={true}
+          style={[styles.slider, { height: 70 }]}
+        />
       );
     },
   },

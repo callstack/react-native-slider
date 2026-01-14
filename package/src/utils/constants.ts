@@ -1,8 +1,13 @@
+import {Platform} from 'react-native';
+
 export const constants = {
+  SLIDER_DEFAULT_INITIAL_VALUE: 0,
   MARGIN_HORIZONTAL_PADDING: 0.05,
+  // Default thumb size for web platform (used in step indicator positioning)
+  THUMB_SIZE: 20,
   STEP_NUMBER_TEXT_FONT_SMALL: 8,
   STEP_NUMBER_TEXT_FONT_BIG: 12,
   LIMIT_MIN_VALUE: Number.MIN_SAFE_INTEGER,
   LIMIT_MAX_VALUE: Number.MAX_SAFE_INTEGER,
-  DEFAULT_STEP_RESOLUTION: 100,
+  DEFAULT_STEP_RESOLUTION: Platform.OS === 'android' ? 128 : 1000,
 };
