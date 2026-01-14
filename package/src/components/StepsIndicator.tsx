@@ -47,7 +47,7 @@ export const StepsIndicator = ({
       stepIndicatorElementStyle: isWeb
         ? {
             ...styles.stepIndicatorElement,
-            width: thumbSize,
+            width: constants.THUMB_SIZE,
             justifyContent: 'space-between' as const,
           }
         : styles.stepIndicatorElement,
