@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 //@ts-ignore
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
+import {constants} from './utils/constants';
 
 type Event = Readonly<{
   nativeEvent: {
@@ -40,7 +41,6 @@ export interface Props {
   inverted: boolean;
   disabled: boolean;
   trackHeight: number;
-  thumbSize: number;
   thumbImage?: ImageSource;
   onRNCSliderSlidingStart: (event: Event) => void;
   onRNCSliderSlidingComplete: (event: Event) => void;
@@ -66,7 +66,6 @@ const RCTSliderWebComponent = React.forwardRef(
       inverted = false,
       disabled = false,
       trackHeight = 4,
-      thumbSize = 20,
       thumbImage,
       onRNCSliderSlidingStart = (_: Event) => {},
       onRNCSliderSlidingComplete = (_: Event) => {},
@@ -234,6 +233,7 @@ const RCTSliderWebComponent = React.forwardRef(
       flexGrow: maxPercent,
     };
 
+    const thumbSize = constants.THUMB_SIZE;
     const thumbViewStyle = [
       {
         width: thumbSize,
