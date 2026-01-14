@@ -52,7 +52,7 @@ export const StepsIndicator = ({
           }
         : styles.stepIndicatorElement,
     };
-  }, [sliderWidth, thumbSize]);
+  }, [sliderWidth]);
 
   const values = isLTR ? options.reverse() : options;
 
