@@ -62,6 +62,12 @@ type IOSProps = Readonly<{
    * Defaults to false on iOS. No effect on Android or Windows.
    */
   tapToSeek?: boolean;
+
+  /**
+   * Permits swiping on the slider track to set the thumb position.
+   * Defaults to false on iOS. This is the default behaviour on Android.
+   */
+  swipeToSeek?: boolean;
 }>;
 
 type Props = ViewProps &
@@ -211,6 +217,7 @@ const SliderComponent = (
     step = 0,
     inverted = false,
     tapToSeek = false,
+    swipeToSeek = false,
     lowerLimit = Platform.select({
       web: minimumValue,
       default: constants.LIMIT_MIN_VALUE,
@@ -310,6 +317,7 @@ const SliderComponent = (
         step={step}
         inverted={inverted}
         tapToSeek={tapToSeek}
+        swipeToSeek={swipeToSeek}
         value={passedValue}
         lowerLimit={lowerLimit}
         upperLimit={upperLimit}
