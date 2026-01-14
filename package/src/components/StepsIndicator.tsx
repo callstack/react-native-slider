@@ -15,7 +15,6 @@ export const StepsIndicator = ({
   renderStepNumber,
   thumbImage,
   isLTR,
-  thumbSize = constants.THUMB_SIZE,
 }: {
   options: number[];
   sliderWidth: number;
