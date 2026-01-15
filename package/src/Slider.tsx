@@ -167,6 +167,12 @@ type Props = ViewProps &
     thumbImage?: ImageSource;
 
     /**
+     * Sets the size (width and height) of the thumb.
+     * If `thumbImage` is provided, it will be scaled to this size.
+     */
+    thumbSize?: number;
+
+    /**
      * If true the slider will be inverted.
      * Default value is false.
      */
@@ -340,6 +346,7 @@ const SliderComponent = (
             ? 'transparent'
             : props.thumbTintColor
         }
+        thumbSize={props.thumbSize}
       />
     </View>
   );

@@ -61,6 +61,12 @@ export interface SliderPropsIOS extends ReactNative.ViewProps {
   thumbImage?: ReactNative.ImageURISource;
 
   /**
+   * Sets the size (width and height) of the thumb.
+   * If `thumbImage` is provided, it will be scaled to this size.
+   */
+  thumbSize?: number;
+
+  /**
    * Assigns a single image for the track. Only static images
    * are supported. The center pixel of the image will be stretched
    * to fill the track.
@@ -165,6 +171,12 @@ export interface SliderProps
    * Reverses the direction of the slider.
    */
   inverted?: boolean;
+
+  /**
+   * Sets the size (width and height) of the thumb.
+   * If `thumbImage` is provided, it will be scaled to this size.
+   */
+  thumbSize?: number;
 
   /**
    * Component to be rendered for each step indicator.
