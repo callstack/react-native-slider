@@ -18,14 +18,14 @@
   "scripts": {
     "prepare": "babel --extensions \".ts,.tsx\" --out-dir dist src",
     "lint": "npx eslint src",
-    "test": "npx jest src",
+    "test": "jest",
     "prepack": "npx copyfiles \"./../README.md\" ./README.md"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.25.2",
     "@babel/preset-flow": "^7.9.0",
-    "@babel/preset-typescript": "^7.18.6",
+    "@babel/preset-typescript": "^7.28.5",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "^20.0.2",
     "@react-native-community/cli-platform-android": "^20.0.2",
