@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "prepare": "babel --extensions \".ts,.tsx\" --out-dir dist src",
-    "lint": "npx eslint src",
+    "lint": "npx eslint src __test__",
     "test": "jest",
     "prepack": "npx copyfiles \"./../README.md\" ./README.md"
   },
