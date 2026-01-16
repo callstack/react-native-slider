@@ -4,14 +4,18 @@ import {styles} from '../utils/styles';
 
 export const StepNumber = ({
   i,
+  index,
   style,
 }: {
   i: number;
+  index: number;
   style: StyleProp<TextStyle>;
 }) => {
   return (
     <View style={styles.stepNumber}>
-      <Text style={style}>{i}</Text>
+      <Text testID={`${index}th-step`} style={style}>
+        {i}
+      </Text>
     </View>
   );
 };

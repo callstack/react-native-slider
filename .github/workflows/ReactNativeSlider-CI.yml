@@ -69,7 +69,7 @@ jobs:
           key: ${{ hashFiles('./package/package.json') }}
 
       - name: Run unit tests
-        run: cd package && npx jest src
+        run: cd package && npx jest --coverage --verbose
 
 
   verify-example-sources:
