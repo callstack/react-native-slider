@@ -74,6 +74,7 @@ export const StepsIndicator = ({
             {renderStepNumber ? (
               <StepNumber
                 i={i}
+                index={index}
                 style={stepNumberFontStyle}
                 key={`${index}th-step`}
               />
@@ -96,6 +97,7 @@ export const StepsIndicator = ({
   return (
     <View
       pointerEvents="none"
+      testID="StepsIndicator-Container"
       style={platformDependentStyles.stepIndicatorContainerStyle}>
       {values.map((i, index) => renderStepIndicator(i, index))}
     </View>
