@@ -232,4 +232,19 @@ export const examples: Props[] = [
       );
     },
   },
+  // Check the fix for the issue #743
+  {
+    title: 'With step numbers',
+    render() {
+      return (
+        <SliderExample
+          minimumValue={1}
+          maximumValue={5}
+          step={1}
+          renderStepNumber={true}
+          style={[styles.slider, { height: 70 }]}
+        />
+      );
+    },
+  },
 ];
