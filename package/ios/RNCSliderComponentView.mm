@@ -208,6 +208,9 @@ using namespace facebook::react;
     if (oldScreenProps.thumbTintColor != newScreenProps.thumbTintColor) {
         slider.thumbTintColor = RCTUIColorFromSharedColor(newScreenProps.thumbTintColor);
     }
+    if (oldScreenProps.thumbSize != newScreenProps.thumbSize) {
+        slider.thumbSize = newScreenProps.thumbSize;
+    }
     if (oldScreenProps.minimumTrackTintColor != newScreenProps.minimumTrackTintColor) {
         slider.minimumTrackTintColor = RCTUIColorFromSharedColor(newScreenProps.minimumTrackTintColor);
     }
@@ -235,6 +238,9 @@ using namespace facebook::react;
         failureBlock:^{
             [self->slider setThumbImage:nil];
         }];
+    }
+    if (oldScreenProps.thumbTintColor != newScreenProps.thumbTintColor && slider.thumbSize > 0) {
+        [slider updateThumbImage];
     }
     if (oldScreenProps.trackImage != newScreenProps.trackImage) {
         [self loadImageFromImageSource:newScreenProps.trackImage completionBlock:^(NSError *error, UIImage *image) {
