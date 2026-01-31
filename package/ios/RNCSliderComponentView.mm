@@ -239,9 +239,6 @@ using namespace facebook::react;
             [self->slider setThumbImage:nil];
         }];
     }
-    if (oldScreenProps.thumbTintColor != newScreenProps.thumbTintColor && slider.thumbSize > 0) {
-        [slider updateThumbImage];
-    }
     if (oldScreenProps.trackImage != newScreenProps.trackImage) {
         [self loadImageFromImageSource:newScreenProps.trackImage completionBlock:^(NSError *error, UIImage *image) {
             dispatch_async(dispatch_get_main_queue(), ^{

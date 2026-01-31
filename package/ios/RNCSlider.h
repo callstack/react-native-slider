@@ -26,6 +26,6 @@
 
 - (float) discreteValue:(float)value;
 - (void) setDisabled:(bool)disabled;
-- (void) updateThumbImage;
+- (void) refreshThumb;
 
 @end

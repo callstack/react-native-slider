@@ -313,19 +313,19 @@ public class ReactSlider extends AppCompatSeekBar {
 
   public void setThumbImage(@Nullable final String uri) {
     mThumbImageUri = uri;
-    updateThumbImage();
+    refreshThumb();
   }
 
   public void setThumbSize(final double size) {
     float density = getResources().getDisplayMetrics().density;
     mThumbSizePx = size > 0 ? Math.round((float) size * density) : 0;
-    updateThumbImage();
+    refreshThumb();
   }
 
   public void setThumbTintColor(@Nullable final Integer color) {
     mThumbTintColor = color;
     if (mThumbImageUri != null || mThumbSizePx > 0) {
-      updateThumbImage();
+      refreshThumb();
     } else {
       applyThumbTintColorFilter();
     }
@@ -343,7 +343,7 @@ public class ReactSlider extends AppCompatSeekBar {
     }
   }
 
-  private void updateThumbImage() {
+  private void refreshThumb() {
     if (mThumbImageUri != null) {
       BitmapDrawable drawable = getBitmapDrawable(mThumbImageUri);
       if (drawable != null) {

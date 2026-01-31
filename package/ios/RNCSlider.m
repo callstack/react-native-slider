@@ -7,6 +7,7 @@
   bool _maximumTrackImageSet;
   UIImage *_thumbImage;
   CGFloat _thumbSize;
+  UIColor *_thumbTintColor;
 }
 
 - (instancetype)init {
@@ -119,7 +120,7 @@
 - (void)setThumbImage:(UIImage *)thumbImage
 {
   _thumbImage = thumbImage;
-  [self updateThumbImage];
+  [self refreshThumb];
 }
 
 - (UIImage *)thumbImage
@@ -130,11 +131,26 @@
 - (void)setThumbSize:(CGFloat)thumbSize
 {
   _thumbSize = thumbSize;
-  [self updateThumbImage];
+  [self refreshThumb];
 }
 
-- (void)updateThumbImage
+- (void)setThumbTintColor:(UIColor *)thumbTintColor
 {
+  _thumbTintColor = thumbTintColor;
+  [super setThumbTintColor:thumbTintColor];
+
+  [self refreshThumb];
+}
+
+- (void)refreshThumb
+{
+  if (![NSThread isMainThread]) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self refreshThumb];
+    });
+    return;
+  }
+
   UIImage *imageToSet = nil;
 
   if (_thumbSize > 0) {
@@ -145,7 +161,7 @@
     if (_thumbImage) {
       [_thumbImage drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
     } else {
-      UIColor *fillColor = self.thumbTintColor ?: [UIColor whiteColor];
+      UIColor *fillColor = _thumbTintColor ?: self.thumbTintColor ?: [UIColor whiteColor];
       CGContextSetFillColorWithColor(context, fillColor.CGColor);
       CGContextFillEllipseInRect(context, CGRectMake(0, 0, newSize.width, newSize.height));
 
@@ -167,6 +183,34 @@
     [self setThumbImage:imageToSet forState:UIControlStateHighlighted];
     [self setThumbImage:imageToSet forState:UIControlStateSelected];
   }
+
+  [UIView performWithoutAnimation:^{
+    float currentValue = super.value;
+    float minimumValue = super.minimumValue;
+    float maximumValue = super.maximumValue;
+
+    float eps = (maximumValue - minimumValue) / 1000.0f;
+    if (eps <= 0) {
+      eps = 0.0001f;
+    }
+
+    float nudgedValue = currentValue + eps;
+    if (nudgedValue > maximumValue) {
+      nudgedValue = currentValue - eps;
+    }
+    if (nudgedValue < minimumValue) {
+      nudgedValue = minimumValue;
+    }
+
+    if (nudgedValue != currentValue) {
+      [super setValue:nudgedValue animated:NO];
+    }
+    [super setValue:currentValue animated:NO];
+
+    [self setNeedsLayout];
+    [self layoutSubviews];
+    [self layoutIfNeeded];
+  }];
 }
 
 - (void)setInverted:(BOOL)inverted

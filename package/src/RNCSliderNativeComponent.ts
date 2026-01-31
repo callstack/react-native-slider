@@ -34,10 +34,6 @@ export interface NativeProps extends ViewProps {
   testID?: string;
   thumbImage?: ImageSource;
   thumbTintColor?: ColorValue;
-  /**
-   * Sets the size (width and height) of the thumb, in points (dp on Android).
-   * If you also set `thumbImage`, the image will be scaled to this size.
-   */
   thumbSize?: Double;
   trackImage?: ImageSource;
   value?: Float;

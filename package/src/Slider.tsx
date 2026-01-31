@@ -346,7 +346,6 @@ const SliderComponent = (
             ? 'transparent'
             : props.thumbTintColor
         }
-        thumbSize={props.thumbSize}
       />
     </View>
   );
