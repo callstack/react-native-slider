@@ -744,4 +744,21 @@ export const examples: Props[] = [
       return <SliderExample disabled value={0.6} />;
     },
   },
+  {
+    title: 'Custom thumb size (no image)',
+    render() {
+      return <SliderExample thumbTintColor={'blue'} thumbSize={32} />;
+    },
+  },
+  {
+    title: 'Custom thumb size (scaled image)',
+    render() {
+      return (
+        <SliderExample
+          thumbImage={require('./resources/uie_thumb_big.png')}
+          thumbSize={60}
+        />
+      );
+    },
+  },
 ];
