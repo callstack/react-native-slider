@@ -90,6 +90,7 @@ To use this library you need to ensure you are using the correct version of Reac
 | `testID` | Used to locate this view in UI automation tests. | string | |
 | `value` | Write-only property representing the value of the slider. Can be used to programmatically control the position of the thumb. Entered once at the beginning still acts as an initial value. Changing the value programmatically does not trigger any event.<br/>The value should be between minimumValue and maximumValue, which default to 0 and 1 respectively. Default value is 0.<br/>_This is not a controlled component_, you don't need to update the value during dragging. | number | |
 | `tapToSeek` | Permits tapping on the slider track to set the thumb position.<br/>Defaults to false on iOS. No effect on Android or Windows. | bool | iOS |
+| `swipeToSeek` | Permits swiping on the slider track to set the thumb position.<br/>Defaults to false on iOS. On Android this is the default behaviour. | bool | iOS |
 | `inverted` | Reverses the direction of the slider.<br/>Default value is false. | bool | |
 | `vertical` | Changes the orientation of the slider to vertical, if set to `true`.<br/>Default value is false. | bool | Windows |
 | `thumbTintColor` | Color of the foreground switch grip.<br/>**NOTE:** This prop will override the `thumbImage` prop set, meaning that if both `thumbImage` and `thumbTintColor` will be set, image used for the thumb may not be displayed correctly! | [color](https://reactnative.dev/docs/colors) | Android |
