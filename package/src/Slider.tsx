@@ -38,6 +38,22 @@ type WindowsProps = Readonly<{
   vertical?: boolean;
 }>;
 
+
+type AndroidProps = Readonly<{
+  /**
+   * modifies slider thickness. Android only.
+   */
+  sliderThickness?: number;
+  /**
+   * modifies slider corner roundness. Android only.
+   */
+  sliderCornerRoundness?: number;
+  /**
+   * modifies thumb size. Android only.
+   */
+  thumbSize?: number;
+}>;
+
 type IOSProps = Readonly<{
   /**
    * Assigns a single image for the track. Only static images are supported.
@@ -67,6 +83,7 @@ type IOSProps = Readonly<{
 type Props = ViewProps &
   IOSProps &
   WindowsProps &
+  AndroidProps &
   Readonly<{
     /**
      * Used to style and layout the `Slider`.  See `StyleSheet.js` and
