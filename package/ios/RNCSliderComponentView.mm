@@ -208,6 +208,9 @@ using namespace facebook::react;
     if (oldScreenProps.thumbTintColor != newScreenProps.thumbTintColor) {
         slider.thumbTintColor = RCTUIColorFromSharedColor(newScreenProps.thumbTintColor);
     }
+    if (oldScreenProps.thumbSize != newScreenProps.thumbSize) {
+        slider.thumbSize = newScreenProps.thumbSize;
+    }
     if (oldScreenProps.minimumTrackTintColor != newScreenProps.minimumTrackTintColor) {
         slider.minimumTrackTintColor = RCTUIColorFromSharedColor(newScreenProps.minimumTrackTintColor);
     }

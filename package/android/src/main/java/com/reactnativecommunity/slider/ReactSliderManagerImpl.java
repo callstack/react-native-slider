@@ -69,13 +69,7 @@ public class ReactSliderManagerImpl {
     }
 
     public static void setThumbTintColor(ReactSlider view, Integer color) {
-        if (view.getThumb() != null) {
-            if (color == null) {
-                view.getThumb().clearColorFilter();
-            } else {
-                view.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            }
-        }
+        view.setThumbTintColor(color);
     }
 
     public static void setMinimumTrackTintColor(ReactSlider view, Integer color) {
@@ -99,6 +93,10 @@ public class ReactSliderManagerImpl {
             uri = source.getString("uri");
         }
         view.setThumbImage(uri);
+    }
+
+    public static void setThumbSize(ReactSlider view, double size) {
+        view.setThumbSize(size);
     }
 
     public static void setMaximumTrackTintColor(ReactSlider view, Integer color) {
