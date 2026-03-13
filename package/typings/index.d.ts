@@ -167,6 +167,12 @@ export interface SliderProps
   inverted?: boolean;
 
   /**
+   * Sets the size (width and height) of the thumb.
+   * If `thumbImage` is provided, it will be scaled to this size.
+   */
+  thumbSize?: number;
+
+  /**
    * Component to be rendered for each step indicator.
    */
   StepMarker?: FC<MarkerProps>;
