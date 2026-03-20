@@ -134,7 +134,7 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> implement
 
   @Override
   @ReactProp(name = "thumbSize", defaultFloat = 0f)
-  public void setThumbSize(ReactSlider view, double size) {
+  public void setThumbSize(ReactSlider view, float size) {
     ReactSliderManagerImpl.setThumbSize(view, size);
   }
 

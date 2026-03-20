@@ -316,9 +316,9 @@ public class ReactSlider extends AppCompatSeekBar {
     refreshThumb();
   }
 
-  public void setThumbSize(final double size) {
+  public void setThumbSize(final float size) {
     float density = getResources().getDisplayMetrics().density;
-    mThumbSizePx = size > 0 ? Math.round((float) size * density) : 0;
+    mThumbSizePx = size > 0 ? Math.round(size * density) : 0;
     refreshThumb();
   }
 

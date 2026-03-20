@@ -34,7 +34,7 @@ export interface NativeProps extends ViewProps {
   testID?: string;
   thumbImage?: ImageSource;
   thumbTintColor?: ColorValue;
-  thumbSize?: Double;
+  thumbSize?: Float;
   trackImage?: ImageSource;
   value?: Float;
   lowerLimit?: Float;

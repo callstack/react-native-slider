@@ -95,7 +95,7 @@ public class ReactSliderManagerImpl {
         view.setThumbImage(uri);
     }
 
-    public static void setThumbSize(ReactSlider view, double size) {
+    public static void setThumbSize(ReactSlider view, float size) {
         view.setThumbSize(size);
     }
 
