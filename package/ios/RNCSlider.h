@@ -19,11 +19,13 @@
 @property (nonatomic, strong) UIImage *minimumTrackImage;
 @property (nonatomic, strong) UIImage *maximumTrackImage;
 @property (nonatomic, strong) UIImage *thumbImage;
+@property (nonatomic, assign) CGFloat thumbSize;
 @property (nonatomic, assign) bool tapToSeek;
 @property (nonatomic, strong) NSString *accessibilityUnits;
 @property (nonatomic, strong) NSArray *accessibilityIncrements;
 
 - (float) discreteValue:(float)value;
 - (void) setDisabled:(bool)disabled;
+- (void) refreshThumb;
 
 @end
