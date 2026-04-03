@@ -56,6 +56,12 @@ export interface SliderPropsIOS extends ReactNative.ViewProps {
   tapToSeek?: boolean;
 
   /**
+   * Permits swiping on the slider track to set the thumb position.
+   * Defaults to false on iOS. This is the default behaviour on Android.
+   */
+  swipeToSeek?: boolean;
+
+  /**
    * Sets an image for the thumb. Only static images are supported.
    */
   thumbImage?: ReactNative.ImageURISource;
