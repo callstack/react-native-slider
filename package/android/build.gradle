@@ -9,10 +9,12 @@ buildscript {
     classpath("com.android.tools.build:gradle:7.1.1")
     classpath("com.facebook.react:react-native-gradle-plugin")
     classpath("de.undercouch:gradle-download-task:5.0.1")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
   }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.facebook.react'
 
 def getExtOrDefault(name) {
@@ -59,5 +61,6 @@ repositories {
 dependencies {
   //noinspection GradleDynamicVersion
   api 'com.facebook.react:react-native:+'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 }
 
