@@ -2,8 +2,6 @@ package com.reactnativecommunity.slider
 
 import android.content.Context
 import android.view.View
-import android.widget.SeekBar
-import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
@@ -111,7 +109,28 @@ class ReactSliderManager : SimpleViewManager<ReactSlider>(), RNCSliderManagerInt
   }
 
   override fun addEventEmitters(reactContext: ThemedReactContext, view: ReactSlider) {
-    view.setOnSeekBarChangeListener(ON_CHANGE_LISTENER)
+    view.setEventListener(
+      object : ReactSliderEventListener {
+        override fun onSliderValueChange(value: Double, fromUser: Boolean) {
+          if (!fromUser) return
+          val reactTag = view.id
+          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+            ?.dispatchEvent(ReactSliderEvent(reactTag, value, true))
+        }
+
+        override fun onSlidingStart(value: Double) {
+          val reactTag = view.id
+          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+            ?.dispatchEvent(ReactSlidingStartEvent(reactTag, value))
+        }
+
+        override fun onSlidingComplete(value: Double) {
+          val reactTag = view.id
+          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+            ?.dispatchEvent(ReactSlidingCompleteEvent(reactTag, value))
+        }
+      },
+    )
   }
 
   // these props are not available on Android, however we must override their setters
@@ -151,42 +170,4 @@ class ReactSliderManager : SimpleViewManager<ReactSlider>(), RNCSliderManagerInt
   override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? =
     ReactSliderManagerImpl.getExportedCustomDirectEventTypeConstants()
 
-  companion object {
-    private val ON_CHANGE_LISTENER =
-      object : SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekbar: SeekBar, progress: Int, fromUser: Boolean) {
-          val slider = seekbar as ReactSlider
-          val p = slider.getValidProgressValue(progress)
-          seekbar.progress = p
-
-          val reactContext = seekbar.context as ReactContext
-          if (fromUser) {
-            val reactTag = seekbar.id
-            UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-              ?.dispatchEvent(ReactSliderEvent(reactTag, slider.toRealProgress(p), true))
-          }
-        }
-
-        override fun onStartTrackingTouch(seekbar: SeekBar) {
-          val reactContext = seekbar.context as ReactContext
-          val reactTag = seekbar.id
-          (seekbar as ReactSlider).isSliding = true
-          UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-            ?.dispatchEvent(
-              ReactSlidingStartEvent(reactTag, seekbar.toRealProgress(seekbar.progress)),
-            )
-        }
-
-        override fun onStopTrackingTouch(seekbar: SeekBar) {
-          val reactContext = seekbar.context as ReactContext
-          (seekbar as ReactSlider).isSliding = false
-          val reactTag = seekbar.id
-          val eventDispatcher =
-            UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
-          eventDispatcher?.dispatchEvent(
-            ReactSlidingCompleteEvent(reactTag, seekbar.toRealProgress(seekbar.progress)),
-          )
-        }
-      }
-  }
 }

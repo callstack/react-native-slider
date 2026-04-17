@@ -1,8 +1,5 @@
 package com.reactnativecommunity.slider
 
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
@@ -14,15 +11,7 @@ object ReactSliderManagerImpl {
 
   @JvmStatic
   fun createViewInstance(context: ThemedReactContext): ReactSlider {
-    val slider = ReactSlider(context, null)
-    if (Build.VERSION.SDK_INT >= 21) {
-      /**
-       * The "splitTrack" parameter should have "false" value, otherwise the SeekBar progress line
-       * doesn't appear when it is rotated.
-       */
-      slider.splitTrack = false
-    }
-    return slider
+    return ReactSlider(context, null)
   }
 
   @JvmStatic
@@ -62,7 +51,7 @@ object ReactSliderManagerImpl {
 
   @JvmStatic
   fun setDisabled(view: ReactSlider, disabled: Boolean) {
-    view.isEnabled = !disabled
+    view.applyDisabledProp(disabled)
   }
 
   @JvmStatic
@@ -72,24 +61,13 @@ object ReactSliderManagerImpl {
 
   @JvmStatic
   fun setMinimumTrackTintColor(view: ReactSlider, color: Int?) {
-    val drawable = view.progressDrawable.current as LayerDrawable
-    val progress = drawable.findDrawableByLayerId(android.R.id.progress)
-    if (color == null) {
-      progress.clearColorFilter()
-    } else {
-      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-        progress.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
-      } else {
-        @Suppress("DEPRECATION")
-        progress.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-      }
-    }
+    view.setMinimumTrackTintColor(color)
   }
 
   @JvmStatic
   fun setThumbImage(view: ReactSlider, source: ReadableMap?) {
     val uri = source?.getString("uri")
-    view.setThumbImage(uri)
+    view.setThumbImageUri(uri)
   }
 
   @JvmStatic
@@ -99,23 +77,12 @@ object ReactSliderManagerImpl {
 
   @JvmStatic
   fun setMaximumTrackTintColor(view: ReactSlider, color: Int?) {
-    val drawable = view.progressDrawable.current as LayerDrawable
-    val background = drawable.findDrawableByLayerId(android.R.id.background)
-    if (color == null) {
-      background.clearColorFilter()
-    } else {
-      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-        background.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
-      } else {
-        @Suppress("DEPRECATION")
-        background.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-      }
-    }
+    view.setMaximumTrackTintColor(color)
   }
 
   @JvmStatic
   fun setInverted(view: ReactSlider, inverted: Boolean) {
-    view.scaleX = if (inverted) -1f else 1f
+    view.setInverted(inverted)
   }
 
   @JvmStatic
