@@ -7,6 +7,7 @@
 #import <react/renderer/components/RNCSlider/Props.h>
 #import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
 #import <React/RCTBridge+Private.h>
+#import <React/RCTI18nUtil.h>
 #import "RCTImagePrimitivesConversions.h"
 #import <React/RCTImageLoaderProtocol.h>
 #import "RCTFabricComponentsPlugins.h"
@@ -41,6 +42,15 @@ using namespace facebook::react;
         static const auto defaultProps = std::make_shared<const RNCSliderProps>();
         _props = defaultProps;
         slider = [[RNCSlider alloc] initWithFrame:self.bounds];
+
+        // Honor app-forced RTL (RCTI18nUtil) instead of device locale
+        BOOL appIsRTL = [[RCTI18nUtil sharedInstance] isRTL];
+        UISemanticContentAttribute attr = appIsRTL
+            ? UISemanticContentAttributeForceRightToLeft
+            : UISemanticContentAttributeForceLeftToRight;
+        slider.semanticContentAttribute = attr;
+        self.semanticContentAttribute = attr;
+
         [slider addTarget:self action:@selector(sliderValueChanged:)
          forControlEvents:UIControlEventValueChanged];
         [slider addTarget:self action:@selector(sliderTouchStart:)
