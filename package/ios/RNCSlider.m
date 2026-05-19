@@ -1,6 +1,6 @@
-#import "RNCSlider.h"
+#import "Slider.h"
 
-@implementation RNCSlider
+@implementation Slider
 {
   float _unclippedValue;
   bool _minimumTrackImageSet;

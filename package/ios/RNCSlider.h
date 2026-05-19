@@ -2,11 +2,11 @@
 
 #import <React/RCTComponent.h>
 
-@interface RNCSlider : UISlider
+@interface Slider : UISlider
 
-@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderValueChange;
-@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderSlidingStart;
-@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderSlidingComplete;
+@property (nonatomic, copy) RCTBubblingEventBlock onSliderValueChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onSliderSlidingStart;
+@property (nonatomic, copy) RCTBubblingEventBlock onSliderSlidingComplete;
 
 @property (nonatomic, assign) float step;
 @property (nonatomic, assign) float lastValue;

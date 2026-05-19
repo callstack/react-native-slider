@@ -19,7 +19,7 @@ namespace winrt::SliderWindows::implementation {
 
     // IViewManager
     winrt::hstring SliderViewManager::Name() noexcept {
-        return L"RNCSlider";
+        return L"Slider";
     }
 
     xaml::FrameworkElement SliderViewManager::CreateView() noexcept {
@@ -73,8 +73,8 @@ namespace winrt::SliderWindows::implementation {
     ConstantProviderDelegate SliderViewManager::ExportedCustomDirectEventTypeConstants() noexcept {
         return [](winrt::IJSValueWriter const& constantWriter) {
             WriteCustomDirectEventTypeConstant(constantWriter, "onChange");
-            WriteCustomDirectEventTypeConstant(constantWriter, L"topSlidingStart", L"onRNCSliderSlidingStart");
-            WriteCustomDirectEventTypeConstant(constantWriter, L"topSlidingComplete", L"onRNCSliderSlidingComplete");
+            WriteCustomDirectEventTypeConstant(constantWriter, L"topSlidingStart", L"onSliderSlidingStart");
+            WriteCustomDirectEventTypeConstant(constantWriter, L"topSlidingComplete", L"onSliderSlidingComplete");
         };
     }
 

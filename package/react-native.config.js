@@ -2,8 +2,8 @@ module.exports = {
   dependency: {
     platforms: {
       android: {
-        libraryName: 'RNCSlider',
-        componentDescriptors: ['RNCSliderComponentDescriptor'],
+        libraryName: 'Slider',
+        componentDescriptors: ['SliderViewComponentDescriptor'],
         cmakeListsPath: 'src/main/jni/CMakeLists.txt',
       },
     },

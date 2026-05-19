@@ -1,4 +1,4 @@
-import React, {RefObject, useCallback} from 'react';
+import React, {RefObject, useCallback} from "react";
 import {
   Animated,
   View,
@@ -8,10 +8,10 @@ import {
   LayoutChangeEvent,
   Image,
   ImageSourcePropType,
-} from 'react-native';
+} from "react-native";
 //@ts-ignore
-import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
-import {constants} from './utils/constants';
+import type {ImageSource} from "react-native/Libraries/Image/ImageSource";
+import {constants} from "./utils/constants";
 
 type Event = Readonly<{
   nativeEvent: {
@@ -58,9 +58,9 @@ const RCTSliderWebComponent = React.forwardRef(
       lowerLimit = 0,
       upperLimit = 0,
       step = 1,
-      minimumTrackTintColor = '#009688',
-      maximumTrackTintColor = '#939393',
-      thumbTintColor = '#009688',
+      minimumTrackTintColor = "#009688",
+      maximumTrackTintColor = "#939393",
+      thumbTintColor = "#009688",
       thumbStyle = {},
       style = {},
       inverted = false,
@@ -189,16 +189,16 @@ const RCTSliderWebComponent = React.forwardRef(
         }
       };
       //@ts-ignore
-      window.addEventListener('resize', invalidateContainerPosition);
+      window.addEventListener("resize", invalidateContainerPosition);
       //@ts-ignore
-      document.addEventListener('scroll', onDocumentScroll, {capture: true});
+      document.addEventListener("scroll", onDocumentScroll, {capture: true});
 
       return () => {
         //@ts-ignore
-        window.removeEventListener('resize', invalidateContainerPosition);
+        window.removeEventListener("resize", invalidateContainerPosition);
 
         //@ts-ignore
-        document.removeEventListener('scroll', onDocumentScroll, {
+        document.removeEventListener("scroll", onDocumentScroll, {
           capture: true,
         });
       };
@@ -208,9 +208,9 @@ const RCTSliderWebComponent = React.forwardRef(
       {
         flexGrow: 1,
         flexShrink: 1,
-        flexBasis: 'auto',
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexBasis: "auto",
+        flexDirection: "row",
+        alignItems: "center",
       },
       style,
     ] as ViewStyle[];
@@ -218,7 +218,7 @@ const RCTSliderWebComponent = React.forwardRef(
     const trackStyle = {
       height: trackHeight,
       borderRadius: trackHeight / 2,
-      userSelect: 'none',
+      userSelect: "none",
     };
 
     const minimumTrackStyle = {
@@ -241,7 +241,7 @@ const RCTSliderWebComponent = React.forwardRef(
         backgroundColor: thumbTintColor,
         zIndex: 1,
         borderRadius: thumbSize / 2,
-        overflow: 'hidden',
+        overflow: "hidden",
       },
       thumbStyle,
     ] as ViewStyle[];
@@ -316,10 +316,10 @@ const RCTSliderWebComponent = React.forwardRef(
     const accessibilityActions = (event: any) => {
       const tenth = (maximumValue - minimumValue) / 10;
       switch (event.nativeEvent.actionName) {
-        case 'increment':
+        case "increment":
           updateValue(value + (step || tenth));
           break;
-        case 'decrement':
+        case "decrement":
           updateValue(value - (step || tenth));
           break;
       }
@@ -346,12 +346,12 @@ const RCTSliderWebComponent = React.forwardRef(
           }
         }}
         accessibilityActions={[
-          {name: 'increment', label: 'increment'},
-          {name: 'decrement', label: 'decrement'},
+          {name: "increment", label: "increment"},
+          {name: "decrement", label: "decrement"},
         ]}
         onAccessibilityAction={accessibilityActions}
         accessible={true}
-        accessibilityRole={'adjustable'}
+        accessibilityRole={"adjustable"}
         style={containerStyle}
         {...others}
         // NOTE: gesture responders should all fall _after_ the {...others}
@@ -366,7 +366,7 @@ const RCTSliderWebComponent = React.forwardRef(
           {thumbImage !== undefined ? (
             <Image
               source={thumbImage as ImageSourcePropType}
-              style={{width: '100%', height: '100%'}}
+              style={{width: "100%", height: "100%"}}
             />
           ) : null}
         </View>
@@ -387,12 +387,12 @@ function calculatePrecision(
   } else {
     // Calculate the number of decimals we can encounter in the results
     const decimals = [minimumValue, maximumValue, step].map(
-      (value) => ((value + '').split('.').pop() || '').length,
+      (value) => ((value + "").split(".").pop() || "").length,
     );
     return Math.max(...decimals);
   }
 }
 
-RCTSliderWebComponent.displayName = 'RTCSliderWebComponent';
+RCTSliderWebComponent.displayName = "RTCSliderWebComponent";
 
 export default RCTSliderWebComponent;
