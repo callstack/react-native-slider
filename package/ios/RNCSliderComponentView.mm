@@ -1,34 +1,34 @@
-#import "RNCSliderComponentView.h"
+#import "SliderComponentView.h"
 
 #import <React/RCTConversions.h>
 
-#import <react/renderer/components/RNCSlider/RNCSliderComponentDescriptor.h>
-#import <react/renderer/components/RNCSlider/EventEmitters.h>
-#import <react/renderer/components/RNCSlider/Props.h>
-#import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
+#import <react/renderer/components/Slider/SliderComponentDescriptor.h>
+#import <react/renderer/components/Slider/EventEmitters.h>
+#import <react/renderer/components/Slider/Props.h>
+#import <react/renderer/components/Slider/RCTComponentViewHelpers.h>
 #import <React/RCTBridge+Private.h>
 #import "RCTImagePrimitivesConversions.h"
 #import <React/RCTImageLoaderProtocol.h>
 #import "RCTFabricComponentsPlugins.h"
-#import "RNCSlider.h"
+#import "Slider.h"
 
 using namespace facebook::react;
 
-@interface RNCSliderComponentView () <RCTRNCSliderViewProtocol>
+@interface SliderComponentView () <RCTSliderViewProtocol>
 
 @end
 
 
-@implementation RNCSliderComponentView
+@implementation SliderComponentView
 {
-    RNCSlider *slider;
+    Slider *slider;
     UIImage *_image;
     BOOL _isSliding;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
-    return concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>();
+    return concreteComponentDescriptorProvider<SliderComponentDescriptor>();
 }
 
 + (BOOL)shouldBeRecycled {
@@ -38,9 +38,9 @@ using namespace facebook::react;
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
-        static const auto defaultProps = std::make_shared<const RNCSliderProps>();
+        static const auto defaultProps = std::make_shared<const SliderProps>();
         _props = defaultProps;
-        slider = [[RNCSlider alloc] initWithFrame:self.bounds];
+        slider = [[Slider alloc] initWithFrame:self.bounds];
         [slider addTarget:self action:@selector(sliderValueChanged:)
          forControlEvents:UIControlEventValueChanged];
         [slider addTarget:self action:@selector(sliderTouchStart:)
@@ -62,10 +62,10 @@ using namespace facebook::react;
 }
 
 - (void)tapHandler:(UITapGestureRecognizer *)gesture {
-    if ([gesture.view class] != [RNCSlider class]) {
+    if ([gesture.view class] != [Slider class]) {
         return;
     }
-    RNCSlider *slider = (RNCSlider *)gesture.view;
+    Slider *slider = (Slider *)gesture.view;
     slider.isSliding = _isSliding;
 
     // Ignore this tap if in the middle of a slide.
@@ -98,37 +98,37 @@ using namespace facebook::react;
 
     [slider setValue:[slider discreteValue:value] animated: YES];
 
-    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-    ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(slider.lastValue)});
+    std::dynamic_pointer_cast<const SliderEventEmitter>(_eventEmitter)
+    ->onSliderSlidingStart(SliderEventEmitter::OnSliderSlidingStart{.value = static_cast<Float>(slider.lastValue)});
 
     // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
-    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-    ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(slider.value)});
+    std::dynamic_pointer_cast<const SliderEventEmitter>(_eventEmitter)
+    ->onSliderValueChange(SliderEventEmitter::OnSliderValueChange{.value = static_cast<Float>(slider.value)});
 
-    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-    ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(slider.value)});
+    std::dynamic_pointer_cast<const SliderEventEmitter>(_eventEmitter)
+    ->onSliderSlidingComplete(SliderEventEmitter::OnSliderSlidingComplete{.value = static_cast<Float>(slider.value)});
 }
 
-- (void)sliderValueChanged:(RNCSlider *)sender
+- (void)sliderValueChanged:(Slider *)sender
 {
     [self RNCSendSliderEvent:sender withContinuous:YES isSlidingStart:NO];
 }
 
-- (void)sliderTouchStart:(RNCSlider *)sender
+- (void)sliderTouchStart:(Slider *)sender
 {
     [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:YES];
     _isSliding = YES;
     sender.isSliding = YES;
 }
 
-- (void)sliderTouchEnd:(RNCSlider *)sender
+- (void)sliderTouchEnd:(Slider *)sender
 {
     [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:NO];
     sender.isSliding = NO;
     _isSliding = NO;
 }
 
-- (void)RNCSendSliderEvent:(RNCSlider *)sender withContinuous:(BOOL)continuous isSlidingStart:(BOOL)isSlidingStart
+- (void)RNCSendSliderEvent:(Slider *)sender withContinuous:(BOOL)continuous isSlidingStart:(BOOL)isSlidingStart
 {
     float value = [sender discreteValue:sender.value];
 
@@ -146,17 +146,17 @@ using namespace facebook::react;
 
     if (continuous) {
         if (sender.lastValue != value)  {
-            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-            ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
+            std::dynamic_pointer_cast<const SliderEventEmitter>(_eventEmitter)
+            ->onSliderValueChange(SliderEventEmitter::OnSliderValueChange{.value = static_cast<Float>(value)});
         }
     } else {
         if (!isSlidingStart) {
-            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-            ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
+            std::dynamic_pointer_cast<const SliderEventEmitter>(_eventEmitter)
+            ->onSliderSlidingComplete(SliderEventEmitter::OnSliderSlidingComplete{.value = static_cast<Float>(value)});
         }
         if (isSlidingStart) {
-            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-            ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
+            std::dynamic_pointer_cast<const SliderEventEmitter>(_eventEmitter)
+            ->onSliderSlidingStart(SliderEventEmitter::OnSliderSlidingStart{.value = static_cast<Float>(value)});
         }
     }
 
@@ -165,8 +165,8 @@ using namespace facebook::react;
 
 - (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
 {
-    const auto &oldScreenProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
-    const auto &newScreenProps = *std::static_pointer_cast<const RNCSliderProps>(props);
+    const auto &oldScreenProps = *std::static_pointer_cast<const SliderProps>(_props);
+    const auto &newScreenProps = *std::static_pointer_cast<const SliderProps>(props);
 
     if (oldScreenProps.value != newScreenProps.value) {
         if (!slider.isSliding) {
@@ -303,7 +303,7 @@ using namespace facebook::react;
 
 @end
 
-Class<RCTComponentViewProtocol> RNCSliderCls(void)
+Class<RCTComponentViewProtocol> SliderCls(void)
 {
-    return RNCSliderComponentView.class;
+    return SliderComponentView.class;
 }

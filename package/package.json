@@ -9,7 +9,6 @@
     "access": "public"
   },
   "main": "dist/Slider.js",
-  "types": "typings/index.d.ts",
   "keywords": [
     "react-native",
     "react native",
@@ -17,7 +16,7 @@
   ],
   "scripts": {
     "prepare": "babel --extensions \".ts,.tsx\" --out-dir dist src",
-    "lint": "npx eslint src __test__",
+    "lint": "npx eslint src",
     "test": "jest",
     "prepack": "npx copyfiles \"./../README.md\" ./README.md"
   },
@@ -65,21 +64,21 @@
     ]
   },
   "prettier": {
-    "singleQuote": true,
+    "singleQuote": false,
     "trailingComma": "all",
     "bracketSpacing": false,
     "jsxBracketSameLine": true
   },
   "codegenConfig": {
-    "name": "RNCSlider",
+    "name": "Slider",
     "type": "components",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "com.reactnativecommunity.slider"
+      "javaPackageName": "com.callstack.slider"
     },
     "ios": {
       "componentProvider": {
-        "RNCSlider": "RNCSliderComponentView"
+        "Slider": "SliderComponentView"
       }
     }
   }

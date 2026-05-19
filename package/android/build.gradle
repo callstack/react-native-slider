@@ -36,7 +36,7 @@ android {
   def major = agpVersion[0].toInteger()
   def minor = agpVersion[1].toInteger()
   if ((major == 7 && minor >= 3) || major >= 8) {
-    namespace "com.reactnativecommunity.slider"
+    namespace "com.callstack.slider"
     buildFeatures {
       buildConfig true
       compose true
@@ -77,5 +77,8 @@ dependencies {
   implementation 'androidx.compose.ui:ui-tooling-preview'
   debugImplementation 'androidx.compose.ui:ui-tooling'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
-}
 
+  implementation 'com.facebook.react:react-android'
+
+  implementation 'androidx.activity:activity-compose:1.8.2'
+}

@@ -1,17 +1,17 @@
 #import <UIKit/UIKit.h>
 #import <React/RCTViewComponentView.h>
-#import "RNCSlider.h"
+#import "Slider.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^RNCLoadImageCompletionBlock)(NSError * _Nullable error, UIImage * _Nullable image);
 typedef void (^RNCLoadImageFailureBlock)();
 
-@interface RNCSliderComponentView : RCTViewComponentView
+@interface SliderComponentView : RCTViewComponentView
 
-@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderValueChange;
-@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderSlidingStart;
-@property (nonatomic, copy) RCTBubblingEventBlock onRNCSliderSlidingComplete;
+@property (nonatomic, copy) RCTBubblingEventBlock onSliderValueChange;
+@property (nonatomic, copy) RCTBubblingEventBlock onSliderSlidingStart;
+@property (nonatomic, copy) RCTBubblingEventBlock onSliderSlidingComplete;
 
 @property (nonatomic, assign) float step;
 @property (nonatomic, assign) float lastValue;
