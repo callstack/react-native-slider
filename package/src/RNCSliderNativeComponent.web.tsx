@@ -42,9 +42,9 @@ export interface Props {
   disabled: boolean;
   trackHeight: number;
   thumbImage?: ImageSource;
-  onRNCSliderSlidingStart: (event: Event) => void;
-  onRNCSliderSlidingComplete: (event: Event) => void;
-  onRNCSliderValueChange: (event: Event) => void;
+  onSliderSlidingStart: (event: Event) => void;
+  onSliderSlidingComplete: (event: Event) => void;
+  onSliderValueChange: (event: Event) => void;
 }
 
 const valueToEvent = (value: number): Event => ({nativeEvent: {value}});
@@ -67,9 +67,9 @@ const RCTSliderWebComponent = React.forwardRef(
       disabled = false,
       trackHeight = 4,
       thumbImage,
-      onRNCSliderSlidingStart = (_: Event) => {},
-      onRNCSliderSlidingComplete = (_: Event) => {},
-      onRNCSliderValueChange = (_: Event) => {},
+      onSliderSlidingStart = (_: Event) => {},
+      onSliderSlidingComplete = (_: Event) => {},
+      onSliderValueChange = (_: Event) => {},
       ...others
     }: Props,
     forwardedRef: any,
@@ -112,26 +112,26 @@ const RCTSliderWebComponent = React.forwardRef(
 
     const onValueChange = useCallback(
       (value: number) => {
-        onRNCSliderValueChange && onRNCSliderValueChange(valueToEvent(value));
+        onSliderValueChange && onSliderValueChange(valueToEvent(value));
       },
-      [onRNCSliderValueChange],
+      [onSliderValueChange],
     );
 
     const onSlidingStart = useCallback(
       (value: number) => {
         isUserInteracting.current = true;
-        onRNCSliderSlidingStart && onRNCSliderSlidingStart(valueToEvent(value));
+        onSliderSlidingStart && onSliderSlidingStart(valueToEvent(value));
       },
-      [onRNCSliderSlidingStart],
+      [onSliderSlidingStart],
     );
 
     const onSlidingComplete = useCallback(
       (value: number) => {
         isUserInteracting.current = false;
-        onRNCSliderSlidingComplete &&
-          onRNCSliderSlidingComplete(valueToEvent(value));
+        onSliderSlidingComplete &&
+          onSliderSlidingComplete(valueToEvent(value));
       },
-      [onRNCSliderSlidingComplete],
+      [onSliderSlidingComplete],
     );
     // Add a ref to track user interaction
     const isUserInteracting = React.useRef(false);
