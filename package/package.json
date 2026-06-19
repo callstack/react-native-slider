@@ -78,7 +78,7 @@
     },
     "ios": {
       "componentProvider": {
-        "Slider": "SliderComponentView"
+        "SliderView": "SliderView"
       }
     }
   }
