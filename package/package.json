@@ -2,20 +2,21 @@
   "name": "@react-native-community/slider",
   "version": "5.2.0",
   "license": "MIT",
-  "author": "react-native-community",
+  "author": "Callstack",
   "homepage": "https://github.com/callstack/react-native-slider#readme",
   "description": "React Native component used to select a single value from a range of values.",
   "publishConfig": {
     "access": "public"
   },
   "main": "dist/Slider.js",
+  "types": "typings/index.d.ts",
   "keywords": [
     "react-native",
     "react native",
     "slider"
   ],
   "scripts": {
-    "prepare": "babel --extensions \".ts,.tsx\" --out-dir dist src",
+    "prepare": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && babel --extensions \".ts,.tsx\" --out-dir dist src",
     "lint": "npx eslint src",
     "test": "jest",
     "prepack": "npx copyfiles \"./../README.md\" ./README.md"
@@ -64,7 +65,7 @@
     ]
   },
   "prettier": {
-    "singleQuote": false,
+    "singleQuote": true,
     "trailingComma": "all",
     "bracketSpacing": false,
     "jsxBracketSameLine": true
@@ -78,7 +79,7 @@
     },
     "ios": {
       "componentProvider": {
-        "SliderView": "SliderView"
+        "SliderView": "SliderComponentView"
       }
     }
   }

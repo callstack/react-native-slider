@@ -1,5 +1,5 @@
 {
-  "name": "example",
+  "name": "slider-example",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -18,7 +18,8 @@
     "@mgcrea/react-native-jetpack-compose": "^0.8.0",
     "@react-native-community/slider": "file:../package",
     "react": "19.2.3",
-    "react-native": "0.85.1"
+    "react-native": "0.85.1",
+    "react-native-pager-view": "^6.9.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -48,8 +49,8 @@
   },
   "react-native-windows": {
     "init-windows": {
-      "name": "example",
-      "namespace": "example",
+      "name": "SliderExample",
+      "namespace": "SliderExample",
       "template": "old/uwp-cpp-app"
     }
   }

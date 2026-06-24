@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* Slider.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* Slider.m */; };
-		F4FF95D7245B92E800C19C63 /*  Slider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  Slider.swift */; };
+		17E6A4A12CF7B8D100000001 /* SliderComponentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 17E6A4A02CF7B8D100000001 /* SliderComponentView.mm */; };
+		5E555C0D2413F4C50049A1A2 /* SliderViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* SliderViewManager.m */; };
+		F4FF95D7245B92E800C19C63 /* SliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* SliderView.swift */; };
+		F4FF95D9245B92E800C19C63 /* SliderViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D8245B92E800C19C63 /* SliderViewManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,9 +27,12 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libSlider.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSlider.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5891CC2AC0600A0062D /* Slider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Slider.m; sourceTree = "<group>"; };
+		17E6A4A02CF7B8D100000001 /* SliderComponentView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SliderComponentView.mm; sourceTree = "<group>"; };
+		17E6A4A22CF7B8D100000001 /* slider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = slider.h; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* SliderViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SliderViewManager.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* Slider-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Slider-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* Slider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slider.swift; sourceTree = "<group>"; };
+		F4FF95D6245B92E800C19C63 /* SliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderView.swift; sourceTree = "<group>"; };
+		F4FF95D8245B92E800C19C63 /* SliderViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderViewManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,8 +57,11 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				F4FF95D6245B92E800C19C63 /* Slider.swift */,
-				B3E7B5891CC2AC0600A0062D /* Slider.m */,
+				17E6A4A02CF7B8D100000001 /* SliderComponentView.mm */,
+				F4FF95D6245B92E800C19C63 /* SliderView.swift */,
+				F4FF95D8245B92E800C19C63 /* SliderViewManager.swift */,
+				B3E7B5891CC2AC0600A0062D /* SliderViewManager.m */,
+				17E6A4A22CF7B8D100000001 /* slider.h */,
 				F4FF95D5245B92E700C19C63 /* Slider-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
@@ -116,8 +124,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4FF95D7245B92E800C19C63 /* Slider.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* Slider.m in Sources */,
+				17E6A4A12CF7B8D100000001 /* SliderComponentView.mm in Sources */,
+				F4FF95D7245B92E800C19C63 /* SliderView.swift in Sources */,
+				F4FF95D9245B92E800C19C63 /* SliderViewManager.swift in Sources */,
+				5E555C0D2413F4C50049A1A2 /* SliderViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,12 +232,13 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../../../React/**",
-					"$(SRCROOT)/../../react-native/React/**",
-				);
+					HEADER_SEARCH_PATHS = (
+						"$(inherited)",
+						/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+						"$(SRCROOT)/../node_modules/react-native/React/**",
+						"$(SRCROOT)/../../../React/**",
+						"$(SRCROOT)/../../react-native/React/**",
+					);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Slider;
@@ -241,12 +252,13 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../../../React/**",
-					"$(SRCROOT)/../../react-native/React/**",
-				);
+					HEADER_SEARCH_PATHS = (
+						"$(inherited)",
+						/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+						"$(SRCROOT)/../node_modules/react-native/React/**",
+						"$(SRCROOT)/../../../React/**",
+						"$(SRCROOT)/../../react-native/React/**",
+					);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Slider;

@@ -69,7 +69,7 @@ To use this library you need to ensure you are using the correct version of Reac
 | `4.x.x`                                  | `>=0.60`; `>=0.62` (on Windows); |
 | `3.1.x`                                  | `>=0.60`                     |
 | `2.x.x`                                  | `>= 0.60`                    |
-| [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0) | `<= 0.59` |
+| [`1.x.x`](https://github.com/callstack/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0) | `<= 0.59` |
 
 
 ## Properties
@@ -93,14 +93,14 @@ To use this library you need to ensure you are using the correct version of Reac
 | `tapToSeek` | Permits tapping on the slider track to set the thumb position.<br/>Defaults to false on iOS. No effect on Android or Windows. | bool | iOS |
 | `inverted` | Reverses the direction of the slider.<br/>Default value is false. | bool | |
 | `vertical` | Changes the orientation of the slider to vertical, if set to `true`.<br/>Default value is false. | bool | Windows |
-| `thumbTintColor` | Color of the foreground switch grip.<br/>**NOTE:** This prop will override the `thumbImage` prop set, meaning that if both `thumbImage` and `thumbTintColor` will be set, image used for the thumb may not be displayed correctly! | [color](https://reactnative.dev/docs/colors) | Android |
+| `thumbTintColor` | Color of the foreground switch grip.<br/>**NOTE:** This prop will override the `thumbImage` prop set, meaning that if both `thumbImage` and `thumbTintColor` will be set, image used for the thumb may not be displayed correctly! | [color](https://reactnative.dev/docs/colors) | Android, iOS, Web |
 | `thumbSize` | Sets the size (width and height) of the thumb.<br/>If `thumbImage` is provided, it will be scaled to this size.<br/>Units: points on iOS, dp on Android. | number | Android, iOS, Web |
-| `maximumTrackImage` | Assigns a maximum track image. Only static images are supported. The leftmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
-| `minimumTrackImage` | Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
-| `thumbImage` | Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported. | Image<br/>.propTypes<br/>.source | |
-| `trackImage` | Assigns a single image for the track. Only static images are supported. The center pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS |
-| [`StepMarker`](#stepmarker) | Component to be rendered for each step on the track,<br/>with the possibility to change the styling, when thumb is at that given step | `FC<MarkerProps>` | iOS, Android, Windows |
-| [`renderStepNumber`](#renderstepnumber) | Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track | bool | iOS, Android, Windows |
+| `maximumTrackImage` | Assigns a maximum track image. Only static images are supported. The leftmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS, Web |
+| `minimumTrackImage` | Assigns a minimum track image. Only static images are supported. The rightmost pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS, Web |
+| `thumbImage` | Sets an image for the thumb. Only static images are supported. Needs to be a URI of a local or network image; base64-encoded SVG is not supported. | Image<br/>.propTypes<br/>.source | iOS, Web |
+| `trackImage` | Assigns a single image for the track. Only static images are supported. The center pixel of the image will be stretched to fill the track. | Image<br/>.propTypes<br/>.source | iOS, Web |
+| [`StepMarker`](#stepmarker) | Component to be rendered for each step on the track,<br/>with the possibility to change the styling, when thumb is at that given step | `FC<MarkerProps>` | Android, iOS, Web |
+| [`renderStepNumber`](#renderstepnumber) | Turns on the displaying of numbers of steps.<br/>Numbers of steps are displayed under the track | bool | Android, iOS, Web |
 | `ref` | Reference object. | MutableRefObject | web |
 | `View` | [Inherited `View` props...](https://github.com/facebook/react-native-website/blob/master/docs/view.md#props) | | |
 
@@ -236,7 +236,7 @@ You can also do this manually by:
 
 ## Contributors
 
-This module was extracted from `react-native` core. Please, refer to [contributors graph](https://github.com/react-native-community/react-native-slider/graphs/contributors) for the complete list of contributors.
+This module was extracted from `react-native` core. Please, refer to [contributors graph](https://github.com/callstack/react-native-slider/graphs/contributors) for the complete list of contributors.
 
 ---
 

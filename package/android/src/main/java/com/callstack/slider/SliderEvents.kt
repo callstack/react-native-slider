@@ -18,3 +18,33 @@ class ValueChangedEvent(surfaceId: Int, viewId: Int, private val value: Float) :
     const val EVENT_NAME = "topValueChange"
   }
 }
+
+class SlidingStartEvent(surfaceId: Int, viewId: Int, private val value: Float) :
+  Event<SlidingStartEvent>(surfaceId, viewId) {
+
+  override fun getEventName(): String = EVENT_NAME
+
+  override fun getEventData(): WritableMap =
+    Arguments.createMap().apply {
+      putDouble("value", value.toDouble())
+    }
+
+  companion object {
+    const val EVENT_NAME = "topSlidingStart"
+  }
+}
+
+class SlidingCompleteEvent(surfaceId: Int, viewId: Int, private val value: Float) :
+  Event<SlidingCompleteEvent>(surfaceId, viewId) {
+
+  override fun getEventName(): String = EVENT_NAME
+
+  override fun getEventData(): WritableMap =
+    Arguments.createMap().apply {
+      putDouble("value", value.toDouble())
+    }
+
+  companion object {
+    const val EVENT_NAME = "topSlidingComplete"
+  }
+}

@@ -1,1 +1,2 @@
-#import <React/RCTViewManager.h>
+#import "RCTComponent.h"
+#import "RCTViewManager.h"

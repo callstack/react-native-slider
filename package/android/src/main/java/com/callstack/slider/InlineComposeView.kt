@@ -51,6 +51,7 @@ abstract class RNCustomRenderComposeView(
     setViewCompositionStrategy(
       ViewCompositionStrategy.DisposeOnLifecycleDestroyed(lifecycle),
     )
+    ensureRecomposer()
   }
 
   override fun onAttachedToWindow() {

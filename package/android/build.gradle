@@ -9,12 +9,12 @@ buildscript {
     classpath("com.android.tools.build:gradle:7.1.1")
     classpath("com.facebook.react:react-native-gradle-plugin")
     classpath("de.undercouch:gradle-download-task:5.0.1")
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
   }
 }
 
 plugins {
-  id 'org.jetbrains.kotlin.plugin.compose' version '2.0.21'
+  id 'org.jetbrains.kotlin.plugin.compose' version '2.1.20'
 }
 
 apply plugin: 'com.android.library'
@@ -22,11 +22,15 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.facebook.react'
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ReactNativeSlider_' + name]
+  return rootProject.ext.has(name)
+    ? rootProject.ext.get(name)
+    : project.properties['ReactNativeSlider_' + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeSlider_' + name]).toInteger()
+  return rootProject.ext.has(name)
+    ? rootProject.ext.get(name)
+    : (project.properties['ReactNativeSlider_' + name]).toInteger()
 }
 
 android {

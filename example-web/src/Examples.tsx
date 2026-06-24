@@ -1,24 +1,30 @@
-import React, {useState} from 'react';
-// @ts-ignore
-import {Text, View, StyleSheet, ScrollView} from 'react-native';
-// @ts-ignore
-import Slider, {SliderProps} from '@react-native-community/slider';
+import React, {type FC, type JSX, useCallback, useState} from "react";
+import {Image, StyleSheet, Text, View} from "react-native";
+import Slider, {type MarkerProps, type SliderProps} from "@react-native-community/slider";
 
 export interface Props {
   title: string;
-  render(): React.ReactElement;
+  render(): JSX.Element;
   platform?: string;
 }
 
+const CONSTANTS = {
+  MAX_VALUE: 100,
+  MIN_VALUE: 10,
+  STEP: 10,
+} as const;
+
 const SliderExample = (props: SliderProps) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(props.value ?? 0);
   return (
-    <View>
+    <View style={styles.exampleContainer}>
       <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
       <Slider
         step={0.5}
-        style={styles.slider}
+        style={[styles.slider, props.style]}
         {...props}
+        tapToSeek={props.tapToSeek ?? true}
+        value={value}
         onValueChange={setValue}
       />
     </View>
@@ -32,7 +38,7 @@ const SlidingStartExample = (props: SliderProps) => {
     <View>
       <SliderExample
         {...props}
-        onSlidingStart={(value: number) => {
+        onSlidingStart={value => {
           setSlideStartingValue(value);
           setSlideStartingCount(prev => prev + 1);
         }}
@@ -51,7 +57,7 @@ const SlidingCompleteExample = (props: SliderProps) => {
     <View>
       <SliderExample
         {...props}
-        onSlidingComplete={(value: number) => {
+        onSlidingComplete={value => {
           setSlideCompletionValue(value);
           setSlideCompletionCount(prev => prev + 1);
         }}
@@ -63,186 +69,682 @@ const SlidingCompleteExample = (props: SliderProps) => {
   );
 };
 
+const SlidingStepsExample = (props: SliderProps) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={styles.outerTrue}>
+        <View style={styles.innerTrue} />
+      </View>
+    ) : (
+      <View style={styles.outer}>
+        <View style={styles.inner} />
+      </View>
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={4}
+      step={1}
+      tapToSeek
+      StepMarker={renderStepMarker}
+      minimumTrackTintColor="#112233"
+      maximumTrackTintColor="#00FF00"
+    />
+  );
+};
+
+const SlidingStepsNumbersExample = (props: SliderProps) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={styles.outerTrue}>
+        <View style={styles.innerTrue} />
+      </View>
+    ) : (
+      <View style={styles.outer}>
+        <View style={styles.inner} />
+      </View>
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={5}
+      step={1}
+      tapToSeek
+      renderStepNumber
+      StepMarker={renderStepMarker}
+      minimumTrackTintColor="#123456"
+      maximumTrackTintColor="#00FF00"
+    />
+  );
+};
+
+const SlidingStepsSmallNumbersExample = (props: SliderProps) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={styles.outerTrueSmall}>
+        <View style={styles.innerTrueSmall} />
+      </View>
+    ) : (
+      <View style={styles.outerSmall}>
+        <View style={styles.innerSmall} />
+      </View>
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={5}
+      step={1}
+      tapToSeek
+      renderStepNumber
+      StepMarker={renderStepMarker}
+      minimumTrackTintColor="#123456"
+      maximumTrackTintColor="#00FF00"
+    />
+  );
+};
+
+const SlidingCustomStepsThumbImageNumbersExample = (props: SliderProps) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={styles.outerTrue}>
+        <View style={styles.innerTrue} />
+      </View>
+    ) : (
+      <View style={styles.outer}>
+        <View style={styles.inner} />
+      </View>
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={4}
+      step={1}
+      tapToSeek
+      renderStepNumber
+      thumbImage={require("./resources/ck-icon.png")}
+      StepMarker={renderStepMarker}
+      minimumTrackTintColor="#123456"
+      maximumTrackTintColor="#654321"
+    />
+  );
+};
+
+const SlidingCustomStepsAnotherThumbImageNumbersExample = (
+  props: SliderProps,
+) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={styles.outerTrueSmall}>
+        <View style={styles.innerTrueSmall} />
+      </View>
+    ) : (
+      <View style={styles.outerSmall}>
+        <View style={styles.innerSmall} />
+      </View>
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={15}
+      step={1}
+      tapToSeek
+      renderStepNumber
+      thumbImage={require("./resources/twitter-small.png")}
+      StepMarker={renderStepMarker}
+      minimumTrackTintColor="#123456"
+      maximumTrackTintColor="#654321"
+    />
+  );
+};
+
+const InvertedSliderWithStepMarker = (props: SliderProps) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={styles.outerTrueSmall}>
+        <View style={styles.innerTrueSmall} />
+      </View>
+    ) : (
+      <View style={styles.outerSmall}>
+        <View style={styles.innerSmall} />
+      </View>
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={15}
+      step={1}
+      tapToSeek
+      renderStepNumber
+      thumbImage={require("./resources/twitter-small.png")}
+      StepMarker={renderStepMarker}
+      inverted
+      minimumTrackTintColor="#123456"
+      maximumTrackTintColor="#654321"
+    />
+  );
+};
+
+const SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth = (
+  props: SliderProps,
+) => {
+  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
+    return stepMarked ? (
+      <View style={[styles.innerTrue, styles.offsetStepMarker]} />
+    ) : (
+      <View style={[styles.inner, styles.offsetStepMarker]} />
+    );
+  }, []);
+
+  return (
+    <SliderExample
+      {...props}
+      minimumValue={0}
+      maximumValue={3}
+      step={1}
+      style={styles.narrowSlider}
+      tapToSeek
+      renderStepNumber
+      StepMarker={renderStepMarker}
+      minimumTrackTintColor="#ABCDEF"
+      maximumTrackTintColor="#001122"
+    />
+  );
+};
+
+const MyStepMarker: FC<MarkerProps> = ({stepMarked, currentValue}) => {
+  return stepMarked ? (
+    <View style={styles.background}>
+      <View style={styles.separator} />
+      <View style={styles.label}>
+        {currentValue !== undefined ? (
+          <Text>
+            {currentValue % 1 === 0 ? currentValue : currentValue.toFixed(2)}
+          </Text>
+        ) : (
+          <Text>-</Text>
+        )}
+        <Image
+          style={styles.tinyLogo}
+          source={require("./resources/twitter-small.png")}
+        />
+      </View>
+    </View>
+  ) : (
+    <View style={styles.divider} />
+  );
+};
+
+const CustomComponent: FC<MarkerProps> = ({
+  stepMarked,
+  currentValue,
+  index,
+  max,
+}) => {
+  if (stepMarked) {
+    return (
+      <View style={styles.customComponentFrame}>
+        <View style={[styles.customComponentLeftFrame, styles.filled]}>
+          <Text style={styles.trackText}>{index}</Text>
+        </View>
+        <View style={[styles.customComponentRightFrame, styles.empty]}>
+          <Text style={styles.trackText}>{max}</Text>
+        </View>
+        <Text style={[styles.trackText, styles.trackDividerText]}>/</Text>
+      </View>
+    );
+  }
+
+  return currentValue > index ? (
+    <View style={[styles.trackDot, styles.filled]} />
+  ) : (
+    <View style={[styles.trackDot, styles.empty]} />
+  );
+};
+
+const SliderExampleWithCustomMarker = (props: SliderProps) => {
+  const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
+
+  return (
+    <View style={styles.customMarkerContainer}>
+      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
+      <Slider
+        step={CONSTANTS.STEP}
+        style={[styles.slider, props.style]}
+        minimumValue={CONSTANTS.MIN_VALUE}
+        maximumValue={CONSTANTS.MAX_VALUE}
+        thumbImage={require("./resources/empty.png")}
+        tapToSeek
+        {...props}
+        value={value}
+        onValueChange={setValue}
+        lowerLimit={1}
+        StepMarker={MyStepMarker}
+        minimumTrackTintColor="#00629A"
+        maximumTrackTintColor="#979EA4"
+      />
+    </View>
+  );
+};
+
+const SliderExampleWithCustomComponentAndFilledSteps = (props: SliderProps) => {
+  const [value, setValue] = useState(props.value || 50);
+
+  return (
+    <View style={styles.exampleContainer}>
+      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
+      <Slider
+        step={CONSTANTS.STEP}
+        style={[styles.slider, props.style]}
+        minimumValue={CONSTANTS.MIN_VALUE}
+        maximumValue={CONSTANTS.MAX_VALUE}
+        StepMarker={CustomComponent}
+        {...props}
+        value={value}
+        onValueChange={setValue}
+        minimumTrackTintColor="#00629A"
+        maximumTrackTintColor="#979EA4"
+      />
+    </View>
+  );
+};
+
 export default SliderExample;
 
 const styles = StyleSheet.create({
-  slider: {
-    width: 300,
-    opacity: 1,
-    height: 50,
-    marginTop: 10,
-  },
   text: {
     fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
+    textAlign: "center",
+    fontWeight: "500",
     margin: 0,
+  },
+  exampleContainer: {
+    alignItems: "center",
+    alignSelf: "stretch",
+  },
+  trackText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    justifyContent: "center",
+    alignSelf: "center",
+    top: 12,
+  },
+  trackDividerText: {
+    left: 18,
+    position: "absolute",
+  },
+  trackDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+    top: 4,
+  },
+  empty: {
+    backgroundColor: "#B3BFC9",
+  },
+  filled: {
+    backgroundColor: "#00629A",
+  },
+  customComponentFrame: {
+    flex: 1,
+    flexDirection: "row",
+    top: -10,
+    opacity: 0.95,
+  },
+  customComponentLeftFrame: {
+    height: 40,
+    width: 20,
+    borderTopLeftRadius: 40,
+    borderBottomLeftRadius: 40,
+  },
+  customComponentRightFrame: {
+    height: 40,
+    width: 20,
+    borderTopRightRadius: 40,
+    borderBottomRightRadius: 40,
+  },
+  divider: {
+    width: 2,
+    height: 20,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  separator: {
+    width: 2,
+    height: 20,
+    backgroundColor: "#00629A",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  label: {
+    marginTop: 10,
+    width: 55,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "#ffffff",
+    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.4)" as never,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  background: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  tinyLogo: {
+    marginVertical: 2,
+    aspectRatio: 1,
+    flex: 1,
+    height: "100%",
+    width: "100%",
+  },
+  slider: {
+    alignSelf: "stretch",
+    opacity: 1,
+    marginTop: 10,
+    height: 44,
+  },
+  narrowSlider: {
+    width: 200,
+  },
+  outer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#11FF11",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  outerTrue: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#0F0FFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  inner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#111111",
+  },
+  innerTrue: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#0F0FFF",
+  },
+  offsetStepMarker: {
+    top: 3,
+  },
+  container: {
+    alignItems: "center",
+  },
+  customMarkerContainer: {
+    alignItems: "center",
+    paddingBottom: 80,
+  },
+  outerSmall: {
+    width: 4,
+    height: 4,
+    top: 6,
+    borderRadius: 2,
+    backgroundColor: "#003366",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  outerTrueSmall: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+    backgroundColor: "#ABCDEF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  innerSmall: {
+    width: 7,
+    height: 7,
+    borderRadius: 1,
+    backgroundColor: "#223366",
+  },
+  innerTrueSmall: {
+    width: 7,
+    height: 7,
+    borderRadius: 1,
+    backgroundColor: "#334488",
   },
 });
 
 export const examples: Props[] = [
   {
-    title: 'Default settings',
+    title: "Default settings",
     render() {
       return <SliderExample />;
     },
   },
   {
-    title: 'Initial value: 0.5',
+    title: "Initial value: 0.5",
     render() {
       return <SliderExample value={0.5} />;
     },
   },
   {
-    title: 'minimumValue: -1, maximumValue: 2',
-    render(): React.ReactElement {
+    title: "minimumValue: -1, maximumValue: 2",
+    render() {
       return <SliderExample minimumValue={-1} maximumValue={2} />;
     },
   },
   {
-    title: 'lowerLimit: 2, upperLimit: 7',
-    render(): React.ReactElement {
-      return <SliderExample minimumValue={0} maximumValue={10}  lowerLimit={2} upperLimit={7} />;
+    title: "step: 0.25, tap to seek on iOS",
+    render() {
+      return <SliderExample step={0.25} tapToSeek />;
     },
   },
   {
-    title: 'step: 0.25, tap to seek on iOS',
-    render(): React.ReactElement {
-      return <SliderExample step={0.25} tapToSeek={true} />;
+    title: "Limit on positive values [30, 80]",
+    render() {
+      return (
+        <SliderExample
+          step={1}
+          value={40}
+          minimumValue={0}
+          maximumValue={120}
+          lowerLimit={30}
+          upperLimit={80}
+        />
+      );
     },
   },
   {
-    title: 'onSlidingStart',
-    render(): React.ReactElement {
+    title: "Limit on negative values [-70, -20]",
+    render() {
+      return (
+        <SliderExample
+          step={1}
+          value={-30}
+          minimumValue={-80}
+          maximumValue={0}
+          lowerLimit={-70}
+          upperLimit={-20}
+        />
+      );
+    },
+  },
+  {
+    title: "onSlidingStart",
+    render() {
       return <SlidingStartExample />;
     },
   },
   {
-    title: 'onSlidingComplete',
+    title: "onSlidingComplete",
     render() {
       return <SlidingCompleteExample />;
     },
   },
   {
-    title: 'Custom min/max track tint color',
+    title: "Custom min/max track tint color",
     render() {
       return (
         <SliderExample
-          minimumTrackTintColor={'#00FF00'}
-          maximumTrackTintColor={'red'}
+          minimumTrackTintColor="#00FF00"
+          maximumTrackTintColor="red"
           value={0.5}
         />
       );
     },
   },
   {
-    title: 'Custom thumb tint color',
+    title: "Custom thumb tint color",
     render() {
-      return <SliderExample thumbTintColor={'magenta'} />;
+      return <SliderExample thumbTintColor="magenta" />;
     },
   },
   {
-    title: 'Custom thumb image',
+    title: "Custom thumb image",
     render() {
-      return (
-        <SliderExample thumbImage={require('./resources/uie_thumb_big.png')} />
-      );
+      return <SliderExample thumbImage={require("./resources/uie_thumb_big.png")} />;
     },
   },
   {
-    title: 'Custom thumb (network image)',
-    platform: 'windows',
+    title: "Custom thumb (network image)",
+    platform: "windows",
     render() {
       return (
         <SliderExample
-          thumbImage={{
-            uri: 'https://img.icons8.com/windows/50/000000/bus.png',
-          }}
+          thumbImage={{uri: "https://img.icons8.com/windows/50/000000/bus.png"}}
         />
       );
     },
   },
   {
-    title: 'Custom track image',
-    platform: 'ios',
+    title: "Custom track image",
     render() {
-      return <SliderExample trackImage={require('./resources/slider.png')} />;
+      return <SliderExample trackImage={require("./resources/slider.png")} />;
     },
   },
   {
-    title: 'Custom min/max track image',
-    platform: 'ios',
+    title: "Custom min/max track image",
     render() {
       return (
         <SliderExample
-          minimumTrackImage={require('./resources/slider-left.png')}
-          maximumTrackImage={require('./resources/slider-right.png')}
+          minimumTrackImage={require("./resources/slider-left.png")}
+          maximumTrackImage={require("./resources/slider-right.png")}
         />
       );
     },
   },
   {
-    title: 'Inverted slider direction',
+    title: "Slider with customized indicator and no numbers",
+    render() {
+      return <SlidingStepsExample />;
+    },
+  },
+  {
+    title: "Slider with customized indicator and default numbers",
+    render() {
+      return <SlidingStepsNumbersExample />;
+    },
+  },
+  {
+    title: "Slider with smaller customized indicator and default numbers",
+    render() {
+      return <SlidingStepsSmallNumbersExample />;
+    },
+  },
+  {
+    title: "Slider with custom steps, thumbImage and steps numbers",
+    render() {
+      return <SlidingCustomStepsThumbImageNumbersExample />;
+    },
+  },
+  {
+    title: "Slider with custom steps, different thumbImage and steps numbers",
+    render() {
+      return <SlidingCustomStepsAnotherThumbImageNumbersExample />;
+    },
+  },
+  {
+    title: "Slider with custom steps, different width and thumbImage",
+    render() {
+      return <SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth />;
+    },
+  },
+  {
+    title: "Inverted slider direction with steps number and thumbImage",
+    render() {
+      return <InvertedSliderWithStepMarker />;
+    },
+  },
+  {
+    title: "Custom step marker settings",
+    render() {
+      return <SliderExampleWithCustomMarker />;
+    },
+  },
+  {
+    title: "Custom component with steps filled when passed",
+    render() {
+      return <SliderExampleWithCustomComponentAndFilledSteps />;
+    },
+  },
+  {
+    title: "Inverted slider direction",
     render() {
       return <SliderExample value={0.6} inverted />;
     },
   },
   {
-    title: 'Vertical slider',
-    platform: 'windows',
+    title: "Vertical slider",
+    platform: "windows",
     render() {
       return <SliderExample value={0.6} vertical />;
     },
   },
   {
-    title: 'Disabled slider',
+    title: "Disabled slider",
     render() {
       return <SliderExample disabled value={0.6} />;
     },
   },
   {
-    title: 'Slider with accessibilityState disabled',
-    platform: 'android',
+    title: "Slider with accessibilityState disabled",
+    platform: "android",
     render() {
       return <SliderExample disabled value={0.6} />;
     },
   },
   {
-    title: 'Slider in horizontal scroll view',
+    title: "Custom thumb size (no image)",
     render() {
-      return (
-        <ScrollView
-          horizontal
-          style={{
-            paddingVertical: 50,
-            borderStyle: 'dotted',
-            borderWidth: 1,
-            flexDirection: 'row',
-            width: 300,
-          }}
-          contentContainerStyle={{ overflowX: 'scroll' }}
-        >
-          <View style={{ width: 400, paddingLeft: 100 }}>
-            <SliderExample maximumValue={100} />
-            <Text style={{ textAlign: 'right', width: 200 }}>
-              Scroll right, then slide ➔
-            </Text>
-          </View>
-        </ScrollView>
-      );
+      return <SliderExample thumbTintColor="blue" thumbSize={32} />;
     },
   },
-  // Check the fix for the issue #743
   {
-    title: 'With step numbers',
+    title: "Custom thumb size (scaled image)",
     render() {
       return (
         <SliderExample
-          minimumValue={1}
-          maximumValue={5}
-          step={1}
-          renderStepNumber={true}
-          style={[styles.slider, { height: 70 }]}
+          thumbImage={require("./resources/uie_thumb_big.png")}
+          thumbSize={60}
         />
       );
     },
