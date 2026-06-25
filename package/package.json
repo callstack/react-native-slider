@@ -60,6 +60,7 @@
   "jest": {
     "preset": "react-native",
     "verbose": true,
+    "watchman": false,
     "modulePathIgnorePatterns": [
       "/e2e/"
     ]
