@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ForwardedRef,
 } from 'react';
@@ -105,10 +106,18 @@ const SliderNativeComponent = React.forwardRef(
   ) => {
     const [width, setWidth] = useState(0);
     const [value, setValue] = useState(valueProp ?? minValue);
+    const isSlidingRef = useRef(false);
+    const valueRef = useRef(value);
     const thumbSize = thumbSizeProp ?? (thumbImage ? 48 : THUMB_SIZE);
 
     useEffect(() => {
-      setValue(valueProp ?? minValue);
+      if (isSlidingRef.current) {
+        return;
+      }
+
+      const nextValue = valueProp ?? minValue;
+      valueRef.current = nextValue;
+      setValue(nextValue);
     }, [minValue, valueProp]);
 
     const updateValue = useCallback(
@@ -129,6 +138,7 @@ const SliderNativeComponent = React.forwardRef(
           upperLimit,
         );
 
+        valueRef.current = nextValue;
         setValue(nextValue);
         onValueChange?.({nativeEvent: {value: nextValue}} as never);
       },
@@ -151,19 +161,23 @@ const SliderNativeComponent = React.forwardRef(
           return;
         }
 
-        onSlidingStart?.({nativeEvent: {value}} as never);
+        isSlidingRef.current = true;
+        onSlidingStart?.({nativeEvent: {value: valueRef.current}} as never);
         updateValue(event);
       },
-      [disabled, onSlidingStart, updateValue, value],
+      [disabled, onSlidingStart, updateValue],
     );
 
     const completeSliding = useCallback(() => {
-      if (disabled) {
+      if (disabled || !isSlidingRef.current) {
         return;
       }
 
-      onSlidingComplete?.({nativeEvent: {value}} as never);
-    }, [disabled, onSlidingComplete, value]);
+      isSlidingRef.current = false;
+      onSlidingComplete?.({
+        nativeEvent: {value: valueRef.current},
+      } as never);
+    }, [disabled, onSlidingComplete]);
 
     const handleLayout = useCallback(
       (event: LayoutChangeEvent) => {
@@ -193,10 +207,18 @@ const SliderNativeComponent = React.forwardRef(
       <View
         {...props}
         ref={ref}
-        style={[{minHeight: 40, justifyContent: 'center'}, style]}
+        style={[
+          {
+            minHeight: 40,
+            justifyContent: 'center',
+            touchAction: 'none',
+          } as never,
+          style,
+        ]}
         onLayout={handleLayout}
         onStartShouldSetResponder={() => true}
         onMoveShouldSetResponder={() => true}
+        onResponderTerminationRequest={() => false}
         onResponderGrant={startSliding}
         onResponderMove={updateValue}
         onResponderRelease={completeSliding}

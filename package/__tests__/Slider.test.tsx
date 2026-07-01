@@ -3,6 +3,7 @@ import {fireEvent, render} from '@testing-library/react-native';
 import {Text} from 'react-native';
 
 import Slider, {type MarkerProps} from '../src/Slider';
+import SliderNativeComponentWeb from '../src/SliderNativeComponent.web';
 
 describe('Slider', () => {
   it('maps public value props to native prop names', () => {
@@ -75,10 +76,7 @@ describe('Slider', () => {
     const onAccessibilityAction = jest.fn();
     const event = {nativeEvent: {actionName: 'increment'}};
     const {getByTestId} = render(
-      <Slider
-        testID="slider"
-        onAccessibilityAction={onAccessibilityAction}
-      />,
+      <Slider testID="slider" onAccessibilityAction={onAccessibilityAction} />,
     );
 
     fireEvent(getByTestId('slider'), 'onAccessibilityAction', event);
@@ -131,5 +129,41 @@ describe('Slider', () => {
       }),
       undefined,
     );
+  });
+
+  it('keeps web sliding state independent from controlled value updates', () => {
+    const onValueChange = jest.fn();
+    const onSlidingComplete = jest.fn();
+    const props = {
+      testID: 'slider',
+      minValue: 0,
+      maxValue: 1,
+      onValueChange,
+      onSlidingComplete,
+    };
+    const {getByTestId, rerender} = render(
+      <SliderNativeComponentWeb {...props} value={0} />,
+    );
+
+    fireEvent(getByTestId('slider'), 'onLayout', {
+      nativeEvent: {layout: {width: 100}},
+    });
+    fireEvent(getByTestId('slider'), 'onResponderGrant', {
+      nativeEvent: {locationX: 20},
+    });
+
+    rerender(<SliderNativeComponentWeb {...props} value={0.9} />);
+
+    fireEvent(getByTestId('slider'), 'onResponderMove', {
+      nativeEvent: {locationX: 40},
+    });
+    fireEvent(getByTestId('slider'), 'onResponderRelease');
+
+    expect(onValueChange).toHaveBeenLastCalledWith({
+      nativeEvent: {value: 0.4},
+    });
+    expect(onSlidingComplete).toHaveBeenLastCalledWith({
+      nativeEvent: {value: 0.4},
+    });
   });
 });

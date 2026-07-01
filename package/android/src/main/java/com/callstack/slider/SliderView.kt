@@ -52,6 +52,10 @@ internal class SliderView(reactContext: ThemedReactContext) :
   }
 
   fun setValue(value: Float) {
+    if (isSliding) {
+      return
+    }
+
     sliderValue.value = clampedValue(value)
   }
 

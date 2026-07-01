@@ -318,6 +318,14 @@ class SliderState: ObservableObject {
     }
   }
 
+  func setExternalValue(_ nextValue: Double) {
+    guard !isEditing else {
+      return
+    }
+
+    setValue(nextValue, notify: false)
+  }
+
   func setEditing(_ editing: Bool) {
     guard editing != isEditing else {
       return
@@ -480,7 +488,7 @@ public class SliderView: UIView {
 
   @objc public var value: Double = 0 {
     didSet {
-      state.setValue(value, notify: false)
+      state.setExternalValue(value)
     }
   }
 

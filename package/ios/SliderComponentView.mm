@@ -1,14 +1,9 @@
 #import <React/RCTViewComponentView.h>
 #import <React/RCTBridge+Private.h>
+#import <React/RCTComponent.h>
 #import <React/RCTConversions.h>
 #import <React/RCTImageLoaderProtocol.h>
 #import <react/renderer/imagemanager/RCTImagePrimitivesConversions.h>
-
-#if __has_include("slider-Swift.h")
-#import "slider-Swift.h"
-#elif __has_include("Slider-Swift.h")
-#import "Slider-Swift.h"
-#endif
 
 #import <react/renderer/components/Slider/ComponentDescriptors.h>
 #import <react/renderer/components/Slider/EventEmitters.h>
@@ -16,6 +11,29 @@
 #import <react/renderer/components/Slider/RCTComponentViewHelpers.h>
 
 using namespace facebook::react;
+
+@interface SliderView : UIView
+@property (nonatomic, assign) double minValue;
+@property (nonatomic, assign) double maxValue;
+@property (nonatomic, assign) double step;
+@property (nonatomic, assign) double value;
+@property (nonatomic, assign) double lowerLimit;
+@property (nonatomic, assign) double upperLimit;
+@property (nonatomic, assign) BOOL disabled;
+@property (nonatomic, assign) BOOL inverted;
+@property (nonatomic, assign) BOOL tapToSeek;
+@property (nonatomic, strong) UIColor *minimumTrackTintColor;
+@property (nonatomic, strong) UIColor *maximumTrackTintColor;
+@property (nonatomic, strong) UIColor *thumbTintColor;
+@property (nonatomic, strong) UIImage *thumbImage;
+@property (nonatomic, assign) double thumbSize;
+@property (nonatomic, strong) UIImage *trackImage;
+@property (nonatomic, strong) UIImage *minimumTrackImage;
+@property (nonatomic, strong) UIImage *maximumTrackImage;
+@property (nonatomic, copy) RCTDirectEventBlock onValueChange;
+@property (nonatomic, copy) RCTDirectEventBlock onSlidingStart;
+@property (nonatomic, copy) RCTDirectEventBlock onSlidingComplete;
+@end
 
 @interface SliderComponentView : RCTViewComponentView <RCTSliderViewViewProtocol>
 @end
