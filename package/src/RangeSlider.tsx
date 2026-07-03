@@ -466,6 +466,10 @@ const RangeSliderComponent = (
     onRangeSlidingComplete?.(nextRange, thumbIndex);
   };
 
+  const onResponderTerminate = () => {
+    isSlidingRef.current = false;
+  };
+
   const onAccessibilityActionEvent = (event: AccessibilityActionEvent) => {
     const tenth = (maximumValue - minimumValue) / 10;
     const thumbIndex = activeThumbRef.current;
@@ -535,7 +539,8 @@ const RangeSliderComponent = (
       onResponderGrant={onResponderGrant}
       onResponderMove={onResponderMove}
       onResponderRelease={onResponderRelease}
-      onResponderTerminate={onResponderRelease}
+      onResponderTerminate={onResponderTerminate}
+      onResponderTerminationRequest={() => false}
       pointerEvents={disabled ? 'none' : 'auto'}>
       <View pointerEvents="none" style={maximumTrackStyle} />
       <View
