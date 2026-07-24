@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
   s.homepage     = package["homepage"]
 
-  s.platforms    = { :ios => "16.0" }
+  s.platforms    = { :ios => "15.1" }
   s.source       = { :git => "https://github.com/callstack/react-native-slider.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"

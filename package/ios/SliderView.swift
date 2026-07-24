@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 struct SliderComponent: View {
-  @EnvironmentObject var state: SliderState
+  @ObservedObject var state: SliderState
 
   @State private var value: Double = 0
 
@@ -23,23 +23,17 @@ class SliderState: ObservableObject {
   @Published var step: Double = 1
   @Published var color: Color = .accentColor
   @Published var onValueChange: (Double) -> Void = { _ in }
-}
 
-class SliderView: UIView {
-  private var state: SliderState = SliderState()
-    
-  override init(frame: CGRect) {
-    super.init(frame: frame)
-    let hostingController = UIHostingController(rootView: SliderComponent().environmentObject(state))
-    addSubview(hostingController.view)
+  func setMinValue(_ nextValue: Double) {
+    minValue = nextValue
   }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  func setMaxValue(_ nextValue: Double) {
+    maxValue = nextValue
   }
 
-  override func layoutSubviews() {
-    subviews.first?.frame = self.frame
+  func setStep(_ nextValue: Double) {
+    step = max(nextValue, 0)
   }
 }
 

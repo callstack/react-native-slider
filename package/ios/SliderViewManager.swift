@@ -1,9 +1,8 @@
-
+import UIKit
 
 @objc(SliderViewManager)
 class SliderViewManager: RCTViewManager {
-    
-    override func view() -> (SliderView) {
+    override func view() -> UIView! {
         return SliderView()
     }
     
@@ -11,5 +10,3 @@ class SliderViewManager: RCTViewManager {
         return false
     }
 }
-
-
