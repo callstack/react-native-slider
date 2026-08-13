@@ -3,12 +3,6 @@ import { FC } from 'react';
 import * as ReactNative from 'react-native';
 import { ImageURISource } from 'react-native';
 
-type Constructor<T> = new (...args: any[]) => T;
-
-type SliderReferenceType =
-  | (React.MutableRefObject<SliderRef> & React.LegacyRef<Slider>)
-  | undefined;
-
 export interface SliderPropsAndroid extends ReactNative.ViewProps {
   /**
    * Color of the foreground switch grip.
@@ -197,18 +191,13 @@ export interface SliderProps
    * The number of elements must be the same as `maximumValue`.
    */
   accessibilityIncrements?: Array<string>;
-
-  /**
-   * Reference object.
-   */
-  ref?: SliderReferenceType;
 }
 
 /**
  * A component used to select a single value from a range of values.
  */
-declare class SliderComponent extends React.Component<SliderProps> {}
-declare const SliderBase: Constructor<ReactNative.NativeMethods> &
-  typeof SliderComponent;
-export default class Slider extends SliderBase {}
-export type SliderIOS = Slider;
+declare function Slider(
+  props: SliderProps & {ref?: React.Ref<SliderRef> | undefined},
+): React.ReactNode;
+export default Slider;
+export type SliderIOS = typeof Slider;
