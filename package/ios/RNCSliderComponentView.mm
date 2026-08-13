@@ -274,14 +274,6 @@ using namespace facebook::react;
 }
 
 
-// Legacy-bridge path first: when the bridge is present, RCTImageLoader provides caching,
-// decode-time sizing and custom RCTImageURLLoader schemes. On bridgeless, [RCTBridge currentBridge]
-// may be nil or expose an ImageLoader that cannot load
-// (https://github.com/reactwg/react-native-new-architecture/discussions/31#discussioncomment-2717047),
-// so fall back to fetching the bytes directly with NSURLSession. The fallback covers file://
-// (bundled require() assets) and http(s) (Metro in dev, remote images) and honours custom request
-// headers; it does not support RCTImageURLLoader plugin schemes (e.g. ph://) or ImageLoader's
-// resizing and caching. TODO: replace both paths with the Fabric ImageManager pipeline.
 - (void)loadImageFromImageSource:(ImageSource)source completionBlock:(RNCLoadImageCompletionBlock)completionBlock failureBlock:(RNCLoadImageFailureBlock)failureBlock
 {
     NSString *uri = [[NSString alloc] initWithUTF8String:source.uri.c_str()];
