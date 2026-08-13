@@ -84,7 +84,7 @@ const pageViewPositionSlider = {
 
 const styles = StyleSheet.create({
   slider: {
-    width: '100%',
+    width: '100%' as const,
   },
   pagerViewContainer: {
     flex: 1,
