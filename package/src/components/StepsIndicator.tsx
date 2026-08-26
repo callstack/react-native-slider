@@ -52,7 +52,7 @@ export const StepsIndicator = ({
     };
   }, [sliderWidth]);
 
-  const values = isLTR ? options.reverse() : options;
+  const values = isLTR ? options.slice().reverse() : options;
 
   const renderStepIndicator = useCallback(
     (i: number, index: number) => {
