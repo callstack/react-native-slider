@@ -61,6 +61,7 @@
     "preset": "react-native",
     "verbose": true,
     "modulePathIgnorePatterns": [
+      "/dist/",
       "/e2e/"
     ]
   },

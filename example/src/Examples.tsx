@@ -31,6 +31,28 @@ const SliderExample = (props: SliderProps) => {
   );
 };
 
+const RangeSliderExample = () => {
+  const [values, setValues] = useState<[number, number]>([20, 80]);
+
+  return (
+    <View style={{alignItems: 'center'}}>
+      <Text style={styles.text}>
+        {values[0].toFixed(0)} - {values[1].toFixed(0)}
+      </Text>
+      <Slider
+        range
+        values={values}
+        minimumValue={0}
+        maximumValue={100}
+        minimumRange={5}
+        step={1}
+        style={styles.slider}
+        onValuesChange={nextValues => setValues(nextValues)}
+      />
+    </View>
+  );
+};
+
 const SlidingStartExample = (props: SliderProps) => {
   const [slideStartingValue, setSlideStartingValue] = useState(0);
   const [slideStartingCount, setSlideStartingCount] = useState(0);
@@ -592,6 +614,12 @@ export const examples: Props[] = [
           upperLimit={-20}
         />
       );
+    },
+  },
+  {
+    title: 'Range slider',
+    render() {
+      return <RangeSliderExample />;
     },
   },
   {

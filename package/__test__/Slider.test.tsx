@@ -77,4 +77,92 @@ describe('Slider', () => {
     fireEvent(getByTestId('slider'), 'onResponderTerminationRequest');
     expect(mockedRelease).not.toHaveBeenCalled();
   });
+
+  it('Calls the given onValuesChange when a range thumb is moved', () => {
+    const onValuesChange = jest.fn();
+    const {getByTestId} = render(
+      <Slider
+        testID="slider"
+        range
+        values={[2, 8]}
+        minimumValue={0}
+        maximumValue={10}
+        onValuesChange={onValuesChange}
+      />,
+    );
+    const slider = getByTestId('slider');
+
+    fireEvent(slider, 'onLayout', {nativeEvent: {layout: {width: 120}}});
+    fireEvent(slider, 'onResponderGrant', {nativeEvent: {locationX: 30}});
+    fireEvent(slider, 'onResponderMove', {nativeEvent: {locationX: 50}});
+
+    expect(onValuesChange).toHaveBeenCalledWith([4, 8], 0);
+  });
+
+  it('Calls the given onRangeSlidingComplete when a range thumb is released', () => {
+    const onRangeSlidingComplete = jest.fn();
+    const {getByTestId} = render(
+      <Slider
+        testID="slider"
+        range
+        values={[2, 8]}
+        minimumValue={0}
+        maximumValue={10}
+        onRangeSlidingComplete={onRangeSlidingComplete}
+      />,
+    );
+    const slider = getByTestId('slider');
+
+    fireEvent(slider, 'onLayout', {nativeEvent: {layout: {width: 120}}});
+    fireEvent(slider, 'onResponderGrant', {nativeEvent: {locationX: 90}});
+    fireEvent(slider, 'onResponderRelease', {nativeEvent: {locationX: 80}});
+
+    expect(onRangeSlidingComplete).toHaveBeenCalledWith([2, 7], 1);
+  });
+
+  it('Prevents the range gesture control from being released externally', () => {
+    const onRangeSlidingComplete = jest.fn();
+    const {getByTestId} = render(
+      <Slider
+        testID="slider"
+        range
+        values={[2, 8]}
+        minimumValue={0}
+        maximumValue={10}
+        onRangeSlidingComplete={onRangeSlidingComplete}
+      />,
+    );
+    const slider = getByTestId('slider');
+
+    fireEvent(slider, 'onLayout', {nativeEvent: {layout: {width: 120}}});
+    fireEvent(slider, 'onResponderGrant', {nativeEvent: {locationX: 30}});
+
+    expect(slider.props.onResponderTerminationRequest()).toBe(false);
+
+    fireEvent(slider, 'onResponderTerminate');
+
+    expect(onRangeSlidingComplete).not.toHaveBeenCalled();
+  });
+
+  it('Keeps range thumbs from crossing each other', () => {
+    const onValuesChange = jest.fn();
+    const {getByTestId} = render(
+      <Slider
+        testID="slider"
+        range
+        values={[2, 5]}
+        minimumValue={0}
+        maximumValue={10}
+        minimumRange={1}
+        onValuesChange={onValuesChange}
+      />,
+    );
+    const slider = getByTestId('slider');
+
+    fireEvent(slider, 'onLayout', {nativeEvent: {layout: {width: 120}}});
+    fireEvent(slider, 'onResponderGrant', {nativeEvent: {locationX: 30}});
+    fireEvent(slider, 'onResponderMove', {nativeEvent: {locationX: 100}});
+
+    expect(onValuesChange).toHaveBeenCalledWith([4, 5], 0);
+  });
 });
