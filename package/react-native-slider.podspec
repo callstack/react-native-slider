@@ -10,13 +10,21 @@ Pod::Spec.new do |s|
 
   s.authors      = package['author']
   s.homepage     = package['homepage']
-  s.platforms    = { :ios => "9.0", :visionos => "1.0" }
+  # SwiftUI needs iOS 13; 15.1 is the floor React Native itself supports.
+  s.platforms    = { :ios => "15.1", :visionos => "1.0" }
+  s.swift_version = "5.0"
 
   s.source       = { :git => "https://github.com/callstack/react-native-slider.git", :tag => "v#{s.version}" }
-  s.source_files = "ios/**/*.{h,m,mm}"
+  s.source_files = "ios/**/*.{h,m,mm,swift}"
+  # The Swift sources make this a mixed-language target, so CocoaPods builds a
+  # Clang module out of the public headers. Nothing here is meant to be imported
+  # from outside the pod, and the Fabric headers drag in C++ that cannot live in
+  # an Objective-C module - so keep every header out of the umbrella.
+  s.private_header_files = "ios/**/*.h"
 
   s.subspec "common" do |ss|
     ss.source_files         = "common/cpp/**/*.{cpp,h}"
+    ss.private_header_files = "common/cpp/**/*.h"
     ss.pod_target_xcconfig  = { "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/common/cpp\"" }
   end
 

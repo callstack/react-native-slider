@@ -75,7 +75,7 @@
     "type": "components",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "com.reactnativecommunity.slider"
+      "javaPackageName": "callstack.slider"
     },
     "ios": {
       "componentProvider": {

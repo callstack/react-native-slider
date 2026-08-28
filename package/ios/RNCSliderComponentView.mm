@@ -1,17 +1,20 @@
 #import "RNCSliderComponentView.h"
 
-#import <React/RCTConversions.h>
-
-#import <react/renderer/components/RNCSlider/RNCSliderComponentDescriptor.h>
 #import <react/renderer/components/RNCSlider/EventEmitters.h>
 #import <react/renderer/components/RNCSlider/Props.h>
 #import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
-#import <React/RCTBridge+Private.h>
-#import "RCTImagePrimitivesConversions.h"
-#import <React/RCTImageLoaderProtocol.h>
-#import <React/RCTUtils.h>
+#import <react/renderer/components/RNCSlider/RNCSliderComponentDescriptor.h>
+
 #import "RCTFabricComponentsPlugins.h"
-#import "RNCSlider.h"
+
+// The pod is called `react-native-slider`, so Swift lands in the
+// `react_native_slider` module. Which of the two spellings resolves depends on
+// whether the app links pods as frameworks.
+#if __has_include(<react_native_slider/react_native_slider-Swift.h>)
+#import <react_native_slider/react_native_slider-Swift.h>
+#else
+#import "react_native_slider-Swift.h"
+#endif
 
 using namespace facebook::react;
 
@@ -19,322 +22,93 @@ using namespace facebook::react;
 
 @end
 
-
-@implementation RNCSliderComponentView
-{
-    RNCSlider *slider;
-    UIImage *_image;
-    BOOL _isSliding;
+@implementation RNCSliderComponentView {
+  RNCSliderView *_sliderView;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
-    return concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>();
-}
-
-+ (BOOL)shouldBeRecycled {
-  return NO;
+  return concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>();
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
-    if (self = [super initWithFrame:frame]) {
-        static const auto defaultProps = std::make_shared<const RNCSliderProps>();
-        _props = defaultProps;
-        slider = [[RNCSlider alloc] initWithFrame:self.bounds];
-        [slider addTarget:self action:@selector(sliderValueChanged:)
-         forControlEvents:UIControlEventValueChanged];
-        [slider addTarget:self action:@selector(sliderTouchStart:)
-         forControlEvents:UIControlEventTouchDown];
-        [slider addTarget:self action:@selector(sliderTouchEnd:)
-         forControlEvents:(UIControlEventTouchUpInside |
-                           UIControlEventTouchUpOutside |
-                           UIControlEventTouchCancel)];
+  if (self = [super initWithFrame:frame]) {
+    static const auto defaultProps = std::make_shared<const RNCSliderProps>();
+    _props = defaultProps;
 
-        UITapGestureRecognizer *tapGesturer;
-        tapGesturer = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(tapHandler:)];
-        [tapGesturer setNumberOfTapsRequired: 1];
-        [slider addGestureRecognizer:tapGesturer];
+    _sliderView = [[RNCSliderView alloc] initWithFrame:self.bounds];
+    [self applySliderProps:*defaultProps];
 
-        slider.value = (float)defaultProps->value;
-        self.contentView = slider;
-    }
-    return self;
+    // Installed once and kept across recycles: the emitter it reaches for is
+    // reset by `prepareForRecycle`, so it simply goes quiet until the view is
+    // mounted again.
+    __weak __typeof(self) weakSelf = self;
+    _sliderView.onValueChange = ^(double value) {
+      [weakSelf emitValueChange:value];
+    };
+
+    self.contentView = _sliderView;
+  }
+
+  return self;
 }
 
-- (void)tapHandler:(UITapGestureRecognizer *)gesture {
-    if ([gesture.view class] != [RNCSlider class]) {
-        return;
-    }
-    RNCSlider *slider = (RNCSlider *)gesture.view;
-    slider.isSliding = _isSliding;
-
-    // Ignore this tap if in the middle of a slide.
-    if (_isSliding) {
-        return;
-    }
-
-    if (!slider.tapToSeek) {
-        return;
-    }
-
-    CGPoint touchPoint = [gesture locationInView:slider];
-    float rangeWidth = slider.maximumValue - slider.minimumValue;
-    
-    float sliderPercent;
-    if ([UIView userInterfaceLayoutDirectionForSemanticContentAttribute:slider.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft) {
-        sliderPercent = 1.0 - (touchPoint.x / slider.bounds.size.width);
-    } else {
-        sliderPercent = touchPoint.x / slider.bounds.size.width;
-    }
-
-    slider.lastValue = slider.value;
-    float value = slider.minimumValue + (rangeWidth * sliderPercent);
-
-    if (value < slider.lowerLimit) {
-        value = slider.lowerLimit;
-    } else if (value > slider.upperLimit) {
-        value = slider.upperLimit;
-    }
-
-    [slider setValue:[slider discreteValue:value] animated: YES];
-
-    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-    ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(slider.lastValue)});
-
-    // Trigger onValueChange to address https://github.com/react-native-community/react-native-slider/issues/212
-    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-    ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(slider.value)});
-
-    std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-    ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(slider.value)});
-}
-
-- (void)sliderValueChanged:(RNCSlider *)sender
+- (void)applySliderProps:(const RNCSliderProps &)props
 {
-    [self RNCSendSliderEvent:sender withContinuous:YES isSlidingStart:NO];
+  _sliderView.minimumValue = props.minimumValue;
+  _sliderView.maximumValue = props.maximumValue;
+  _sliderView.value = props.value;
 }
 
-- (void)sliderTouchStart:(RNCSlider *)sender
+- (void)emitValueChange:(double)value
 {
-    [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:YES];
-    _isSliding = YES;
-    sender.isSliding = YES;
+  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  if (!eventEmitter) {
+    return;
+  }
+
+  eventEmitter->onValueChange(RNCSliderEventEmitter::OnValueChange{.value = value});
 }
 
-- (void)sliderTouchEnd:(RNCSlider *)sender
-{
-    [self RNCSendSliderEvent:sender withContinuous:NO isSlidingStart:NO];
-    sender.isSliding = NO;
-    _isSliding = NO;
-}
-
-- (void)RNCSendSliderEvent:(RNCSlider *)sender withContinuous:(BOOL)continuous isSlidingStart:(BOOL)isSlidingStart
-{
-    float value = [sender discreteValue:sender.value];
-
-    if (value < sender.lowerLimit) {
-        value = sender.lowerLimit;
-        [sender setValue:value animated:NO];
-    } else if (value > sender.upperLimit) {
-        value = sender.upperLimit;
-        [sender setValue:value animated:NO];
-    }
-
-    if(!sender.isSliding) {
-        [sender setValue:value animated:NO];
-    }
-
-    if (continuous) {
-        if (sender.lastValue != value)  {
-            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-            ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(value)});
-        }
-    } else {
-        if (!isSlidingStart) {
-            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-            ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(value)});
-        }
-        if (isSlidingStart) {
-            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
-            ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(value)});
-        }
-    }
-
-    sender.lastValue = value;
-}
+#pragma mark - RCTComponentViewProtocol
 
 - (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
 {
-    const auto &oldScreenProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
-    const auto &newScreenProps = *std::static_pointer_cast<const RNCSliderProps>(props);
+  const auto &oldViewProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
+  const auto &newViewProps = *std::static_pointer_cast<const RNCSliderProps>(props);
 
-    if (oldScreenProps.value != newScreenProps.value) {
-        if (!slider.isSliding) {
-            slider.value = newScreenProps.value;
-        }
-    }
-    if (oldScreenProps.disabled != newScreenProps.disabled) {
-        [slider setDisabled: newScreenProps.disabled];
-    }
-    if (oldScreenProps.step != newScreenProps.step) {
-        slider.step = newScreenProps.step;
-    }
-    if (oldScreenProps.inverted != newScreenProps.inverted) {
-        [self setInverted:newScreenProps.inverted];
-    }
-    if (oldScreenProps.maximumValue != newScreenProps.maximumValue) {
-        [slider setMaximumValue:newScreenProps.maximumValue];
-    }
-    if (slider.lowerLimit != newScreenProps.lowerLimit) {
-        if(newScreenProps.lowerLimit > slider.upperLimit){
-            NSLog(@"Invalid configuration: upperLimit < lowerLimit; lowerLimit not set");
-        } else {
-            slider.lowerLimit = newScreenProps.lowerLimit;
-        }
-    }
-    if (slider.upperLimit != newScreenProps.upperLimit) {
-        if(newScreenProps.upperLimit < slider.lowerLimit){
-            NSLog(@"Invalid configuration: upperLimit < lowerLimit; upperLimit not set");
-        } else {
-            slider.upperLimit = newScreenProps.upperLimit;
-        }
-    }
-    if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
-        slider.tapToSeek = newScreenProps.tapToSeek;
-    }
-    if (oldScreenProps.minimumValue != newScreenProps.minimumValue) {
-        [slider setMinimumValue:newScreenProps.minimumValue];
-    }
-    if (oldScreenProps.thumbTintColor != newScreenProps.thumbTintColor) {
-        slider.thumbTintColor = RCTUIColorFromSharedColor(newScreenProps.thumbTintColor);
-    }
-    if (oldScreenProps.thumbSize != newScreenProps.thumbSize) {
-        slider.thumbSize = newScreenProps.thumbSize;
-    }
-    if (oldScreenProps.minimumTrackTintColor != newScreenProps.minimumTrackTintColor) {
-        slider.minimumTrackTintColor = RCTUIColorFromSharedColor(newScreenProps.minimumTrackTintColor);
-    }
-    if (oldScreenProps.maximumTrackTintColor != newScreenProps.maximumTrackTintColor) {
-        slider.maximumTrackTintColor = RCTUIColorFromSharedColor(newScreenProps.maximumTrackTintColor);
-    }
-    if (oldScreenProps.accessibilityUnits != newScreenProps.accessibilityUnits) {
-        NSString *convertedAccessibilityUnits = [NSString stringWithCString:newScreenProps.accessibilityUnits.c_str()
-                                                                   encoding:[NSString defaultCStringEncoding]];
-        slider.accessibilityUnits = convertedAccessibilityUnits;
-    }
-    if (oldScreenProps.accessibilityIncrements != newScreenProps.accessibilityIncrements) {
-        id accessibilityIncrements = [NSMutableArray new];
-        for (auto str : newScreenProps.accessibilityIncrements) {
-            [accessibilityIncrements addObject:[NSString stringWithUTF8String:str.c_str()]];
-        }
-        [slider setAccessibilityIncrements:accessibilityIncrements];
-    }
-    if (oldScreenProps.thumbImage != newScreenProps.thumbImage) {
-        [self loadImageFromImageSource:newScreenProps.thumbImage completionBlock:^(NSError *error, UIImage *image) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self->slider setThumbImage:image];
-            });
-        }
-        failureBlock:^{
-            [self->slider setThumbImage:nil];
-        }];
-    }
-    if (oldScreenProps.trackImage != newScreenProps.trackImage) {
-        [self loadImageFromImageSource:newScreenProps.trackImage completionBlock:^(NSError *error, UIImage *image) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self->slider setTrackImage:image];
-            });
-        }
-        failureBlock:^{
-            [self->slider setTrackImage:nil];
-        }];
-    }
-    if (oldScreenProps.minimumTrackImage != newScreenProps.minimumTrackImage) {
-        [self loadImageFromImageSource:newScreenProps.minimumTrackImage completionBlock:^(NSError *error, UIImage *image) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self->slider setMinimumTrackImage:image];
-            });
-        }
-        failureBlock:^{
-            [self->slider setMinimumTrackImage:nil];
-        }];
-    }
-    if (oldScreenProps.maximumTrackImage != newScreenProps.maximumTrackImage) {
-        [self loadImageFromImageSource:newScreenProps.maximumTrackImage completionBlock:^(NSError *error, UIImage *image) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self->slider setMaximumTrackImage:image];
-            });
-        }
-        failureBlock:^{
-            [self->slider setMaximumTrackImage:nil];
-        }];
-    }
-    [super updateProps:props oldProps:oldProps];
+  if (oldViewProps.minimumValue != newViewProps.minimumValue) {
+    _sliderView.minimumValue = newViewProps.minimumValue;
+  }
+  if (oldViewProps.maximumValue != newViewProps.maximumValue) {
+    _sliderView.maximumValue = newViewProps.maximumValue;
+  }
+  if (oldViewProps.value != newViewProps.value) {
+    _sliderView.value = newViewProps.value;
+  }
+
+  [super updateProps:props oldProps:oldProps];
 }
 
-
-- (void)loadImageFromImageSource:(ImageSource)source completionBlock:(RNCLoadImageCompletionBlock)completionBlock failureBlock:(RNCLoadImageFailureBlock)failureBlock
+- (void)prepareForRecycle
 {
-    NSString *uri = [[NSString alloc] initWithUTF8String:source.uri.c_str()];
-    if (!(BOOL)uri.length) {
-        failureBlock();
-        return;
-    }
+  [super prepareForRecycle];
 
-    NSURLRequest *request = NSURLRequestFromImageSource(source);
-    CGFloat scale = source.scale > 0 ? source.scale : RCTScreenScale();
+  // `updateProps:` diffs against `_props`, so the props and the slider have to
+  // be walked back to their defaults together.
+  static const auto defaultProps = std::make_shared<const RNCSliderProps>();
+  _props = defaultProps;
 
-    void (^loadDirectly)(void) = ^{
-        [[[NSURLSession sharedSession] dataTaskWithRequest:request
-                                         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            UIImage *image = data ? [UIImage imageWithData:data scale:scale] : nil;
-            // The session queue is a background queue; callers touch UIKit, so hop to main.
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (image) {
-                    completionBlock(nil, image);
-                } else {
-                    failureBlock();
-                }
-            });
-        }] resume];
-    };
-
-    id<RCTImageLoaderProtocol> imageLoader = [[RCTBridge currentBridge] moduleForName:@"ImageLoader"];
-    if (!imageLoader) {
-        loadDirectly();
-        return;
-    }
-
-    [imageLoader
-    loadImageWithURLRequest:request
-    size:CGSizeMake(source.size.width, source.size.height)
-    scale:source.scale
-    clipped:NO
-    resizeMode:RCTResizeModeCover
-    progressBlock:nil
-    partialLoadBlock:nil
-    completionBlock:^(NSError *error, UIImage *image) {
-        if (image) {
-            completionBlock(nil, image);
-        } else {
-            loadDirectly();
-        }
-    }];
-}
-
-- (void)setInverted:(BOOL)inverted
-{
-    if (inverted) {
-        self.transform = CGAffineTransformMakeScale(-1, 1);
-    } else {
-        self.transform = CGAffineTransformMakeScale(1, 1);
-    }
+  // A view retired mid-drag still believes it owns the thumb, and would drop the
+  // value pushed right after.
+  [_sliderView cancelSliding];
+  [self applySliderProps:*defaultProps];
 }
 
 @end
 
 Class<RCTComponentViewProtocol> RNCSliderCls(void)
 {
-    return RNCSliderComponentView.class;
+  return RNCSliderComponentView.class;
 }
