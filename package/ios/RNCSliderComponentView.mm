@@ -382,11 +382,6 @@ using namespace facebook::react;
 
 - (float)calculateSliderValueFromLocation:(CGPoint)point {
     CGFloat sliderWidth = slider.bounds.size.width;
-    
-    if (sliderWidth <= 0) {
-        return slider.value;
-    }
-    
     CGFloat percentage = point.x / sliderWidth;
     percentage = MIN(1.0, MAX(0.0, percentage));
     
