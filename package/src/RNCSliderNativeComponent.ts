@@ -20,7 +20,6 @@ export interface NativeProps extends ViewProps {
   inverted?: WithDefault<boolean, false>;
   vertical?: WithDefault<boolean, false>;
   tapToSeek?: WithDefault<boolean, false>;
-  swipeToSeek?: WithDefault<boolean, false>;
   maximumTrackImage?: ImageSource;
   maximumTrackTintColor?: ColorValue;
   maximumValue?: Double;
