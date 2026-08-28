@@ -25,7 +25,6 @@ using namespace facebook::react;
     RNCSlider *slider;
     UIImage *_image;
     BOOL _isSliding;
-    BOOL _swipeGestureEnabled;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -56,6 +55,10 @@ using namespace facebook::react;
         tapGesturer = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(tapHandler:)];
         [tapGesturer setNumberOfTapsRequired: 1];
         [slider addGestureRecognizer:tapGesturer];
+
+        UIPanGestureRecognizer *panGesturer;
+        panGesturer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panHandler:)];
+        [slider addGestureRecognizer:panGesturer];
 
         slider.value = (float)defaultProps->value;
         self.contentView = slider;
@@ -204,9 +207,6 @@ using namespace facebook::react;
     if (oldScreenProps.tapToSeek != newScreenProps.tapToSeek) {
         slider.tapToSeek = newScreenProps.tapToSeek;
     }
-    if (oldScreenProps.swipeToSeek != newScreenProps.swipeToSeek) {
-        [self setSwipeToSeek:newScreenProps.swipeToSeek];
-    }
     if (oldScreenProps.minimumValue != newScreenProps.minimumValue) {
         [slider setMinimumValue:newScreenProps.minimumValue];
     }
@@ -337,16 +337,6 @@ using namespace facebook::react;
 }
 
 #pragma mark - Swipe to seek
-
-- (void)setSwipeToSeek:(BOOL)swipeToSeek
-{
-    if (swipeToSeek && !_swipeGestureEnabled) {
-        UIPanGestureRecognizer *panGesturer;
-        panGesturer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panHandler:)];
-        [slider addGestureRecognizer:panGesturer];
-        _swipeGestureEnabled = YES;
-    }
-}
 
 - (void)panHandler:(UIPanGestureRecognizer *)gesture {
     CGPoint location = [gesture locationInView:slider];
