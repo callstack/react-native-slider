@@ -355,8 +355,7 @@ using namespace facebook::react;
         }
             
         case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateCancelled:
-        case UIGestureRecognizerStateFailed: {
+        case UIGestureRecognizerStateCancelled: {
             std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
             ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(slider.value)});
             break;
