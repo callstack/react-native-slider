@@ -1,44 +1,35 @@
-import type {ColorValue, HostComponent, ViewProps} from 'react-native';
-import {ImageSource, codegenNativeComponent} from 'react-native';
+import type {HostComponent, ViewProps} from 'react-native';
+import {codegenNativeComponent} from 'react-native';
 import type {
-  Float,
-  WithDefault,
-  DirectEventHandler,
-  BubblingEventHandler,
   Double,
+  DirectEventHandler,
+  WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
-type Event = Readonly<{
-  value: Float;
-  fromUser?: boolean;
+type SliderValueChangeEvent = Readonly<{
+  value: Double;
 }>;
 
 export interface NativeProps extends ViewProps {
-  accessibilityUnits?: string;
-  accessibilityIncrements?: ReadonlyArray<string>;
-  disabled?: WithDefault<boolean, false>;
-  inverted?: WithDefault<boolean, false>;
-  vertical?: WithDefault<boolean, false>;
-  tapToSeek?: WithDefault<boolean, false>;
-  maximumTrackImage?: ImageSource;
-  maximumTrackTintColor?: ColorValue;
-  maximumValue?: Double;
-  minimumTrackImage?: ImageSource;
-  minimumTrackTintColor?: ColorValue;
-  minimumValue?: Double;
-  onChange?: BubblingEventHandler<Event>;
-  onRNCSliderSlidingStart?: DirectEventHandler<Event>;
-  onRNCSliderSlidingComplete?: DirectEventHandler<Event>;
-  onRNCSliderValueChange?: BubblingEventHandler<Event>;
-  step?: Double;
-  testID?: string;
-  thumbImage?: ImageSource;
-  thumbTintColor?: ColorValue;
-  thumbSize?: Float;
-  trackImage?: ImageSource;
-  value?: Float;
-  lowerLimit?: Float;
-  upperLimit?: Float;
+  /**
+   * Lower bound of the range the slider can select from.
+   */
+  minimumValue?: WithDefault<Double, 0>;
+
+  /**
+   * Upper bound of the range the slider can select from.
+   */
+  maximumValue?: WithDefault<Double, 1>;
+
+  /**
+   * Position of the thumb, expressed in the slider's own range.
+   */
+  value?: WithDefault<Double, 0>;
+
+  /**
+   * Emitted continuously while the user drags the thumb.
+   */
+  onValueChange?: DirectEventHandler<SliderValueChangeEvent>;
 }
 
 export default codegenNativeComponent<NativeProps>('RNCSlider', {
