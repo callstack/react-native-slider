@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {examples, Props as ExamplesTabProperties} from './Examples';
 import {propsExamples, Props as PropsTabProperties} from './Props';
-import PagerView from 'react-native-pager-view';
+import PagerView, {PagerViewOnPageSelectedEvent} from 'react-native-pager-view';
 import Slider from '@react-native-community/slider';
 
 const App = () => {
@@ -62,7 +62,7 @@ const App = () => {
       <PagerView
         initialPage={0}
         style={styles.pagerViewContainer}
-        onPageSelected={e => {
+        onPageSelected={(e: PagerViewOnPageSelectedEvent) => {
           setCurrentPage(e.nativeEvent.position);
         }}>
         {renderExampleTab(examples, true)}
@@ -84,7 +84,7 @@ const pageViewPositionSlider = {
 
 const styles = StyleSheet.create({
   slider: {
-    width: '100%',
+    width: '100%' as const,
   },
   pagerViewContainer: {
     flex: 1,

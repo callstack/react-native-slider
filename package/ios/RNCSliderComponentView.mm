@@ -9,6 +9,7 @@
 #import <React/RCTBridge+Private.h>
 #import "RCTImagePrimitivesConversions.h"
 #import <React/RCTImageLoaderProtocol.h>
+#import <React/RCTUtils.h>
 #import "RCTFabricComponentsPlugins.h"
 #import "RNCSlider.h"
 
@@ -212,6 +213,9 @@ using namespace facebook::react;
     if (oldScreenProps.thumbTintColor != newScreenProps.thumbTintColor) {
         slider.thumbTintColor = RCTUIColorFromSharedColor(newScreenProps.thumbTintColor);
     }
+    if (oldScreenProps.thumbSize != newScreenProps.thumbSize) {
+        slider.thumbSize = newScreenProps.thumbSize;
+    }
     if (oldScreenProps.minimumTrackTintColor != newScreenProps.minimumTrackTintColor) {
         slider.minimumTrackTintColor = RCTUIColorFromSharedColor(newScreenProps.minimumTrackTintColor);
     }
@@ -274,23 +278,53 @@ using namespace facebook::react;
 }
 
 
-// TODO temporarily using bridge, workaround for https://github.com/reactwg/react-native-new-architecture/discussions/31#discussioncomment-2717047, rewrite when Meta comes with a solution.
 - (void)loadImageFromImageSource:(ImageSource)source completionBlock:(RNCLoadImageCompletionBlock)completionBlock failureBlock:(RNCLoadImageFailureBlock)failureBlock
 {
     NSString *uri = [[NSString alloc] initWithUTF8String:source.uri.c_str()];
-    if ((BOOL)uri.length) {
-        [[[RCTBridge currentBridge] moduleForName:@"ImageLoader"]
-        loadImageWithURLRequest:NSURLRequestFromImageSource(source)
-        size:CGSizeMake(source.size.width, source.size.height)
-        scale:source.scale
-        clipped:NO
-        resizeMode:RCTResizeModeCover
-        progressBlock:nil
-        partialLoadBlock:nil
-        completionBlock:completionBlock];
-    } else {
+    if (!(BOOL)uri.length) {
         failureBlock();
+        return;
     }
+
+    NSURLRequest *request = NSURLRequestFromImageSource(source);
+    CGFloat scale = source.scale > 0 ? source.scale : RCTScreenScale();
+
+    void (^loadDirectly)(void) = ^{
+        [[[NSURLSession sharedSession] dataTaskWithRequest:request
+                                         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+            UIImage *image = data ? [UIImage imageWithData:data scale:scale] : nil;
+            // The session queue is a background queue; callers touch UIKit, so hop to main.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (image) {
+                    completionBlock(nil, image);
+                } else {
+                    failureBlock();
+                }
+            });
+        }] resume];
+    };
+
+    id<RCTImageLoaderProtocol> imageLoader = [[RCTBridge currentBridge] moduleForName:@"ImageLoader"];
+    if (!imageLoader) {
+        loadDirectly();
+        return;
+    }
+
+    [imageLoader
+    loadImageWithURLRequest:request
+    size:CGSizeMake(source.size.width, source.size.height)
+    scale:source.scale
+    clipped:NO
+    resizeMode:RCTResizeModeCover
+    progressBlock:nil
+    partialLoadBlock:nil
+    completionBlock:^(NSError *error, UIImage *image) {
+        if (image) {
+            completionBlock(nil, image);
+        } else {
+            loadDirectly();
+        }
+    }];
 }
 
 - (void)setInverted:(BOOL)inverted
