@@ -56,6 +56,10 @@ using namespace facebook::react;
         [tapGesturer setNumberOfTapsRequired: 1];
         [slider addGestureRecognizer:tapGesturer];
 
+        UIPanGestureRecognizer *panGesturer;
+        panGesturer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panHandler:)];
+        [slider addGestureRecognizer:panGesturer];
+
         slider.value = (float)defaultProps->value;
         self.contentView = slider;
     }
@@ -330,6 +334,61 @@ using namespace facebook::react;
     } else {
         self.transform = CGAffineTransformMakeScale(1, 1);
     }
+}
+
+#pragma mark - Swipe to seek
+
+- (void)panHandler:(UIPanGestureRecognizer *)gesture {
+    CGPoint location = [gesture locationInView:slider];
+    
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan: {
+            [self updateSliderToLocation:location];
+            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+            ->onRNCSliderSlidingStart(RNCSliderEventEmitter::OnRNCSliderSlidingStart{.value = static_cast<Float>(slider.lastValue)});
+            break;
+        }
+            
+        case UIGestureRecognizerStateChanged: {
+            [self updateSliderToLocation:location];
+            break;
+        }
+            
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateCancelled: {
+            std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+            ->onRNCSliderSlidingComplete(RNCSliderEventEmitter::OnRNCSliderSlidingComplete{.value = static_cast<Float>(slider.value)});
+            break;
+        }
+            
+        default:
+            break;
+    }
+}
+
+- (void)updateSliderToLocation:(CGPoint)location {
+    float newValue = [self calculateSliderValueFromLocation:location];
+    float discreteValue = [slider discreteValue:newValue];
+    
+    [slider setValue:newValue animated:NO];
+    
+    if (discreteValue != slider.lastValue) {
+        std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
+        ->onRNCSliderValueChange(RNCSliderEventEmitter::OnRNCSliderValueChange{.value = static_cast<Float>(slider.value)});
+    }
+    
+    slider.lastValue = discreteValue;
+}
+
+- (float)calculateSliderValueFromLocation:(CGPoint)point {
+    CGFloat sliderWidth = slider.bounds.size.width;
+    CGFloat percentage = point.x / sliderWidth;
+    percentage = MIN(1.0, MAX(0.0, percentage));
+    
+    CGFloat range = slider.maximumValue - slider.minimumValue;
+    float newValue = slider.minimumValue + (percentage * range);
+    
+    return newValue;
 }
 
 @end
