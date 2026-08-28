@@ -342,7 +342,6 @@ using namespace facebook::react;
     CGPoint location = [gesture locationInView:slider];
     
     switch (gesture.state) {
-        
         case UIGestureRecognizerStateBegan: {
             [self updateSliderToLocation:location];
             std::dynamic_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter)
