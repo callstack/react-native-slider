@@ -1,52 +1,65 @@
-
 buildscript {
+  ext.safeExtGet = { name, fallback ->
+    rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeSlider_' + name] ?: fallback)
+  }
+
+  ext.kotlinVersion = safeExtGet('kotlinVersion', '2.2.0')
+
   repositories {
     mavenCentral()
     google()
   }
 
   dependencies {
-    classpath("com.android.tools.build:gradle:7.1.1")
+    classpath("com.android.tools.build:gradle:8.6.0")
     classpath("com.facebook.react:react-native-gradle-plugin")
-    classpath("de.undercouch:gradle-download-task:5.0.1")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    // Bundled with Kotlin 2.x - this is what turns @Composable into Compose code.
+    classpath("org.jetbrains.kotlin:compose-compiler-gradle-plugin:$kotlinVersion")
   }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.facebook.react'
 
-def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ReactNativeSlider_' + name]
+def getExtOrDefault(name, fallback) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeSlider_' + name] ?: fallback)
 }
 
-def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeSlider_' + name]).toInteger()
+def getExtOrIntegerDefault(name, fallback) {
+  return getExtOrDefault(name, fallback).toString().toInteger()
 }
 
 android {
+  namespace "callstack.slider"
 
-  def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
-  // Check AGP version for backward compatibility w/react-native versions still on gradle plugin 6
-  def major = agpVersion[0].toInteger()
-  def minor = agpVersion[1].toInteger()
-  if ((major == 7 && minor >= 3) || major >= 8) {
-    namespace "com.reactnativecommunity.slider"
-    buildFeatures {
-      buildConfig true
-    }
-  }
-
-  compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
-  buildToolsVersion getExtOrDefault('buildToolsVersion')
+  compileSdkVersion getExtOrIntegerDefault('compileSdkVersion', 35)
+  buildToolsVersion getExtOrDefault('buildToolsVersion', '35.0.0')
 
   defaultConfig {
-    minSdkVersion getExtOrIntegerDefault('minSdkVersion')
-    targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
+    minSdkVersion getExtOrIntegerDefault('minSdkVersion', 24)
+    targetSdkVersion getExtOrIntegerDefault('targetSdkVersion', 35)
+  }
+
+  buildFeatures {
+    buildConfig true
+    compose true
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = '17'
   }
 
   sourceSets {
     main {
-      java.srcDirs += ['src', "${project.buildDir}/generated/source/codegen/java"]
+      java.srcDirs += ["${project.buildDir}/generated/source/codegen/java"]
     }
   }
 }
@@ -59,5 +72,10 @@ repositories {
 dependencies {
   //noinspection GradleDynamicVersion
   api 'com.facebook.react:react-native:+'
-}
 
+  def composeBom = platform("androidx.compose:compose-bom:${getExtOrDefault('composeBomVersion', '2024.09.00')}")
+  implementation composeBom
+  implementation 'androidx.compose.runtime:runtime'
+  implementation 'androidx.compose.ui:ui'
+  implementation 'androidx.compose.material3:material3'
+}
