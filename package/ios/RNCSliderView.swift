@@ -49,11 +49,7 @@ struct RNCSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
   var body: some View {
-    if model.ranged {
-      RNCRangedSliderContent(model: model)
-    } else {
-      RNCSingleSliderContent(model: model)
-    }
+    RNCRangedSliderContent(model: model)
   }
 }
 
@@ -98,10 +94,13 @@ struct RNCRangedSliderContent: View {
       let diameter = min(Self.thumbDiameter, geometry.size.height)
       // The span the centre of a thumb moves across. Both thumbs stay fully
       // inside the view, so it is short of the width by one thumb.
-      let travel = max(geometry.size.width - diameter, 0)
+      let travel = max(geometry.size.width - (model.ranged ? diameter : 0), 0)
 
       let leftOffset = offset(of: model.valueLeft, in: range, travel: travel)
       let rightOffset = offset(of: model.valueRight, in: range, travel: travel)
+
+      let trackFillWidth = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
+      let trackFillStartPoint = model.ranged ? min(leftOffset, rightOffset) + diameter / 2 : 0
 
       ZStack(alignment: .leading) {
         Capsule()
@@ -112,8 +111,8 @@ struct RNCRangedSliderContent: View {
         // a thumb. `max` keeps it from inverting on values crossed by JS.
         Capsule()
           .fill(Color.accentColor)
-          .frame(width: max(rightOffset - leftOffset, 0), height: Self.trackHeight)
-          .offset(x: min(leftOffset, rightOffset) + diameter / 2)
+          .frame(width: trackFillWidth, height: Self.trackHeight)
+          .offset(x: trackFillStartPoint)
 
         thumb(.left, diameter: diameter, offset: leftOffset, range: range, travel: travel)
           // Both thumbs pinned to the upper bound overlap exactly, and the right
@@ -121,7 +120,9 @@ struct RNCRangedSliderContent: View {
           // or the pair is stuck there.
           .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
 
-        thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
+        if model.ranged {
+          thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
+        }
       }
       .frame(width: geometry.size.width, height: geometry.size.height)
     }
