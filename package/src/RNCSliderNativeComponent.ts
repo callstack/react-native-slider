@@ -27,9 +27,39 @@ export interface NativeProps extends ViewProps {
   value?: WithDefault<Double, 0>;
 
   /**
+   * Whether the slider selects a span of its range with two thumbs, rather
+   * than a single value with one.
+   */
+  ranged?: WithDefault<boolean, false>;
+
+  /**
+   * Position of the thumb bounding the selected span from below, expressed in
+   * the slider's own range. Only used by a ranged slider.
+   */
+  valueLeft?: WithDefault<Double, 0>;
+
+  /**
+   * Position of the thumb bounding the selected span from above, expressed in
+   * the slider's own range. Only used by a ranged slider.
+   */
+  valueRight?: WithDefault<Double, 1>;
+
+  /**
    * Emitted continuously while the user drags the thumb.
    */
   onValueChange?: DirectEventHandler<SliderValueChangeEvent>;
+
+  /**
+   * Emitted continuously while the user drags the lower thumb of a ranged
+   * slider.
+   */
+  onLeftValueChange?: DirectEventHandler<SliderValueChangeEvent>;
+
+  /**
+   * Emitted continuously while the user drags the upper thumb of a ranged
+   * slider.
+   */
+  onRightValueChange?: DirectEventHandler<SliderValueChangeEvent>;
 }
 
 export default codegenNativeComponent<NativeProps>('RNCSlider', {

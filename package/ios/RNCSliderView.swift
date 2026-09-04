@@ -11,14 +11,32 @@ final class RNCSliderModel: ObservableObject {
   @Published var minimumValue: Double = 0
   @Published var maximumValue: Double = 1
   @Published var value: Double = 0
+  @Published var ranged: Bool = false
+  @Published var valueLeft: Double = 0
+  @Published var valueRight: Double = 1
 
   /// While the user drags, the thumb position is owned by this view. Value
   /// updates coming from JS in the meantime would fight the gesture, so they are
   /// ignored - the slider is uncontrolled for the duration of the drag.
   var isSliding = false
 
+  /// The value a ranged thumb had when the drag in progress began, or `nil` when
+  /// that thumb is not being dragged - which is also how the ranged slider knows
+  /// to ignore values pushed from JS, the way `isSliding` does for the single
+  /// thumb.
+  ///
+  /// A drag is tracked by how far it has travelled rather than by where the
+  /// finger is, so grabbing a thumb off-centre does not snap it under the finger.
+  var leftDragOrigin: Double?
+  var rightDragOrigin: Double?
+
   /// Invoked continuously while the user drags the thumb.
   var onValueChange: ((Double) -> Void)?
+
+  /// Invoked continuously while the user drags the respective thumb of a ranged
+  /// slider.
+  var onLeftValueChange: ((Double) -> Void)?
+  var onRightValueChange: ((Double) -> Void)?
 
   /// SwiftUI traps on an empty or descending range. Props arrive one at a time,
   /// so a momentarily inverted range is expected rather than exceptional.
@@ -28,6 +46,18 @@ final class RNCSliderModel: ObservableObject {
 }
 
 struct RNCSliderContent: View {
+  @ObservedObject var model: RNCSliderModel
+
+  var body: some View {
+    if model.ranged {
+      RNCRangedSliderContent(model: model)
+    } else {
+      RNCSingleSliderContent(model: model)
+    }
+  }
+}
+
+struct RNCSingleSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
   var body: some View {
@@ -45,6 +75,190 @@ struct RNCSliderContent: View {
       onEditingChanged: { isEditing in model.isSliding = isEditing }
     )
   }
+}
+
+/// SwiftUI has no two-thumb slider, so this one is drawn here: a track, the
+/// selected span, and a thumb at each end of it. The shape follows `Slider` -
+/// a capsule track with the selected part tinted, and a white circular thumb -
+/// so that a ranged slider does not look foreign next to a plain one.
+struct RNCRangedSliderContent: View {
+  @ObservedObject var model: RNCSliderModel
+
+  /// Which end of the range a thumb drags.
+  private enum Thumb {
+    case left
+    case right
+  }
+
+  var body: some View {
+    GeometryReader { geometry in
+      let range = model.range
+      // A thumb is never taller than the slider itself: JS decides the height,
+      // and a thumb spilling out of it would draw over its neighbours.
+      let diameter = min(Self.thumbDiameter, geometry.size.height)
+      // The span the centre of a thumb moves across. Both thumbs stay fully
+      // inside the view, so it is short of the width by one thumb.
+      let travel = max(geometry.size.width - diameter, 0)
+
+      let leftOffset = offset(of: model.valueLeft, in: range, travel: travel)
+      let rightOffset = offset(of: model.valueRight, in: range, travel: travel)
+
+      ZStack(alignment: .leading) {
+        Capsule()
+          .fill(Self.trackColor)
+          .frame(height: Self.trackHeight)
+
+        // Drawn between the two thumb centres, which is why it is inset by half
+        // a thumb. `max` keeps it from inverting on values crossed by JS.
+        Capsule()
+          .fill(Color.accentColor)
+          .frame(width: max(rightOffset - leftOffset, 0), height: Self.trackHeight)
+          .offset(x: min(leftOffset, rightOffset) + diameter / 2)
+
+        thumb(.left, diameter: diameter, offset: leftOffset, range: range, travel: travel)
+          // Both thumbs pinned to the upper bound overlap exactly, and the right
+          // one has nowhere left to go - so the left one has to take the touches
+          // or the pair is stuck there.
+          .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
+
+        thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
+      }
+      .frame(width: geometry.size.width, height: geometry.size.height)
+    }
+  }
+
+  private func thumb(
+    _ thumb: Thumb,
+    diameter: CGFloat,
+    offset: CGFloat,
+    range: ClosedRange<Double>,
+    travel: CGFloat
+  ) -> some View {
+    Circle()
+      .fill(Color.white)
+      .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+      .frame(width: diameter, height: diameter)
+      // A thumb is a small thing to grab, and the two of them can end up right
+      // next to each other, so the area that answers to a touch is padded out
+      // to the 44pt Apple asks for. The padding is then shifted back off the
+      // offset, leaving the circle itself where the value puts it.
+      .padding(Self.thumbTouchSlop)
+      .contentShape(Rectangle())
+      .offset(x: offset - Self.thumbTouchSlop)
+      .gesture(
+        DragGesture(minimumDistance: 0)
+          .onChanged { gesture in
+            let origin = dragOrigin(of: thumb) ?? value(of: thumb)
+            setDragOrigin(origin, of: thumb)
+
+            let travelled = travel > 0
+              ? Double(gesture.translation.width / travel) * span(of: range)
+              : 0
+            set(origin + travelled, of: thumb, in: range)
+          }
+          .onEnded { _ in setDragOrigin(nil, of: thumb) }
+      )
+      // Drawn rather than built from a UIKit control, so VoiceOver has to be
+      // told what this is by hand. The 10% step matches `UISlider`.
+      .accessibilityElement()
+      .accessibilityValue(Text(percentage(of: value(of: thumb), in: range)))
+      .accessibilityAdjustableAction { direction in
+        let step = span(of: range) / 10
+        switch direction {
+        case .increment:
+          set(value(of: thumb) + step, of: thumb, in: range)
+        case .decrement:
+          set(value(of: thumb) - step, of: thumb, in: range)
+        @unknown default:
+          break
+        }
+      }
+  }
+
+  // MARK: - Values
+
+  private func value(of thumb: Thumb) -> Double {
+    switch thumb {
+    case .left: return model.valueLeft
+    case .right: return model.valueRight
+    }
+  }
+
+  /// Moves one thumb, keeping it inside the range and on its own side of the
+  /// other thumb, and reports it to JS. The two thumbs cannot swap places.
+  private func set(_ newValue: Double, of thumb: Thumb, in range: ClosedRange<Double>) {
+    switch thumb {
+    case .left:
+      let clamped = newValue.clamped(
+        to: range.lowerBound...model.valueRight.clamped(to: range)
+      )
+      guard clamped != model.valueLeft else { return }
+      model.valueLeft = clamped
+      model.onLeftValueChange?(clamped)
+    case .right:
+      let clamped = newValue.clamped(
+        to: model.valueLeft.clamped(to: range)...range.upperBound
+      )
+      guard clamped != model.valueRight else { return }
+      model.valueRight = clamped
+      model.onRightValueChange?(clamped)
+    }
+  }
+
+  private func dragOrigin(of thumb: Thumb) -> Double? {
+    switch thumb {
+    case .left: return model.leftDragOrigin
+    case .right: return model.rightDragOrigin
+    }
+  }
+
+  private func setDragOrigin(_ origin: Double?, of thumb: Thumb) {
+    switch thumb {
+    case .left: model.leftDragOrigin = origin
+    case .right: model.rightDragOrigin = origin
+    }
+  }
+
+  // MARK: - Geometry
+
+  private func span(of range: ClosedRange<Double>) -> Double {
+    range.upperBound - range.lowerBound
+  }
+
+  /// Distance from the leading edge of the view to the leading edge of a thumb
+  /// sitting at `value`.
+  private func offset(
+    of value: Double,
+    in range: ClosedRange<Double>,
+    travel: CGFloat
+  ) -> CGFloat {
+    CGFloat(fraction(of: value, in: range)) * travel
+  }
+
+  private func fraction(of value: Double, in range: ClosedRange<Double>) -> Double {
+    let span = span(of: range)
+    guard span > 0 else { return 0 }
+
+    return ((value - range.lowerBound) / span).clamped(to: 0...1)
+  }
+
+  private func percentage(of value: Double, in range: ClosedRange<Double>) -> String {
+    NumberFormatter.localizedString(
+      from: NSNumber(value: fraction(of: value, in: range)),
+      number: .percent
+    )
+  }
+
+  /// Matches the thumb `UISlider` draws.
+  private static let thumbDiameter: CGFloat = 28
+
+  /// Grown around the thumb on every side, to reach 44pt across.
+  private static let thumbTouchSlop: CGFloat = 8
+
+  private static let trackHeight: CGFloat = 4
+
+  /// What `Slider` leaves the unselected part of its track looking like.
+  private static let trackColor = Color(uiColor: .systemFill)
 }
 
 /// Hosts the SwiftUI slider inside the UIKit view hierarchy Fabric mounts.
@@ -79,9 +293,45 @@ public final class RNCSliderView: UIView {
     }
   }
 
+  /// Whether the slider selects a span of the range with two thumbs, rather
+  /// than a single value with one. `value` and `valueLeft`/`valueRight` belong
+  /// to the two shapes respectively, and the unused pair is simply not drawn.
+  @objc public var ranged: Bool {
+    get { model.ranged }
+    set { model.ranged = newValue }
+  }
+
+  /// Setting either of these while the matching thumb is being dragged is a
+  /// no-op - see `RNCSliderModel.leftDragOrigin`.
+  @objc public var valueLeft: Double {
+    get { model.valueLeft }
+    set {
+      guard model.leftDragOrigin == nil else { return }
+      model.valueLeft = newValue
+    }
+  }
+
+  @objc public var valueRight: Double {
+    get { model.valueRight }
+    set {
+      guard model.rightDragOrigin == nil else { return }
+      model.valueRight = newValue
+    }
+  }
+
   @objc public var onValueChange: ((Double) -> Void)? {
     get { model.onValueChange }
     set { model.onValueChange = newValue }
+  }
+
+  @objc public var onLeftValueChange: ((Double) -> Void)? {
+    get { model.onLeftValueChange }
+    set { model.onLeftValueChange = newValue }
+  }
+
+  @objc public var onRightValueChange: ((Double) -> Void)? {
+    get { model.onRightValueChange }
+    set { model.onRightValueChange = newValue }
   }
 
   public override init(frame: CGRect) {
@@ -113,9 +363,13 @@ public final class RNCSliderView: UIView {
   /// `Slider` has no width of its own to report, and flexbox is what actually
   /// stretches it.
   ///
+  /// A ranged slider is deliberately measured the same way, from the single
+  /// thumb: it is laid out inside whatever height it is given, and taking the
+  /// platform's own slider height keeps the two the same size.
+  ///
   /// Must be called on the main thread.
   @objc public static func measuredIntrinsicSize() -> CGSize {
-    let controller = UIHostingController(rootView: RNCSliderContent(model: RNCSliderModel()))
+    let controller = UIHostingController(rootView: RNCSingleSliderContent(model: RNCSliderModel()))
     let fitted = controller.sizeThatFits(
       in: CGSize(width: intrinsicWidth, height: .greatestFiniteMagnitude)
     )
@@ -138,6 +392,8 @@ public final class RNCSliderView: UIView {
   /// retired mid-drag would otherwise stay deaf to updates for good.
   @objc public func cancelSliding() {
     model.isSliding = false
+    model.leftDragOrigin = nil
+    model.rightDragOrigin = nil
   }
 
   public override func layoutSubviews() {

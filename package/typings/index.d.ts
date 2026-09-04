@@ -19,17 +19,59 @@ export interface SliderProps extends ReactNative.ViewProps {
    *
    * This is not a controlled component, you don't need to update the
    * value while the user is dragging.
+   *
+   * Ignored by a ranged slider, which is positioned by `valueLeft` and
+   * `valueRight` instead.
    */
   value?: number;
+
+  /**
+   * Whether the slider selects a span of its range with two thumbs, rather
+   * than a single value with one. Default value is false.
+   *
+   * Supported on iOS.
+   */
+  ranged?: boolean;
+
+  /**
+   * Value of the thumb bounding the selected span from below. Defaults to
+   * `minimumValue`.
+   *
+   * Behaves like `value`, and is only used by a ranged slider. The thumb
+   * cannot be dragged past `valueRight`.
+   */
+  valueLeft?: number;
+
+  /**
+   * Value of the thumb bounding the selected span from above. Defaults to
+   * `maximumValue`.
+   *
+   * Behaves like `value`, and is only used by a ranged slider. The thumb
+   * cannot be dragged past `valueLeft`.
+   */
+  valueRight?: number;
 
   /**
    * Callback continuously called while the user is dragging the slider.
    */
   onValueChange?: (value: number) => void;
+
+  /**
+   * Callback continuously called while the user is dragging the lower thumb
+   * of a ranged slider.
+   */
+  onLeftValueChange?: (value: number) => void;
+
+  /**
+   * Callback continuously called while the user is dragging the upper thumb
+   * of a ranged slider.
+   */
+  onRightValueChange?: (value: number) => void;
 }
 
 /**
- * A component used to select a single value from a range of values.
+ * A component used to select a single value, or a span of values, from a range
+ * of values.
  */
 declare function Slider(props: SliderProps): React.ReactNode;
 export default Slider;

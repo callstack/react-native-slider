@@ -47,6 +47,12 @@ using namespace facebook::react;
     _sliderView.onValueChange = ^(double value) {
       [weakSelf emitValueChange:value];
     };
+    _sliderView.onLeftValueChange = ^(double value) {
+      [weakSelf emitLeftValueChange:value];
+    };
+    _sliderView.onRightValueChange = ^(double value) {
+      [weakSelf emitRightValueChange:value];
+    };
 
     self.contentView = _sliderView;
   }
@@ -59,6 +65,9 @@ using namespace facebook::react;
   _sliderView.minimumValue = props.minimumValue;
   _sliderView.maximumValue = props.maximumValue;
   _sliderView.value = props.value;
+  _sliderView.ranged = props.ranged;
+  _sliderView.valueLeft = props.valueLeft;
+  _sliderView.valueRight = props.valueRight;
 }
 
 - (void)emitValueChange:(double)value
@@ -69,6 +78,26 @@ using namespace facebook::react;
   }
 
   eventEmitter->onValueChange(RNCSliderEventEmitter::OnValueChange{.value = value});
+}
+
+- (void)emitLeftValueChange:(double)value
+{
+  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  if (!eventEmitter) {
+    return;
+  }
+
+  eventEmitter->onLeftValueChange(RNCSliderEventEmitter::OnLeftValueChange{.value = value});
+}
+
+- (void)emitRightValueChange:(double)value
+{
+  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  if (!eventEmitter) {
+    return;
+  }
+
+  eventEmitter->onRightValueChange(RNCSliderEventEmitter::OnRightValueChange{.value = value});
 }
 
 #pragma mark - RCTComponentViewProtocol
@@ -87,6 +116,15 @@ using namespace facebook::react;
   if (oldViewProps.value != newViewProps.value) {
     _sliderView.value = newViewProps.value;
   }
+  if (oldViewProps.ranged != newViewProps.ranged) {
+    _sliderView.ranged = newViewProps.ranged;
+  }
+  if (oldViewProps.valueLeft != newViewProps.valueLeft) {
+    _sliderView.valueLeft = newViewProps.valueLeft;
+  }
+  if (oldViewProps.valueRight != newViewProps.valueRight) {
+    _sliderView.valueRight = newViewProps.valueRight;
+  }
 
   [super updateProps:props oldProps:oldProps];
 }
@@ -100,8 +138,8 @@ using namespace facebook::react;
   static const auto defaultProps = std::make_shared<const RNCSliderProps>();
   _props = defaultProps;
 
-  // A view retired mid-drag still believes it owns the thumb, and would drop the
-  // value pushed right after.
+  // A view retired mid-drag still believes it owns the thumb it was dragging,
+  // and would drop the value pushed right after.
   [_sliderView cancelSliding];
   [self applySliderProps:*defaultProps];
 }
