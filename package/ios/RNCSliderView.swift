@@ -19,6 +19,12 @@ final class RNCSliderModel: ObservableObject {
   /// multiple of this. Zero means no granularity.
   @Published var step: Double = 0
 
+  /// Bounds the thumbs can be dragged between. The track is drawn across the
+  /// whole range regardless: a limit takes away the values a thumb can reach,
+  /// not the ones the slider shows.
+  @Published var lowerLimit: Double = 0
+  @Published var upperLimit: Double = 1
+
   /// While the user drags, the thumb position is owned by this view. Value
   /// updates coming from JS in the meantime would fight the gesture, so they are
   /// ignored - the slider is uncontrolled for the duration of the drag.
@@ -46,6 +52,18 @@ final class RNCSliderModel: ObservableObject {
   /// so a momentarily inverted range is expected rather than exceptional.
   var range: ClosedRange<Double> {
     maximumValue > minimumValue ? minimumValue...maximumValue : minimumValue...(minimumValue + 1)
+  }
+
+  /// The range narrowed down to the part of it the thumbs can be dragged across.
+  ///
+  /// A limit that cannot be honoured is dropped: limits that have crossed leave
+  /// the slider unlimited, and one reaching out of the range limits only as far
+  /// as the range itself goes.
+  var limits: ClosedRange<Double> {
+    let range = self.range
+    guard lowerLimit <= upperLimit else { return range }
+
+    return lowerLimit.clamped(to: range)...upperLimit.clamped(to: range)
   }
 }
 
@@ -158,7 +176,7 @@ struct RNCRangedSliderContent: View {
             let travelled = travel > 0
               ? Double(gesture.translation.width / travel) * span(of: range)
               : 0
-            set(origin + travelled, of: thumb, in: range)
+            set(origin + travelled, of: thumb)
           }
           .onEnded { _ in setDragOrigin(nil, of: thumb) }
       )
@@ -172,9 +190,9 @@ struct RNCRangedSliderContent: View {
         let step = model.step > 0 ? model.step : span(of: range) / 10
         switch direction {
         case .increment:
-          set(value(of: thumb) + step, of: thumb, in: range)
+          set(value(of: thumb) + step, of: thumb)
         case .decrement:
-          set(value(of: thumb) - step, of: thumb, in: range)
+          set(value(of: thumb) - step, of: thumb)
         @unknown default:
           break
         }
@@ -191,27 +209,31 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  /// Moves one thumb, keeping it inside the range and on its own side of the
+  /// Moves one thumb, keeping it inside the limits and on its own side of the
   /// other thumb, and reports it to JS. The two thumbs cannot swap places.
-  private func set(_ newValue: Double, of thumb: Thumb, in range: ClosedRange<Double>) {
+  ///
+  /// A thumb held against a limit stops moving, and a value that has not moved
+  /// is not reported, so JS hears nothing of a drag carrying on beyond it.
+  private func set(_ newValue: Double, of thumb: Thumb) {
     let stepped = snapped(newValue)
+    let limits = model.limits
 
     switch thumb {
     case .single:
-      let clamped = stepped.clamped(to: range)
+      let clamped = stepped.clamped(to: limits)
       guard clamped != model.value else { return }
       model.value = clamped
       model.onValueChange?(clamped)
     case .left:
       let clamped = stepped.clamped(
-        to: range.lowerBound...model.valueRight.clamped(to: range)
+        to: limits.lowerBound...model.valueRight.clamped(to: limits)
       )
       guard clamped != model.valueLeft else { return }
       model.valueLeft = clamped
       model.onLeftValueChange?(clamped)
     case .right:
       let clamped = stepped.clamped(
-        to: model.valueLeft.clamped(to: range)...range.upperBound
+        to: model.valueLeft.clamped(to: limits)...limits.upperBound
       )
       guard clamped != model.valueRight else { return }
       model.valueRight = clamped
@@ -222,10 +244,10 @@ struct RNCRangedSliderContent: View {
   /// Rounds a value to the nearest multiple of the step, which is the
   /// granularity JS is promised. A step of zero leaves the value alone.
   ///
-  /// Clamping is left to the caller: a snapped value can land outside the range
-  /// or past the other thumb, and each thumb answers for that differently. The
-  /// ends of the range stay reachable that way, whether or not the step divides
-  /// the range evenly.
+  /// Clamping is left to the caller: a snapped value can land outside the
+  /// limits or past the other thumb, and each thumb answers for that
+  /// differently. The ends stay reachable that way, whether or not the step
+  /// divides the range evenly.
   private func snapped(_ value: Double) -> Double {
     let step = model.step
     guard step > 0 else { return value }
@@ -360,6 +382,19 @@ public final class RNCSliderView: UIView {
   @objc public var step: Double {
     get { model.step }
     set { model.step = newValue }
+  }
+
+  /// Bounds the thumbs can be dragged between - see `RNCSliderModel.limits`. A
+  /// value pushed from JS is taken as it comes, so only the values the slider
+  /// arrives at itself are held to the limits.
+  @objc public var lowerLimit: Double {
+    get { model.lowerLimit }
+    set { model.lowerLimit = newValue }
+  }
+
+  @objc public var upperLimit: Double {
+    get { model.upperLimit }
+    set { model.upperLimit = newValue }
   }
 
   @objc public var onValueChange: ((Double) -> Void)? {

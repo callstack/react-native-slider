@@ -51,6 +51,18 @@ export interface NativeProps extends ViewProps {
   step?: WithDefault<Double, 0>;
 
   /**
+   * Lowest position a thumb can be dragged to, expressed in the slider's own
+   * range. The track is still drawn from `minimumValue`.
+   */
+  lowerLimit?: WithDefault<Double, 0>;
+
+  /**
+   * Highest position a thumb can be dragged to, expressed in the slider's own
+   * range. The track is still drawn up to `maximumValue`.
+   */
+  upperLimit?: WithDefault<Double, 1>;
+
+  /**
    * Emitted continuously while the user drags the thumb.
    */
   onValueChange?: DirectEventHandler<SliderValueChangeEvent>;

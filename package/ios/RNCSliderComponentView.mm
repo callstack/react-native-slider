@@ -69,6 +69,8 @@ using namespace facebook::react;
   _sliderView.valueLeft = props.valueLeft;
   _sliderView.valueRight = props.valueRight;
   _sliderView.step = props.step;
+  _sliderView.lowerLimit = props.lowerLimit;
+  _sliderView.upperLimit = props.upperLimit;
 }
 
 - (void)emitValueChange:(double)value
@@ -128,6 +130,12 @@ using namespace facebook::react;
   }
   if (oldViewProps.step != newViewProps.step) {
     _sliderView.step = newViewProps.step;
+  }
+  if (oldViewProps.lowerLimit != newViewProps.lowerLimit) {
+    _sliderView.lowerLimit = newViewProps.lowerLimit;
+  }
+  if (oldViewProps.upperLimit != newViewProps.upperLimit) {
+    _sliderView.upperLimit = newViewProps.upperLimit;
   }
 
   [super updateProps:props oldProps:oldProps];

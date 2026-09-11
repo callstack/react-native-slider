@@ -77,6 +77,24 @@ export type SliderProps = ViewProps &
     step?: number;
 
     /**
+     * Limits the avaiable range of the slider to the lower value;
+     * Slider's thumb can't go below this value, but the track is still rendered below it to the minimumValue.
+     * Dragging events will not be emitted when the user's dragging is below this value.
+     * If the lowerLimit is greater than the upperLimit, the lowerLimit will be ignored.
+     * If the lowerLimit is lower than the minimumValue, the lowerLimit will be ignored.
+     */
+    lowerLimit?: number;
+
+    /**
+     * Limits the avaiable range of the slider to the upper value;
+     * Slider's thumb can't go above this value, but the track is still rendered above it to the maximumValue.
+     * Dragging events will not be emitted when the user's dragging is above this value.
+     * If the upperLimit is lower than the lowerLimit, the upperLimit will be ignored.
+     * If the upperLimit is greater than the maximumValue, the upperLimit will be ignored.
+     */
+    upperLimit?: number;
+
+    /**
      * Callback continuously called while the user is dragging the slider.
      */
     onValueChange?: (value: number) => void;
@@ -112,6 +130,8 @@ const Slider = ({
   valueLeft = minimumValue,
   valueRight = maximumValue,
   step = 0,
+  lowerLimit = minimumValue,
+  upperLimit = maximumValue,
   onValueChange,
   onLeftValueChange,
   onRightValueChange,
@@ -127,6 +147,8 @@ const Slider = ({
       valueLeft={valueLeft}
       valueRight={valueRight}
       step={step}
+      lowerLimit={lowerLimit}
+      upperLimit={upperLimit}
       onValueChange={valueHandler(onValueChange)}
       onLeftValueChange={valueHandler(onLeftValueChange)}
       onRightValueChange={valueHandler(onRightValueChange)}

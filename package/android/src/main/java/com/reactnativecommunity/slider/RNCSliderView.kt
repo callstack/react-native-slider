@@ -57,6 +57,16 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var stepValue by mutableDoubleStateOf(DEFAULT_STEP)
 
   /**
+   * Bounds the thumbs can be dragged between. The track is drawn across the whole
+   * range regardless: a limit takes away the values a thumb can reach, not the
+   * ones the slider shows.
+   *
+   * Named the way [stepValue] is, and for the same reason.
+   */
+  private var lowerLimitValue by mutableFloatStateOf(DEFAULT_LOWER_LIMIT)
+  private var upperLimitValue by mutableFloatStateOf(DEFAULT_UPPER_LIMIT)
+
+  /**
    * While the user drags, the thumb position is owned by this view. Value updates
    * coming from JS in the meantime would fight the gesture, so they are ignored -
    * the slider is uncontrolled during a drag.
@@ -125,6 +135,18 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     stepValue = value
   }
 
+  /**
+   * A value pushed from JS is taken as it comes here too, so only the values the
+   * slider arrives at itself are held to the limits.
+   */
+  fun setLowerLimit(value: Double) {
+    lowerLimitValue = value.toFloat()
+  }
+
+  fun setUpperLimit(value: Double) {
+    upperLimitValue = value.toFloat()
+  }
+
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     if (!isAttachedToWindow) {
       // Measuring the child here would make Compose look for a window recomposer
@@ -166,6 +188,23 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       minimumValue..minimumValue + 1f
     }
 
+  /**
+   * The range narrowed down to the part of it the thumbs can be dragged across.
+   *
+   * A limit that cannot be honoured is dropped: limits that have crossed leave the
+   * slider unlimited, and one reaching out of the range limits only as far as the
+   * range itself goes.
+   */
+  private fun limits(
+    range: ClosedFloatingPointRange<Float>
+  ): ClosedFloatingPointRange<Float> {
+    if (lowerLimitValue > upperLimitValue) {
+      return range
+    }
+
+    return lowerLimitValue.coerceIn(range)..upperLimitValue.coerceIn(range)
+  }
+
   private fun selectedRange(
     range: ClosedFloatingPointRange<Float>
   ): ClosedFloatingPointRange<Float> {
@@ -187,11 +226,12 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   @Composable
   private fun SingleSliderContent() {
     val range = valueRange()
+    val limits = limits(range)
 
     Slider(
       value = sliderValue.coerceIn(range.start, range.endInclusive),
       valueRange = range,
-      onValueChange = { moved -> onSliderValueChange(moved, range) },
+      onValueChange = { moved -> onSliderValueChange(moved, limits) },
       onValueChangeFinished = { isSliding = false },
       modifier = Modifier.fillMaxWidth(),
     )
@@ -199,14 +239,15 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   /**
    * Takes the value a drag has moved the thumb to and reports it snapped to the
-   * step. A stepped slider hears from Compose far more often than it moves, so a
-   * value that snapped back to the one already showing is dropped rather than
-   * reported to JS again.
+   * step and held to the limits. A stepped or limited slider hears from Compose far
+   * more often than it moves, so a value that came back as the one already showing
+   * is dropped rather than reported to JS again - which is also how a drag carrying
+   * on beyond a limit stays unheard of.
    */
-  private fun onSliderValueChange(value: Float, range: ClosedFloatingPointRange<Float>) {
+  private fun onSliderValueChange(value: Float, limits: ClosedFloatingPointRange<Float>) {
     isSliding = true
 
-    val stepped = snapped(value.toDouble(), range)
+    val stepped = snapped(value.toDouble(), limits)
     if (stepped.toFloat() == sliderValue) {
       return
     }
@@ -229,11 +270,12 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private fun RangedSliderContent() {
     val range = valueRange()
     val selected = selectedRange(range)
+    val limits = limits(range)
 
     RangeSlider(
       value = selected,
       valueRange = range,
-      onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved, range = range) },
+      onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved, limits = limits) },
       onValueChangeFinished = { isSliding = false },
       modifier = Modifier.fillMaxWidth(),
     )
@@ -247,17 +289,17 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private fun onSelectedRangeChange(
     from: ClosedFloatingPointRange<Float>,
     to: ClosedFloatingPointRange<Float>,
-    range: ClosedFloatingPointRange<Float>,
+    limits: ClosedFloatingPointRange<Float>,
   ) {
     isSliding = true
 
-    val left = snapped(to.start.toDouble(), range)
+    val left = snapped(to.start.toDouble(), limits)
     if (left.toFloat() != from.start) {
       valueLeft = left.toFloat()
       onLeftValueChange?.invoke(left)
     }
 
-    val right = snapped(to.endInclusive.toDouble(), range)
+    val right = snapped(to.endInclusive.toDouble(), limits)
     if (right.toFloat() != from.endInclusive) {
       valueRight = right.toFloat()
       onRightValueChange?.invoke(right)
@@ -265,9 +307,9 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   /**
-   * Rounds a value to the nearest multiple of the step and back into the slider's
-   * range, which is the granularity JS is promised. A step of zero leaves the
-   * value where it is.
+   * Rounds a value to the nearest multiple of the step and back into the part of
+   * the range the thumbs are limited to, which is the granularity JS is promised.
+   * A step of zero leaves the value where it is.
    *
    * Compose has a step of its own, but it counts ticks spread evenly across the
    * range and lands the value a whole number of steps away from `minimumValue`
@@ -275,10 +317,10 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * range evenly to do even that. Snapping here answers for both, and answers
    * the same way iOS does.
    */
-  private fun snapped(value: Double, range: ClosedFloatingPointRange<Float>): Double {
+  private fun snapped(value: Double, limits: ClosedFloatingPointRange<Float>): Double {
     val stepped = if (stepValue > 0) value.roundedToMultipleOf(stepValue) else value
 
-    return stepped.coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
+    return stepped.coerceIn(limits.start.toDouble(), limits.endInclusive.toDouble())
   }
 
   companion object {
@@ -289,6 +331,8 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     const val DEFAULT_VALUE_LEFT = 0f
     const val DEFAULT_VALUE_RIGHT = 1f
     const val DEFAULT_STEP = 0.0
+    const val DEFAULT_LOWER_LIMIT = 0f
+    const val DEFAULT_UPPER_LIMIT = 1f
   }
 }
 

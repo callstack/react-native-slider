@@ -62,6 +62,16 @@ class RNCSliderViewManager :
     view.setStep(value)
   }
 
+  @ReactProp(name = "lowerLimit", defaultDouble = 0.0)
+  override fun setLowerLimit(view: RNCSliderView, value: Double) {
+    view.setLowerLimit(value)
+  }
+
+  @ReactProp(name = "upperLimit", defaultDouble = 1.0)
+  override fun setUpperLimit(view: RNCSliderView, value: Double) {
+    view.setUpperLimit(value)
+  }
+
   override fun addEventEmitters(reactContext: ThemedReactContext, view: RNCSliderView) {
     @Suppress("DEPRECATION")
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, view.id)

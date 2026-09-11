@@ -52,6 +52,17 @@ export interface SliderProps extends ReactNative.ViewProps {
   valueRight?: number;
 
   /**
+   * Limits the avaiable range of the slider to the lower value;
+   * 
+   */
+  lowerLimit?: number;
+
+  /**
+   * Limits the avaiable range of the slider to the upper value;
+   */
+  upperLimit?: number;
+
+  /**
    * Step defines the granularity of the slider. The value of the slider will always be a multiple of the step value.
    * This works for both single and ranged sliders in the same manner.
    * The default value is 0, which means no step.
