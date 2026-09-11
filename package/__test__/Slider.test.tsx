@@ -39,4 +39,16 @@ describe('Slider', () => {
     expect(slider.props.maximumValue).toBe(1);
     expect(slider.props.value).toBe(0);
   });
+
+  it('Forwards the step to the native component', () => {
+    const {getByTestId} = render(<Slider testID="slider" step={0.25} />);
+
+    expect(getByTestId('slider').props.step).toBe(0.25);
+  });
+
+  it('Falls back to a slider with no step', () => {
+    const {getByTestId} = render(<Slider testID="slider" />);
+
+    expect(getByTestId('slider').props.step).toBe(0);
+  });
 });

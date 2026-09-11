@@ -57,6 +57,11 @@ class RNCSliderViewManager :
     view.setValueRight(value)
   }
 
+  @ReactProp(name = "step", defaultDouble = 0.0)
+  override fun setStep(view: RNCSliderView, value: Double) {
+    view.setStep(value)
+  }
+
   override fun addEventEmitters(reactContext: ThemedReactContext, view: RNCSliderView) {
     @Suppress("DEPRECATION")
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, view.id)

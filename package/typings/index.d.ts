@@ -52,6 +52,13 @@ export interface SliderProps extends ReactNative.ViewProps {
   valueRight?: number;
 
   /**
+   * Step defines the granularity of the slider. The value of the slider will always be a multiple of the step value.
+   * This works for both single and ranged sliders in the same manner.
+   * The default value is 0, which means no step.
+   */
+  step?: number;
+
+  /**
    * Callback continuously called while the user is dragging the slider.
    */
   onValueChange?: (value: number) => void;

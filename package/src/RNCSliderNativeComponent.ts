@@ -45,6 +45,12 @@ export interface NativeProps extends ViewProps {
   valueRight?: WithDefault<Double, 1>;
 
   /**
+   * Granularity the slider's values snap to: every value it reports is a
+   * multiple of this. 0 means no granularity.
+   */
+  step?: WithDefault<Double, 0>;
+
+  /**
    * Emitted continuously while the user drags the thumb.
    */
   onValueChange?: DirectEventHandler<SliderValueChangeEvent>;

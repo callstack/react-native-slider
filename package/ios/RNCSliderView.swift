@@ -15,6 +15,10 @@ final class RNCSliderModel: ObservableObject {
   @Published var valueLeft: Double = 0
   @Published var valueRight: Double = 1
 
+  /// Granularity of the values the slider reports: every one of them is a
+  /// multiple of this. Zero means no granularity.
+  @Published var step: Double = 0
+
   /// While the user drags, the thumb position is owned by this view. Value
   /// updates coming from JS in the meantime would fight the gesture, so they are
   /// ignored - the slider is uncontrolled for the duration of the drag.
@@ -159,11 +163,13 @@ struct RNCRangedSliderContent: View {
           .onEnded { _ in setDragOrigin(nil, of: thumb) }
       )
       // Drawn rather than built from a UIKit control, so VoiceOver has to be
-      // told what this is by hand. The 10% step matches `UISlider`.
+      // told what this is by hand. An adjustment moves the thumb by one step,
+      // or by 10% of the range when the slider has none - which is what
+      // `UISlider` does.
       .accessibilityElement()
       .accessibilityValue(Text(percentage(of: value(of: thumb), in: range)))
       .accessibilityAdjustableAction { direction in
-        let step = span(of: range) / 10
+        let step = model.step > 0 ? model.step : span(of: range) / 10
         switch direction {
         case .increment:
           set(value(of: thumb) + step, of: thumb, in: range)
@@ -188,27 +194,48 @@ struct RNCRangedSliderContent: View {
   /// Moves one thumb, keeping it inside the range and on its own side of the
   /// other thumb, and reports it to JS. The two thumbs cannot swap places.
   private func set(_ newValue: Double, of thumb: Thumb, in range: ClosedRange<Double>) {
+    let stepped = snapped(newValue)
+
     switch thumb {
     case .single:
-      let clamped = newValue.clamped(to: range)
+      let clamped = stepped.clamped(to: range)
       guard clamped != model.value else { return }
       model.value = clamped
       model.onValueChange?(clamped)
     case .left:
-      let clamped = newValue.clamped(
+      let clamped = stepped.clamped(
         to: range.lowerBound...model.valueRight.clamped(to: range)
       )
       guard clamped != model.valueLeft else { return }
       model.valueLeft = clamped
       model.onLeftValueChange?(clamped)
     case .right:
-      let clamped = newValue.clamped(
+      let clamped = stepped.clamped(
         to: model.valueLeft.clamped(to: range)...range.upperBound
       )
       guard clamped != model.valueRight else { return }
       model.valueRight = clamped
       model.onRightValueChange?(clamped)
     }
+  }
+
+  /// Rounds a value to the nearest multiple of the step, which is the
+  /// granularity JS is promised. A step of zero leaves the value alone.
+  ///
+  /// Clamping is left to the caller: a snapped value can land outside the range
+  /// or past the other thumb, and each thumb answers for that differently. The
+  /// ends of the range stay reachable that way, whether or not the step divides
+  /// the range evenly.
+  private func snapped(_ value: Double) -> Double {
+    let step = model.step
+    guard step > 0 else { return value }
+
+    // Multiplying the step back out misses the mark by a fraction whenever the
+    // step is one that binary floating point cannot hold - three tenths
+    // arriving as 0.30000000000000004 - so the product is rounded to the
+    // decimals the step itself is written with, and reaches JS reading the way
+    // the step was written.
+    return ((value / step).rounded() * step).rounded(toDecimals: step.decimals)
   }
 
   private func dragOrigin(of thumb: Thumb) -> Double? {
@@ -325,6 +352,14 @@ public final class RNCSliderView: UIView {
       guard model.rightDragOrigin == nil else { return }
       model.valueRight = newValue
     }
+  }
+
+  /// Granularity of the values the slider reports - see
+  /// `RNCSliderModel.step`. A value pushed from JS is taken as it comes, so
+  /// only the values the slider arrives at itself are snapped.
+  @objc public var step: Double {
+    get { model.step }
+    set { model.step = newValue }
   }
 
   @objc public var onValueChange: ((Double) -> Void)? {
@@ -456,4 +491,26 @@ private extension Double {
   func clamped(to range: ClosedRange<Double>) -> Double {
     min(max(self, range.lowerBound), range.upperBound)
   }
+
+  /// How many decimals it takes to write this value out, capped at the digits a
+  /// `Double` can be trusted with.
+  var decimals: Int {
+    var decimals = 0
+    var scaled = magnitude
+
+    while decimals < Self.maximumDecimals, scaled != scaled.rounded(.down) {
+      scaled *= 10
+      decimals += 1
+    }
+
+    return decimals
+  }
+
+  func rounded(toDecimals decimals: Int) -> Double {
+    let scale = pow(10, Double(decimals))
+
+    return (self * scale).rounded() / scale
+  }
+
+  private static let maximumDecimals = 15
 }

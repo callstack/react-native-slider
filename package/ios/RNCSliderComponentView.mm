@@ -68,6 +68,7 @@ using namespace facebook::react;
   _sliderView.ranged = props.ranged;
   _sliderView.valueLeft = props.valueLeft;
   _sliderView.valueRight = props.valueRight;
+  _sliderView.step = props.step;
 }
 
 - (void)emitValueChange:(double)value
@@ -124,6 +125,9 @@ using namespace facebook::react;
   }
   if (oldViewProps.valueRight != newViewProps.valueRight) {
     _sliderView.valueRight = newViewProps.valueRight;
+  }
+  if (oldViewProps.step != newViewProps.step) {
+    _sliderView.step = newViewProps.step;
   }
 
   [super updateProps:props oldProps:oldProps];
