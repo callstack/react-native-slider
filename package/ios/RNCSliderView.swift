@@ -82,6 +82,7 @@ struct RNCRangedSliderContent: View {
 
   /// Which end of the range a thumb drags.
   private enum Thumb {
+    case single
     case left
     case right
   }
@@ -96,7 +97,7 @@ struct RNCRangedSliderContent: View {
       // inside the view, so it is short of the width by one thumb.
       let travel = max(geometry.size.width - (model.ranged ? diameter : 0), 0)
 
-      let leftOffset = offset(of: model.valueLeft, in: range, travel: travel)
+      let leftOffset = offset(of: model.ranged ? model.valueLeft : model.value, in: range, travel: travel)
       let rightOffset = offset(of: model.valueRight, in: range, travel: travel)
 
       let trackFillWidth = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
@@ -114,14 +115,12 @@ struct RNCRangedSliderContent: View {
           .frame(width: trackFillWidth, height: Self.trackHeight)
           .offset(x: trackFillStartPoint)
 
-        thumb(.left, diameter: diameter, offset: leftOffset, range: range, travel: travel)
-          // Both thumbs pinned to the upper bound overlap exactly, and the right
-          // one has nowhere left to go - so the left one has to take the touches
-          // or the pair is stuck there.
-          .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
-
         if model.ranged {
           thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
+          thumb(.left, diameter: diameter, offset: leftOffset, range: range, travel: travel)
+            .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
+        } else {
+          thumb(.single, diameter: diameter, offset: leftOffset, range: range, travel: travel)
         }
       }
       .frame(width: geometry.size.width, height: geometry.size.height)
@@ -180,6 +179,7 @@ struct RNCRangedSliderContent: View {
 
   private func value(of thumb: Thumb) -> Double {
     switch thumb {
+    case .single: return model.value
     case .left: return model.valueLeft
     case .right: return model.valueRight
     }
@@ -189,6 +189,11 @@ struct RNCRangedSliderContent: View {
   /// other thumb, and reports it to JS. The two thumbs cannot swap places.
   private func set(_ newValue: Double, of thumb: Thumb, in range: ClosedRange<Double>) {
     switch thumb {
+    case .single:
+      let clamped = newValue.clamped(to: range)
+      guard clamped != model.value else { return }
+      model.value = clamped
+      model.onValueChange?(clamped)
     case .left:
       let clamped = newValue.clamped(
         to: range.lowerBound...model.valueRight.clamped(to: range)
@@ -208,6 +213,7 @@ struct RNCRangedSliderContent: View {
 
   private func dragOrigin(of thumb: Thumb) -> Double? {
     switch thumb {
+    case .single: return model.leftDragOrigin
     case .left: return model.leftDragOrigin
     case .right: return model.rightDragOrigin
     }
@@ -215,6 +221,7 @@ struct RNCRangedSliderContent: View {
 
   private func setDragOrigin(_ origin: Double?, of thumb: Thumb) {
     switch thumb {
+    case .single: model.leftDragOrigin = origin
     case .left: model.leftDragOrigin = origin
     case .right: model.rightDragOrigin = origin
     }
