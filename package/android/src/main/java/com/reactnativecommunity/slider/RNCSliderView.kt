@@ -3,10 +3,12 @@ package callstack.slider
 import android.content.Context
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -30,14 +32,31 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var sliderValue by mutableFloatStateOf(DEFAULT_VALUE)
 
   /**
+   * Whether the slider selects a span of its range with two thumbs, rather than a
+   * single value with one. [sliderValue] and [valueLeft]/[valueRight] belong to the
+   * two shapes respectively, and the unused ones are simply not read.
+   */
+  private var selectsRange by mutableStateOf(DEFAULT_RANGED)
+  private var valueLeft by mutableFloatStateOf(DEFAULT_VALUE_LEFT)
+  private var valueRight by mutableFloatStateOf(DEFAULT_VALUE_RIGHT)
+
+  /**
    * While the user drags, the thumb position is owned by this view. Value updates
    * coming from JS in the meantime would fight the gesture, so they are ignored -
    * the slider is uncontrolled during a drag.
+   *
+   * A ranged slider stops listening for both of its values at once, even though
+   * only one thumb can be under the finger: Compose's `RangeSlider` is driven by
+   * the span as a whole, so a value pushed for the thumb standing still would
+   * disturb the one being dragged just the same.
    */
   private var isSliding = false
 
   /** Invoked continuously while the user drags the thumb. */
   var onValueChange: ((Double) -> Unit)? = null
+
+  var onLeftValueChange: ((Double) -> Unit)? = null
+  var onRightValueChange: ((Double) -> Unit)? = null
 
   private val composeView =
     ComposeView(context).apply {
@@ -63,6 +82,22 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   fun setValue(value: Double) {
     if (!isSliding) {
       sliderValue = value.toFloat()
+    }
+  }
+
+  fun setRanged(value: Boolean) {
+    selectsRange = value
+  }
+
+  fun setValueLeft(value: Double) {
+    if (!isSliding) {
+      valueLeft = value.toFloat()
+    }
+  }
+
+  fun setValueRight(value: Double) {
+    if (!isSliding) {
+      valueRight = value.toFloat()
     }
   }
 
@@ -107,8 +142,26 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       minimumValue..minimumValue + 1f
     }
 
+  private fun selectedRange(
+    range: ClosedFloatingPointRange<Float>
+  ): ClosedFloatingPointRange<Float> {
+    val left = valueLeft.coerceIn(range.start, range.endInclusive)
+    val right = valueRight.coerceIn(range.start, range.endInclusive)
+
+    return minOf(left, right)..maxOf(left, right)
+  }
+
   @Composable
   private fun SliderContent() {
+    if (selectsRange) {
+      RangedSliderContent()
+    } else {
+      SingleSliderContent()
+    }
+  }
+
+  @Composable
+  private fun SingleSliderContent() {
     val range = valueRange()
 
     Slider(
@@ -124,9 +177,58 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     )
   }
 
+  /**
+   * Material 3 has a two-thumb slider of its own, so a ranged slider is that rather
+   * than a pair of thumbs assembled here - it comes with the thumbs that cannot swap
+   * places, the tinted span between them and the per-thumb accessibility that the
+   * platform's own control has.
+   *
+   * What it does not come with is any notion of the two thumbs being separate: a drag
+   * reports the whole span at once. Splitting that back into a thumb apiece is left
+   * to [onSelectedRangeChange].
+   */
+  @Composable
+  private fun RangedSliderContent() {
+    val range = valueRange()
+    val selected = selectedRange(range)
+
+    RangeSlider(
+      value = selected,
+      valueRange = range,
+      onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved) },
+      onValueChangeFinished = { isSliding = false },
+      modifier = Modifier.fillMaxWidth(),
+    )
+  }
+
+  /**
+   * Takes the span a drag has moved the thumbs to and reports the ends that actually
+   * moved, so that JS hears about the thumb under the finger and not about the one
+   * standing still.
+   */
+  private fun onSelectedRangeChange(
+    from: ClosedFloatingPointRange<Float>,
+    to: ClosedFloatingPointRange<Float>,
+  ) {
+    isSliding = true
+
+    if (to.start != from.start) {
+      valueLeft = to.start
+      onLeftValueChange?.invoke(to.start.toDouble())
+    }
+
+    if (to.endInclusive != from.endInclusive) {
+      valueRight = to.endInclusive
+      onRightValueChange?.invoke(to.endInclusive.toDouble())
+    }
+  }
+
   companion object {
     const val DEFAULT_MINIMUM_VALUE = 0f
     const val DEFAULT_MAXIMUM_VALUE = 1f
     const val DEFAULT_VALUE = 0f
+    const val DEFAULT_RANGED = false
+    const val DEFAULT_VALUE_LEFT = 0f
+    const val DEFAULT_VALUE_RIGHT = 1f
   }
 }

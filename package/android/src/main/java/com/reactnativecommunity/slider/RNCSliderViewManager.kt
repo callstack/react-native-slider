@@ -42,29 +42,49 @@ class RNCSliderViewManager :
     view.setValue(value)
   }
 
+  @ReactProp(name = "ranged", defaultBoolean = false)
+  override fun setRanged(view: RNCSliderView, value: Boolean) {
+    view.setRanged(value)
+  }
+
+  @ReactProp(name = "valueLeft", defaultDouble = 0.0)
+  override fun setValueLeft(view: RNCSliderView, value: Double) {
+    view.setValueLeft(value)
+  }
+
+  @ReactProp(name = "valueRight", defaultDouble = 1.0)
+  override fun setValueRight(view: RNCSliderView, value: Double) {
+    view.setValueRight(value)
+  }
+
   override fun addEventEmitters(reactContext: ThemedReactContext, view: RNCSliderView) {
     @Suppress("DEPRECATION")
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, view.id)
 
     // The tag and the surface are read at dispatch time, so a recycled view keeps
     // reporting under the identity it currently has.
-    view.onValueChange = { value ->
+    fun emit(thumb: RNCSliderValueChangeEvent.Thumb): (Double) -> Unit = { value ->
       eventDispatcher?.dispatchEvent(
-        RNCSliderValueChangeEvent(UIManagerHelper.getSurfaceId(view), view.id, value)
+        RNCSliderValueChangeEvent(UIManagerHelper.getSurfaceId(view), view.id, thumb, value)
       )
     }
+
+    view.onValueChange = emit(RNCSliderValueChangeEvent.Thumb.SINGLE)
+    view.onLeftValueChange = emit(RNCSliderValueChangeEvent.Thumb.LEFT)
+    view.onRightValueChange = emit(RNCSliderValueChangeEvent.Thumb.RIGHT)
   }
 
   override fun onDropViewInstance(view: RNCSliderView) {
     view.onValueChange = null
+    view.onLeftValueChange = null
+    view.onRightValueChange = null
     super.onDropViewInstance(view)
   }
 
   override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> =
-    mapOf(
-      RNCSliderValueChangeEvent.EVENT_NAME to
-        mapOf("registrationName" to RNCSliderValueChangeEvent.REGISTRATION_NAME)
-    )
+    RNCSliderValueChangeEvent.Thumb.entries.associate { thumb ->
+      thumb.eventName to mapOf("registrationName" to thumb.registrationName)
+    }
 
   /**
    * Fabric asks for the intrinsic size once per surface and reuses the answer for
