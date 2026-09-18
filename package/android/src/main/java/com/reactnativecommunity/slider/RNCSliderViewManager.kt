@@ -84,22 +84,38 @@ class RNCSliderViewManager :
       )
     }
 
+    fun emitSliding(phase: RNCSliderSlidingEvent.Phase): () -> Unit = {
+      eventDispatcher?.dispatchEvent(
+        RNCSliderSlidingEvent(UIManagerHelper.getSurfaceId(view), view.id, phase)
+      )
+    }
+
     view.onValueChange = emit(RNCSliderValueChangeEvent.Thumb.SINGLE)
     view.onLeftValueChange = emit(RNCSliderValueChangeEvent.Thumb.LEFT)
     view.onRightValueChange = emit(RNCSliderValueChangeEvent.Thumb.RIGHT)
+    view.onSlidingStart = emitSliding(RNCSliderSlidingEvent.Phase.START)
+    view.onSlidingComplete = emitSliding(RNCSliderSlidingEvent.Phase.COMPLETE)
   }
 
   override fun onDropViewInstance(view: RNCSliderView) {
     view.onValueChange = null
     view.onLeftValueChange = null
     view.onRightValueChange = null
+    view.onSlidingStart = null
+    view.onSlidingComplete = null
     super.onDropViewInstance(view)
   }
 
   override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> =
     RNCSliderValueChangeEvent.Thumb.entries.associate { thumb ->
-      thumb.eventName to mapOf("registrationName" to thumb.registrationName)
-    }
+      thumb.eventName to registrationOf(thumb.registrationName)
+    } +
+      RNCSliderSlidingEvent.Phase.entries.associate { phase ->
+        phase.eventName to registrationOf(phase.registrationName)
+      }
+
+  private fun registrationOf(registrationName: String): Map<String, Any> =
+    mapOf("registrationName" to registrationName)
 
   /**
    * Fabric asks for the intrinsic size once per surface and reuses the answer for

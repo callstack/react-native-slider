@@ -78,6 +78,20 @@ export interface NativeProps extends ViewProps {
    * slider.
    */
   onRightValueChange?: DirectEventHandler<SliderValueChangeEvent>;
+
+  /**
+   * Emitted once the user grabs a thumb, before it has moved anywhere. A
+   * ranged slider reports whichever of its thumbs was grabbed first, and does
+   * not report the second one being grabbed on top of it.
+   */
+  onSlidingStart?: DirectEventHandler<null>;
+
+  /**
+   * Emitted once the user lets go of the thumb they were dragging, whether or
+   * not the drag moved it. A ranged slider reports the last of its thumbs
+   * being let go of, so that every start is answered by exactly one complete.
+   */
+  onSlidingComplete?: DirectEventHandler<null>;
 }
 
 export default codegenNativeComponent<NativeProps>('RNCSlider', {

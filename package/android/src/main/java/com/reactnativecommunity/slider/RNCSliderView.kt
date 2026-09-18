@@ -2,6 +2,8 @@ package callstack.slider
 
 import android.content.Context
 import android.widget.FrameLayout
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
@@ -12,6 +14,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import kotlin.math.abs
@@ -67,6 +71,10 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var upperLimitValue by mutableFloatStateOf(DEFAULT_UPPER_LIMIT)
 
   /**
+   * Whether the user has hold of the slider. It lasts from the touch going down
+   * to the last finger coming off, so it covers a drag that never moved a thumb
+   * as well as one that did - see [slidingGestures].
+   *
    * While the user drags, the thumb position is owned by this view. Value updates
    * coming from JS in the meantime would fight the gesture, so they are ignored -
    * the slider is uncontrolled during a drag.
@@ -83,6 +91,18 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   var onLeftValueChange: ((Double) -> Unit)? = null
   var onRightValueChange: ((Double) -> Unit)? = null
+
+  /**
+   * Invoked once the user takes hold of a thumb, and again once they let go of
+   * it - whether or not the drag in between moved it anywhere.
+   *
+   * The two always come in pairs: [isSliding] is what a drag is recognised by,
+   * so a thumb grabbed while another is already being dragged does not begin a
+   * second drag, and neither does a value pushed from JS end the one in
+   * progress.
+   */
+  var onSlidingStart: (() -> Unit)? = null
+  var onSlidingComplete: (() -> Unit)? = null
 
   private val composeView =
     ComposeView(context).apply {
@@ -232,9 +252,58 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       value = sliderValue.coerceIn(range.start, range.endInclusive),
       valueRange = range,
       onValueChange = { moved -> onSliderValueChange(moved, limits) },
-      onValueChangeFinished = { isSliding = false },
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().slidingGestures(),
     )
+  }
+
+  /**
+   * Reports the beginning and the end of a drag, which JS is promised to hear
+   * about whether or not the drag moved a thumb anywhere.
+   *
+   * Neither Compose slider offers that: `onValueChangeFinished` does fire for a
+   * press that moved nothing, but there is no callback for the press itself, and
+   * the drag interactions the slider publishes only begin once the finger has
+   * travelled past the touch slop - by which point the thumb has already moved.
+   * So the touches are watched here instead, on the initial pass, where they can
+   * be heard before the slider claims them rather than taken away from it.
+   */
+  private fun Modifier.slidingGestures(): Modifier =
+    pointerInput(Unit) {
+      awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        beginSliding()
+
+        try {
+          // The gesture is over once the last finger comes off: a second finger
+          // landing on the other thumb of a ranged slider joins the drag already
+          // in progress rather than starting one of its own.
+          do {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+          } while (event.changes.any { it.pressed })
+        } finally {
+          // Also reached when the gesture is cancelled out from under us, which
+          // would otherwise leave the slider deaf to values pushed from JS.
+          finishSliding()
+        }
+      }
+    }
+
+  private fun beginSliding() {
+    if (isSliding) {
+      return
+    }
+
+    isSliding = true
+    onSlidingStart?.invoke()
+  }
+
+  private fun finishSliding() {
+    if (!isSliding) {
+      return
+    }
+
+    isSliding = false
+    onSlidingComplete?.invoke()
   }
 
   /**
@@ -245,8 +314,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * on beyond a limit stays unheard of.
    */
   private fun onSliderValueChange(value: Float, limits: ClosedFloatingPointRange<Float>) {
-    isSliding = true
-
     val stepped = snapped(value.toDouble(), limits)
     if (stepped.toFloat() == sliderValue) {
       return
@@ -276,8 +343,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       value = selected,
       valueRange = range,
       onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved, limits = limits) },
-      onValueChangeFinished = { isSliding = false },
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().slidingGestures(),
     )
   }
 
@@ -291,8 +357,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     to: ClosedFloatingPointRange<Float>,
     limits: ClosedFloatingPointRange<Float>,
   ) {
-    isSliding = true
-
     val left = snapped(to.start.toDouble(), limits)
     if (left.toFloat() != from.start) {
       valueLeft = left.toFloat()

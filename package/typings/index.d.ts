@@ -85,6 +85,20 @@ export interface SliderProps extends ReactNative.ViewProps {
    * of a ranged slider.
    */
   onRightValueChange?: (value: number) => void;
+
+  /**
+   * Callback called each time user starts dragging.
+   * The event is fired as soon as user holds (long press) any thumb (left or right),
+   * regardless if the drag changed the value or not.
+   */
+  onSlidingStart?: () => void;
+
+  /**
+   * Callback called each time user ends dragging.
+   * The event is fired as soon as user releases any thumb (left or right) after long press,
+   * regardless if the drag changed the value or not.
+   */
+  onSlidingComplete?: () => void;
 }
 
 /**

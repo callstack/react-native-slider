@@ -25,20 +25,22 @@ final class RNCSliderModel: ObservableObject {
   @Published var lowerLimit: Double = 0
   @Published var upperLimit: Double = 1
 
-  /// While the user drags, the thumb position is owned by this view. Value
-  /// updates coming from JS in the meantime would fight the gesture, so they are
-  /// ignored - the slider is uncontrolled for the duration of the drag.
-  var isSliding = false
-
-  /// The value a ranged thumb had when the drag in progress began, or `nil` when
-  /// that thumb is not being dragged - which is also how the ranged slider knows
-  /// to ignore values pushed from JS, the way `isSliding` does for the single
-  /// thumb.
+  /// The value a thumb had when the drag in progress began, or `nil` when that
+  /// thumb is not being dragged. The single thumb keeps its origin in the left
+  /// one of the two.
   ///
   /// A drag is tracked by how far it has travelled rather than by where the
   /// finger is, so grabbing a thumb off-centre does not snap it under the finger.
   var leftDragOrigin: Double?
   var rightDragOrigin: Double?
+
+  /// Whether the user has hold of a thumb, which is simply whether either of the
+  /// origins above is set.
+  ///
+  /// While the user drags, the thumb position is owned by this view. Value
+  /// updates coming from JS in the meantime would fight the gesture, so they are
+  /// ignored - the slider is uncontrolled for the duration of the drag.
+  var isSliding: Bool { leftDragOrigin != nil || rightDragOrigin != nil }
 
   /// Invoked continuously while the user drags the thumb.
   var onValueChange: ((Double) -> Void)?
@@ -47,6 +49,11 @@ final class RNCSliderModel: ObservableObject {
   /// slider.
   var onLeftValueChange: ((Double) -> Void)?
   var onRightValueChange: ((Double) -> Void)?
+
+  /// Invoked once the user takes hold of a thumb, and again once they let go of
+  /// it - whether or not the drag in between moved it anywhere.
+  var onSlidingStart: (() -> Void)?
+  var onSlidingComplete: (() -> Void)?
 
   /// SwiftUI traps on an empty or descending range. Props arrive one at a time,
   /// so a momentarily inverted range is expected rather than exceptional.
@@ -89,8 +96,7 @@ struct RNCSingleSliderContent: View {
           model.onValueChange?(newValue)
         }
       ),
-      in: range,
-      onEditingChanged: { isEditing in model.isSliding = isEditing }
+      in: range
     )
   }
 }
@@ -170,15 +176,14 @@ struct RNCRangedSliderContent: View {
       .gesture(
         DragGesture(minimumDistance: 0)
           .onChanged { gesture in
-            let origin = dragOrigin(of: thumb) ?? value(of: thumb)
-            setDragOrigin(origin, of: thumb)
+            let origin = dragOrigin(of: thumb) ?? beginDrag(of: thumb)
 
             let travelled = travel > 0
               ? Double(gesture.translation.width / travel) * span(of: range)
               : 0
             set(origin + travelled, of: thumb)
           }
-          .onEnded { _ in setDragOrigin(nil, of: thumb) }
+          .onEnded { _ in endDrag(of: thumb) }
       )
       // Drawn rather than built from a UIKit control, so VoiceOver has to be
       // told what this is by hand. An adjustment moves the thumb by one step,
@@ -258,6 +263,39 @@ struct RNCRangedSliderContent: View {
     // decimals the step itself is written with, and reaches JS reading the way
     // the step was written.
     return ((value / step).rounded() * step).rounded(toDecimals: step.decimals)
+  }
+
+  /// Takes hold of a thumb, remembering where it stood so that the drag can be
+  /// tracked by how far it travels, and tells JS that a drag has begun.
+  ///
+  /// Only the thumb grabbed first reports a start: a second finger landing on the
+  /// other thumb of a ranged slider joins the drag already in progress rather
+  /// than beginning one of its own, so that every start is answered by exactly
+  /// one complete.
+  private func beginDrag(of thumb: Thumb) -> Double {
+    let wasSliding = model.isSliding
+    let origin = value(of: thumb)
+    setDragOrigin(origin, of: thumb)
+
+    if !wasSliding {
+      model.onSlidingStart?()
+    }
+
+    return origin
+  }
+
+  /// Lets go of a thumb, and tells JS the drag is over once the last thumb has
+  /// been let go of - whether or not it moved anywhere in between.
+  private func endDrag(of thumb: Thumb) {
+    // A drag that was never begun - a gesture that ended without ever having
+    // changed - has nothing to report.
+    guard dragOrigin(of: thumb) != nil else { return }
+
+    setDragOrigin(nil, of: thumb)
+
+    if !model.isSliding {
+      model.onSlidingComplete?()
+    }
   }
 
   private func dragOrigin(of thumb: Thumb) -> Double? {
@@ -412,6 +450,16 @@ public final class RNCSliderView: UIView {
     set { model.onRightValueChange = newValue }
   }
 
+  @objc public var onSlidingStart: (() -> Void)? {
+    get { model.onSlidingStart }
+    set { model.onSlidingStart = newValue }
+  }
+
+  @objc public var onSlidingComplete: (() -> Void)? {
+    get { model.onSlidingComplete }
+    set { model.onSlidingComplete = newValue }
+  }
+
   public override init(frame: CGRect) {
     let model = RNCSliderModel()
     self.model = model
@@ -468,8 +516,10 @@ public final class RNCSliderView: UIView {
   /// Drops any drag in progress, so that a value pushed straight after is not
   /// swallowed by the rule above. Fabric recycles component views, and one
   /// retired mid-drag would otherwise stay deaf to updates for good.
+  ///
+  /// The drag is abandoned rather than ended: the JS that would have heard the
+  /// completion is no longer mounted on this view.
   @objc public func cancelSliding() {
-    model.isSliding = false
     model.leftDragOrigin = nil
     model.rightDragOrigin = nil
   }

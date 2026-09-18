@@ -53,6 +53,12 @@ using namespace facebook::react;
     _sliderView.onRightValueChange = ^(double value) {
       [weakSelf emitRightValueChange:value];
     };
+    _sliderView.onSlidingStart = ^{
+      [weakSelf emitSlidingStart];
+    };
+    _sliderView.onSlidingComplete = ^{
+      [weakSelf emitSlidingComplete];
+    };
 
     self.contentView = _sliderView;
   }
@@ -101,6 +107,26 @@ using namespace facebook::react;
   }
 
   eventEmitter->onRightValueChange(RNCSliderEventEmitter::OnRightValueChange{.value = value});
+}
+
+- (void)emitSlidingStart
+{
+  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  if (!eventEmitter) {
+    return;
+  }
+
+  eventEmitter->onSlidingStart(RNCSliderEventEmitter::OnSlidingStart{});
+}
+
+- (void)emitSlidingComplete
+{
+  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  if (!eventEmitter) {
+    return;
+  }
+
+  eventEmitter->onSlidingComplete(RNCSliderEventEmitter::OnSlidingComplete{});
 }
 
 #pragma mark - RCTComponentViewProtocol
