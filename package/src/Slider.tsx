@@ -95,6 +95,18 @@ export type SliderProps = ViewProps &
     upperLimit?: number;
 
     /**
+     * The orientation of Slider.
+     * Default is "horizontal".
+     * Switches the way how Slider is displayed.
+     *
+     * A vertical slider holds its `minimumValue` at the bottom and its
+     * `maximumValue` at the top, and is dragged up and down. Everything else -
+     * the range, the step, the limits, the second thumb of a ranged slider and
+     * the events all of them report - behaves exactly as it does horizontally.
+     */
+    orientation?: 'horizontal' | 'vertical';
+
+    /**
      * Callback continuously called while the user is dragging the slider.
      */
     onValueChange?: (value: number) => void;
@@ -146,6 +158,7 @@ const Slider = ({
   step = 0,
   lowerLimit = minimumValue,
   upperLimit = maximumValue,
+  orientation = 'horizontal',
   onValueChange,
   onLeftValueChange,
   onRightValueChange,
@@ -163,6 +176,7 @@ const Slider = ({
       step={step}
       lowerLimit={lowerLimit}
       upperLimit={upperLimit}
+      orientation={orientation}
       onValueChange={valueHandler(onValueChange)}
       onLeftValueChange={valueHandler(onLeftValueChange)}
       onRightValueChange={valueHandler(onRightValueChange)}

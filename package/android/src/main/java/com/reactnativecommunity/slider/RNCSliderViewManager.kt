@@ -72,6 +72,11 @@ class RNCSliderViewManager :
     view.setUpperLimit(value)
   }
 
+  @ReactProp(name = "orientation")
+  override fun setOrientation(view: RNCSliderView, value: String?) {
+    view.setOrientation(value)
+  }
+
   override fun addEventEmitters(reactContext: ThemedReactContext, view: RNCSliderView) {
     @Suppress("DEPRECATION")
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, view.id)
@@ -121,6 +126,10 @@ class RNCSliderViewManager :
    * Fabric asks for the intrinsic size once per surface and reuses the answer for
    * every slider on it, so it must not depend on the incoming constraints. The
    * width is only a hint - flexbox is what actually stretches the slider.
+   *
+   * The answer describes a horizontal slider, which is the only shape measured
+   * here: a vertical one is the same control on its side, and its shadow node
+   * turns this size round to match - see `RNCSliderShadowNode::measureContent`.
    */
   override fun measure(
     context: Context,

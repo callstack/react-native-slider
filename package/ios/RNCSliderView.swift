@@ -25,6 +25,13 @@ final class RNCSliderModel: ObservableObject {
   @Published var lowerLimit: Double = 0
   @Published var upperLimit: Double = 1
 
+  /// Whether the slider runs up the view rather than across it, with the
+  /// minimum at the bottom and the maximum at the top.
+  ///
+  /// Only the geometry changes with it: the range, the step, the limits, the
+  /// two thumbs and the events they report are the same either way round.
+  @Published var vertical: Bool = false
+
   /// The value a thumb had when the drag in progress began, or `nil` when that
   /// thumb is not being dragged. The single thumb keeps its origin in the left
   /// one of the two.
@@ -101,10 +108,17 @@ struct RNCSingleSliderContent: View {
   }
 }
 
-/// SwiftUI has no two-thumb slider, so this one is drawn here: a track, the
-/// selected span, and a thumb at each end of it. The shape follows `Slider` -
-/// a capsule track with the selected part tinted, and a white circular thumb -
-/// so that a ranged slider does not look foreign next to a plain one.
+/// SwiftUI has no two-thumb slider and no vertical one, so the slider is drawn
+/// here: a track, the selected span, and a thumb at each end of it. The shape
+/// follows `Slider` - a capsule track with the selected part tinted, and a white
+/// circular thumb - so that this slider does not look foreign next to a plain one.
+///
+/// The geometry is written along two axes rather than across the view: values
+/// are spread along its *length*, and the track and thumbs are as thick as its
+/// *breadth* allows. Which of the view's two sides each of those is comes from
+/// `RNCSliderModel.vertical` - and on a vertical slider the left thumb is the
+/// bottom one, the direction its value grows in being the only thing that
+/// changes.
 struct RNCRangedSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
@@ -118,30 +132,33 @@ struct RNCRangedSliderContent: View {
   var body: some View {
     GeometryReader { geometry in
       let range = model.range
-      // A thumb is never taller than the slider itself: JS decides the height,
-      // and a thumb spilling out of it would draw over its neighbours.
-      let diameter = min(Self.thumbDiameter, geometry.size.height)
+      let length = model.vertical ? geometry.size.height : geometry.size.width
+      let breadth = model.vertical ? geometry.size.width : geometry.size.height
+
+      // A thumb is never thicker than the slider itself: JS decides how much
+      // room there is across it, and a thumb spilling out would draw over its
+      // neighbours.
+      let diameter = min(Self.thumbDiameter, breadth)
       // The span the centre of a thumb moves across. Both thumbs stay fully
-      // inside the view, so it is short of the width by one thumb.
-      let travel = max(geometry.size.width - (model.ranged ? diameter : 0), 0)
+      // inside the view, so it is short of the length by one thumb.
+      let travel = max(length - (model.ranged ? diameter : 0), 0)
 
       let leftOffset = offset(of: model.ranged ? model.valueLeft : model.value, in: range, travel: travel)
       let rightOffset = offset(of: model.valueRight, in: range, travel: travel)
 
-      let trackFillWidth = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
+      let trackFillLength = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
       let trackFillStartPoint = model.ranged ? min(leftOffset, rightOffset) + diameter / 2 : 0
 
-      ZStack(alignment: .leading) {
-        Capsule()
-          .fill(Self.trackColor)
-          .frame(height: Self.trackHeight)
+      // Everything is placed by how far along the slider it sits, so the stack
+      // is anchored at the end the minimum value is at: the leading edge across
+      // the view, and the bottom one up it.
+      ZStack(alignment: model.vertical ? .bottom : .leading) {
+        track(Self.trackColor, length: nil)
 
         // Drawn between the two thumb centres, which is why it is inset by half
         // a thumb. `max` keeps it from inverting on values crossed by JS.
-        Capsule()
-          .fill(Color.accentColor)
-          .frame(width: trackFillWidth, height: Self.trackHeight)
-          .offset(x: trackFillStartPoint)
+        track(Color.accentColor, length: trackFillLength)
+          .offset(offsetAlong(trackFillStartPoint))
 
         if model.ranged {
           thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
@@ -153,6 +170,17 @@ struct RNCRangedSliderContent: View {
       }
       .frame(width: geometry.size.width, height: geometry.size.height)
     }
+  }
+
+  /// A capsule as thick as the track, running the given distance along the
+  /// slider. A length of `nil` leaves it to stretch the whole way.
+  private func track(_ color: Color, length: CGFloat?) -> some View {
+    Capsule()
+      .fill(color)
+      .frame(
+        width: model.vertical ? Self.trackThickness : length,
+        height: model.vertical ? length : Self.trackThickness
+      )
   }
 
   private func thumb(
@@ -172,14 +200,14 @@ struct RNCRangedSliderContent: View {
       // offset, leaving the circle itself where the value puts it.
       .padding(Self.thumbTouchSlop)
       .contentShape(Rectangle())
-      .offset(x: offset - Self.thumbTouchSlop)
+      .offset(offsetAlong(offset - Self.thumbTouchSlop))
       .gesture(
         DragGesture(minimumDistance: 0)
           .onChanged { gesture in
             let origin = dragOrigin(of: thumb) ?? beginDrag(of: thumb)
 
             let travelled = travel > 0
-              ? Double(gesture.translation.width / travel) * span(of: range)
+              ? Double(dragDistance(of: gesture) / travel) * span(of: range)
               : 0
             set(origin + travelled, of: thumb)
           }
@@ -320,14 +348,28 @@ struct RNCRangedSliderContent: View {
     range.upperBound - range.lowerBound
   }
 
-  /// Distance from the leading edge of the view to the leading edge of a thumb
-  /// sitting at `value`.
+  /// Distance from the end of the view the minimum value sits at to the near
+  /// edge of a thumb sitting at `value`.
   private func offset(
     of value: Double,
     in range: ClosedRange<Double>,
     travel: CGFloat
   ) -> CGFloat {
     CGFloat(fraction(of: value, in: range)) * travel
+  }
+
+  /// How far a drag has carried a thumb along the slider, towards the maximum
+  /// value. A vertical slider grows upwards, which SwiftUI's vertical
+  /// coordinates run backwards along.
+  private func dragDistance(of gesture: DragGesture.Value) -> CGFloat {
+    model.vertical ? -gesture.translation.height : gesture.translation.width
+  }
+
+  /// A shift of the given distance along the slider, away from the end its
+  /// minimum value sits at - the same direction `dragDistance(of:)` measures a
+  /// drag in.
+  private func offsetAlong(_ distance: CGFloat) -> CGSize {
+    model.vertical ? CGSize(width: 0, height: -distance) : CGSize(width: distance, height: 0)
   }
 
   private func fraction(of value: Double, in range: ClosedRange<Double>) -> Double {
@@ -350,7 +392,7 @@ struct RNCRangedSliderContent: View {
   /// Grown around the thumb on every side, to reach 44pt across.
   private static let thumbTouchSlop: CGFloat = 8
 
-  private static let trackHeight: CGFloat = 4
+  private static let trackThickness: CGFloat = 4
 
   /// What `Slider` leaves the unselected part of its track looking like.
   private static let trackColor = Color(uiColor: .systemFill)
@@ -435,6 +477,14 @@ public final class RNCSliderView: UIView {
     set { model.upperLimit = newValue }
   }
 
+  /// Whether the slider runs up the view rather than across it - see
+  /// `RNCSliderModel.vertical`. The shadow node measures a vertical slider the
+  /// other way round to match, so this only decides how it is drawn and dragged.
+  @objc public var vertical: Bool {
+    get { model.vertical }
+    set { model.vertical = newValue }
+  }
+
   @objc public var onValueChange: ((Double) -> Void)? {
     get { model.onValueChange }
     set { model.onValueChange = newValue }
@@ -491,7 +541,9 @@ public final class RNCSliderView: UIView {
   ///
   /// A ranged slider is deliberately measured the same way, from the single
   /// thumb: it is laid out inside whatever height it is given, and taking the
-  /// platform's own slider height keeps the two the same size.
+  /// platform's own slider height keeps the two the same size. A vertical
+  /// slider is too - it is the same control on its side, so its shadow node
+  /// turns this size round rather than measuring a second one.
   ///
   /// Must be called on the main thread.
   @objc public static func measuredIntrinsicSize() -> CGSize {

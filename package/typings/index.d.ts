@@ -70,6 +70,13 @@ export interface SliderProps extends ReactNative.ViewProps {
   step?: number;
 
   /**
+   * The orientation of Slider.
+   * Default is "horizontal".
+   * Switches the way how Slider is displayed.
+   */
+  orientation?: "horizontal" | "vertical";
+
+  /**
    * Callback continuously called while the user is dragging the slider.
    */
   onValueChange?: (value: number) => void;

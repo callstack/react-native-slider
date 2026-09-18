@@ -25,6 +25,20 @@ namespace facebook {
         public:
             using ConcreteViewShadowNode::ConcreteViewShadowNode;
 
+            /*
+             * The size this slider takes, given the size measured for a horizontal
+             * one. A vertical slider is the same control turned a quarter turn, so
+             * it stands as tall as a horizontal one is wide and as wide as one is
+             * tall - which is why neither platform measures it a second time.
+             */
+            Size sizeForOrientation(Size horizontalSize) const {
+                if (getConcreteProps().orientation != RNCSliderOrientation::Vertical) {
+                    return horizontalSize;
+                }
+
+                return {horizontalSize.height, horizontalSize.width};
+            }
+
 #ifdef ANDROID
             void setSliderMeasurementsManager(
                     const std::shared_ptr<RNCSliderMeasurementsManager> &measurementsManager);

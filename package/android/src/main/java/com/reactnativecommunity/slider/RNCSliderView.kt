@@ -4,6 +4,8 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
@@ -13,11 +15,16 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.Constraints
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.pow
@@ -69,6 +76,16 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    */
   private var lowerLimitValue by mutableFloatStateOf(DEFAULT_LOWER_LIMIT)
   private var upperLimitValue by mutableFloatStateOf(DEFAULT_UPPER_LIMIT)
+
+  /**
+   * Whether the slider is laid out along the view's height rather than its width,
+   * with the larger values at the top - see [sliderAxis].
+   *
+   * Kept as the one thing the orientation actually decides, rather than as the
+   * string it arrives as, so that anything other than "vertical" reads as the
+   * horizontal slider it defaults to.
+   */
+  private var isVertical by mutableStateOf(DEFAULT_VERTICAL)
 
   /**
    * Whether the user has hold of the slider. It lasts from the touch going down
@@ -167,6 +184,10 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     upperLimitValue = value.toFloat()
   }
 
+  fun setOrientation(value: String?) {
+    isVertical = value == ORIENTATION_VERTICAL
+  }
+
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     if (!isAttachedToWindow) {
       // Measuring the child here would make Compose look for a window recomposer
@@ -236,12 +257,59 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   @Composable
   private fun SliderContent() {
-    if (selectsRange) {
-      RangedSliderContent()
-    } else {
-      SingleSliderContent()
+    // The slider is only ever as thick as the control itself, and a vertical one
+    // is far narrower than the view is wide, so it sits in the middle of whatever
+    // room JS has given it rather than against one edge.
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      if (selectsRange) {
+        RangedSliderContent()
+      } else {
+        SingleSliderContent()
+      }
     }
   }
+
+  /**
+   * Lays the slider out along the axis the orientation asks for, stretched across
+   * the view.
+   *
+   * Material 3 has no vertical slider, so a vertical one here is its horizontal
+   * slider turned a quarter turn anticlockwise, which puts the larger values at
+   * the top. Everything the rotation encloses is the same control as ever - the
+   * range and the step, both thumbs of a ranged slider, the gestures [slidingGestures]
+   * listens to and the accessibility the platform's own slider comes with - it is
+   * only measured and drawn the other way round.
+   */
+  private fun Modifier.sliderAxis(): Modifier =
+    if (!isVertical) {
+      fillMaxWidth()
+    } else {
+      graphicsLayer {
+          rotationZ = -90f
+          // Turned about the top left corner, so that the slider ends up in the
+          // box the layout below reports rather than somewhere off the side of it.
+          transformOrigin = TransformOrigin(0f, 0f)
+        }
+        .layout { measurable, constraints ->
+          // Inside the rotation the slider is still a horizontal control, so it is
+          // offered the height it has to span as its width, and the other way round.
+          val placeable =
+            measurable.measure(
+              Constraints(
+                minWidth = constraints.minHeight,
+                maxWidth = constraints.maxHeight,
+                minHeight = constraints.minWidth,
+                maxHeight = constraints.maxWidth,
+              )
+            )
+
+          // Turning anticlockwise about the corner carries the slider straight up
+          // out of the view, so it is laid out one width to the left of it to come
+          // back down into place - taking up a box with its two sides swapped.
+          layout(placeable.height, placeable.width) { placeable.place(-placeable.width, 0) }
+        }
+        .fillMaxWidth()
+    }
 
   @Composable
   private fun SingleSliderContent() {
@@ -252,7 +320,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       value = sliderValue.coerceIn(range.start, range.endInclusive),
       valueRange = range,
       onValueChange = { moved -> onSliderValueChange(moved, limits) },
-      modifier = Modifier.fillMaxWidth().slidingGestures(),
+      modifier = Modifier.sliderAxis().slidingGestures(),
     )
   }
 
@@ -343,7 +411,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       value = selected,
       valueRange = range,
       onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved, limits = limits) },
-      modifier = Modifier.fillMaxWidth().slidingGestures(),
+      modifier = Modifier.sliderAxis().slidingGestures(),
     )
   }
 
@@ -397,6 +465,10 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     const val DEFAULT_STEP = 0.0
     const val DEFAULT_LOWER_LIMIT = 0f
     const val DEFAULT_UPPER_LIMIT = 1f
+    const val DEFAULT_VERTICAL = false
+
+    /** The one orientation that is not the default. */
+    private const val ORIENTATION_VERTICAL = "vertical"
   }
 }
 

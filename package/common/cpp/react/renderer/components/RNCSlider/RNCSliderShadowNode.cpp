@@ -19,7 +19,8 @@ namespace facebook {
         Size RNCSliderShadowNode::measureContent(
                 const LayoutContext & /*layoutContext*/,
                 const LayoutConstraints &layoutConstraints) const {
-            return measurementsManager_->measure(getSurfaceId(), layoutConstraints);
+            return sizeForOrientation(
+                    measurementsManager_->measure(getSurfaceId(), layoutConstraints));
         }
 #endif
 

@@ -63,6 +63,12 @@ export interface NativeProps extends ViewProps {
   upperLimit?: WithDefault<Double, 1>;
 
   /**
+   * Axis the slider is laid out along. A vertical slider holds its lowest
+   * value at the bottom and its highest at the top.
+   */
+  orientation?: WithDefault<'horizontal' | 'vertical', 'horizontal'>;
+
+  /**
    * Emitted continuously while the user drags the thumb.
    */
   onValueChange?: DirectEventHandler<SliderValueChangeEvent>;

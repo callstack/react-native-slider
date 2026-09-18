@@ -77,6 +77,7 @@ using namespace facebook::react;
   _sliderView.step = props.step;
   _sliderView.lowerLimit = props.lowerLimit;
   _sliderView.upperLimit = props.upperLimit;
+  _sliderView.vertical = props.orientation == RNCSliderOrientation::Vertical;
 }
 
 - (void)emitValueChange:(double)value
@@ -162,6 +163,9 @@ using namespace facebook::react;
   }
   if (oldViewProps.upperLimit != newViewProps.upperLimit) {
     _sliderView.upperLimit = newViewProps.upperLimit;
+  }
+  if (oldViewProps.orientation != newViewProps.orientation) {
+    _sliderView.vertical = newViewProps.orientation == RNCSliderOrientation::Vertical;
   }
 
   [super updateProps:props oldProps:oldProps];
