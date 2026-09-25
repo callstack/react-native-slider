@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FC } from 'react';
-import * as ReactNative from 'react-native';
+import { ColorValue, ViewProps } from 'react-native';
 
 export type ThumbProps = {
   /**
@@ -9,7 +9,7 @@ export type ThumbProps = {
   index: number
 }
 
-export interface SliderProps extends ReactNative.ViewProps {
+export interface SliderProps extends ViewProps {
   /**
    * Initial minimum value of the slider. Default value is 0.
    */
@@ -119,6 +119,21 @@ export interface SliderProps extends ReactNative.ViewProps {
    * Used to pass a custom component rendered as a thumb of the Slider.
    */
   thumb?: FC<ThumbProps>;
+
+  /**
+   * Defines the color the track from minimumValue to thumb, or left thumb (when ranged) will be.
+   */
+  minimumTrackColor?: ColorValue;
+
+  /**
+   * Defines the color the track from left thumb to right thumb (when ranged) will be.
+   */
+  middleRangeTrackColor?: ColorValue;
+
+  /**
+   * Defines the color the track from thumb, or right thumb (when ranged) to maximumValue will be.
+   */
+  maximumTrackColor?: ColorValue;
 }
 
 /**

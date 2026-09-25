@@ -5,6 +5,8 @@
 #import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
 #import <react/renderer/components/RNCSlider/RNCSliderComponentDescriptor.h>
 
+#import <React/RCTConversions.h>
+
 #import "RCTFabricComponentsPlugins.h"
 
 // The pod is called `react-native-slider`, so Swift lands in the
@@ -78,6 +80,9 @@ using namespace facebook::react;
   _sliderView.lowerLimit = props.lowerLimit;
   _sliderView.upperLimit = props.upperLimit;
   _sliderView.vertical = props.orientation == RNCSliderOrientation::Vertical;
+  _sliderView.minimumTrackColor = RCTUIColorFromSharedColor(props.minimumTrackColor);
+  _sliderView.middleRangeTrackColor = RCTUIColorFromSharedColor(props.middleRangeTrackColor);
+  _sliderView.maximumTrackColor = RCTUIColorFromSharedColor(props.maximumTrackColor);
 }
 
 - (void)emitValueChange:(double)value
@@ -166,6 +171,15 @@ using namespace facebook::react;
   }
   if (oldViewProps.orientation != newViewProps.orientation) {
     _sliderView.vertical = newViewProps.orientation == RNCSliderOrientation::Vertical;
+  }
+  if (oldViewProps.minimumTrackColor != newViewProps.minimumTrackColor) {
+    _sliderView.minimumTrackColor = RCTUIColorFromSharedColor(newViewProps.minimumTrackColor);
+  }
+  if (oldViewProps.middleRangeTrackColor != newViewProps.middleRangeTrackColor) {
+    _sliderView.middleRangeTrackColor = RCTUIColorFromSharedColor(newViewProps.middleRangeTrackColor);
+  }
+  if (oldViewProps.maximumTrackColor != newViewProps.maximumTrackColor) {
+    _sliderView.maximumTrackColor = RCTUIColorFromSharedColor(newViewProps.maximumTrackColor);
   }
 
   [super updateProps:props oldProps:oldProps];

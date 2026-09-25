@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.RangeSliderState
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,8 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,6 +40,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.floor
@@ -97,6 +103,16 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * horizontal slider it defaults to.
    */
   private var isVertical by mutableStateOf(DEFAULT_VERTICAL)
+
+  /**
+   * Tints of the three parts the thumbs cut the track into: below the thumb (or the
+   * left thumb), between the two thumbs of a ranged slider, and above the thumb (or
+   * the right thumb). [Color.Unspecified] leaves a part the colour Material 3 gives
+   * it - see [trackColors].
+   */
+  private var minimumTrackColor by mutableStateOf(Color.Unspecified)
+  private var middleRangeTrackColor by mutableStateOf(Color.Unspecified)
+  private var maximumTrackColor by mutableStateOf(Color.Unspecified)
 
   /**
    * Whether the user has hold of the slider. It lasts from the touch going down
@@ -259,6 +275,18 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     isVertical = value == ORIENTATION_VERTICAL
   }
 
+  fun setMinimumTrackColor(value: Int?) {
+    minimumTrackColor = value.toTrackColor()
+  }
+
+  fun setMiddleRangeTrackColor(value: Int?) {
+    middleRangeTrackColor = value.toTrackColor()
+  }
+
+  fun setMaximumTrackColor(value: Int?) {
+    maximumTrackColor = value.toTrackColor()
+  }
+
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     if (!isAttachedToWindow) {
       // Measuring the child here would make Compose look for a window recomposer
@@ -397,14 +425,23 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       interactionSource = interactionSource,
       thumb = { Thumb(interactionSource, index = 0) },
       track = { state ->
+        val colors = trackColors(active = minimumTrackColor, inactive = maximumTrackColor)
         if (customThumbCount > 0) {
-          SliderDefaults.Track(sliderState = state, thumbTrackGapSize = 0.dp)
+          SliderDefaults.Track(sliderState = state, colors = colors, thumbTrackGapSize = 0.dp)
         } else {
-          SliderDefaults.Track(sliderState = state)
+          SliderDefaults.Track(sliderState = state, colors = colors)
         }
       },
     )
   }
+
+  /**
+   * The slider's own colours, with the parts of the track JS has tinted swapped for
+   * the tints it gave. Material 3 fills in whatever is left [Color.Unspecified].
+   */
+  @Composable
+  private fun trackColors(active: Color, inactive: Color): SliderColors =
+    SliderDefaults.colors(activeTrackColor = active, inactiveTrackColor = inactive)
 
   /**
    * The built-in thumb, or - once JS has replaced it - the same thumb left undrawn,
@@ -533,14 +570,69 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       endInteractionSource = endInteractionSource,
       startThumb = { Thumb(startInteractionSource, index = 0) },
       endThumb = { Thumb(endInteractionSource, index = 1) },
-      track = { state ->
-        if (customThumbCount > 0) {
-          SliderDefaults.Track(rangeSliderState = state, thumbTrackGapSize = 0.dp)
-        } else {
-          SliderDefaults.Track(rangeSliderState = state)
-        }
-      },
+      track = { state -> RangedTrack(state) },
     )
+  }
+
+  /**
+   * The track of a ranged slider, tinted in three parts - see [minimumTrackColor].
+   *
+   * Material 3 draws both parts outside the span in the one inactive colour, so the
+   * track is drawn twice over, once in the colours of each end, and each copy is cut
+   * down to its own side of the left thumb. The cut runs through the centre of that
+   * thumb, where the track is hidden under it or under the gap it leaves around it,
+   * so the two copies meet unseen.
+   */
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  private fun RangedTrack(state: RangeSliderState) {
+    val span = state.valueRange.endInclusive - state.valueRange.start
+    val cut = if (span > 0f) ((state.activeRangeStart - state.valueRange.start) / span).coerceIn(0f, 1f) else 0f
+
+    Box {
+      RangedTrackPart(
+        state,
+        trackColors(active = middleRangeTrackColor, inactive = minimumTrackColor),
+        Modifier.clipAlongTrack(from = 0f, to = cut),
+      )
+      RangedTrackPart(
+        state,
+        trackColors(active = middleRangeTrackColor, inactive = maximumTrackColor),
+        Modifier.clipAlongTrack(from = cut, to = 1f),
+      )
+    }
+  }
+
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  private fun RangedTrackPart(state: RangeSliderState, colors: SliderColors, modifier: Modifier) {
+    if (customThumbCount > 0) {
+      SliderDefaults.Track(
+        rangeSliderState = state,
+        modifier = modifier,
+        colors = colors,
+        thumbTrackGapSize = 0.dp,
+      )
+    } else {
+      SliderDefaults.Track(rangeSliderState = state, modifier = modifier, colors = colors)
+    }
+  }
+
+  /**
+   * Draws only the stretch of the track between the two given fractions of it,
+   * counted from the end its minimum value is at - which is the right-hand one in a
+   * right-to-left layout, the way Material 3 lays the track out too.
+   *
+   * The track spans the distance between the centres of the two thumbs at either
+   * end of the range, so a fraction of its width is exactly where a thumb at that
+   * fraction of the range is centred.
+   */
+  private fun Modifier.clipAlongTrack(from: Float, to: Float): Modifier = drawWithContent {
+    val (left, right) =
+      if (layoutDirection == LayoutDirection.Rtl) (1f - to) to (1f - from) else from to to
+    clipRect(left = left * size.width, right = right * size.width) {
+      this@drawWithContent.drawContent()
+    }
   }
 
   /**
@@ -616,6 +708,9 @@ private class ThumbContainer(context: Context) : ViewGroup(context) {
 
   override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) = Unit
 }
+
+/** A colour coming from JS, where `null` means JS gave none. */
+private fun Int?.toTrackColor(): Color = this?.let { Color(it) } ?: Color.Unspecified
 
 /**
  * Rounds this value to the nearest multiple of [step].

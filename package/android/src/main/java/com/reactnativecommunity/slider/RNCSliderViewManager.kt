@@ -84,6 +84,21 @@ class RNCSliderViewManager :
     view.setOrientation(value)
   }
 
+  @ReactProp(name = "minimumTrackColor", customType = "Color")
+  override fun setMinimumTrackColor(view: RNCSliderView, value: Int?) {
+    view.setMinimumTrackColor(value)
+  }
+
+  @ReactProp(name = "middleRangeTrackColor", customType = "Color")
+  override fun setMiddleRangeTrackColor(view: RNCSliderView, value: Int?) {
+    view.setMiddleRangeTrackColor(value)
+  }
+
+  @ReactProp(name = "maximumTrackColor", customType = "Color")
+  override fun setMaximumTrackColor(view: RNCSliderView, value: Int?) {
+    view.setMaximumTrackColor(value)
+  }
+
   override fun addView(parent: RNCSliderView, child: View, index: Int) {
     parent.addThumbView(child, index)
   }

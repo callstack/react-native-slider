@@ -1,4 +1,4 @@
-import type {HostComponent, ViewProps} from 'react-native';
+import type {ColorValue, HostComponent, ViewProps} from 'react-native';
 import {codegenNativeComponent} from 'react-native';
 import type {
   Double,
@@ -67,6 +67,24 @@ export interface NativeProps extends ViewProps {
    * value at the bottom and its highest at the top.
    */
   orientation?: WithDefault<'horizontal' | 'vertical', 'horizontal'>;
+
+  /**
+   * Tint of the track from `minimumValue` up to the thumb, or up to the lower
+   * thumb of a ranged slider. Left unset, the platform's own tint is used.
+   */
+  minimumTrackColor?: ColorValue;
+
+  /**
+   * Tint of the track between the two thumbs of a ranged slider. Left unset,
+   * the platform's own tint is used.
+   */
+  middleRangeTrackColor?: ColorValue;
+
+  /**
+   * Tint of the track from the thumb, or from the upper thumb of a ranged
+   * slider, up to `maximumValue`. Left unset, the platform's own tint is used.
+   */
+  maximumTrackColor?: ColorValue;
 
   /**
    * Emitted continuously while the user drags the thumb.

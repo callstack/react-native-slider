@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import type {FC} from 'react';
 import {View} from 'react-native';
 import type {
+  ColorValue,
   NativeSyntheticEvent,
   StyleProp,
   ViewProps,
@@ -153,6 +154,21 @@ export type SliderProps = ViewProps &
      * Used to pass a custom component rendered as a thumb of the Slider.
      */
     thumb?: FC<ThumbProps>;
+
+    /**
+     * Defines the color the track from minimumValue to thumb, or left thumb (when ranged) will be.
+     */
+    minimumTrackColor?: ColorValue;
+
+    /**
+     * Defines the color the track from left thumb to right thumb (when ranged) will be.
+     */
+    middleRangeTrackColor?: ColorValue;
+
+    /**
+     * Defines the color the track from thumb, or right thumb (when ranged) to maximumValue will be.
+     */
+    maximumTrackColor?: ColorValue;
   }>;
 
 /**

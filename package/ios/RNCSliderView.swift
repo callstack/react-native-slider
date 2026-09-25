@@ -33,6 +33,14 @@ final class RNCSliderModel: ObservableObject {
   /// two thumbs and the events they report are the same either way round.
   @Published var vertical: Bool = false
 
+  /// Tints of the three parts the thumbs cut the track into: below the thumb (or
+  /// the left thumb), between the two thumbs of a ranged slider, and above the
+  /// thumb (or the right thumb). `nil` leaves a part looking the way `Slider`
+  /// draws it - see `RNCRangedSliderContent.trackSegments`.
+  @Published var minimumTrackColor: UIColor?
+  @Published var middleRangeTrackColor: UIColor?
+  @Published var maximumTrackColor: UIColor?
+
   /// How many of the thumbs JS has replaced with views of its own, counted from
   /// the left one - which the single thumb counts as. A replaced thumb is still
   /// there to be dragged, it is just no longer drawn; `RNCSliderView` lays the
@@ -208,7 +216,13 @@ struct RNCRangedSliderContent: View {
       let rightOffset = geometry.rightOffset
 
       let trackFillLength = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
-      let trackFillStartPoint = model.ranged ? min(leftOffset, rightOffset) + diameter / 2 : 0
+      let trackFillStartPoint = min(leftOffset, rightOffset) + diameter / 2
+      let trackUpperStartPoint = model.ranged ? rightOffset : leftOffset
+      let trackEndLength = model.ranged ? geometry.length - rightOffset : geometry.length - leftOffset
+
+      let lowerColor = tint(model.minimumTrackColor, or: model.ranged ? Self.trackColor : .accentColor)
+      let middleColor = tint(model.middleRangeTrackColor, or: .accentColor)
+      let upperColor = tint(model.maximumTrackColor, or: Self.trackColor)
 
       // Everything is placed by how far along the slider it sits, so the stack
       // is anchored at the end the minimum value is at: the leading edge across
@@ -216,11 +230,15 @@ struct RNCRangedSliderContent: View {
       ZStack(alignment: model.vertical ? .bottom : .leading) {
         track(Self.trackColor, length: nil)
 
+        track(lowerColor, length: leftOffset)
         // Drawn between the two thumb centres, which is why it is inset by half
         // a thumb. `max` keeps it from inverting on values crossed by JS.
-        track(Color.accentColor, length: trackFillLength)
-          .offset(offsetAlong(trackFillStartPoint))
+        if model.ranged {
+          track(middleColor, length: trackFillLength)
+            .offset(offsetAlong(trackFillStartPoint))
+        }
 
+        track(upperColor, length: trackEndLength).offset(offsetAlong(trackUpperStartPoint))
         if model.ranged {
           thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
           thumb(.left, diameter: diameter, offset: leftOffset, range: range, travel: travel)
@@ -233,8 +251,6 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  /// A capsule as thick as the track, running the given distance along the
-  /// slider. A length of `nil` leaves it to stretch the whole way.
   private func track(_ color: Color, length: CGFloat?) -> some View {
     Capsule()
       .fill(color)
@@ -242,6 +258,10 @@ struct RNCRangedSliderContent: View {
         width: model.vertical ? Self.trackThickness : length,
         height: model.vertical ? length : Self.trackThickness
       )
+  }
+
+  private func tint(_ color: UIColor?, or fallback: Color) -> Color {
+    color.map { Color(uiColor: $0) } ?? fallback
   }
 
   private func thumb(
@@ -550,6 +570,22 @@ public final class RNCSliderView: UIView {
   @objc public var vertical: Bool {
     get { model.vertical }
     set { model.vertical = newValue }
+  }
+
+  /// Tints of the parts of the track - see `RNCSliderModel.minimumTrackColor`.
+  @objc public var minimumTrackColor: UIColor? {
+    get { model.minimumTrackColor }
+    set { model.minimumTrackColor = newValue }
+  }
+
+  @objc public var middleRangeTrackColor: UIColor? {
+    get { model.middleRangeTrackColor }
+    set { model.middleRangeTrackColor = newValue }
+  }
+
+  @objc public var maximumTrackColor: UIColor? {
+    get { model.maximumTrackColor }
+    set { model.maximumTrackColor = newValue }
   }
 
   @objc public var onValueChange: ((Double) -> Void)? {
