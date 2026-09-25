@@ -1,5 +1,13 @@
 import * as React from 'react';
+import { FC } from 'react';
 import * as ReactNative from 'react-native';
+
+export type ThumbProps = {
+  /**
+   * Contains the exact step number on which this custom Thumb currently is.
+   */
+  index: number
+}
 
 export interface SliderProps extends ReactNative.ViewProps {
   /**
@@ -106,6 +114,11 @@ export interface SliderProps extends ReactNative.ViewProps {
    * regardless if the drag changed the value or not.
    */
   onSlidingComplete?: () => void;
+
+  /**
+   * Used to pass a custom component rendered as a thumb of the Slider.
+   */
+  thumb?: FC<ThumbProps>;
 }
 
 /**

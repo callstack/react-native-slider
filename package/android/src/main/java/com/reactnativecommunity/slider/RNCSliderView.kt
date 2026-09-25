@@ -1,30 +1,41 @@
 package callstack.slider
 
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.pow
@@ -103,6 +114,31 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    */
   private var isSliding = false
 
+  /**
+   * How many of the thumbs JS has replaced with views of its own, counted from the
+   * left one - which the single thumb counts as. A replaced thumb is still there to
+   * be dragged, it is just no longer drawn; the view JS gave is laid over it
+   * instead - see [thumbContainers].
+   */
+  private var customThumbCount by mutableIntStateOf(0)
+
+  /**
+   * The views JS rendered in place of the built-in thumbs, in the order it rendered
+   * them: the single thumb, or the left and then the right one.
+   */
+  private val thumbViews = mutableListOf<View>()
+
+  /**
+   * One for each thumb there can be, holding the view that replaces it. Each is
+   * moved so that its origin stays on the centre of its thumb: the shadow node
+   * centres the view it holds on that origin, so the view ends up centred on the
+   * thumb too.
+   *
+   * They handle no touches, and neither does a view JS renders as a thumb, so every
+   * touch falls through them to the slider underneath.
+   */
+  private val thumbContainers = List(MAXIMUM_THUMB_COUNT) { ThumbContainer(context) }
+
   /** Invoked continuously while the user drags the thumb. */
   var onValueChange: ((Double) -> Unit)? = null
 
@@ -132,6 +168,41 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   init {
     addView(composeView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+
+    // A custom thumb is centred on the origin of its container, and so hangs off
+    // it - and off the slider too, at either end of the track.
+    clipChildren = false
+    thumbContainers.forEach {
+      addView(it, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+    }
+  }
+
+  /** Takes a view JS rendered in place of a built-in thumb - see [thumbViews]. */
+  fun addThumbView(view: View, index: Int) {
+    thumbViews.add(index.coerceIn(0, thumbViews.size), view)
+    onThumbViewsChanged()
+  }
+
+  fun removeThumbViewAt(index: Int) {
+    val view = thumbViews.removeAt(index)
+    (view.parent as? ViewGroup)?.removeView(view)
+    onThumbViewsChanged()
+  }
+
+  fun getThumbViewCount(): Int = thumbViews.size
+
+  fun getThumbViewAt(index: Int): View? = thumbViews.getOrNull(index)
+
+  private fun onThumbViewsChanged() {
+    // A view inserted ahead of another moves that one onto the next thumb.
+    thumbContainers.zip(thumbViews).forEach { (container, view) ->
+      if (view.parent !== container) {
+        (view.parent as? ViewGroup)?.removeView(view)
+        container.addView(view)
+      }
+    }
+
+    customThumbCount = minOf(thumbViews.size, MAXIMUM_THUMB_COUNT)
   }
 
   fun setMinimumValue(value: Double) {
@@ -311,16 +382,59 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
         .fillMaxWidth()
     }
 
+  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun SingleSliderContent() {
     val range = valueRange()
     val limits = limits(range)
+    val interactionSource = remember { MutableInteractionSource() }
 
     Slider(
       value = sliderValue.coerceIn(range.start, range.endInclusive),
       valueRange = range,
       onValueChange = { moved -> onSliderValueChange(moved, limits) },
       modifier = Modifier.sliderAxis().slidingGestures(),
+      interactionSource = interactionSource,
+      thumb = { Thumb(interactionSource, index = 0) },
+      track = { state ->
+        if (customThumbCount > 0) {
+          SliderDefaults.Track(sliderState = state, thumbTrackGapSize = 0.dp)
+        } else {
+          SliderDefaults.Track(sliderState = state)
+        }
+      },
+    )
+  }
+
+  /**
+   * The built-in thumb, or - once JS has replaced it - the same thumb left undrawn,
+   * so that it keeps its place in the slider's geometry and the view that replaces
+   * it has a centre to follow.
+   *
+   * The centre is read off the thumb itself rather than worked out from the value,
+   * which leaves the geometry to Material 3 and takes the rotation of a vertical
+   * slider along with it.
+   */
+  @Composable
+  private fun Thumb(interactionSource: MutableInteractionSource, index: Int) {
+    if (index >= customThumbCount) {
+      SliderDefaults.Thumb(interactionSource = interactionSource)
+      return
+    }
+
+    SliderDefaults.Thumb(
+      interactionSource = interactionSource,
+      modifier =
+        Modifier.alpha(0f).onGloballyPositioned { coordinates ->
+          // The slider is hosted across the whole of this view, so the root of
+          // its composition is this view's own coordinate space.
+          val center =
+            coordinates.localToRoot(
+              Offset(coordinates.size.width / 2f, coordinates.size.height / 2f)
+            )
+          thumbContainers[index].translationX = center.x
+          thumbContainers[index].translationY = center.y
+        },
     )
   }
 
@@ -401,17 +515,31 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * reports the whole span at once. Splitting that back into a thumb apiece is left
    * to [onSelectedRangeChange].
    */
+  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun RangedSliderContent() {
     val range = valueRange()
     val selected = selectedRange(range)
     val limits = limits(range)
+    val startInteractionSource = remember { MutableInteractionSource() }
+    val endInteractionSource = remember { MutableInteractionSource() }
 
     RangeSlider(
       value = selected,
       valueRange = range,
       onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved, limits = limits) },
       modifier = Modifier.sliderAxis().slidingGestures(),
+      startInteractionSource = startInteractionSource,
+      endInteractionSource = endInteractionSource,
+      startThumb = { Thumb(startInteractionSource, index = 0) },
+      endThumb = { Thumb(endInteractionSource, index = 1) },
+      track = { state ->
+        if (customThumbCount > 0) {
+          SliderDefaults.Track(rangeSliderState = state, thumbTrackGapSize = 0.dp)
+        } else {
+          SliderDefaults.Track(rangeSliderState = state)
+        }
+      },
     )
   }
 
@@ -469,7 +597,24 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
     /** The one orientation that is not the default. */
     private const val ORIENTATION_VERTICAL = "vertical"
+
+    /** The two thumbs of a ranged slider. */
+    private const val MAXIMUM_THUMB_COUNT = 2
   }
+}
+
+/**
+ * Holds the view JS renders in place of a thumb - see `RNCSliderView.thumbContainers`.
+ *
+ * Fabric lays that view out itself, so this lays out nothing, and leaves the view
+ * drawn wherever it hangs off it.
+ */
+private class ThumbContainer(context: Context) : ViewGroup(context) {
+  init {
+    clipChildren = false
+  }
+
+  override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) = Unit
 }
 
 /**

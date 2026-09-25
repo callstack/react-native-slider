@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 import UIKit
 
@@ -31,6 +32,12 @@ final class RNCSliderModel: ObservableObject {
   /// Only the geometry changes with it: the range, the step, the limits, the
   /// two thumbs and the events they report are the same either way round.
   @Published var vertical: Bool = false
+
+  /// How many of the thumbs JS has replaced with views of its own, counted from
+  /// the left one - which the single thumb counts as. A replaced thumb is still
+  /// there to be dragged, it is just no longer drawn; `RNCSliderView` lays the
+  /// view JS gave over it instead.
+  @Published var customThumbCount: Int = 0
 
   /// The value a thumb had when the drag in progress began, or `nil` when that
   /// thumb is not being dragged. The single thumb keeps its origin in the left
@@ -81,6 +88,71 @@ final class RNCSliderModel: ObservableObject {
   }
 }
 
+/// Where the thumbs of the slider sit in a view of the given size.
+///
+/// The slider draws the thumbs, but a custom thumb from JS is a UIKit view laid
+/// over it, so both of them read the geometry from here to agree on where a
+/// thumb is.
+///
+/// The geometry is written along two axes rather than across the view: values
+/// are spread along its *length*, and the thumbs are as thick as its *breadth*
+/// allows. Which of the view's two sides each of those is comes from
+/// `RNCSliderModel.vertical`.
+struct RNCSliderGeometry {
+  let size: CGSize
+  let vertical: Bool
+  let range: ClosedRange<Double>
+  let length: CGFloat
+  let breadth: CGFloat
+
+  /// A thumb is never thicker than the slider itself: JS decides how much room
+  /// there is across it, and a thumb spilling out would draw over its
+  /// neighbours.
+  let diameter: CGFloat
+
+  /// The span the near edge of a thumb moves across. The thumbs of a ranged
+  /// slider stay fully inside the view, so it is short of the length by one
+  /// thumb there.
+  let travel: CGFloat
+
+  /// Distance from the end of the view the minimum value sits at to the near
+  /// edge of the left (or single) and of the right thumb.
+  let leftOffset: CGFloat
+  let rightOffset: CGFloat
+
+  init(model: RNCSliderModel, size: CGSize) {
+    self.size = size
+    vertical = model.vertical
+    range = model.range
+    length = vertical ? size.height : size.width
+    breadth = vertical ? size.width : size.height
+    diameter = min(Self.thumbDiameter, breadth)
+    travel = max(length - (model.ranged ? diameter : 0), 0)
+    leftOffset = CGFloat(Self.fraction(of: model.ranged ? model.valueLeft : model.value, in: range)) * travel
+    rightOffset = CGFloat(Self.fraction(of: model.valueRight, in: range)) * travel
+  }
+
+  // Centre of the thumb whose near edge sits the given distance along the slider, in the coordinates of the view.
+  // The thumbs lie along the middle of the view, and a vertical slider grows upwards.
+  func thumbCenter(atOffset offset: CGFloat) -> CGPoint {
+    let along = offset + diameter / 2
+
+    return vertical
+      ? CGPoint(x: size.width / 2, y: size.height - along)
+      : CGPoint(x: along, y: size.height / 2)
+  }
+
+  static func fraction(of value: Double, in range: ClosedRange<Double>) -> Double {
+    let span = range.upperBound - range.lowerBound
+    guard span > 0 else { return 0 }
+
+    return ((value - range.lowerBound) / span).clamped(to: 0...1)
+  }
+
+  /// Matches the thumb `UISlider` draws.
+  static let thumbDiameter: CGFloat = 28
+}
+
 struct RNCSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
@@ -113,12 +185,9 @@ struct RNCSingleSliderContent: View {
 /// follows `Slider` - a capsule track with the selected part tinted, and a white
 /// circular thumb - so that this slider does not look foreign next to a plain one.
 ///
-/// The geometry is written along two axes rather than across the view: values
-/// are spread along its *length*, and the track and thumbs are as thick as its
-/// *breadth* allows. Which of the view's two sides each of those is comes from
-/// `RNCSliderModel.vertical` - and on a vertical slider the left thumb is the
-/// bottom one, the direction its value grows in being the only thing that
-/// changes.
+/// Where everything goes is worked out by `RNCSliderGeometry` - and on a
+/// vertical slider the left thumb is the bottom one, the direction its value
+/// grows in being the only thing that changes.
 struct RNCRangedSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
@@ -130,21 +199,13 @@ struct RNCRangedSliderContent: View {
   }
 
   var body: some View {
-    GeometryReader { geometry in
-      let range = model.range
-      let length = model.vertical ? geometry.size.height : geometry.size.width
-      let breadth = model.vertical ? geometry.size.width : geometry.size.height
-
-      // A thumb is never thicker than the slider itself: JS decides how much
-      // room there is across it, and a thumb spilling out would draw over its
-      // neighbours.
-      let diameter = min(Self.thumbDiameter, breadth)
-      // The span the centre of a thumb moves across. Both thumbs stay fully
-      // inside the view, so it is short of the length by one thumb.
-      let travel = max(length - (model.ranged ? diameter : 0), 0)
-
-      let leftOffset = offset(of: model.ranged ? model.valueLeft : model.value, in: range, travel: travel)
-      let rightOffset = offset(of: model.valueRight, in: range, travel: travel)
+    GeometryReader { proxy in
+      let geometry = RNCSliderGeometry(model: model, size: proxy.size)
+      let range = geometry.range
+      let diameter = geometry.diameter
+      let travel = geometry.travel
+      let leftOffset = geometry.leftOffset
+      let rightOffset = geometry.rightOffset
 
       let trackFillLength = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
       let trackFillStartPoint = model.ranged ? min(leftOffset, rightOffset) + diameter / 2 : 0
@@ -168,7 +229,7 @@ struct RNCRangedSliderContent: View {
           thumb(.single, diameter: diameter, offset: leftOffset, range: range, travel: travel)
         }
       }
-      .frame(width: geometry.size.width, height: geometry.size.height)
+      .frame(width: proxy.size.width, height: proxy.size.height)
     }
   }
 
@@ -190,9 +251,13 @@ struct RNCRangedSliderContent: View {
     range: ClosedRange<Double>,
     travel: CGFloat
   ) -> some View {
-    Circle()
-      .fill(Color.white)
-      .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+    // A thumb JS has replaced is still here to be dragged, only undrawn - the
+    // clear circle keeps its place and the padding below keeps its touch area.
+    let isReplaced = isCustom(thumb)
+
+    return Circle()
+      .fill(isReplaced ? Color.clear : Color.white)
+      .shadow(color: isReplaced ? .clear : .black.opacity(0.25), radius: 2, y: 1)
       .frame(width: diameter, height: diameter)
       // A thumb is a small thing to grab, and the two of them can end up right
       // next to each other, so the area that answers to a touch is padded out
@@ -232,7 +297,12 @@ struct RNCRangedSliderContent: View {
       }
   }
 
-  // MARK: - Values
+  private func isCustom(_ thumb: Thumb) -> Bool {
+    switch thumb {
+    case .single, .left: return model.customThumbCount > 0
+    case .right: return model.customThumbCount > 1
+    }
+  }
 
   private func value(of thumb: Thumb) -> Double {
     switch thumb {
@@ -342,20 +412,8 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  // MARK: - Geometry
-
   private func span(of range: ClosedRange<Double>) -> Double {
     range.upperBound - range.lowerBound
-  }
-
-  /// Distance from the end of the view the minimum value sits at to the near
-  /// edge of a thumb sitting at `value`.
-  private func offset(
-    of value: Double,
-    in range: ClosedRange<Double>,
-    travel: CGFloat
-  ) -> CGFloat {
-    CGFloat(fraction(of: value, in: range)) * travel
   }
 
   /// How far a drag has carried a thumb along the slider, towards the maximum
@@ -372,22 +430,12 @@ struct RNCRangedSliderContent: View {
     model.vertical ? CGSize(width: 0, height: -distance) : CGSize(width: distance, height: 0)
   }
 
-  private func fraction(of value: Double, in range: ClosedRange<Double>) -> Double {
-    let span = span(of: range)
-    guard span > 0 else { return 0 }
-
-    return ((value - range.lowerBound) / span).clamped(to: 0...1)
-  }
-
   private func percentage(of value: Double, in range: ClosedRange<Double>) -> String {
     NumberFormatter.localizedString(
-      from: NSNumber(value: fraction(of: value, in: range)),
+      from: NSNumber(value: RNCSliderGeometry.fraction(of: value, in: range)),
       number: .percent
     )
   }
-
-  /// Matches the thumb `UISlider` draws.
-  private static let thumbDiameter: CGFloat = 28
 
   /// Grown around the thumb on every side, to reach 44pt across.
   private static let thumbTouchSlop: CGFloat = 8
@@ -409,6 +457,25 @@ public final class RNCSliderView: UIView {
 
   private let model: RNCSliderModel
   private let hostingController: UIHostingController<RNCSliderContent>
+
+  /// The views JS rendered in place of the built-in thumbs, in the order it
+  /// rendered them: the single thumb, or the left and then the right one.
+  private var thumbViews: [UIView] = []
+
+  /// One for each thumb there can be, holding the view that replaces it. Each
+  /// is kept centred on its thumb and takes up no room of its own: the shadow
+  /// node centres the view it holds on its origin, so the view ends up centred
+  /// on the thumb too.
+  ///
+  /// They take no touches, which leaves every drag to the slider underneath.
+  private let thumbContainers: [UIView] = (0..<2).map { _ in
+    let container = UIView()
+    container.isUserInteractionEnabled = false
+    return container
+  }
+
+  /// Keeps the custom thumbs moving with the slider - see `layoutSubviews`.
+  private var modelObservation: AnyCancellable?
 
   @objc public var minimumValue: Double {
     get { model.minimumValue }
@@ -525,6 +592,14 @@ public final class RNCSliderView: UIView {
       hostingController.safeAreaRegions = []
     }
     addSubview(hostingController.view)
+    thumbContainers.forEach(addSubview)
+
+    // Every change the slider could redraw its thumbs for may have moved them,
+    // a drag above all. It is only announced before it lands, so the custom
+    // thumbs are moved in the layout pass that follows it.
+    modelObservation = model.objectWillChange.sink { [weak self] _ in
+      self?.setNeedsLayout()
+    }
   }
 
   @available(*, unavailable)
@@ -576,9 +651,38 @@ public final class RNCSliderView: UIView {
     model.rightDragOrigin = nil
   }
 
+  /// Takes a view JS rendered in place of a built-in thumb - see
+  /// `thumbViews`.
+  @objc(mountThumbView:atIndex:)
+  public func mountThumbView(_ view: UIView, at index: Int) {
+    thumbViews.insert(view, at: min(index, thumbViews.count))
+    thumbViewsDidChange()
+  }
+
+  @objc(unmountThumbView:)
+  public func unmountThumbView(_ view: UIView) {
+    thumbViews.removeAll { $0 === view }
+    view.removeFromSuperview()
+    thumbViewsDidChange()
+  }
+
+  private func thumbViewsDidChange() {
+    // A view inserted ahead of another moves that one onto the next thumb.
+    for (container, view) in zip(thumbContainers, thumbViews) where view.superview !== container {
+      container.addSubview(view)
+    }
+
+    model.customThumbCount = min(thumbViews.count, thumbContainers.count)
+  }
+
   public override func layoutSubviews() {
     super.layoutSubviews()
     hostingController.view.frame = bounds
+
+    // The hosted slider fills this view, so its geometry is this view's too.
+    let geometry = RNCSliderGeometry(model: model, size: bounds.size)
+    thumbContainers[0].center = geometry.thumbCenter(atOffset: geometry.leftOffset)
+    thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)
   }
 
   public override func didMoveToWindow() {

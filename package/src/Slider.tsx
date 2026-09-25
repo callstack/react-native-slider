@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
+import type {FC} from 'react';
+import {View} from 'react-native';
 import type {
   NativeSyntheticEvent,
   StyleProp,
@@ -12,6 +14,16 @@ type SliderValueChangeEvent = NativeSyntheticEvent<
     value: number;
   }>
 >;
+
+export type ThumbProps = {
+  /**
+   * Contains the exact step number on which this custom Thumb currently is.
+   *
+   * Steps are counted from `minimumValue`, which is step 0.
+   * A slider with no `step` has no steps to count, and reports 0.
+   */
+  index: number;
+};
 
 export type SliderProps = ViewProps &
   Readonly<{
@@ -136,6 +148,11 @@ export type SliderProps = ViewProps &
      * regardless if the drag changed the value or not.
      */
     onSlidingComplete?: () => void;
+
+    /**
+     * Used to pass a custom component rendered as a thumb of the Slider.
+     */
+    thumb?: FC<ThumbProps>;
   }>;
 
 /**
@@ -147,6 +164,41 @@ const valueHandler = (onChange?: (value: number) => void) =>
   onChange
     ? (event: SliderValueChangeEvent) => onChange(event.nativeEvent.value)
     : undefined;
+
+const stepIndex = (
+  value: number,
+  minimumValue: number,
+  maximumValue: number,
+  step: number,
+) => {
+  if (step <= 0) {
+    return 0;
+  }
+
+  const clamped = Math.min(
+    Math.max(value, minimumValue),
+    Math.max(maximumValue, minimumValue),
+  );
+
+  return Math.round((clamped - minimumValue) / step);
+};
+
+const useThumbValue = (value: number) => {
+  const [dispatched, setDispatched] = useState({given: value, value});
+  const current = dispatched.given === value ? dispatched.value : value;
+
+  return [
+    current,
+    (newValue: number) => setDispatched({given: value, value: newValue}),
+  ] as const;
+};
+
+const thumbValueHandler =
+  (callback: (value: number) => void, onChange?: (value: number) => void) =>
+  (value: number) => {
+    callback(value);
+    onChange?.(value);
+  };
 
 const Slider = ({
   minimumValue = 0,
@@ -162,8 +214,27 @@ const Slider = ({
   onValueChange,
   onLeftValueChange,
   onRightValueChange,
+  thumb: Thumb,
   ...props
 }: SliderProps) => {
+  const [currentValue, setCurrentValue] = useThumbValue(value);
+  const [currentValueLeft, setCurrentValueLeft] = useThumbValue(valueLeft);
+  const [currentValueRight, setCurrentValueRight] = useThumbValue(valueRight);
+
+  const handleValueChange = Thumb
+    ? thumbValueHandler(setCurrentValue, onValueChange)
+    : onValueChange;
+  const handleLeftValueChange = Thumb
+    ? thumbValueHandler(setCurrentValueLeft, onLeftValueChange)
+    : onLeftValueChange;
+  const handleRightValueChange = Thumb
+    ? thumbValueHandler(setCurrentValueRight, onRightValueChange)
+    : onRightValueChange;
+
+  const thumbValues = ranged
+    ? [currentValueLeft, currentValueRight]
+    : [currentValue];
+
   return (
     <RNCSliderNativeComponent
       {...props}
@@ -177,10 +248,18 @@ const Slider = ({
       lowerLimit={lowerLimit}
       upperLimit={upperLimit}
       orientation={orientation}
-      onValueChange={valueHandler(onValueChange)}
-      onLeftValueChange={valueHandler(onLeftValueChange)}
-      onRightValueChange={valueHandler(onRightValueChange)}
-    />
+      onValueChange={valueHandler(handleValueChange)}
+      onLeftValueChange={valueHandler(handleLeftValueChange)}
+      onRightValueChange={valueHandler(handleRightValueChange)}>
+      {Thumb ? 
+        thumbValues.map((thumbValue, thumbIndex) => (
+          <View key={thumbIndex} collapsable={false} pointerEvents="none">
+            <Thumb
+              index={stepIndex(thumbValue, minimumValue, maximumValue, step)}
+            />
+          </View>
+        )) : null}
+    </RNCSliderNativeComponent>
   );
 };
 

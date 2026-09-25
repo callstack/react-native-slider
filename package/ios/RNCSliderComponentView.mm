@@ -171,6 +171,18 @@ using namespace facebook::react;
   [super updateProps:props oldProps:oldProps];
 }
 
+// The only children a slider has are the custom thumbs JS renders in place of
+// the built-in ones, and the slider view is what keeps them on its thumbs.
+- (void)mountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
+{
+  [_sliderView mountThumbView:childComponentView atIndex:index];
+}
+
+- (void)unmountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
+{
+  [_sliderView unmountThumbView:childComponentView];
+}
+
 - (void)prepareForRecycle
 {
   [super prepareForRecycle];

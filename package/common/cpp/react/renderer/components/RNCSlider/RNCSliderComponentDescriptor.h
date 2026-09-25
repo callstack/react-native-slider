@@ -22,14 +22,10 @@ namespace facebook {
                 auto &rncSliderShadowNode =
                         static_cast<RNCSliderShadowNode &>(shadowNode);
 
-                // `RNCSliderShadowNode` uses `RNCSliderMeasurementsManager` to
-                // provide measurements to Yoga.
+                // `RNCSliderShadowNode` uses `RNCSliderMeasurementsManager` to provide measurements to Yoga.
+                // It is a measured leaf by its own traits. see `RNCSliderShadowNode::BaseTraits`.
                 rncSliderShadowNode.setSliderMeasurementsManager(
                         measurementsManager_);
-
-                // All `RNCSliderShadowNode`s must have leaf Yoga nodes with properly
-                // setup measure function.
-                rncSliderShadowNode.enableMeasurement();
             }
         private:
             const std::shared_ptr<RNCSliderMeasurementsManager> measurementsManager_;

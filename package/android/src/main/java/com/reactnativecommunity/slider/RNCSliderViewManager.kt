@@ -1,11 +1,12 @@
 package callstack.slider
 
 import android.content.Context
+import android.view.View
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
-import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
+import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.RNCSliderManagerDelegate
@@ -13,10 +14,16 @@ import com.facebook.react.viewmanagers.RNCSliderManagerInterface
 import com.facebook.yoga.YogaMeasureMode
 import com.facebook.yoga.YogaMeasureOutput
 
-/** Manages instances of [RNCSliderView]. */
+/**
+ * Manages instances of [RNCSliderView].
+ *
+ * The only children a slider has are the custom thumbs JS renders in place of the
+ * built-in ones, which the view keeps apart from the slider it hosts - so its
+ * children are the thumbs, and not the views it happens to hold.
+ */
 @ReactModule(name = RNCSliderViewManager.REACT_CLASS)
 class RNCSliderViewManager :
-  SimpleViewManager<RNCSliderView>(), RNCSliderManagerInterface<RNCSliderView> {
+  ViewGroupManager<RNCSliderView>(), RNCSliderManagerInterface<RNCSliderView> {
 
   private val delegate: ViewManagerDelegate<RNCSliderView> = RNCSliderManagerDelegate(this)
 
@@ -75,6 +82,18 @@ class RNCSliderViewManager :
   @ReactProp(name = "orientation")
   override fun setOrientation(view: RNCSliderView, value: String?) {
     view.setOrientation(value)
+  }
+
+  override fun addView(parent: RNCSliderView, child: View, index: Int) {
+    parent.addThumbView(child, index)
+  }
+
+  override fun getChildCount(parent: RNCSliderView): Int = parent.getThumbViewCount()
+
+  override fun getChildAt(parent: RNCSliderView, index: Int): View? = parent.getThumbViewAt(index)
+
+  override fun removeViewAt(parent: RNCSliderView, index: Int) {
+    parent.removeThumbViewAt(index)
   }
 
   override fun addEventEmitters(reactContext: ThemedReactContext, view: RNCSliderView) {
