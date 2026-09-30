@@ -32,7 +32,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -383,13 +382,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     if (!isVertical) {
       fillMaxWidth()
     } else {
-      graphicsLayer {
-          rotationZ = -90f
-          // Turned about the top left corner, so that the slider ends up in the
-          // box the layout below reports rather than somewhere off the side of it.
-          transformOrigin = TransformOrigin(0f, 0f)
-        }
-        .layout { measurable, constraints ->
+      layout { measurable, constraints ->
           // Inside the rotation the slider is still a horizontal control, so it is
           // offered the height it has to span as its width, and the other way round.
           val placeable =
@@ -402,10 +395,22 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
               )
             )
 
-          // Turning anticlockwise about the corner carries the slider straight up
-          // out of the view, so it is laid out one width to the left of it to come
-          // back down into place - taking up a box with its two sides swapped.
-          layout(placeable.height, placeable.width) { placeable.place(-placeable.width, 0) }
+          // Turning anticlockwise about its top left corner carries the slider
+          // straight up out of the view, so it is placed one width further down to
+          // come back into place - filling a box with its two sides swapped.
+          //
+          // The rotation is applied here, on the slider inside the box, rather than
+          // on the box itself: touches are hit-tested against the bounds of every
+          // node on their way in, with each one's rotation undone. Rotating the box
+          // would leave the slider laid out off to the side of it, outside the
+          // bounds the touch is checked against, and all but a sliver at the very
+          // edge of the box would miss the slider altogether.
+          layout(placeable.height, placeable.width) {
+            placeable.placeWithLayer(0, placeable.width) {
+              rotationZ = -90f
+              transformOrigin = TransformOrigin(0f, 0f)
+            }
+          }
         }
         .fillMaxWidth()
     }
@@ -490,6 +495,9 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     pointerInput(Unit) {
       awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        if (isVertical) {
+          claimGesture()
+        }
         beginSliding()
 
         try {
@@ -506,6 +514,26 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
         }
       }
     }
+
+  /**
+   * Keeps the views this slider sits in from taking the gesture away from it.
+   *
+   * A vertical slider is dragged along the same axis a vertical scroll view scrolls
+   * along, and the scroll view gets to intercept every move before the slider sees
+   * it. Both wait for the finger to travel past the touch slop, so the scroll view
+   * would win that race and cancel the drag - and a ranged slider, which only picks
+   * the thumb to drag once the slop is crossed, would hardly ever get hold of one.
+   * So the gesture is claimed as soon as it lands on the slider instead.
+   *
+   * A horizontal slider is left to share its touches: it moves across the way a
+   * page scrolls, so the two tell each other apart on their own, and claiming the
+   * press would stop the page scrolling from any touch that happens to start on it.
+   *
+   * The claim lasts until the finger comes off, when Android lets it go by itself.
+   */
+  private fun claimGesture() {
+    parent?.requestDisallowInterceptTouchEvent(true)
+  }
 
   private fun beginSliding() {
     if (isSliding) {
