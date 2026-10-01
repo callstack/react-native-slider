@@ -104,7 +104,8 @@ final class RNCSliderModel: ObservableObject {
 ///
 /// The geometry is written along two axes rather than across the view: values
 /// are spread along its *length*, and the thumbs are as thick as its *breadth*
-/// allows. Which of the view's two sides each of those is comes from
+/// allows. A thumb has a length and a thickness of its own too, as the thumb
+/// `Slider` draws is not round everywhere - see `thumbLength`. Which of the view's two sides each of those is comes from
 /// `RNCSliderModel.vertical`.
 struct RNCSliderGeometry {
   let size: CGSize
@@ -113,10 +114,14 @@ struct RNCSliderGeometry {
   let length: CGFloat
   let breadth: CGFloat
 
+  /// The extent of a thumb along the slider and across it.
+  ///
   /// A thumb is never thicker than the slider itself: JS decides how much room
   /// there is across it, and a thumb spilling out would draw over its
-  /// neighbours.
-  let diameter: CGFloat
+  /// neighbours. One that has to be thinner is shrunk as a whole, keeping its
+  /// shape.
+  let thumbLength: CGFloat
+  let thumbThickness: CGFloat
 
   /// The span the near edge of a thumb moves across. The thumbs of a ranged
   /// slider stay fully inside the view, so it is short of the length by one
@@ -134,8 +139,10 @@ struct RNCSliderGeometry {
     range = model.range
     length = vertical ? size.height : size.width
     breadth = vertical ? size.width : size.height
-    diameter = min(Self.thumbDiameter, breadth)
-    travel = max(length - (model.ranged ? diameter : 0), 0)
+    let thumbScale = min(breadth / Self.thumbThickness, 1)
+    thumbLength = Self.thumbLength * thumbScale
+    thumbThickness = Self.thumbThickness * thumbScale
+    travel = max(length - (model.ranged ? thumbLength : 0), 0)
     leftOffset = CGFloat(Self.fraction(of: model.ranged ? model.valueLeft : model.value, in: range)) * travel
     rightOffset = CGFloat(Self.fraction(of: model.valueRight, in: range)) * travel
   }
@@ -143,7 +150,7 @@ struct RNCSliderGeometry {
   // Centre of the thumb whose near edge sits the given distance along the slider, in the coordinates of the view.
   // The thumbs lie along the middle of the view, and a vertical slider grows upwards.
   func thumbCenter(atOffset offset: CGFloat) -> CGPoint {
-    let along = offset + diameter / 2
+    let along = offset + thumbLength / 2
 
     return vertical
       ? CGPoint(x: size.width / 2, y: size.height - along)
@@ -157,8 +164,21 @@ struct RNCSliderGeometry {
     return ((value - range.lowerBound) / span).clamped(to: 0...1)
   }
 
-  /// Matches the thumb `UISlider` draws.
-  static let thumbDiameter: CGFloat = 28
+  /// Match the thumb `UISlider` draws: a capsule lying along the track since
+  /// iOS 26, and a circle before it.
+  static var thumbLength: CGFloat {
+    if #available(iOS 26.0, *) {
+      return 38
+    }
+    return 28
+  }
+
+  static var thumbThickness: CGFloat {
+    if #available(iOS 26.0, *) {
+      return 24
+    }
+    return 28
+  }
 }
 
 struct RNCSliderContent: View {
@@ -191,7 +211,8 @@ struct RNCSingleSliderContent: View {
 /// SwiftUI has no two-thumb slider and no vertical one, so the slider is drawn
 /// here: a track, the selected span, and a thumb at each end of it. The shape
 /// follows `Slider` - a capsule track with the selected part tinted, and a white
-/// circular thumb - so that this slider does not look foreign next to a plain one.
+/// capsule thumb that turns to Liquid Glass while it is held on iOS 26 - so that
+/// this slider does not look foreign next to a plain one.
 ///
 /// Where everything goes is worked out by `RNCSliderGeometry` - and on a
 /// vertical slider the left thumb is the bottom one, the direction its value
@@ -206,17 +227,27 @@ struct RNCRangedSliderContent: View {
     case right
   }
 
+  /// Whether the user has hold of the left (or single) and of the right thumb,
+  /// which is what turns it to glass. Kept apart from the drag origins in the
+  /// model, as a gesture state resets itself however the touch ends - a
+  /// cancelled one included.
+  @GestureState private var isLeftThumbPressed = false
+  @GestureState private var isRightThumbPressed = false
+
   var body: some View {
     GeometryReader { proxy in
       let geometry = RNCSliderGeometry(model: model, size: proxy.size)
       let range = geometry.range
-      let diameter = geometry.diameter
+      let thumbSize = CGSize(
+        width: model.vertical ? geometry.thumbThickness : geometry.thumbLength,
+        height: model.vertical ? geometry.thumbLength : geometry.thumbThickness
+      )
       let travel = geometry.travel
       let leftOffset = geometry.leftOffset
       let rightOffset = geometry.rightOffset
 
       let trackFillLength = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
-      let trackFillStartPoint = min(leftOffset, rightOffset) + diameter / 2
+      let trackFillStartPoint = min(leftOffset, rightOffset) + geometry.thumbLength / 2
       let trackUpperStartPoint = model.ranged ? rightOffset : leftOffset
       let trackEndLength = model.ranged ? geometry.length - rightOffset : geometry.length - leftOffset
 
@@ -240,11 +271,11 @@ struct RNCRangedSliderContent: View {
 
         track(upperColor, length: trackEndLength).offset(offsetAlong(trackUpperStartPoint))
         if model.ranged {
-          thumb(.right, diameter: diameter, offset: rightOffset, range: range, travel: travel)
-          thumb(.left, diameter: diameter, offset: leftOffset, range: range, travel: travel)
+          thumb(.right, size: thumbSize, offset: rightOffset, range: range, travel: travel)
+          thumb(.left, size: thumbSize, offset: leftOffset, range: range, travel: travel)
             .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
         } else {
-          thumb(.single, diameter: diameter, offset: leftOffset, range: range, travel: travel)
+          thumb(.single, size: thumbSize, offset: leftOffset, range: range, travel: travel)
         }
       }
       .frame(width: proxy.size.width, height: proxy.size.height)
@@ -266,28 +297,29 @@ struct RNCRangedSliderContent: View {
 
   private func thumb(
     _ thumb: Thumb,
-    diameter: CGFloat,
+    size: CGSize,
     offset: CGFloat,
     range: ClosedRange<Double>,
     travel: CGFloat
   ) -> some View {
-    // A thumb JS has replaced is still here to be dragged, only undrawn - the
-    // clear circle keeps its place and the padding below keeps its touch area.
-    let isReplaced = isCustom(thumb)
+    // A thumb is a small thing to grab, and the two of them can end up right
+    // next to each other, so the area that answers to a touch is padded out to
+    // the 44pt Apple asks for, on whichever side of the thumb falls short of it.
+    // The padding is then shifted back off the offset, leaving the thumb itself
+    // where the value puts it.
+    let horizontalSlop = Self.touchSlop(around: size.width)
+    let verticalSlop = Self.touchSlop(around: size.height)
+    let alongSlop = model.vertical ? verticalSlop : horizontalSlop
 
-    return Circle()
-      .fill(isReplaced ? Color.clear : Color.white)
-      .shadow(color: isReplaced ? .clear : .black.opacity(0.25), radius: 2, y: 1)
-      .frame(width: diameter, height: diameter)
-      // A thumb is a small thing to grab, and the two of them can end up right
-      // next to each other, so the area that answers to a touch is padded out
-      // to the 44pt Apple asks for. The padding is then shifted back off the
-      // offset, leaving the circle itself where the value puts it.
-      .padding(Self.thumbTouchSlop)
+    return thumbFace(isReplaced: isCustom(thumb), isPressed: isPressed(thumb))
+      .frame(width: size.width, height: size.height)
+      .padding(.horizontal, horizontalSlop)
+      .padding(.vertical, verticalSlop)
       .contentShape(Rectangle())
-      .offset(offsetAlong(offset - Self.thumbTouchSlop))
+      .offset(offsetAlong(offset - alongSlop))
       .gesture(
         DragGesture(minimumDistance: 0)
+          .updating(pressedState(of: thumb)) { _, isPressed, _ in isPressed = true }
           .onChanged { gesture in
             let origin = dragOrigin(of: thumb) ?? beginDrag(of: thumb)
 
@@ -315,6 +347,53 @@ struct RNCRangedSliderContent: View {
           break
         }
       }
+  }
+
+  /// What a thumb looks like. A thumb JS has replaced is still here to be
+  /// dragged, only undrawn - the clear capsule keeps its place.
+  ///
+  /// On iOS 26 a thumb that is held grows and turns to clear glass, the track
+  /// showing through it, the way the thumb of `Slider` does. The glass only
+  /// grows the thumb as it is drawn, so neither the touch area nor where the
+  /// value puts the thumb move with it.
+  @ViewBuilder
+  private func thumbFace(isReplaced: Bool, isPressed: Bool) -> some View {
+    if isReplaced {
+      Capsule().fill(Color.clear)
+    } else {
+      #if compiler(>=6.2) && os(iOS)
+      if #available(iOS 26.0, *) {
+        Capsule()
+          .fill(isPressed ? Color.clear : Color.white)
+          .shadow(color: .black.opacity(isPressed ? 0 : 0.25), radius: 2, y: 1)
+          .glassEffect(isPressed ? .clear.interactive() : .identity, in: Capsule())
+          .scaleEffect(isPressed ? Self.pressedThumbScale : 1)
+          .animation(.spring(response: 0.3, dampingFraction: 0.65), value: isPressed)
+      } else {
+        Capsule()
+          .fill(Color.white)
+          .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+      }
+      #else
+      Capsule()
+        .fill(Color.white)
+        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+      #endif
+    }
+  }
+
+  private func isPressed(_ thumb: Thumb) -> Bool {
+    switch thumb {
+    case .single, .left: return isLeftThumbPressed
+    case .right: return isRightThumbPressed
+    }
+  }
+
+  private func pressedState(of thumb: Thumb) -> GestureState<Bool> {
+    switch thumb {
+    case .single, .left: return $isLeftThumbPressed
+    case .right: return $isRightThumbPressed
+    }
   }
 
   private func isCustom(_ thumb: Thumb) -> Bool {
@@ -457,8 +536,16 @@ struct RNCRangedSliderContent: View {
     )
   }
 
-  /// Grown around the thumb on every side, to reach 44pt across.
-  private static let thumbTouchSlop: CGFloat = 8
+  /// How much to grow a thumb by on either side of the given extent of it, to
+  /// reach the 44pt Apple asks for a touch target to be.
+  private static func touchSlop(around extent: CGFloat) -> CGFloat {
+    max((minimumTouchTarget - extent) / 2, 0)
+  }
+
+  private static let minimumTouchTarget: CGFloat = 44
+
+  /// How much bigger a held thumb is drawn, as `Slider` grows its own.
+  private static let pressedThumbScale: CGFloat = 1.5
 
   private static let trackThickness: CGFloat = 4
 
