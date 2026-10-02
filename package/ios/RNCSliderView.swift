@@ -142,7 +142,7 @@ struct RNCSliderGeometry {
     let thumbScale = min(breadth / Self.thumbThickness, 1)
     thumbLength = Self.thumbLength * thumbScale
     thumbThickness = Self.thumbThickness * thumbScale
-    travel = max(length - (model.ranged ? thumbLength : 0), 0)
+    travel = max(length - thumbLength, 0)
     leftOffset = CGFloat(Self.fraction(of: model.ranged ? model.valueLeft : model.value, in: range)) * travel
     rightOffset = CGFloat(Self.fraction(of: model.valueRight, in: range)) * travel
   }
