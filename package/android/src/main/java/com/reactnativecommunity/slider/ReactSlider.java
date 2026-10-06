@@ -280,33 +280,38 @@ public class ReactSlider extends AppCompatSeekBar {
   private BitmapDrawable getBitmapDrawable(final String uri) {
     BitmapDrawable bitmapDrawable = null;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
-    Future<BitmapDrawable> future = executorService.submit(new Callable<BitmapDrawable>() {
-      @Override
-      public BitmapDrawable call() {
-        BitmapDrawable bitmapDrawable = null;
-        try {
-          Bitmap bitmap = null;
-          if (uri.startsWith("http://") || uri.startsWith("https://") ||
-              uri.startsWith("file://") || uri.startsWith("asset://") || uri.startsWith("data:")) {
-            bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
-          } else {
-            int drawableId = getResources()
-                .getIdentifier(uri, "drawable", getContext()
-                .getPackageName());
-            bitmap = BitmapFactory.decodeResource(getResources(), drawableId);
-          }
-
-          bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        return bitmapDrawable;
-      }
-    });
     try {
-      bitmapDrawable = future.get();
-    } catch (Exception e) {
-      e.printStackTrace();
+      Future<BitmapDrawable> future = executorService.submit(new Callable<BitmapDrawable>() {
+        @Override
+        public BitmapDrawable call() {
+          BitmapDrawable bitmapDrawable = null;
+          try {
+            Bitmap bitmap = null;
+            if (uri.startsWith("http://") || uri.startsWith("https://") ||
+                uri.startsWith("file://") || uri.startsWith("asset://") || uri.startsWith("data:")) {
+              bitmap = BitmapFactory.decodeStream(new URL(uri).openStream());
+            } else {
+              int drawableId = getResources()
+                  .getIdentifier(uri, "drawable", getContext()
+                  .getPackageName());
+              bitmap = BitmapFactory.decodeResource(getResources(), drawableId);
+            }
+
+            bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return bitmapDrawable;
+        }
+      });
+      try {
+        bitmapDrawable = future.get();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } finally {
+      // Without this, every call leaks the worker thread for the lifetime of the process.
+      executorService.shutdown();
     }
     return bitmapDrawable;
   }
