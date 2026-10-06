@@ -336,8 +336,6 @@ using namespace facebook::react;
     }
 }
 
-#pragma mark - Swipe to seek
-
 - (void)panHandler:(UIPanGestureRecognizer *)gesture {
     CGPoint location = [gesture locationInView:slider];
     
