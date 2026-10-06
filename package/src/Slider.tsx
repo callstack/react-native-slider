@@ -65,11 +65,12 @@ const Slider = ({
   step = 0,
   lowerLimit = minimumValue,
   upperLimit = maximumValue,
-  orientation = 'horizontal',
+  orientation = "horizontal",
   onValueChange,
   onLeftValueChange,
   onRightValueChange,
   thumb: Thumb,
+  track: Track,
   ...props
 }: SliderProps) => {
   const [currentValue, setCurrentValue] = useThumbValue(value);
@@ -103,9 +104,15 @@ const Slider = ({
       lowerLimit={lowerLimit}
       upperLimit={upperLimit}
       orientation={orientation}
+      customTrack={Track !== undefined}
       onValueChange={valueHandler(handleValueChange)}
       onLeftValueChange={valueHandler(handleLeftValueChange)}
       onRightValueChange={valueHandler(handleRightValueChange)}>
+      {Track ? (
+        <View collapsable={false} pointerEvents="none">
+          <Track />
+        </View>
+      ) : null}
       {Thumb ? 
         thumbValues.map((thumbValue, thumbIndex) => (
           <View key={thumbIndex} collapsable={false} pointerEvents="none">

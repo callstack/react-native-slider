@@ -17,9 +17,10 @@ import com.facebook.yoga.YogaMeasureOutput
 /**
  * Manages instances of [RNCSliderView].
  *
- * The only children a slider has are the custom thumbs JS renders in place of the
- * built-in ones, which the view keeps apart from the slider it hosts - so its
- * children are the thumbs, and not the views it happens to hold.
+ * The only children a slider has are the custom track and thumbs JS renders in
+ * place of the built-in ones, which the view keeps apart from the slider it hosts -
+ * so its children are the track and the thumbs, and not the views it happens to
+ * hold.
  */
 @ReactModule(name = RNCSliderViewManager.REACT_CLASS)
 class RNCSliderViewManager :
@@ -99,16 +100,21 @@ class RNCSliderViewManager :
     view.setMaximumTrackColor(value)
   }
 
-  override fun addView(parent: RNCSliderView, child: View, index: Int) {
-    parent.addThumbView(child, index)
+  @ReactProp(name = "customTrack", defaultBoolean = false)
+  override fun setCustomTrack(view: RNCSliderView, value: Boolean) {
+    view.setCustomTrack(value)
   }
 
-  override fun getChildCount(parent: RNCSliderView): Int = parent.getThumbViewCount()
+  override fun addView(parent: RNCSliderView, child: View, index: Int) {
+    parent.addChildView(child, index)
+  }
 
-  override fun getChildAt(parent: RNCSliderView, index: Int): View? = parent.getThumbViewAt(index)
+  override fun getChildCount(parent: RNCSliderView): Int = parent.getChildViewCount()
+
+  override fun getChildAt(parent: RNCSliderView, index: Int): View? = parent.getChildViewAt(index)
 
   override fun removeViewAt(parent: RNCSliderView, index: Int) {
-    parent.removeThumbViewAt(index)
+    parent.removeChildViewAt(index)
   }
 
   override fun addEventEmitters(reactContext: ThemedReactContext, view: RNCSliderView) {

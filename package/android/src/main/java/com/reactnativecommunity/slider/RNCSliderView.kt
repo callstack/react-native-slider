@@ -138,10 +138,20 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var customThumbCount by mutableIntStateOf(0)
 
   /**
-   * The views JS rendered in place of the built-in thumbs, in the order it rendered
-   * them: the single thumb, or the left and then the right one.
+   * Whether JS has replaced the track with a view of its own. The slider then draws
+   * no track at all, whatever its tints - the view JS gave lies underneath it
+   * instead, see [trackContainer].
+   *
+   * Named the way [stepValue] is, and for the same reason.
    */
-  private val thumbViews = mutableListOf<View>()
+  private var hasCustomTrack by mutableStateOf(DEFAULT_CUSTOM_TRACK)
+
+  /**
+   * The views JS rendered as the slider's children, in the order it rendered them:
+   * the track, when [hasCustomTrack] says JS replaced it, and then the single thumb,
+   * or the left and then the right one.
+   */
+  private val childViews = mutableListOf<View>()
 
   /**
    * One for each thumb there can be, holding the view that replaces it. Each is
@@ -152,7 +162,22 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * They handle no touches, and neither does a view JS renders as a thumb, so every
    * touch falls through them to the slider underneath.
    */
-  private val thumbContainers = List(MAXIMUM_THUMB_COUNT) { ThumbContainer(context) }
+  private val thumbContainers = List(MAXIMUM_THUMB_COUNT) { ChildContainer(context) }
+
+  /**
+   * Holds the view that replaces the track, the way [thumbContainers] hold the
+   * thumbs: its origin stays on the middle of the slider, and it is turned a quarter
+   * turn anticlockwise about it on a vertical slider, which carries the start of
+   * the track down to the bottom, where the minimum is - see [placeTrackContainer].
+   *
+   * It lies underneath the slider rather than over it, so that the thumbs the
+   * slider draws stay on top of the track.
+   */
+  private val trackContainer =
+    ChildContainer(context).apply {
+      pivotX = 0f
+      pivotY = 0f
+    }
 
   /** Invoked continuously while the user drags the thumb. */
   var onValueChange: ((Double) -> Unit)? = null
@@ -185,32 +210,52 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     addView(composeView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
     // A custom thumb is centred on the origin of its container, and so hangs off
-    // it - and off the slider too, at either end of the track.
+    // it - and off the slider too, at either end of the track. So does the custom
+    // track, which is centred the same way.
     clipChildren = false
+    addView(trackContainer, 0, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     thumbContainers.forEach {
       addView(it, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     }
   }
 
-  /** Takes a view JS rendered in place of a built-in thumb - see [thumbViews]. */
-  fun addThumbView(view: View, index: Int) {
-    thumbViews.add(index.coerceIn(0, thumbViews.size), view)
-    onThumbViewsChanged()
+  /**
+   * Takes a view JS rendered in place of the built-in track or of a built-in thumb -
+   * see [childViews].
+   */
+  fun addChildView(view: View, index: Int) {
+    childViews.add(index.coerceIn(0, childViews.size), view)
+    onChildViewsChanged()
   }
 
-  fun removeThumbViewAt(index: Int) {
-    val view = thumbViews.removeAt(index)
+  fun removeChildViewAt(index: Int) {
+    val view = childViews.removeAt(index)
     (view.parent as? ViewGroup)?.removeView(view)
-    onThumbViewsChanged()
+    onChildViewsChanged()
   }
 
-  fun getThumbViewCount(): Int = thumbViews.size
+  fun getChildViewCount(): Int = childViews.size
 
-  fun getThumbViewAt(index: Int): View? = thumbViews.getOrNull(index)
+  fun getChildViewAt(index: Int): View? = childViews.getOrNull(index)
 
-  private fun onThumbViewsChanged() {
-    // A view inserted ahead of another moves that one onto the next thumb.
-    thumbContainers.zip(thumbViews).forEach { (container, view) ->
+  /**
+   * Hands every child to the container it belongs in. Which one that is depends on
+   * whether there is a track ahead of the thumbs, which can change before or after
+   * the children it concerns are added - so it is worked out afresh whenever either
+   * does.
+   */
+  private fun onChildViewsChanged() {
+    val trackView = if (hasCustomTrack) childViews.firstOrNull() else null
+    val thumbViews = if (trackView != null) childViews.drop(1) else childViews
+    val placements =
+      thumbViews.zip(thumbContainers) + listOfNotNull(trackView?.let { it to trackContainer })
+
+    // A view inserted ahead of another moves that one onto the next container, and
+    // one left without a container is not shown anywhere.
+    childViews
+      .filter { view -> placements.none { (placed, _) -> placed === view } }
+      .forEach { view -> (view.parent as? ViewGroup)?.removeView(view) }
+    placements.forEach { (view, container) ->
       if (view.parent !== container) {
         (view.parent as? ViewGroup)?.removeView(view)
         container.addView(view)
@@ -218,6 +263,16 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     }
 
     customThumbCount = minOf(thumbViews.size, MAXIMUM_THUMB_COUNT)
+  }
+
+  /** Whether the first of the views JS adds is a track rather than a thumb. */
+  fun setCustomTrack(value: Boolean) {
+    if (value == hasCustomTrack) {
+      return
+    }
+
+    hasCustomTrack = value
+    onChildViewsChanged()
   }
 
   fun setMinimumValue(value: Double) {
@@ -272,6 +327,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   fun setOrientation(value: String?) {
     isVertical = value == ORIENTATION_VERTICAL
+    placeTrackContainer()
   }
 
   fun setMinimumTrackColor(value: Int?) {
@@ -298,6 +354,22 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     }
 
     super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+  }
+
+  override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    super.onLayout(changed, left, top, right, bottom)
+    placeTrackContainer()
+  }
+
+  /**
+   * Moves the origin of [trackContainer] onto the middle of the slider, where the
+   * shadow node centres the track on - laid out along the slider's length, which
+   * is its height on a vertical one.
+   */
+  private fun placeTrackContainer() {
+    trackContainer.translationX = width / 2f
+    trackContainer.translationY = height / 2f
+    trackContainer.rotation = if (isVertical) -90f else 0f
   }
 
   override fun onAttachedToWindow() {
@@ -432,9 +504,14 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       track = { state ->
         val colors = trackColors(active = minimumTrackColor, inactive = maximumTrackColor)
         if (customThumbCount > 0) {
-          SliderDefaults.Track(sliderState = state, colors = colors, thumbTrackGapSize = 0.dp)
+          SliderDefaults.Track(
+            sliderState = state,
+            modifier = Modifier.trackVisibility(),
+            colors = colors,
+            thumbTrackGapSize = 0.dp,
+          )
         } else {
-          SliderDefaults.Track(sliderState = state, colors = colors)
+          SliderDefaults.Track(sliderState = state, modifier = Modifier.trackVisibility(), colors = colors)
         }
       },
     )
@@ -603,6 +680,13 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   /**
+   * Leaves the built-in track undrawn once JS has replaced it, the way a replaced
+   * thumb is - so that it keeps its place in the slider's geometry, and the thumbs
+   * travel along the custom track exactly as far as they would along this one.
+   */
+  private fun Modifier.trackVisibility(): Modifier = if (hasCustomTrack) alpha(0f) else this
+
+  /**
    * The track of a ranged slider, tinted in three parts - see [minimumTrackColor].
    *
    * Material 3 draws both parts outside the span in the one inactive colour, so the
@@ -617,7 +701,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     val span = state.valueRange.endInclusive - state.valueRange.start
     val cut = if (span > 0f) ((state.activeRangeStart - state.valueRange.start) / span).coerceIn(0f, 1f) else 0f
 
-    Box {
+    Box(modifier = Modifier.trackVisibility()) {
       RangedTrackPart(
         state,
         trackColors(active = middleRangeTrackColor, inactive = minimumTrackColor),
@@ -714,6 +798,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     const val DEFAULT_LOWER_LIMIT = 0f
     const val DEFAULT_UPPER_LIMIT = 1f
     const val DEFAULT_VERTICAL = false
+    const val DEFAULT_CUSTOM_TRACK = false
 
     /** The one orientation that is not the default. */
     private const val ORIENTATION_VERTICAL = "vertical"
@@ -724,12 +809,13 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 }
 
 /**
- * Holds the view JS renders in place of a thumb - see `RNCSliderView.thumbContainers`.
+ * Holds the view JS renders in place of a thumb or of the track - see
+ * `RNCSliderView.thumbContainers` and `RNCSliderView.trackContainer`.
  *
  * Fabric lays that view out itself, so this lays out nothing, and leaves the view
  * drawn wherever it hangs off it.
  */
-private class ThumbContainer(context: Context) : ViewGroup(context) {
+private class ChildContainer(context: Context) : ViewGroup(context) {
   init {
     clipChildren = false
   }

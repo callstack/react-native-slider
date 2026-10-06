@@ -87,6 +87,13 @@ export interface NativeProps extends ViewProps {
   maximumTrackColor?: ColorValue;
 
   /**
+   * Whether the first of the slider's children is a track JS renders in place
+   * of the built-in one, rather than a custom thumb. A replaced track is not
+   * drawn at all, so it outranks the three track colours.
+   */
+  customTrack?: WithDefault<boolean, false>;
+
+  /**
    * Emitted continuously while the user drags the thumb.
    */
   onValueChange?: DirectEventHandler<SliderValueChangeEvent>;

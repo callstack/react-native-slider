@@ -47,6 +47,11 @@ final class RNCSliderModel: ObservableObject {
   /// view JS gave over it instead.
   @Published var customThumbCount: Int = 0
 
+  /// Whether JS has replaced the track with a view of its own. The slider then
+  /// draws no track at all, whatever its tints - `RNCSliderView` lays the view
+  /// JS gave underneath it instead.
+  @Published var customTrack: Bool = false
+
   /// The value a thumb had when the drag in progress began, or `nil` when that
   /// thumb is not being dragged. The single thumb keeps its origin in the left
   /// one of the two.
@@ -259,17 +264,19 @@ struct RNCRangedSliderContent: View {
       // is anchored at the end the minimum value is at: the leading edge across
       // the view, and the bottom one up it.
       ZStack(alignment: model.vertical ? .bottom : .leading) {
-        track(Self.trackColor, length: nil)
+        if !model.customTrack {
+          track(Self.trackColor, length: nil)
 
-        track(lowerColor, length: leftOffset)
-        // Drawn between the two thumb centres, which is why it is inset by half
-        // a thumb. `max` keeps it from inverting on values crossed by JS.
-        if model.ranged {
-          track(middleColor, length: trackFillLength)
-            .offset(offsetAlong(trackFillStartPoint))
+          track(lowerColor, length: leftOffset)
+          // Drawn between the two thumb centres, which is why it is inset by half
+          // a thumb. `max` keeps it from inverting on values crossed by JS.
+          if model.ranged {
+            track(middleColor, length: trackFillLength)
+              .offset(offsetAlong(trackFillStartPoint))
+          }
+
+          track(upperColor, length: trackEndLength).offset(offsetAlong(trackUpperStartPoint))
         }
-
-        track(upperColor, length: trackEndLength).offset(offsetAlong(trackUpperStartPoint))
         if model.ranged {
           thumb(.right, size: thumbSize, offset: rightOffset, range: range, travel: travel)
           thumb(.left, size: thumbSize, offset: leftOffset, range: range, travel: travel)
@@ -278,7 +285,14 @@ struct RNCRangedSliderContent: View {
           thumb(.single, size: thumbSize, offset: leftOffset, range: range, travel: travel)
         }
       }
-      .frame(width: proxy.size.width, height: proxy.size.height)
+      // Anchored at the same end as the stack, which is only as big as what it
+      // holds: with the track replaced that is just the thumbs, and a stack
+      // centred in the view would have them start out from its middle.
+      .frame(
+        width: proxy.size.width,
+        height: proxy.size.height,
+        alignment: model.vertical ? .bottom : .leading
+      )
     }
   }
 
@@ -565,9 +579,10 @@ public final class RNCSliderView: UIView {
   private let model: RNCSliderModel
   private let hostingController: UIHostingController<RNCSliderContent>
 
-  /// The views JS rendered in place of the built-in thumbs, in the order it
-  /// rendered them: the single thumb, or the left and then the right one.
-  private var thumbViews: [UIView] = []
+  /// The views JS rendered as the slider's children, in the order it rendered
+  /// them: the track, when `customTrack` says JS replaced it, and then the
+  /// single thumb, or the left and then the right one.
+  private var childViews: [UIView] = []
 
   /// One for each thumb there can be, holding the view that replaces it. Each
   /// is kept centred on its thumb and takes up no room of its own: the shadow
@@ -580,6 +595,19 @@ public final class RNCSliderView: UIView {
     container.isUserInteractionEnabled = false
     return container
   }
+
+  /// Holds the view that replaces the track, the way `thumbContainers` hold
+  /// the thumbs: centred on the middle of the slider, and turned a quarter turn
+  /// anticlockwise on a vertical one, which carries the start of the track down
+  /// to the bottom, where the minimum is.
+  ///
+  /// It lies underneath the slider rather than over it, so that the thumbs
+  /// the slider draws stay on top of the track.
+  private let trackContainer: UIView = {
+    let container = UIView()
+    container.isUserInteractionEnabled = false
+    return container
+  }()
 
   /// Keeps the custom thumbs moving with the slider - see `layoutSubviews`.
   private var modelObservation: AnyCancellable?
@@ -675,6 +703,17 @@ public final class RNCSliderView: UIView {
     set { model.maximumTrackColor = newValue }
   }
 
+  /// Whether the first of the views JS mounts is a track rather than a thumb -
+  /// see `RNCSliderModel.customTrack`.
+  @objc public var customTrack: Bool {
+    get { model.customTrack }
+    set {
+      guard newValue != model.customTrack else { return }
+      model.customTrack = newValue
+      childViewsDidChange()
+    }
+  }
+
   @objc public var onValueChange: ((Double) -> Void)? {
     get { model.onValueChange }
     set { model.onValueChange = newValue }
@@ -714,6 +753,7 @@ public final class RNCSliderView: UIView {
       // hosting controller inset the slider a second time would shift it.
       hostingController.safeAreaRegions = []
     }
+    addSubview(trackContainer)
     addSubview(hostingController.view)
     thumbContainers.forEach(addSubview)
 
@@ -774,24 +814,40 @@ public final class RNCSliderView: UIView {
     model.rightDragOrigin = nil
   }
 
-  /// Takes a view JS rendered in place of a built-in thumb - see
-  /// `thumbViews`.
-  @objc(mountThumbView:atIndex:)
-  public func mountThumbView(_ view: UIView, at index: Int) {
-    thumbViews.insert(view, at: min(index, thumbViews.count))
-    thumbViewsDidChange()
+  /// Takes a view JS rendered in place of the built-in track or of a
+  /// built-in thumb - see `childViews`.
+  @objc(mountChildView:atIndex:)
+  public func mountChildView(_ view: UIView, at index: Int) {
+    childViews.insert(view, at: min(index, childViews.count))
+    childViewsDidChange()
   }
 
-  @objc(unmountThumbView:)
-  public func unmountThumbView(_ view: UIView) {
-    thumbViews.removeAll { $0 === view }
+  @objc(unmountChildView:)
+  public func unmountChildView(_ view: UIView) {
+    childViews.removeAll { $0 === view }
     view.removeFromSuperview()
-    thumbViewsDidChange()
+    childViewsDidChange()
   }
 
-  private func thumbViewsDidChange() {
-    // A view inserted ahead of another moves that one onto the next thumb.
-    for (container, view) in zip(thumbContainers, thumbViews) where view.superview !== container {
+  /// Hands every child to the container it belongs in. Which one that is
+  /// depends on whether there is a track ahead of the thumbs, which can change
+  /// before or after the children it concerns are mounted - so it is worked out
+  /// afresh whenever either does.
+  private func childViewsDidChange() {
+    let trackView = model.customTrack ? childViews.first : nil
+    let thumbViews = trackView == nil ? childViews : Array(childViews.dropFirst())
+
+    var placements = zip(thumbViews, thumbContainers).map { ($0, $1) }
+    if let trackView {
+      placements.append((trackView, trackContainer))
+    }
+
+    // A view inserted ahead of another moves that one onto the next container,
+    // and one left without a container is not shown anywhere.
+    for view in childViews where !placements.contains(where: { $0.0 === view }) {
+      view.removeFromSuperview()
+    }
+    for (view, container) in placements where view.superview !== container {
       container.addSubview(view)
     }
 
@@ -806,6 +862,11 @@ public final class RNCSliderView: UIView {
     let geometry = RNCSliderGeometry(model: model, size: bounds.size)
     thumbContainers[0].center = geometry.thumbCenter(atOffset: geometry.leftOffset)
     thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)
+
+    // The shadow node centres the track on the origin of its container, laid
+    // out along the slider's length - which is its height on a vertical one.
+    trackContainer.center = CGPoint(x: bounds.midX, y: bounds.midY)
+    trackContainer.transform = model.vertical ? CGAffineTransform(rotationAngle: -.pi / 2) : .identity
   }
 
   public override func didMoveToWindow() {

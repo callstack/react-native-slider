@@ -55,15 +55,29 @@ namespace facebook {
 #pragma mark - LayoutableShadowNode
 
             /*
-             * The children of a slider are the custom thumbs JS renders in
-             * place of the built-in ones. A slider is a leaf to Yoga, so they
-             * take no part in laying it out, and are laid out here instead:
-             * each one at the size it asks for, centred on the slider's
-             * origin. The native slider moves that centre onto its thumb,
-             * which is the one thing JS cannot know the position of.
+             * The children of a slider are the custom track and thumbs JS
+             * renders in place of the built-in ones - the track first, when
+             * there is one. A slider is a leaf to Yoga, so they take no part in
+             * laying it out, and are laid out here instead: each thumb at the
+             * size it asks for, and the track along the whole slider, all of
+             * them centred on the slider's origin. The native slider moves that
+             * centre onto its thumb, which is the one thing JS cannot know the
+             * position of, or onto the middle of the slider for the track.
              */
             void layout(LayoutContext layoutContext) override;
 
+        private:
+            /*
+             * Lays out the host JS wraps the custom track in, stretching every
+             * view of the track along the slider - see `layout`.
+             */
+            std::shared_ptr<const ShadowNode> layoutTrack(
+                    const ShadowNode &trackHost,
+                    LayoutContext layoutContext) const;
+
+            static Point centredOnOrigin(Size size, LayoutContext layoutContext);
+
+        public:
 #ifdef ANDROID
             void setSliderMeasurementsManager(
                     const std::shared_ptr<RNCSliderMeasurementsManager> &measurementsManager);

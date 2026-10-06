@@ -83,6 +83,7 @@ using namespace facebook::react;
   _sliderView.minimumTrackColor = RCTUIColorFromSharedColor(props.minimumTrackColor);
   _sliderView.middleRangeTrackColor = RCTUIColorFromSharedColor(props.middleRangeTrackColor);
   _sliderView.maximumTrackColor = RCTUIColorFromSharedColor(props.maximumTrackColor);
+  _sliderView.customTrack = props.customTrack;
 }
 
 - (void)emitValueChange:(double)value
@@ -181,20 +182,24 @@ using namespace facebook::react;
   if (oldViewProps.maximumTrackColor != newViewProps.maximumTrackColor) {
     _sliderView.maximumTrackColor = RCTUIColorFromSharedColor(newViewProps.maximumTrackColor);
   }
+  if (oldViewProps.customTrack != newViewProps.customTrack) {
+    _sliderView.customTrack = newViewProps.customTrack;
+  }
 
   [super updateProps:props oldProps:oldProps];
 }
 
-// The only children a slider has are the custom thumbs JS renders in place of
-// the built-in ones, and the slider view is what keeps them on its thumbs.
+// The only children a slider has are the custom track and thumbs JS renders in
+// place of the built-in ones, and the slider view is what keeps them on its
+// track and thumbs.
 - (void)mountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
 {
-  [_sliderView mountThumbView:childComponentView atIndex:index];
+  [_sliderView mountChildView:childComponentView atIndex:index];
 }
 
 - (void)unmountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
 {
-  [_sliderView unmountThumbView:childComponentView];
+  [_sliderView unmountChildView:childComponentView];
 }
 
 - (void)prepareForRecycle

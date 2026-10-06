@@ -9,6 +9,8 @@ export type ThumbProps = {
   index: number
 }
 
+export type TrackProps = {}
+
 export interface SliderProps extends ViewProps {
   /**
    * Initial minimum value of the slider. Default value is 0.
@@ -134,6 +136,18 @@ export interface SliderProps extends ViewProps {
    * Defines the color the track from thumb, or right thumb (when ranged) to maximumValue will be.
    */
   maximumTrackColor?: ColorValue;
+
+  /**
+   * Replaces the default (native) track with the given component.
+   * The component will be spread along the whole track by it's X-axis,
+   * meaning that:
+   *  * In horizontal Slider, the width of given component will be increased to the width of the track,
+   *  * In vertical Slider, the width of given component will be increased as well, but the component will
+   *    be transformed in the same 90 degree as vertical Slider is.
+   * NOTE, that the custom track component takes the priority against
+   * the minimumTrackColor, middleRangeTrackColor and maximumTrackColor.
+   */
+  track?: FC<TrackProps>;
 }
 
 /**
