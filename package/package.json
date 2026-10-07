@@ -53,6 +53,10 @@
     "react-test-renderer": "^19.2.0",
     "typescript": "^5.0.4"
   },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/callstack/react-native-slider.git"
