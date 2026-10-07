@@ -19,6 +19,8 @@ import {MarkerProps} from './components/TrackMark';
 import {StepsIndicator} from './components/StepsIndicator';
 import {styles} from './utils/styles';
 import {constants} from './utils/constants';
+import {RangeSlider} from './RangeSlider';
+import type {RangeThumbIndex, RangeValue} from './RangeSlider';
 
 type Event = NativeSyntheticEvent<
   Readonly<{
@@ -88,6 +90,18 @@ type Props = ViewProps &
     value?: number;
 
     /**
+     * Enables two-thumb range selection.
+     * Default value is false.
+     */
+    range?: boolean;
+
+    /**
+     * Write-only property representing the lower and upper values of the
+     * range slider. Used when `range` is true.
+     */
+    values?: RangeValue;
+
+    /**
      * Step value of the slider. The value should be
      * between 0 and (maximumValue - minimumValue).
      * Default value is 0.
@@ -113,6 +127,13 @@ type Props = ViewProps &
      * The upper limit value of the slider. The user won't be able to slide above this limit.
      */
     upperLimit?: number;
+
+    /**
+     * Minimum distance between the lower and upper range thumbs.
+     * Used when `range` is true.
+     * Default value is 0.
+     */
+    minimumRange?: number;
 
     /**
      * The color used for the track to the left of the button.
@@ -143,6 +164,15 @@ type Props = ViewProps &
     onValueChange?: (_value: number) => void;
 
     /**
+     * Callback continuously called while the user is dragging either range
+     * thumb. Used when `range` is true.
+     */
+    onValuesChange?: (
+      _values: RangeValue,
+      _thumbIndex: RangeThumbIndex,
+    ) => void;
+
+    /**
      * Callback that is called when the user touches the slider,
      * regardless if the value has changed. The current value is passed
      * as an argument to the callback handler.
@@ -150,11 +180,29 @@ type Props = ViewProps &
     onSlidingStart?: (_value: number) => void;
 
     /**
+     * Callback that is called when the user touches either range thumb.
+     * Used when `range` is true.
+     */
+    onRangeSlidingStart?: (
+      _values: RangeValue,
+      _thumbIndex: RangeThumbIndex,
+    ) => void;
+
+    /**
      * Callback that is called when the user releases the slider,
      * regardless if the value has changed. The current value is passed
      * as an argument to the callback handler.
      */
     onSlidingComplete?: (_value: number) => void;
+
+    /**
+     * Callback that is called when the user releases either range thumb.
+     * Used when `range` is true.
+     */
+    onRangeSlidingComplete?: (
+      _values: RangeValue,
+      _thumbIndex: RangeThumbIndex,
+    ) => void;
 
     /**
      * Used to locate this view in UI automation tests.
@@ -210,12 +258,18 @@ const SliderComponent = (
     onValueChange,
     onSlidingStart,
     onSlidingComplete,
+    onValuesChange,
+    onRangeSlidingStart,
+    onRangeSlidingComplete,
     onAccessibilityAction,
     value = constants.SLIDER_DEFAULT_INITIAL_VALUE,
+    values,
     minimumValue = 0,
     maximumValue = 1,
     step = 0,
     inverted = false,
+    range = false,
+    minimumRange = 0,
     tapToSeek = false,
     lowerLimit = Platform.select({
       web: minimumValue,
@@ -227,10 +281,12 @@ const SliderComponent = (
     }),
     ...props
   }: Props,
-  forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
+  forwardedRef?: Ref<any>,
 ) => {
   const [currentValue, setCurrentValue] = useState(
-    value ?? minimumValue ?? constants.SLIDER_DEFAULT_INITIAL_VALUE,
+    range && values
+      ? values[0]
+      : value ?? minimumValue ?? constants.SLIDER_DEFAULT_INITIAL_VALUE,
   );
   const [width, setWidth] = useState(0);
 
@@ -254,6 +310,30 @@ const SliderComponent = (
   const onValueChangeEvent = (event: Event) => {
     onValueChange && onValueChange(event.nativeEvent.value);
     setCurrentValue(event.nativeEvent.value);
+  };
+
+  const onValuesChangeEvent = (
+    nextValues: RangeValue,
+    thumbIndex: RangeThumbIndex,
+  ) => {
+    setCurrentValue(nextValues[thumbIndex]);
+    onValuesChange && onValuesChange(nextValues, thumbIndex);
+  };
+
+  const onRangeSlidingStartEvent = (
+    nextValues: RangeValue,
+    thumbIndex: RangeThumbIndex,
+  ) => {
+    setCurrentValue(nextValues[thumbIndex]);
+    onRangeSlidingStart && onRangeSlidingStart(nextValues, thumbIndex);
+  };
+
+  const onRangeSlidingCompleteEvent = (
+    nextValues: RangeValue,
+    thumbIndex: RangeThumbIndex,
+  ) => {
+    setCurrentValue(nextValues[thumbIndex]);
+    onRangeSlidingComplete && onRangeSlidingComplete(nextValues, thumbIndex);
   };
 
   const _disabled =
@@ -309,44 +389,73 @@ const SliderComponent = (
           isLTR={inverted}
         />
       ) : null}
-      <RCTSliderNativeComponent
-        {...props}
-        minimumValue={minimumValue}
-        maximumValue={maximumValue}
-        step={step}
-        inverted={inverted}
-        tapToSeek={tapToSeek}
-        value={passedValue}
-        lowerLimit={lowerLimit}
-        upperLimit={upperLimit}
-        accessibilityState={_accessibilityState}
-        thumbImage={
-          Platform.OS === 'web'
-            ? props.thumbImage
-            : props.StepMarker || !props.thumbImage
-            ? undefined
-            : Image.resolveAssetSource(props.thumbImage as ImageSourcePropType)
-        }
-        ref={forwardedRef}
-        style={[
-          sliderStyle,
-          defaultStyle,
-          {alignContent: 'center', alignItems: 'center'},
-        ]}
-        onChange={onValueChangeEvent}
-        onRNCSliderSlidingStart={onSlidingStartEvent}
-        onRNCSliderSlidingComplete={onSlidingCompleteEvent}
-        onRNCSliderValueChange={onValueChangeEvent}
-        disabled={_disabled}
-        onStartShouldSetResponder={() => true}
-        onResponderTerminationRequest={() => false}
-        onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
-        thumbTintColor={
-          props.thumbImage && !!props.StepMarker
-            ? 'transparent'
-            : props.thumbTintColor
-        }
-      />
+      {range ? (
+        <RangeSlider
+          {...props}
+          minimumValue={minimumValue}
+          maximumValue={maximumValue}
+          step={step}
+          inverted={inverted}
+          value={value}
+          values={values}
+          minimumRange={minimumRange}
+          lowerLimit={lowerLimit}
+          upperLimit={upperLimit}
+          accessibilityState={_accessibilityState}
+          ref={forwardedRef}
+          style={[
+            sliderStyle,
+            defaultStyle,
+            {alignContent: 'center', alignItems: 'center'},
+          ]}
+          onValuesChange={onValuesChangeEvent}
+          onRangeSlidingStart={onRangeSlidingStartEvent}
+          onRangeSlidingComplete={onRangeSlidingCompleteEvent}
+          disabled={_disabled}
+          onAccessibilityAction={onAccessibilityActionEvent ?? undefined}
+        />
+      ) : (
+        <RCTSliderNativeComponent
+          {...props}
+          minimumValue={minimumValue}
+          maximumValue={maximumValue}
+          step={step}
+          inverted={inverted}
+          tapToSeek={tapToSeek}
+          value={passedValue}
+          lowerLimit={lowerLimit}
+          upperLimit={upperLimit}
+          accessibilityState={_accessibilityState}
+          thumbImage={
+            Platform.OS === 'web'
+              ? props.thumbImage
+              : props.StepMarker || !props.thumbImage
+              ? undefined
+              : Image.resolveAssetSource(
+                  props.thumbImage as ImageSourcePropType,
+                )
+          }
+          ref={forwardedRef}
+          style={[
+            sliderStyle,
+            defaultStyle,
+            {alignContent: 'center', alignItems: 'center'},
+          ]}
+          onChange={onValueChangeEvent}
+          onRNCSliderSlidingStart={onSlidingStartEvent}
+          onRNCSliderSlidingComplete={onSlidingCompleteEvent}
+          onRNCSliderValueChange={onValueChangeEvent}
+          disabled={_disabled}
+          onStartShouldSetResponder={() => true}
+          onResponderTerminationRequest={() => false}
+          onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
+          thumbTintColor={
+            props.thumbImage && !!props.StepMarker
+              ? 'transparent'
+              : props.thumbTintColor
+          }
+        />
+      )}
     </View>
   );
 };
