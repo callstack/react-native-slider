@@ -8,7 +8,7 @@ import {
 // @ts-ignore
 } from 'react-native';
 
-import {examples, Props as ExamplesTabProperties} from './Examples';
+import {ControlledSliderExample, examples, Props as ExamplesTabProperties} from './Examples';
 import {propsExamples, Props as PropsTabProperties} from './Props';
 
 function App() {
@@ -18,21 +18,17 @@ function App() {
   ) => {
     return (
       <View>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.container}>
-          {(filtered
-            ? (sliders as ExamplesTabProperties[]).filter(
-                e => !e.platform || e.platform === Platform.OS,
-              )
-            : sliders
-          ).map((e, i) => (
-            <View key={`slider${i}`} style={styles.sliderWidget}>
-              <Text style={styles.instructions}>{e.title}</Text>
-              {e.render()}
-            </View>
-          ))}
-        </ScrollView>
+        {(filtered
+          ? (sliders as ExamplesTabProperties[]).filter(
+              e => !e.platform || e.platform === Platform.OS,
+            )
+          : sliders
+        ).map((e, i) => (
+          <View key={`slider${i}`} style={styles.sliderWidget}>
+            <Text style={styles.instructions}>{e.title}</Text>
+            {e.render()}
+          </View>
+        ))}
       </View>
     );
   };
@@ -41,8 +37,13 @@ function App() {
     <div className="App">
       <header className="App-header">
         <View style={{ width: '100%', margin: 'auto' }}>
-          {renderExampleTab(examples, true)}
-          {renderExampleTab(propsExamples)}
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.container}>
+                {renderExampleTab(examples, true)}
+                {renderExampleTab(propsExamples)}
+                <ControlledSliderExample />
+            </ScrollView>
         </View>
       </header>
     </div>
