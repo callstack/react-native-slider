@@ -1,3 +1,3 @@
-const RNCSlider = require('./RNCSliderNativeComponent').default;
+const RNCSlider = require("./RNCSliderNativeComponent").default;
 
 export default RNCSlider;

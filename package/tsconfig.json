@@ -18,6 +18,7 @@
 
     /* Type Checking */
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["jest"]
   }
 }

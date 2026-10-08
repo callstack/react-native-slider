@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
-import {View} from 'react-native';
-import type { NativeSyntheticEvent } from 'react-native';
-import RNCSliderNativeComponent from './index';
-import { type SliderProps } from '../typings';
+import React, {useState} from "react";
+import {View} from "react-native";
+import type {NativeSyntheticEvent} from "react-native";
+import RNCSliderNativeComponent from "./index";
+import {type SliderProps} from "../typings";
 
 type SliderValueChangeEvent = NativeSyntheticEvent<
   Readonly<{
@@ -113,14 +113,15 @@ const Slider = ({
           <Track />
         </View>
       ) : null}
-      {Thumb ? 
-        thumbValues.map((thumbValue, thumbIndex) => (
-          <View key={thumbIndex} collapsable={false} pointerEvents="none">
-            <Thumb
-              index={stepIndex(thumbValue, minimumValue, maximumValue, step)}
-            />
-          </View>
-        )) : null}
+      {Thumb
+        ? thumbValues.map((thumbValue, thumbIndex) => (
+            <View key={thumbIndex} collapsable={false} pointerEvents="none">
+              <Thumb
+                index={stepIndex(thumbValue, minimumValue, maximumValue, step)}
+              />
+            </View>
+          ))
+        : null}
     </RNCSliderNativeComponent>
   );
 };

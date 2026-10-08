@@ -1,15 +1,15 @@
-import * as React from 'react';
-import { FC } from 'react';
-import { ColorValue, ViewProps } from 'react-native';
+import * as React from "react";
+import {FC} from "react";
+import {ColorValue, ViewProps} from "react-native";
 
 export type ThumbProps = {
   /**
    * Contains the exact step number on which this custom Thumb currently is.
    */
-  index: number
-}
+  index: number;
+};
 
-export type TrackProps = {}
+export type TrackProps = {};
 
 export interface SliderProps extends ViewProps {
   /**
@@ -63,7 +63,7 @@ export interface SliderProps extends ViewProps {
 
   /**
    * Limits the avaiable range of the slider to the lower value;
-   * 
+   *
    */
   lowerLimit?: number;
 
