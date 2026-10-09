@@ -129,6 +129,38 @@ final class RNCSliderModel: ObservableObject {
   /// ignored - the slider is uncontrolled for the duration of the drag.
   var isSliding: Bool { leftDragOrigin != nil || rightDragOrigin != nil }
 
+  /// The drag origin of the given thumb - see `leftDragOrigin` and
+  /// `rightDragOrigin`. Whether that is nil is also whether the thumb is being
+  /// dragged, which is what `isSliding` reads.
+  func dragOrigin(of thumb: Thumb) -> Double? {
+    switch thumb {
+    case .single, .left: return leftDragOrigin
+    case .right: return rightDragOrigin
+    }
+  }
+
+  /// Takes hold of a thumb, by remembering the value it is held at, or lets go of
+  /// it - see `dragOrigin(of:)`.
+  func setDragOrigin(_ origin: Double?, of thumb: Thumb) {
+    switch thumb {
+    case .single, .left: leftDragOrigin = origin
+    case .right: rightDragOrigin = origin
+    }
+  }
+
+  /// The thumb a hold on the track has picked up, and `nil` when the track is not
+  /// held: one thumb at a time, for as long as the finger is down.
+  ///
+  /// The thumbs' own drags report being pressed through `@GestureState` inside
+  /// `RNCRangedSliderContent`, which resets itself however a gesture ends. This is
+  /// the track's half of the same look, written by UIKit and so published here for
+  /// the hosted slider to draw - and read back by `RNCSliderView` as the hold it
+  /// has in progress, there being no second place to keep it.
+  @Published var heldThumb: Thumb?
+
+  /// Whether a hold on the track has a thumb in hand.
+  var isHeld: Bool { heldThumb != nil }
+
   /// Invoked continuously while the user drags the thumb.
   var onValueChange: ((Double) -> Void)?
 
@@ -478,7 +510,7 @@ struct RNCRangedSliderContent: View {
         DragGesture(minimumDistance: 0)
           .updating(pressedState(of: thumb)) { _, isPressed, _ in isPressed = true }
           .onChanged { gesture in
-            let origin = dragOrigin(of: thumb) ?? beginDrag(of: thumb)
+            let origin = model.dragOrigin(of: thumb) ?? beginDrag(of: thumb)
 
             let travelled = travel > 0
               ? Double(dragDistance(of: gesture) / travel) * span(of: range)
@@ -539,7 +571,12 @@ struct RNCRangedSliderContent: View {
     }
   }
 
+  /// Whether the given thumb should be drawn held: while its own gesture has
+  /// hold of it, or while a hold on the track has picked it up. The latter comes
+  /// from UIKit, which cannot feed a SwiftUI gesture state.
   private func isPressed(_ thumb: Thumb) -> Bool {
+    if model.heldThumb == thumb { return true }
+
     switch thumb {
     case .single, .left: return isLeftThumbPressed
     case .right: return isRightThumbPressed
@@ -570,7 +607,7 @@ struct RNCRangedSliderContent: View {
   private func beginDrag(of thumb: Thumb) -> Double {
     let wasSliding = model.isSliding
     let origin = model.value(of: thumb)
-    setDragOrigin(origin, of: thumb)
+    model.setDragOrigin(origin, of: thumb)
 
     if !wasSliding {
       model.onSlidingStart?()
@@ -584,28 +621,12 @@ struct RNCRangedSliderContent: View {
   private func endDrag(of thumb: Thumb) {
     // A drag that was never begun - a gesture that ended without ever having
     // changed - has nothing to report.
-    guard dragOrigin(of: thumb) != nil else { return }
+    guard model.dragOrigin(of: thumb) != nil else { return }
 
-    setDragOrigin(nil, of: thumb)
+    model.setDragOrigin(nil, of: thumb)
 
     if !model.isSliding {
       model.onSlidingComplete?()
-    }
-  }
-
-  private func dragOrigin(of thumb: Thumb) -> Double? {
-    switch thumb {
-    case .single: return model.leftDragOrigin
-    case .left: return model.leftDragOrigin
-    case .right: return model.rightDragOrigin
-    }
-  }
-
-  private func setDragOrigin(_ origin: Double?, of thumb: Thumb) {
-    switch thumb {
-    case .single: model.leftDragOrigin = origin
-    case .left: model.leftDragOrigin = origin
-    case .right: model.rightDragOrigin = origin
     }
   }
 
@@ -708,6 +729,62 @@ public final class RNCSliderView: UIView {
     return recognizer
   }()
 
+  /// Takes over a touch held on the track, after a moment, and drags the thumb
+  /// nearest the finger for as long as it is held.
+  ///
+  /// The same thing as the tap above done slowly, so the two share
+  /// `beginSeek(at:)`, `continueSeek(at:)` and `endSeek()`, and it sits on the
+  /// very same track for the very same reason.
+  ///
+  /// The hold is short enough to feel immediate, which asks something of a finger
+  /// that means to scroll instead: `allowableMovement` is left at what UIKit asks
+  /// for, so a finger already sliding as it lands is left to whatever the slider
+  /// sits in, and only a finger that comes to rest on the track picks a thumb up.
+  /// Once the hold has begun the finger is free to travel the whole track.
+  ///
+  /// The touches are left to carry on underneath it, exactly as they are under
+  /// the tap, so that a finger which moved before the hold began is still handed
+  /// to the hosted slider.
+  private lazy var holdToSeek: UILongPressGestureRecognizer = {
+    let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(seekToHold(_:)))
+    recognizer.minimumPressDuration = Self.seekHoldDuration
+    recognizer.cancelsTouchesInView = false
+
+    return recognizer
+  }()
+
+  /// How long the track has to be held before a thumb is picked up off it - short
+  /// enough that picking one up this way feels like it begins at once.
+  private static let seekHoldDuration: TimeInterval = 0.15
+
+  /// Installs the two reads of the track, and keeps them from answering the same
+  /// touch twice: a tap recognizes on release however long the finger was down,
+  /// so without this a press held past the hold duration would be answered by the
+  /// hold and then again by the tap - a second start and complete carrying no
+  /// value. A quick tap fails the hold the moment it is released, which is too
+  /// soon to be felt.
+  private func installSeekGestures() {
+    tapToSeek.require(toFail: holdToSeek)
+    addGestureRecognizer(tapToSeek)
+    addGestureRecognizer(holdToSeek)
+  }
+
+  /// Drags the thumb picked at the start of a hold along with the finger.
+  @objc private func seekToHold(_ recognizer: UILongPressGestureRecognizer) {
+    let point = recognizer.location(in: hostingController.view)
+
+    switch recognizer.state {
+    case .began:
+      beginSeek(at: point)
+    case .changed:
+      continueSeek(at: point)
+    case .ended, .cancelled, .failed:
+      endSeek()
+    default:
+      break
+    }
+  }
+
   /// Takes the thumb nearest a tap on the track to where the tap landed.
   ///
   /// A tap landing on a thumb is left to the hosted slider, which reads it the
@@ -718,28 +795,73 @@ public final class RNCSliderView: UIView {
   /// A tap is reported the way a drag of the same distance would have been: a
   /// start, the value, and a complete.
   @objc private func seekToTap(_ recognizer: UITapGestureRecognizer) {
-    guard !model.isSliding else { return }
-
     // The hosted slider is laid out to fill this view, so the tap is read in its
     // own bounds - the same bounds `RNCRangedSliderContent` is drawn in.
-    seek(to: recognizer.location(in: hostingController.view))
+    beginSeek(at: recognizer.location(in: hostingController.view))
+    endSeek()
   }
 
-  /// Carries the nearest thumb to the tapped point of the slider, unless the tap
-  /// landed on a thumb to begin with.
-  private func seek(to point: CGPoint) {
-    let geometry = RNCSliderGeometry(model: model, size: hostingController.view.bounds.size)
+  /// Takes the thumb nearest the given point of the slider to it, and keeps it
+  /// there for as long as the finger holds.
+  ///
+  /// Unlike a thumb taken hold of directly, which is then dragged by how far the
+  /// finger travels, a thumb picked up off the track follows where the finger
+  /// *is*, from the moment it is grabbed: there is nothing to have travelled from
+  /// when the finger was never on the thumb to begin with.
+  ///
+  /// Answers whether the hold began: a thumb already being dragged, or a hold
+  /// beginning on one, is left to the hosted slider, and a hold beginning where
+  /// the thumbs cannot travel has no thumb to pick up.
+  @discardableResult
+  private func beginSeek(at point: CGPoint) -> Bool {
+    guard !model.isSliding, !model.isHeld else { return false }
 
-    guard let thumb = geometry.thumb(tappedAt: point) else {
-      return
-    }
+    let geometry = seekGeometry()
+    guard let thumb = geometry.thumb(tappedAt: point) else { return false }
 
+    // The origin marks the thumb as held, so that a value pushed from JS is kept
+    // off it for as long as the finger is down. The seek never reads the value
+    // back, as it is the finger that decides where the thumb goes.
+    model.setDragOrigin(model.value(of: thumb), of: thumb)
+    // Which also grows the thumb and turns it to glass, the way it does when it
+    // is taken hold of directly.
+    model.heldThumb = thumb
     model.onSlidingStart?()
-    // The value the tap asks for can still be refused: it can be outside the
+    continueSeek(at: point)
+
+    return true
+  }
+
+  /// Carries the thumb picked up off the track to the given point of it.
+  private func continueSeek(at point: CGPoint) {
+    guard let thumb = model.heldThumb else { return }
+
+    // The value the finger asks for can still be refused: it can be outside the
     // limits or on the far side of the other thumb, and a thumb held against one
     // of those does not move - exactly as it would not if it were dragged there.
-    model.set(geometry.value(tappedAt: point), of: thumb)
-    model.onSlidingComplete?()
+    model.set(seekGeometry().value(tappedAt: point), of: thumb)
+  }
+
+  /// Lets go of a thumb held on the track, and answers the beginning of the hold
+  /// with its completion.
+  private func endSeek() {
+    guard let thumb = model.heldThumb else { return }
+    model.heldThumb = nil
+
+    // A second finger that took hold of the same thumb, and let go of it first,
+    // has already reported the completion. A hold can begin once that drag is
+    // over, so reporting one here too would answer a start that is no longer
+    // there.
+    if model.dragOrigin(of: thumb) != nil {
+      model.setDragOrigin(nil, of: thumb)
+      model.onSlidingComplete?()
+    }
+  }
+
+  /// The geometry of the slider as the hosted view draws it, which fills this
+  /// view - so the track is sought where it is drawn.
+  private func seekGeometry() -> RNCSliderGeometry {
+    RNCSliderGeometry(model: model, size: hostingController.view.bounds.size)
   }
 
   @objc public var minimumValue: Double {
@@ -886,7 +1008,7 @@ public final class RNCSliderView: UIView {
     addSubview(trackContainer)
     addSubview(hostingController.view)
     thumbContainers.forEach(addSubview)
-    addGestureRecognizer(tapToSeek)
+    installSeekGestures()
 
     // Every change the slider could redraw its thumbs for may have moved them,
     // a drag above all. It is only announced before it lands, so the custom
@@ -941,6 +1063,7 @@ public final class RNCSliderView: UIView {
   /// The drag is abandoned rather than ended: the JS that would have heard the
   /// completion is no longer mounted on this view.
   @objc public func cancelSliding() {
+    model.heldThumb = nil
     model.leftDragOrigin = nil
     model.rightDragOrigin = nil
   }
