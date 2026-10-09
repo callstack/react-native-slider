@@ -66,6 +66,18 @@ using namespace facebook::react;
     return self;
 }
 
+// RNCSlider is the accessibility element, not its Fabric wrapper. Exposing the
+// wrapper blocks UISlider's native adjustable trait and increment/decrement actions.
+- (BOOL)isAccessibilityElement
+{
+    return NO;
+}
+
+- (NSObject *)accessibilityElement
+{
+    return slider;
+}
+
 - (void)tapHandler:(UITapGestureRecognizer *)gesture {
     if ([gesture.view class] != [RNCSlider class]) {
         return;
