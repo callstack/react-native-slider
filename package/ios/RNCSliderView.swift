@@ -52,6 +52,66 @@ final class RNCSliderModel: ObservableObject {
   /// JS gave underneath it instead.
   @Published var customTrack: Bool = false
 
+  /// Which end of the range a thumb drags. The single thumb of a slider that is
+  /// not ranged counts as the left one, which is how it shares the drag origins
+  /// and the clamping below with a ranged slider's.
+  enum Thumb {
+    case single
+    case left
+    case right
+  }
+
+  /// The value a thumb holds.
+  func value(of thumb: Thumb) -> Double {
+    switch thumb {
+    case .single: return value
+    case .left: return valueLeft
+    case .right: return valueRight
+    }
+  }
+
+  /// Takes a thumb to the given value, keeping it inside the limits and on its
+  /// own side of the other thumb, and reports it to JS. The two thumbs cannot
+  /// swap places.
+  ///
+  /// A thumb held against a limit stops moving, and a value that has not moved
+  /// is not reported, so JS hears nothing of a drag carrying on beyond it.
+  ///
+  /// Answers whether the thumb moved anywhere, which is what the thumb is worth
+  /// reporting for.
+  ///
+  /// Both the way a thumb is dragged and the way a thumb jumps to a tap on the
+  /// track go through here, so the two cannot disagree on where a value lands.
+  @discardableResult
+  func set(_ newValue: Double, of thumb: Thumb) -> Bool {
+    let stepped = newValue.snapped(to: step)
+    let limits = self.limits
+
+    switch thumb {
+    case .single:
+      let clamped = stepped.clamped(to: limits)
+      guard clamped != value else { return false }
+      value = clamped
+      onValueChange?(clamped)
+    case .left:
+      let clamped = stepped.clamped(
+        to: limits.lowerBound...valueRight.clamped(to: limits)
+      )
+      guard clamped != valueLeft else { return false }
+      valueLeft = clamped
+      onLeftValueChange?(clamped)
+    case .right:
+      let clamped = stepped.clamped(
+        to: valueLeft.clamped(to: limits)...limits.upperBound
+      )
+      guard clamped != valueRight else { return false }
+      valueRight = clamped
+      onRightValueChange?(clamped)
+    }
+
+    return true
+  }
+
   /// The value a thumb had when the drag in progress began, or `nil` when that
   /// thumb is not being dragged. The single thumb keeps its origin in the left
   /// one of the two.
@@ -115,6 +175,7 @@ final class RNCSliderModel: ObservableObject {
 struct RNCSliderGeometry {
   let size: CGSize
   let vertical: Bool
+  let ranged: Bool
   let range: ClosedRange<Double>
   let length: CGFloat
   let breadth: CGFloat
@@ -141,6 +202,7 @@ struct RNCSliderGeometry {
   init(model: RNCSliderModel, size: CGSize) {
     self.size = size
     vertical = model.vertical
+    ranged = model.ranged
     range = model.range
     length = vertical ? size.height : size.width
     breadth = vertical ? size.width : size.height
@@ -184,6 +246,90 @@ struct RNCSliderGeometry {
     }
     return 28
   }
+
+  /// The value asked for by a tap on the given point of the view: the one whose
+  /// thumb is placed under the finger, rather than pulled up beside it. Where
+  /// the step leaves that value is no concern of the geometry - the thumb being
+  /// moved answers for that, exactly as it does for a drag.
+  func value(tappedAt point: CGPoint) -> Double {
+    let span = range.upperBound - range.lowerBound
+    guard travel > 0, span > 0 else { return range.lowerBound }
+
+    let along = min(max(offset(of: point) - thumbLength / 2, 0), travel)
+
+    return range.lowerBound + Double(along / travel) * span
+  }
+
+  /// How far along the slider the given point of the view is, measured from the
+  /// end the minimum value sits at - the same measure `leftOffset` and
+  /// `rightOffset` place the thumbs by. A vertical slider grows upwards, which
+  /// the coordinates of the view run backwards along.
+  func offset(of point: CGPoint) -> CGFloat {
+    min(max(vertical ? size.height - point.y : point.x, 0), length)
+  }
+
+  /// The thumb a tap on the given point of the view should carry to it: the
+  /// closest one, unless the tap lands on a thumb to begin with. A thumb that
+  /// has nowhere to travel to has nowhere to be sought to either.
+  func thumb(tappedAt point: CGPoint) -> RNCSliderModel.Thumb? {
+    guard travel > 0, !touchesThumb(at: point) else { return nil }
+
+    let offset = offset(of: point)
+
+    return thumbs.min {
+      abs($0.offset + thumbLength / 2 - offset) < abs($1.offset + thumbLength / 2 - offset)
+    }?.thumb
+  }
+
+  /// Whether the given point of the view is one a thumb is drawn to catch. A
+  /// touch falling there belongs to that thumb rather than to the track, which
+  /// is exactly what `RNCRangedSliderContent` makes of it too - so that a tap
+  /// answers either as a thumb or as the track, never as both nor as neither.
+  func touchesThumb(at point: CGPoint) -> Bool {
+    thumbs.contains { thumbTouchRect(atOffset: $0.offset).contains(point) }
+  }
+
+  /// The rectangle a thumb whose near edge sits at the given offset answers
+  /// touches over: itself grown on either side of each axis to the touch target
+  /// Apple asks for - the padding `RNCRangedSliderContent` gives a thumb, so
+  /// that a thumb is answered wherever it catches a drag and nowhere else.
+  func thumbTouchRect(atOffset offset: CGFloat) -> CGRect {
+    let center = thumbCenter(atOffset: offset)
+    let along = Self.touchSlop(around: thumbLength)
+    let across = Self.touchSlop(around: thumbThickness)
+
+    return vertical
+      ? CGRect(
+          x: center.x - thumbThickness / 2 - across,
+          y: center.y - thumbLength / 2 - along,
+          width: thumbThickness + across * 2,
+          height: thumbLength + along * 2
+      )
+      : CGRect(
+          x: center.x - thumbLength / 2 - along,
+          y: center.y - thumbThickness / 2 - across,
+          width: thumbLength + along * 2,
+          height: thumbThickness + across * 2
+      )
+  }
+
+  /// The thumbs there are to be moved, and how far along the slider each of them
+  /// stands. The single thumb of a slider that is not ranged is the left one, as
+  /// it is everywhere else.
+  private var thumbs: [(thumb: RNCSliderModel.Thumb, offset: CGFloat)] {
+    ranged
+      ? [(.left, leftOffset), (.right, rightOffset)]
+      : [(.single, leftOffset)]
+  }
+
+  /// How much to grow a thumb on either side of the given extent of it to reach
+  /// the touch target Apple asks for.
+  static func touchSlop(around extent: CGFloat) -> CGFloat {
+    max((minimumTouchTarget - extent) / 2, 0)
+  }
+
+  /// The smallest control Apple's guidelines will accept as a touch target.
+  static let minimumTouchTarget: CGFloat = 44
 }
 
 struct RNCSliderContent: View {
@@ -225,12 +371,9 @@ struct RNCSingleSliderContent: View {
 struct RNCRangedSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
-  /// Which end of the range a thumb drags.
-  private enum Thumb {
-    case single
-    case left
-    case right
-  }
+  /// The two shapes a thumb takes are one and the same thing to this view, to
+  /// the thumb being dragged and to the one a tap on the track jumps.
+  private typealias Thumb = RNCSliderModel.Thumb
 
   /// Whether the user has hold of the left (or single) and of the right thumb,
   /// which is what turns it to glass. Kept apart from the drag origins in the
@@ -321,8 +464,8 @@ struct RNCRangedSliderContent: View {
     // the 44pt Apple asks for, on whichever side of the thumb falls short of it.
     // The padding is then shifted back off the offset, leaving the thumb itself
     // where the value puts it.
-    let horizontalSlop = Self.touchSlop(around: size.width)
-    let verticalSlop = Self.touchSlop(around: size.height)
+    let horizontalSlop = RNCSliderGeometry.touchSlop(around: size.width)
+    let verticalSlop = RNCSliderGeometry.touchSlop(around: size.height)
     let alongSlop = model.vertical ? verticalSlop : horizontalSlop
 
     return thumbFace(isReplaced: isCustom(thumb), isPressed: isPressed(thumb))
@@ -340,7 +483,7 @@ struct RNCRangedSliderContent: View {
             let travelled = travel > 0
               ? Double(dragDistance(of: gesture) / travel) * span(of: range)
               : 0
-            set(origin + travelled, of: thumb)
+            model.set(origin + travelled, of: thumb)
           }
           .onEnded { _ in endDrag(of: thumb) }
       )
@@ -349,14 +492,14 @@ struct RNCRangedSliderContent: View {
       // or by 10% of the range when the slider has none - which is what
       // `UISlider` does.
       .accessibilityElement()
-      .accessibilityValue(Text(percentage(of: value(of: thumb), in: range)))
+      .accessibilityValue(Text(percentage(of: model.value(of: thumb), in: range)))
       .accessibilityAdjustableAction { direction in
         let step = model.step > 0 ? model.step : span(of: range) / 10
         switch direction {
         case .increment:
-          set(value(of: thumb) + step, of: thumb)
+          model.set(model.value(of: thumb) + step, of: thumb)
         case .decrement:
-          set(value(of: thumb) - step, of: thumb)
+          model.set(model.value(of: thumb) - step, of: thumb)
         @unknown default:
           break
         }
@@ -417,65 +560,6 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  private func value(of thumb: Thumb) -> Double {
-    switch thumb {
-    case .single: return model.value
-    case .left: return model.valueLeft
-    case .right: return model.valueRight
-    }
-  }
-
-  /// Moves one thumb, keeping it inside the limits and on its own side of the
-  /// other thumb, and reports it to JS. The two thumbs cannot swap places.
-  ///
-  /// A thumb held against a limit stops moving, and a value that has not moved
-  /// is not reported, so JS hears nothing of a drag carrying on beyond it.
-  private func set(_ newValue: Double, of thumb: Thumb) {
-    let stepped = snapped(newValue)
-    let limits = model.limits
-
-    switch thumb {
-    case .single:
-      let clamped = stepped.clamped(to: limits)
-      guard clamped != model.value else { return }
-      model.value = clamped
-      model.onValueChange?(clamped)
-    case .left:
-      let clamped = stepped.clamped(
-        to: limits.lowerBound...model.valueRight.clamped(to: limits)
-      )
-      guard clamped != model.valueLeft else { return }
-      model.valueLeft = clamped
-      model.onLeftValueChange?(clamped)
-    case .right:
-      let clamped = stepped.clamped(
-        to: model.valueLeft.clamped(to: limits)...limits.upperBound
-      )
-      guard clamped != model.valueRight else { return }
-      model.valueRight = clamped
-      model.onRightValueChange?(clamped)
-    }
-  }
-
-  /// Rounds a value to the nearest multiple of the step, which is the
-  /// granularity JS is promised. A step of zero leaves the value alone.
-  ///
-  /// Clamping is left to the caller: a snapped value can land outside the
-  /// limits or past the other thumb, and each thumb answers for that
-  /// differently. The ends stay reachable that way, whether or not the step
-  /// divides the range evenly.
-  private func snapped(_ value: Double) -> Double {
-    let step = model.step
-    guard step > 0 else { return value }
-
-    // Multiplying the step back out misses the mark by a fraction whenever the
-    // step is one that binary floating point cannot hold - three tenths
-    // arriving as 0.30000000000000004 - so the product is rounded to the
-    // decimals the step itself is written with, and reaches JS reading the way
-    // the step was written.
-    return ((value / step).rounded() * step).rounded(toDecimals: step.decimals)
-  }
-
   /// Takes hold of a thumb, remembering where it stood so that the drag can be
   /// tracked by how far it travels, and tells JS that a drag has begun.
   ///
@@ -485,7 +569,7 @@ struct RNCRangedSliderContent: View {
   /// one complete.
   private func beginDrag(of thumb: Thumb) -> Double {
     let wasSliding = model.isSliding
-    let origin = value(of: thumb)
+    let origin = model.value(of: thumb)
     setDragOrigin(origin, of: thumb)
 
     if !wasSliding {
@@ -550,14 +634,6 @@ struct RNCRangedSliderContent: View {
     )
   }
 
-  /// How much to grow a thumb by on either side of the given extent of it, to
-  /// reach the 44pt Apple asks for a touch target to be.
-  private static func touchSlop(around extent: CGFloat) -> CGFloat {
-    max((minimumTouchTarget - extent) / 2, 0)
-  }
-
-  private static let minimumTouchTarget: CGFloat = 44
-
   /// How much bigger a held thumb is drawn, as `Slider` grows its own.
   private static let pressedThumbScale: CGFloat = 1.5
 
@@ -611,6 +687,60 @@ public final class RNCSliderView: UIView {
 
   /// Keeps the custom thumbs moving with the slider - see `layoutSubviews`.
   private var modelObservation: AnyCancellable?
+
+  /// Reads a tap anywhere on the slider as the track being tapped to move the
+  /// thumb to - the way `UISlider` behaves, which this slider is drawn to
+  /// stand in for.
+  ///
+  /// It sits on this view rather than being a gesture of the hosted slider, as
+  /// the whole of the track has to answer it while the thumbs keep their own
+  /// gestures: a tap is a thing of the slider's, and a drag of a thumb is a
+  /// thing of the thumb's.
+  ///
+  /// The touches are left to carry on underneath it, so that the drags of the
+  /// hosted slider go on seeing the whole of a touch even when a tap ends up
+  /// being read out of it - a thumb held without ever moving would otherwise
+  /// never be told it has been let go of.
+  private lazy var tapToSeek: UITapGestureRecognizer = {
+    let recognizer = UITapGestureRecognizer(target: self, action: #selector(seekToTap(_:)))
+    recognizer.cancelsTouchesInView = false
+
+    return recognizer
+  }()
+
+  /// Takes the thumb nearest a tap on the track to where the tap landed.
+  ///
+  /// A tap landing on a thumb is left to the hosted slider, which reads it the
+  /// same way it reads a drag begun there: as a thumb being taken hold of. A tap
+  /// arriving while a thumb is already being dragged is left too, and a value
+  /// pushed from JS in between is held off the way one pushed mid-drag is.
+  ///
+  /// A tap is reported the way a drag of the same distance would have been: a
+  /// start, the value, and a complete.
+  @objc private func seekToTap(_ recognizer: UITapGestureRecognizer) {
+    guard !model.isSliding else { return }
+
+    // The hosted slider is laid out to fill this view, so the tap is read in its
+    // own bounds - the same bounds `RNCRangedSliderContent` is drawn in.
+    seek(to: recognizer.location(in: hostingController.view))
+  }
+
+  /// Carries the nearest thumb to the tapped point of the slider, unless the tap
+  /// landed on a thumb to begin with.
+  private func seek(to point: CGPoint) {
+    let geometry = RNCSliderGeometry(model: model, size: hostingController.view.bounds.size)
+
+    guard let thumb = geometry.thumb(tappedAt: point) else {
+      return
+    }
+
+    model.onSlidingStart?()
+    // The value the tap asks for can still be refused: it can be outside the
+    // limits or on the far side of the other thumb, and a thumb held against one
+    // of those does not move - exactly as it would not if it were dragged there.
+    model.set(geometry.value(tappedAt: point), of: thumb)
+    model.onSlidingComplete?()
+  }
 
   @objc public var minimumValue: Double {
     get { model.minimumValue }
@@ -756,6 +886,7 @@ public final class RNCSliderView: UIView {
     addSubview(trackContainer)
     addSubview(hostingController.view)
     thumbContainers.forEach(addSubview)
+    addGestureRecognizer(tapToSeek)
 
     // Every change the slider could redraw its thumbs for may have moved them,
     // a drag above all. It is only announced before it lands, so the custom
@@ -915,6 +1046,24 @@ public final class RNCSliderView: UIView {
 private extension Double {
   func clamped(to range: ClosedRange<Double>) -> Double {
     min(max(self, range.lowerBound), range.upperBound)
+  }
+
+  /// Rounds to the nearest multiple of the given step, which is the granularity
+  /// JS is promised. A step of zero leaves the value alone.
+  ///
+  /// Clamping is left to the caller: a snapped value can land outside the limits
+  /// or past the other thumb, and each thumb answers for that differently. The
+  /// ends stay reachable that way, whether or not the step divides the range
+  /// evenly.
+  func snapped(to step: Double) -> Double {
+    guard step > 0 else { return self }
+
+    // Multiplying the step back out misses the mark by a fraction whenever the
+    // step is one that binary floating point cannot hold - three tenths
+    // arriving as 0.30000000000000004 - so the product is rounded to the
+    // decimals the step itself is written with, and reaches JS reading the way
+    // the step was written.
+    return ((self / step).rounded() * step).rounded(toDecimals: step.decimals)
   }
 
   /// How many decimals it takes to write this value out, capped at the digits a
