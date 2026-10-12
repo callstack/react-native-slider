@@ -27,18 +27,27 @@ Size RNCSliderShadowNode::measureContent(
   // The answer describes a horizontal slider; a vertical one is the same control
   // on its side, and `sizeForOrientation` turns the size round rather than asking
   // SwiftUI for a second one.
+  //
+  // A slider drawing step markers of its own is grown to fit them, which only
+  // ever depends on the thumb, so the room they need is read in the same hop.
   static CGSize intrinsicSize;
+  static CGFloat stepMarkedThickness;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     RCTUnsafeExecuteOnMainQueueSync(^{
       intrinsicSize = [RNCSliderView measuredIntrinsicSize];
+      stepMarkedThickness = [RNCSliderView stepMarkedThickness];
     });
   });
 
-  return layoutConstraints.clamp(sizeForOrientation({
-      .width = static_cast<Float>(intrinsicSize.width),
-      .height = static_cast<Float>(intrinsicSize.height),
-  }));
+  const auto horizontalSize = sizeForStepMarkers(
+      {
+          .width = static_cast<Float>(intrinsicSize.width),
+          .height = static_cast<Float>(intrinsicSize.height),
+      },
+      static_cast<Float>(stepMarkedThickness));
+
+  return layoutConstraints.clamp(sizeForOrientation(horizontalSize));
 }
 
 } // namespace facebook::react

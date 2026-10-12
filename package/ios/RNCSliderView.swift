@@ -52,6 +52,46 @@ final class RNCSliderModel: ObservableObject {
   /// JS gave underneath it instead.
   @Published var customTrack: Bool = false
 
+  /// Whether the steps are marked below the track - see `stepMarkerValues`.
+  @Published var stepMarkers: Bool = false
+
+  /// Whether JS has replaced the step markers with views of its own, one for
+  /// each of `stepMarkerValues`. The slider then draws none of its own -
+  /// `RNCSliderView` hangs the views JS gave below the steps instead.
+  @Published var customStepMarkers: Bool = false
+
+  /// The values the steps stand at: every step from the minimum, and the
+  /// maximum itself when the step does not divide the range, which is how a
+  /// thumb can still reach it. A slider with no step has no steps to mark.
+  ///
+  /// JS works out the very same values to render its own step markers by, and
+  /// has to come to as many of them as this does - so the two are worked out
+  /// the same way, down to the tolerance.
+  var stepMarkerValues: [Double] {
+    let span = maximumValue - minimumValue
+    guard step > 0, span > 0 else { return [] }
+
+    let wholeSteps = Int((span / step + Self.stepTolerance).rounded(.down))
+    var values = (0...wholeSteps).map { minimumValue + Double($0) * step }
+
+    if span - Double(wholeSteps) * step > step * Self.stepTolerance {
+      values.append(maximumValue)
+    }
+
+    return values
+  }
+
+  /// Whether a thumb stands on the step at the given value - which is what
+  /// `marked` tells a step marker JS renders, too.
+  func isMarked(_ stepValue: Double) -> Bool {
+    let thumbValues = ranged ? [valueLeft, valueRight] : [value]
+
+    return thumbValues.contains { abs($0 - stepValue) <= step * Self.stepTolerance }
+  }
+
+  /// Leeway, as a fraction of a step, for a value to count as landing on one.
+  static let stepTolerance = 1e-9
+
   /// Which end of the range a thumb drags. The single thumb of a slider that is
   /// not ranged counts as the left one, which is how it shares the drag origins
   /// and the clamping below with a ranged slider's.
@@ -254,6 +294,35 @@ struct RNCSliderGeometry {
     return vertical
       ? CGPoint(x: size.width / 2, y: size.height - along)
       : CGPoint(x: along, y: size.height / 2)
+  }
+
+  /// The point the marker of the step at the given value hangs from: the middle
+  /// of its top edge, right under where the thumb stands on that step and clear
+  /// of it, so that the marker of the step a thumb is on stays in sight.
+  ///
+  /// A vertical slider has its markers to the right of the track instead, the
+  /// point being the middle of their left edge - they are not turned round with
+  /// the slider, which keeps whatever they read the right way up.
+  func stepMarkerAnchor(at value: Double) -> CGPoint {
+    let along = CGFloat(Self.fraction(of: value, in: range)) * travel + thumbLength / 2
+    let across = breadth / 2 + thumbThickness / 2 + Self.stepMarkerGap
+
+    return vertical
+      ? CGPoint(x: across, y: size.height - along)
+      : CGPoint(x: along, y: across)
+  }
+
+  /// How far a step marker keeps from the thumb.
+  static let stepMarkerGap: CGFloat = 4
+
+  /// The diameter of a built-in step marker.
+  static let stepMarkerSize: CGFloat = 4
+
+  /// How thick a slider has to be across for the built-in step markers to fit
+  /// inside it: a full-sized thumb, with a marker and its gap on either side of
+  /// it, as the track stays in the middle of the slider.
+  static var stepMarkedThickness: CGFloat {
+    thumbThickness + (stepMarkerGap + stepMarkerSize) * 2
   }
 
   static func fraction(of value: Double, in range: ClosedRange<Double>) -> Double {
@@ -468,6 +537,48 @@ struct RNCRangedSliderContent: View {
         height: proxy.size.height,
         alignment: model.vertical ? .bottom : .leading
       )
+      .background(
+        stepMarkers(
+          geometry,
+          marked: model.ranged ? middleColor : lowerColor,
+          unmarked: tint(model.maximumTrackColor, or: Self.stepMarkerColor)
+        )
+      )
+    }
+  }
+
+  /// The markers of the steps, drawn as dots hanging below the thumbs, in the
+  /// tint of the selected part of the track for a step a thumb is on and in that
+  /// of the rest of it otherwise.
+  ///
+  /// Each set of dots is a single path, so that a slider with many steps does not
+  /// cost a view apiece - and a path draws wherever its points are, so that the
+  /// dots are not cut off on a slider too thin to hold them.
+  @ViewBuilder
+  private func stepMarkers(_ geometry: RNCSliderGeometry, marked: Color, unmarked: Color) -> some View {
+    if model.stepMarkers, !model.customStepMarkers {
+      let values = model.stepMarkerValues
+
+      ZStack {
+        stepMarkerDots(at: values.filter { !model.isMarked($0) }, in: geometry).fill(unmarked)
+        stepMarkerDots(at: values.filter(model.isMarked), in: geometry).fill(marked)
+      }
+      .allowsHitTesting(false)
+      .accessibilityHidden(true)
+    }
+  }
+
+  private func stepMarkerDots(at values: [Double], in geometry: RNCSliderGeometry) -> Path {
+    let size = RNCSliderGeometry.stepMarkerSize
+
+    return Path { path in
+      for value in values {
+        let anchor = geometry.stepMarkerAnchor(at: value)
+        let origin = model.vertical
+          ? CGPoint(x: anchor.x, y: anchor.y - size / 2)
+          : CGPoint(x: anchor.x - size / 2, y: anchor.y)
+        path.addEllipse(in: CGRect(origin: origin, size: CGSize(width: size, height: size)))
+      }
     }
   }
 
@@ -662,6 +773,10 @@ struct RNCRangedSliderContent: View {
 
   /// What `Slider` leaves the unselected part of its track looking like.
   private static let trackColor = Color(uiColor: .systemFill)
+
+  /// What a built-in step marker no thumb is on looks like, which has to stand
+  /// out against whatever the slider is laid on rather than against the track.
+  private static let stepMarkerColor = Color(uiColor: .tertiaryLabel)
 }
 
 /// Hosts the SwiftUI slider inside the UIKit view hierarchy Fabric mounts.
@@ -677,9 +792,15 @@ public final class RNCSliderView: UIView {
   private let hostingController: UIHostingController<RNCSliderContent>
 
   /// The views JS rendered as the slider's children, in the order it rendered
-  /// them: the track, when `customTrack` says JS replaced it, and then the
-  /// single thumb, or the left and then the right one.
+  /// them: the track, when `customTrack` says JS replaced it, then the single
+  /// thumb, or the left and then the right one, when `customThumb` says JS
+  /// replaced them, and then a step marker for each step, when
+  /// `customStepMarkers` says JS replaced those.
   private var childViews: [UIView] = []
+
+  /// Whether JS replaced the thumbs with views of its own, which is what tells
+  /// the thumbs apart from the step markers that follow them.
+  private var hasCustomThumb = false
 
   /// One for each thumb there can be, holding the view that replaces it. Each
   /// is kept centred on its thumb and takes up no room of its own: the shadow
@@ -705,6 +826,14 @@ public final class RNCSliderView: UIView {
     container.isUserInteractionEnabled = false
     return container
   }()
+
+  /// One for each step JS renders a marker for, holding that marker the way
+  /// `thumbContainers` hold the thumbs - except that each is kept at the point
+  /// its marker hangs from, see `RNCSliderGeometry.stepMarkerAnchor(at:)`.
+  ///
+  /// There are as many of them as there are markers, so they are made as the
+  /// markers come, and lie between the slider and the thumbs.
+  private var stepMarkerContainers: [UIView] = []
 
   /// Keeps the custom thumbs moving with the slider - see `layoutSubviews`.
   private var modelObservation: AnyCancellable?
@@ -889,7 +1018,12 @@ public final class RNCSliderView: UIView {
   /// to the two shapes respectively, and the unused pair is simply not drawn.
   @objc public var ranged: Bool {
     get { model.ranged }
-    set { model.ranged = newValue }
+    set {
+      guard newValue != model.ranged else { return }
+      model.ranged = newValue
+      // Which of the children are thumbs depends on how many thumbs there are.
+      childViewsDidChange()
+    }
   }
 
   /// Setting either of these while the matching thumb is being dragged is a
@@ -962,6 +1096,35 @@ public final class RNCSliderView: UIView {
     set {
       guard newValue != model.customTrack else { return }
       model.customTrack = newValue
+      childViewsDidChange()
+    }
+  }
+
+  /// Whether the views JS mounts after the track include the thumbs - see
+  /// `childViews`.
+  @objc public var customThumb: Bool {
+    get { hasCustomThumb }
+    set {
+      guard newValue != hasCustomThumb else { return }
+      hasCustomThumb = newValue
+      childViewsDidChange()
+    }
+  }
+
+  /// Whether the steps are marked below the track - see
+  /// `RNCSliderModel.stepMarkers`.
+  @objc public var stepMarkers: Bool {
+    get { model.stepMarkers }
+    set { model.stepMarkers = newValue }
+  }
+
+  /// Whether the last of the views JS mounts are step markers - see
+  /// `RNCSliderModel.customStepMarkers`.
+  @objc public var customStepMarkers: Bool {
+    get { model.customStepMarkers }
+    set {
+      guard newValue != model.customStepMarkers else { return }
+      model.customStepMarkers = newValue
       childViewsDidChange()
     }
   }
@@ -1053,6 +1216,13 @@ public final class RNCSliderView: UIView {
 
   private static let intrinsicWidth: CGFloat = 200
 
+  /// How thick a slider drawing its own step markers has to be across for them
+  /// to fit inside it - see `RNCSliderGeometry.stepMarkedThickness`. The shadow
+  /// node grows a slider measured any thinner to it.
+  @objc public static func stepMarkedThickness() -> CGFloat {
+    RNCSliderGeometry.stepMarkedThickness
+  }
+
   /// The smallest control Apple's guidelines will accept as a touch target.
   private static let fallbackHeight: CGFloat = 44
 
@@ -1084,14 +1254,20 @@ public final class RNCSliderView: UIView {
   }
 
   /// Hands every child to the container it belongs in. Which one that is
-  /// depends on whether there is a track ahead of the thumbs, which can change
-  /// before or after the children it concerns are mounted - so it is worked out
-  /// afresh whenever either does.
+  /// depends on which of the track, the thumbs and the step markers JS
+  /// replaced, which can change before or after the children it concerns are
+  /// mounted - so it is worked out afresh whenever either does.
   private func childViewsDidChange() {
     let trackView = model.customTrack ? childViews.first : nil
-    let thumbViews = trackView == nil ? childViews : Array(childViews.dropFirst())
+    let remainingViews = childViews.dropFirst(trackView == nil ? 0 : 1)
+    let thumbCount = hasCustomThumb ? (model.ranged ? 2 : 1) : 0
+    let thumbViews = Array(remainingViews.prefix(thumbCount))
+    let stepMarkerViews = model.customStepMarkers ? Array(remainingViews.dropFirst(thumbCount)) : []
+
+    setStepMarkerContainerCount(stepMarkerViews.count)
 
     var placements = zip(thumbViews, thumbContainers).map { ($0, $1) }
+    placements += zip(stepMarkerViews, stepMarkerContainers).map { ($0, $1) }
     if let trackView {
       placements.append((trackView, trackContainer))
     }
@@ -1106,6 +1282,22 @@ public final class RNCSliderView: UIView {
     }
 
     model.customThumbCount = min(thumbViews.count, thumbContainers.count)
+    setNeedsLayout()
+  }
+
+  /// Makes or drops step marker containers until there is one for each of the
+  /// given number of markers. A dropped container takes the marker it held with
+  /// it, which `childViewsDidChange` then hands to another one.
+  private func setStepMarkerContainerCount(_ count: Int) {
+    while stepMarkerContainers.count > count {
+      stepMarkerContainers.removeLast().removeFromSuperview()
+    }
+    while stepMarkerContainers.count < count {
+      let container = UIView()
+      container.isUserInteractionEnabled = false
+      insertSubview(container, belowSubview: thumbContainers[0])
+      stepMarkerContainers.append(container)
+    }
   }
 
   public override func layoutSubviews() {
@@ -1116,6 +1308,17 @@ public final class RNCSliderView: UIView {
     let geometry = RNCSliderGeometry(model: model, size: bounds.size)
     thumbContainers[0].center = geometry.thumbCenter(atOffset: geometry.leftOffset)
     thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)
+
+    // A marker JS renders for a step the slider does not have - the two being
+    // momentarily out of step while props and children arrive - is left hidden
+    // rather than piled up somewhere.
+    let stepValues = model.stepMarkerValues
+    for (index, container) in stepMarkerContainers.enumerated() {
+      container.isHidden = index >= stepValues.count
+      if index < stepValues.count {
+        container.center = geometry.stepMarkerAnchor(at: stepValues[index])
+      }
+    }
 
     // The shadow node centres the track on the origin of its container, laid
     // out along the slider's length - which is its height on a vertical one.

@@ -84,6 +84,9 @@ using namespace facebook::react;
   _sliderView.middleRangeTrackColor = RCTUIColorFromSharedColor(props.middleRangeTrackColor);
   _sliderView.maximumTrackColor = RCTUIColorFromSharedColor(props.maximumTrackColor);
   _sliderView.customTrack = props.customTrack;
+  _sliderView.customThumb = props.customThumb;
+  _sliderView.stepMarkers = props.stepMarkers != RNCSliderStepMarkers::None;
+  _sliderView.customStepMarkers = props.stepMarkers == RNCSliderStepMarkers::Custom;
 }
 
 - (void)emitValueChange:(double)value
@@ -185,13 +188,20 @@ using namespace facebook::react;
   if (oldViewProps.customTrack != newViewProps.customTrack) {
     _sliderView.customTrack = newViewProps.customTrack;
   }
+  if (oldViewProps.customThumb != newViewProps.customThumb) {
+    _sliderView.customThumb = newViewProps.customThumb;
+  }
+  if (oldViewProps.stepMarkers != newViewProps.stepMarkers) {
+    _sliderView.stepMarkers = newViewProps.stepMarkers != RNCSliderStepMarkers::None;
+    _sliderView.customStepMarkers = newViewProps.stepMarkers == RNCSliderStepMarkers::Custom;
+  }
 
   [super updateProps:props oldProps:oldProps];
 }
 
-// The only children a slider has are the custom track and thumbs JS renders in
-// place of the built-in ones, and the slider view is what keeps them on its
-// track and thumbs.
+// The only children a slider has are the custom track, thumbs and step markers
+// JS renders in place of the built-in ones, and the slider view is what keeps
+// them on its track, its thumbs and its steps.
 - (void)mountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
 {
   [_sliderView mountChildView:childComponentView atIndex:index];

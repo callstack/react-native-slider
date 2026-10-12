@@ -38,6 +38,59 @@ const stepIndex = (
   return Math.round((clamped - minimumValue) / step);
 };
 
+/**
+ * How many decimals it takes to write the given value out, capped at the
+ * digits a double can be trusted with - see `snapped(to:)` on iOS.
+ */
+const decimals = (value: number) => {
+  let count = 0;
+  let scaled = Math.abs(value);
+
+  while (count < 15 && scaled !== Math.floor(scaled)) {
+    scaled *= 10;
+    count += 1;
+  }
+
+  return count;
+};
+
+/**
+ * Leeway, as a fraction of a step, for a value to count as landing on one.
+ * Mirrored by the native step markers, which have to agree with JS on how
+ * many steps there are.
+ */
+const STEP_TOLERANCE = 1e-9;
+
+/**
+ * The values the steps of a slider stand at, the way the native side lays
+ * them out: every step from the minimum, and the maximum itself when the step
+ * does not divide the range.
+ */
+const stepValues = (
+  minimumValue: number,
+  maximumValue: number,
+  step: number,
+) => {
+  const span = maximumValue - minimumValue;
+  if (step <= 0 || span <= 0) {
+    return [];
+  }
+
+  const DECIMAL_FACTOR = 10;
+  const scale = Math.pow(DECIMAL_FACTOR, Math.max(decimals(step), decimals(minimumValue)));
+  const wholeSteps = Math.floor(span / step + STEP_TOLERANCE);
+  const values = Array.from(
+    {length: wholeSteps + 1},
+    (_, index) => Math.round((minimumValue + index * step) * scale) / scale,
+  );
+
+  if (span - wholeSteps * step > step * STEP_TOLERANCE) {
+    values.push(maximumValue);
+  }
+
+  return values;
+};
+
 const useThumbValue = (value: number) => {
   const [dispatched, setDispatched] = useState({given: value, value});
   const current = dispatched.given === value ? dispatched.value : value;
@@ -71,19 +124,24 @@ const Slider = ({
   onRightValueChange,
   thumb: Thumb,
   track: Track,
+  stepMarkers = false,
   ...props
 }: SliderProps) => {
+  const StepMarker =
+    typeof stepMarkers === "function" ? stepMarkers : undefined;
+  const followsThumbs = Thumb !== undefined || StepMarker !== undefined;
+
   const [currentValue, setCurrentValue] = useThumbValue(value);
   const [currentValueLeft, setCurrentValueLeft] = useThumbValue(valueLeft);
   const [currentValueRight, setCurrentValueRight] = useThumbValue(valueRight);
 
-  const handleValueChange = Thumb
+  const handleValueChange = followsThumbs
     ? thumbValueHandler(setCurrentValue, onValueChange)
     : onValueChange;
-  const handleLeftValueChange = Thumb
+  const handleLeftValueChange = followsThumbs
     ? thumbValueHandler(setCurrentValueLeft, onLeftValueChange)
     : onLeftValueChange;
-  const handleRightValueChange = Thumb
+  const handleRightValueChange = followsThumbs
     ? thumbValueHandler(setCurrentValueRight, onRightValueChange)
     : onRightValueChange;
 
@@ -105,6 +163,8 @@ const Slider = ({
       upperLimit={upperLimit}
       orientation={orientation}
       customTrack={Track !== undefined}
+      customThumb={Thumb !== undefined}
+      stepMarkers={StepMarker ? "custom" : stepMarkers ? "native" : "none"}
       onValueChange={valueHandler(handleValueChange)}
       onLeftValueChange={valueHandler(handleLeftValueChange)}
       onRightValueChange={valueHandler(handleRightValueChange)}>
@@ -121,6 +181,22 @@ const Slider = ({
               />
             </View>
           ))
+        : null}
+      {StepMarker
+        ? stepValues(minimumValue, maximumValue, step).map(
+            (stepValue, index) => (
+              <View key={index} collapsable={false} pointerEvents="none">
+                <StepMarker
+                  index={index}
+                  value={stepValue}
+                  marked={thumbValues.some(
+                    (thumbValue) =>
+                      Math.abs(thumbValue - stepValue) <= step * STEP_TOLERANCE,
+                  )}
+                />
+              </View>
+            ),
+          )
         : null}
     </RNCSliderNativeComponent>
   );

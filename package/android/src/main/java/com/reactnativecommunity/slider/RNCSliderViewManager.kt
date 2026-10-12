@@ -17,10 +17,9 @@ import com.facebook.yoga.YogaMeasureOutput
 /**
  * Manages instances of [RNCSliderView].
  *
- * The only children a slider has are the custom track and thumbs JS renders in
- * place of the built-in ones, which the view keeps apart from the slider it hosts -
- * so its children are the track and the thumbs, and not the views it happens to
- * hold.
+ * The only children a slider has are the custom track, thumbs and step markers JS
+ * renders in place of the built-in ones, which the view keeps apart from the slider
+ * it hosts - so its children are those, and not the views it happens to hold.
  */
 @ReactModule(name = RNCSliderViewManager.REACT_CLASS)
 class RNCSliderViewManager :
@@ -105,6 +104,16 @@ class RNCSliderViewManager :
     view.setCustomTrack(value)
   }
 
+  @ReactProp(name = "customThumb", defaultBoolean = false)
+  override fun setCustomThumb(view: RNCSliderView, value: Boolean) {
+    view.setCustomThumb(value)
+  }
+
+  @ReactProp(name = "stepMarkers")
+  override fun setStepMarkers(view: RNCSliderView, value: String?) {
+    view.setStepMarkers(value)
+  }
+
   override fun addView(parent: RNCSliderView, child: View, index: Int) {
     parent.addChildView(child, index)
   }
@@ -170,6 +179,11 @@ class RNCSliderViewManager :
    * The answer describes a horizontal slider, which is the only shape measured
    * here: a vertical one is the same control on its side, and its shadow node
    * turns this size round to match - see `RNCSliderShadowNode::measureContent`.
+   *
+   * The one prop that bears on the size is whether the slider draws step markers
+   * of its own, which hang below the thumb and need it to be thick enough across to
+   * hold them - see [STEP_MARKED_HEIGHT_DIP]. The shadow node asks for that size
+   * apart from the other, and grows a slider measured any thinner to it.
    */
   override fun measure(
     context: Context,
@@ -181,7 +195,11 @@ class RNCSliderViewManager :
     height: Float,
     heightMode: YogaMeasureMode,
     attachmentsPositions: FloatArray?,
-  ): Long = YogaMeasureOutput.make(INTRINSIC_WIDTH_DIP, INTRINSIC_HEIGHT_DIP)
+  ): Long =
+    YogaMeasureOutput.make(
+      INTRINSIC_WIDTH_DIP,
+      if (props?.getString("stepMarkers") == "native") STEP_MARKED_HEIGHT_DIP else INTRINSIC_HEIGHT_DIP,
+    )
 
   companion object {
     const val REACT_CLASS = "RNCSlider"
@@ -190,5 +208,22 @@ class RNCSliderViewManager :
     private const val INTRINSIC_HEIGHT_DIP = 48f
 
     private const val INTRINSIC_WIDTH_DIP = 200f
+
+    /**
+     * The height of the thumb Material 3 draws - its handle. The view reads the
+     * thumb's actual thickness to hang the step markers below it, but a slider is
+     * measured before anything is composed, so the size it is measured at has to
+     * take the handle at its word.
+     */
+    private const val MATERIAL_THUMB_HEIGHT_DIP = 44f
+
+    /**
+     * How tall a slider drawing its own step markers has to be for them to fit
+     * inside it: a full thumb, with a marker and its gap on either side of it, as the
+     * track stays in the middle of the slider.
+     */
+    private const val STEP_MARKED_HEIGHT_DIP =
+      MATERIAL_THUMB_HEIGHT_DIP +
+        (RNCSliderView.STEP_MARKER_GAP_DP + RNCSliderView.STEP_MARKER_SIZE_DP) * 2
   }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <jsi/jsi.h>
 #include <react/renderer/components/RNCSlider/RNCSliderState.h>
 #include <react/renderer/components/RNCSlider/Props.h>
@@ -40,6 +41,36 @@ namespace facebook {
             }
 
             /*
+             * Whether the slider draws step markers of its own, which it does for a
+             * slider that has steps, unless JS replaced the markers.
+             */
+            bool drawsStepMarkers() const {
+                const auto &props = getConcreteProps();
+
+                return props.stepMarkers == RNCSliderStepMarkers::Native &&
+                        props.step > 0 &&
+                        props.maximumValue > props.minimumValue;
+            }
+
+            /*
+             * The size a horizontal slider of the given size takes for the step
+             * markers it draws to fit inside it: at least the given thickness
+             * across, which each platform works out from its own thumb.
+             *
+             * The track stays in the middle of the slider, so a slider grown to
+             * fit the markers below it grows above it just as much. A slider
+             * whose style gives it a size of its own is never asked to measure
+             * itself, so a height JS gives it still wins.
+             */
+            Size sizeForStepMarkers(Size horizontalSize, Float stepMarkedThickness) const {
+                if (!drawsStepMarkers()) {
+                    return horizontalSize;
+                }
+
+                return {horizontalSize.width, std::max(horizontalSize.height, stepMarkedThickness)};
+            }
+
+            /*
              * A slider is a leaf that knows its own size, so Yoga has to be told to ask for it.
              * Being a leaf also keeps its children, the custom thumbs,
              * out of Yoga altogether, which Yoga insists on for a node that measures itself:
@@ -55,14 +86,19 @@ namespace facebook {
 #pragma mark - LayoutableShadowNode
 
             /*
-             * The children of a slider are the custom track and thumbs JS
-             * renders in place of the built-in ones - the track first, when
-             * there is one. A slider is a leaf to Yoga, so they take no part in
-             * laying it out, and are laid out here instead: each thumb at the
-             * size it asks for, and the track along the whole slider, all of
-             * them centred on the slider's origin. The native slider moves that
-             * centre onto its thumb, which is the one thing JS cannot know the
-             * position of, or onto the middle of the slider for the track.
+             * The children of a slider are the custom track, thumbs and step
+             * markers JS renders in place of the built-in ones - in that order,
+             * each of them only when JS replaced it. A slider is a leaf to Yoga,
+             * so they take no part in laying it out, and are laid out here
+             * instead: each thumb and step marker at the size it asks for, and
+             * the track along the whole slider.
+             *
+             * The track and the thumbs are centred on the slider's origin, and
+             * the native slider moves that centre onto its thumb, which is the
+             * one thing JS cannot know the position of, or onto the middle of
+             * the slider for the track. A step marker hangs from the origin
+             * instead, which the native slider moves to just past the thumbs,
+             * below the step - see `hungFromOrigin`.
              */
             void layout(LayoutContext layoutContext) override;
 
@@ -76,6 +112,14 @@ namespace facebook {
                     LayoutContext layoutContext) const;
 
             static Point centredOnOrigin(Size size, LayoutContext layoutContext);
+
+            /*
+             * Where a step marker of the given size goes for the origin to sit
+             * in the middle of its top edge - or of its left edge on a vertical
+             * slider, which has its step markers to the right of the track
+             * rather than below it, still the right way up.
+             */
+            static Point hungFromOrigin(Size size, bool vertical, LayoutContext layoutContext);
 
         public:
 #ifdef ANDROID

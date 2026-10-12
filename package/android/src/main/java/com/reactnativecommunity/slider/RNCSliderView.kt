@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -34,15 +35,19 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.floor
+import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
 
@@ -62,6 +67,14 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var minimumValue by mutableFloatStateOf(DEFAULT_MINIMUM_VALUE)
   private var maximumValue by mutableFloatStateOf(DEFAULT_MAXIMUM_VALUE)
   private var sliderValue by mutableFloatStateOf(DEFAULT_VALUE)
+
+  /**
+   * The range exactly as JS gave it, for the steps to be worked out from - see
+   * [stepMarkerValues]. JS works out the same steps from the same doubles, and a
+   * range rounded to a [Float] could come to a different number of them.
+   */
+  private var exactMinimumValue by mutableDoubleStateOf(DEFAULT_MINIMUM_VALUE.toDouble())
+  private var exactMaximumValue by mutableDoubleStateOf(DEFAULT_MAXIMUM_VALUE.toDouble())
 
   /**
    * Whether the slider selects a span of its range with two thumbs, rather than a
@@ -147,9 +160,42 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var hasCustomTrack by mutableStateOf(DEFAULT_CUSTOM_TRACK)
 
   /**
+   * Whether JS has replaced the thumbs with views of its own, which is what tells
+   * the thumbs apart from the step markers that follow them - see [childViews].
+   */
+  private var hasCustomThumb = DEFAULT_CUSTOM_THUMB
+
+  /** Whether the steps are marked below the track - see [stepMarkerValues]. */
+  private var showsStepMarkers by mutableStateOf(false)
+
+  /**
+   * Whether JS has replaced the step markers with views of its own, one for each of
+   * [stepMarkerValues]. The slider then draws none of its own - the views JS gave
+   * hang below the steps instead, see [stepMarkerContainers].
+   */
+  private var hasCustomStepMarkers by mutableStateOf(false)
+
+  /**
+   * How thick the thumb Material 3 draws is across the track, which the step
+   * markers keep clear of. Read off the thumb itself rather than written down
+   * here, as the thumb is a different shape from one version of Material 3 to the
+   * next.
+   */
+  private var thumbThickness by mutableIntStateOf(0)
+
+  /**
+   * Where the track lies, and which way round, as last laid out - which is where
+   * the custom step markers are hung from, see [placeStepMarkerContainers].
+   */
+  private var stepMarkerTrack: LayoutCoordinates? = null
+  private var stepMarkerLayoutDirection = LayoutDirection.Ltr
+
+  /**
    * The views JS rendered as the slider's children, in the order it rendered them:
-   * the track, when [hasCustomTrack] says JS replaced it, and then the single thumb,
-   * or the left and then the right one.
+   * the track, when [hasCustomTrack] says JS replaced it, then the single thumb, or
+   * the left and then the right one, when [hasCustomThumb] says JS replaced them,
+   * and then a step marker for each step, when [hasCustomStepMarkers] says JS
+   * replaced those.
    */
   private val childViews = mutableListOf<View>()
 
@@ -179,6 +225,16 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       pivotY = 0f
     }
 
+  /**
+   * One for each step JS renders a marker for, holding that marker the way
+   * [thumbContainers] hold the thumbs - except that the origin of each is kept at
+   * the point its marker hangs from, see [placeStepMarkerContainers].
+   *
+   * There are as many of them as there are markers, so they are made as the
+   * markers come, and lie between the slider and the thumbs.
+   */
+  private val stepMarkerContainers = mutableListOf<ChildContainer>()
+
   /** Invoked continuously while the user drags the thumb. */
   var onValueChange: ((Double) -> Unit)? = null
 
@@ -204,6 +260,9 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
         ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
       )
       setContent { SliderContent() }
+      // The step markers hang below the thumbs, which takes them past the bottom
+      // of a slider laid out at its own height.
+      clipChildren = false
     }
 
   init {
@@ -246,9 +305,17 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    */
   private fun onChildViewsChanged() {
     val trackView = if (hasCustomTrack) childViews.firstOrNull() else null
-    val thumbViews = if (trackView != null) childViews.drop(1) else childViews
+    val remainingViews = if (trackView != null) childViews.drop(1) else childViews
+    val thumbCount = if (hasCustomThumb) (if (selectsRange) MAXIMUM_THUMB_COUNT else 1) else 0
+    val thumbViews = remainingViews.take(thumbCount)
+    val stepMarkerViews = if (hasCustomStepMarkers) remainingViews.drop(thumbCount) else emptyList()
+
+    setStepMarkerContainerCount(stepMarkerViews.size)
+
     val placements =
-      thumbViews.zip(thumbContainers) + listOfNotNull(trackView?.let { it to trackContainer })
+      thumbViews.zip(thumbContainers) +
+        stepMarkerViews.zip(stepMarkerContainers) +
+        listOfNotNull(trackView?.let { it to trackContainer })
 
     // A view inserted ahead of another moves that one onto the next container, and
     // one left without a container is not shown anywhere.
@@ -263,6 +330,80 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     }
 
     customThumbCount = minOf(thumbViews.size, MAXIMUM_THUMB_COUNT)
+    placeStepMarkerContainers()
+  }
+
+  /**
+   * Makes or drops step marker containers until there is one for each of the given
+   * number of markers. A dropped container takes the marker it held with it, which
+   * [onChildViewsChanged] then hands to another one.
+   */
+  private fun setStepMarkerContainerCount(count: Int) {
+    while (stepMarkerContainers.size > count) {
+      removeView(stepMarkerContainers.removeAt(stepMarkerContainers.lastIndex))
+    }
+    while (stepMarkerContainers.size < count) {
+      val container = ChildContainer(context)
+      addView(
+        container,
+        indexOfChild(thumbContainers.first()),
+        LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT),
+      )
+      stepMarkerContainers.add(container)
+    }
+  }
+
+  /**
+   * Moves the origin of every step marker container onto the point its marker hangs
+   * from: right under where the thumb stands on that step and clear of it, so that
+   * the marker of the step a thumb is on stays in sight.
+   *
+   * The point is found along the track as Material 3 lays it out, and turned with it
+   * on a vertical slider - which puts the markers to the right of the track. The
+   * markers themselves are not turned, which keeps whatever they read the right way
+   * up.
+   *
+   * A marker JS renders for a step the slider does not have - the two being
+   * momentarily out of step while props and children arrive - is left hidden rather
+   * than piled up somewhere.
+   */
+  private fun placeStepMarkerContainers() {
+    val track = stepMarkerTrack?.takeIf { it.isAttached } ?: return
+    val values = stepMarkerValues()
+    val below = stepMarkerOffset(track.size.height.toFloat(), resources.displayMetrics.density)
+
+    stepMarkerContainers.forEachIndexed { index, container ->
+      val value = values.getOrNull(index)
+      container.visibility = if (value == null) INVISIBLE else VISIBLE
+      if (value != null) {
+        val anchor =
+          track.localToRoot(
+            Offset(alongTrack(value, track.size.width.toFloat(), stepMarkerLayoutDirection), below)
+          )
+        container.translationX = anchor.x
+        container.translationY = anchor.y
+      }
+    }
+  }
+
+  /** Whether the views JS adds after the track include the thumbs. */
+  fun setCustomThumb(value: Boolean) {
+    if (value == hasCustomThumb) {
+      return
+    }
+
+    hasCustomThumb = value
+    onChildViewsChanged()
+  }
+
+  /**
+   * How the steps are marked: not at all, by markers drawn here, or by the views JS
+   * adds last.
+   */
+  fun setStepMarkers(value: String?) {
+    showsStepMarkers = value == STEP_MARKERS_NATIVE || value == STEP_MARKERS_CUSTOM
+    hasCustomStepMarkers = value == STEP_MARKERS_CUSTOM
+    onChildViewsChanged()
   }
 
   /** Whether the first of the views JS adds is a track rather than a thumb. */
@@ -277,10 +418,14 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   fun setMinimumValue(value: Double) {
     minimumValue = value.toFloat()
+    exactMinimumValue = value
+    placeStepMarkerContainers()
   }
 
   fun setMaximumValue(value: Double) {
     maximumValue = value.toFloat()
+    exactMaximumValue = value
+    placeStepMarkerContainers()
   }
 
   fun setValue(value: Double) {
@@ -291,6 +436,8 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   fun setRanged(value: Boolean) {
     selectsRange = value
+    // Which of the children are thumbs depends on how many thumbs there are.
+    onChildViewsChanged()
   }
 
   fun setValueLeft(value: Double) {
@@ -311,6 +458,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    */
   fun setStep(value: Double) {
     stepValue = value
+    placeStepMarkerContainers()
   }
 
   /**
@@ -503,15 +651,17 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       thumb = { Thumb(interactionSource, index = 0) },
       track = { state ->
         val colors = trackColors(active = minimumTrackColor, inactive = maximumTrackColor)
-        if (customThumbCount > 0) {
-          SliderDefaults.Track(
-            sliderState = state,
-            modifier = Modifier.trackVisibility(),
-            colors = colors,
-            thumbTrackGapSize = 0.dp,
-          )
-        } else {
-          SliderDefaults.Track(sliderState = state, modifier = Modifier.trackVisibility(), colors = colors)
+        StepMarkedTrack(colors) {
+          if (customThumbCount > 0) {
+            SliderDefaults.Track(
+              sliderState = state,
+              modifier = Modifier.trackVisibility(),
+              colors = colors,
+              thumbTrackGapSize = 0.dp,
+            )
+          } else {
+            SliderDefaults.Track(sliderState = state, modifier = Modifier.trackVisibility(), colors = colors)
+          }
         }
       },
     )
@@ -536,15 +686,20 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    */
   @Composable
   private fun Thumb(interactionSource: MutableInteractionSource, index: Int) {
+    val measured = Modifier.onSizeChanged { size ->
+      thumbThickness = size.height
+      placeStepMarkerContainers()
+    }
+
     if (index >= customThumbCount) {
-      SliderDefaults.Thumb(interactionSource = interactionSource)
+      SliderDefaults.Thumb(interactionSource = interactionSource, modifier = measured)
       return
     }
 
     SliderDefaults.Thumb(
       interactionSource = interactionSource,
       modifier =
-        Modifier.alpha(0f).onGloballyPositioned { coordinates ->
+        measured.alpha(0f).onGloballyPositioned { coordinates ->
           // The slider is hosted across the whole of this view, so the root of
           // its composition is this view's own coordinate space.
           val center =
@@ -701,19 +856,121 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     val span = state.valueRange.endInclusive - state.valueRange.start
     val cut = if (span > 0f) ((state.activeRangeStart - state.valueRange.start) / span).coerceIn(0f, 1f) else 0f
 
-    Box(modifier = Modifier.trackVisibility()) {
-      RangedTrackPart(
-        state,
-        trackColors(active = middleRangeTrackColor, inactive = minimumTrackColor),
-        Modifier.clipAlongTrack(from = 0f, to = cut),
-      )
-      RangedTrackPart(
-        state,
-        trackColors(active = middleRangeTrackColor, inactive = maximumTrackColor),
-        Modifier.clipAlongTrack(from = cut, to = 1f),
-      )
+    val upperColors = trackColors(active = middleRangeTrackColor, inactive = maximumTrackColor)
+
+    StepMarkedTrack(upperColors) {
+      Box(modifier = Modifier.trackVisibility()) {
+        RangedTrackPart(
+          state,
+          trackColors(active = middleRangeTrackColor, inactive = minimumTrackColor),
+          Modifier.clipAlongTrack(from = 0f, to = cut),
+        )
+        RangedTrackPart(state, upperColors, Modifier.clipAlongTrack(from = cut, to = 1f))
+      }
     }
   }
+
+  /**
+   * The track, with the markers of the steps drawn below it as dots hanging clear of
+   * the thumbs - in the colour of the selected part of the track for a step a thumb
+   * is on, and in that of the rest of it otherwise.
+   *
+   * The markers are drawn around the track rather than over the slider, as the track
+   * spans exactly the distance between the centres of the thumbs at either end of
+   * the range - so a fraction of its width is exactly where a thumb at that fraction
+   * of the range is centred, see [alongTrack]. They are drawn here even when the
+   * track is replaced, which is only ever left undrawn.
+   *
+   * The track is where custom step markers are hung from too, once it is laid out.
+   */
+  @Composable
+  private fun StepMarkedTrack(colors: SliderColors, track: @Composable () -> Unit) {
+    val layoutDirection = LocalLayoutDirection.current
+
+    Box(
+      modifier =
+        Modifier.onGloballyPositioned { coordinates ->
+            stepMarkerTrack = coordinates
+            stepMarkerLayoutDirection = layoutDirection
+            placeStepMarkerContainers()
+          }
+          .drawBehind {
+            if (!showsStepMarkers || hasCustomStepMarkers) {
+              return@drawBehind
+            }
+
+            val radius = STEP_MARKER_SIZE_DP * density / 2f
+            val below = stepMarkerOffset(size.height, density) + radius
+            stepMarkerValues().forEach { value ->
+              drawCircle(
+                color = if (isMarked(value)) colors.activeTrackColor else colors.inactiveTrackColor,
+                radius = radius,
+                center = Offset(alongTrack(value, size.width, layoutDirection), below),
+              )
+            }
+          }
+    ) {
+      track()
+    }
+  }
+
+  /**
+   * The values the steps stand at: every step from the minimum, and the maximum
+   * itself when the step does not divide the range, which is how a thumb can still
+   * reach it. A slider with no step has no steps to mark.
+   *
+   * JS works out the very same values to render its own step markers by, and has to
+   * come to as many of them as this does - so the two are worked out the same way,
+   * down to the tolerance.
+   */
+  private fun stepMarkerValues(): List<Double> {
+    val span = exactMaximumValue - exactMinimumValue
+    if (stepValue <= 0 || span <= 0) {
+      return emptyList()
+    }
+
+    val wholeSteps = floor(span / stepValue + STEP_TOLERANCE).toInt()
+    val values = List(wholeSteps + 1) { exactMinimumValue + it * stepValue }
+
+    return if (span - wholeSteps * stepValue > stepValue * STEP_TOLERANCE) {
+      values + exactMaximumValue
+    } else {
+      values
+    }
+  }
+
+  /**
+   * Whether a thumb stands on the step at the given value - which is what `marked`
+   * tells a step marker JS renders, too. The thumbs are held as a [Float], so a
+   * thumb is let off by as much as that rounds it by.
+   */
+  private fun isMarked(value: Double): Boolean {
+    val thumbValues = if (selectsRange) listOf(valueLeft, valueRight) else listOf(sliderValue)
+
+    return thumbValues.any { thumbValue ->
+      val tolerance = max(stepValue * STEP_TOLERANCE, Math.ulp(thumbValue).toDouble())
+      abs(thumbValue - value) <= tolerance
+    }
+  }
+
+  /**
+   * How far along a track of the given width the step at the given value is,
+   * counted from its left edge - which the minimum value is at the other end of in a
+   * right-to-left layout.
+   */
+  private fun alongTrack(value: Double, width: Float, layoutDirection: LayoutDirection): Float {
+    val span = exactMaximumValue - exactMinimumValue
+    val fraction = if (span > 0) ((value - exactMinimumValue) / span).coerceIn(0.0, 1.0).toFloat() else 0f
+
+    return width * if (layoutDirection == LayoutDirection.Rtl) 1f - fraction else fraction
+  }
+
+  /**
+   * How far below the top of a track of the given height a step marker begins: past
+   * the thumb, which is centred on the track, and a gap after it.
+   */
+  private fun stepMarkerOffset(trackHeight: Float, density: Float): Float =
+    trackHeight / 2f + thumbThickness / 2f + STEP_MARKER_GAP_DP * density
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
@@ -799,12 +1056,26 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     const val DEFAULT_UPPER_LIMIT = 1f
     const val DEFAULT_VERTICAL = false
     const val DEFAULT_CUSTOM_TRACK = false
+    const val DEFAULT_CUSTOM_THUMB = false
 
     /** The one orientation that is not the default. */
     private const val ORIENTATION_VERTICAL = "vertical"
 
     /** The two thumbs of a ranged slider. */
     private const val MAXIMUM_THUMB_COUNT = 2
+
+    /** The ways of marking the steps that mark them at all. */
+    private const val STEP_MARKERS_NATIVE = "native"
+    private const val STEP_MARKERS_CUSTOM = "custom"
+
+    /** Leeway, as a fraction of a step, for a value to count as landing on one. */
+    private const val STEP_TOLERANCE = 1e-9
+
+    /** The diameter of a built-in step marker. */
+    const val STEP_MARKER_SIZE_DP = 4f
+
+    /** How far a step marker keeps from the thumb. */
+    const val STEP_MARKER_GAP_DP = 4f
   }
 }
 

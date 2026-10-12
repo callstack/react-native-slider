@@ -11,11 +11,13 @@ namespace facebook::react {
 
 Size RNCSliderMeasurementsManager::measure(
     SurfaceId surfaceId,
-    LayoutConstraints layoutConstraints) const {
+    LayoutConstraints layoutConstraints,
+    bool drawsStepMarkers) const {
+  auto &cached = drawsStepMarkers ? cachedStepMarkedMeasurement_ : cachedMeasurement_;
   {
     std::scoped_lock lock(mutex_);
-    if (hasBeenMeasured_) {
-      return cachedMeasurement_;
+    if (cached) {
+      return *cached;
     }
   }
 
@@ -40,12 +42,21 @@ Size RNCSliderMeasurementsManager::measure(
 
   local_ref<JString> componentName = make_jstring("RNCSlider");
 
+  // The view manager is only told what bears on the size: whether the slider
+  // draws step markers, which `RNCSliderViewManager.measure` makes room for.
+  local_ref<ReadableMap::javaobject> props;
+  if (drawsStepMarkers) {
+    auto propsRNM = ReadableNativeMap::newObjectCxxArgs(
+        folly::dynamic::object("stepMarkers", "native"));
+    props = make_local(reinterpret_cast<ReadableMap::javaobject>(propsRNM.get()));
+  }
+
   auto measurement = yogaMeassureToSize(measure(
       fabricUIManager,
       surfaceId,
       componentName.get(),
       nullptr,
-      nullptr,
+      props.get(),
       nullptr,
       minimumSize.width,
       maximumSize.width,
@@ -53,8 +64,7 @@ Size RNCSliderMeasurementsManager::measure(
       maximumSize.height));
 
   std::scoped_lock lock(mutex_);
-  cachedMeasurement_ = measurement;
-  hasBeenMeasured_ = true;
+  cached = measurement;
   return measurement;
 }
 

@@ -97,6 +97,20 @@ export interface NativeProps extends ViewProps {
   customTrack?: CodegenTypes.WithDefault<boolean, false>;
 
   /**
+   * Whether the slider's children include the thumbs JS renders in place of
+   * the built-in ones: one for a single slider and two for a ranged one,
+   * following the custom track when there is one.
+   */
+  customThumb?: CodegenTypes.WithDefault<boolean, false>;
+
+  /**
+   * How the steps are marked below the track: not at all, by markers the
+   * slider draws itself, or by the views JS renders, one for each step, as the
+   * last of the slider's children. Has no effect on a slider with no step.
+   */
+  stepMarkers?: CodegenTypes.WithDefault<"none" | "native" | "custom", "none">;
+
+  /**
    * Emitted continuously while the user drags the thumb.
    */
   onValueChange?: CodegenTypes.DirectEventHandler<SliderValueChangeEvent>;

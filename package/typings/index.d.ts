@@ -9,6 +9,25 @@ export type ThumbProps = {
   index: number;
 };
 
+export type StepsProps = {
+  /**
+   * The sequential number of step.
+   * Always starting from 0, regardless of minimum or maximum value of Slider settings.
+   */
+  index: number;
+  /**
+   * The value that this step represents.
+   * e.g.: the first step in the steps sequence will have it's value equal to minimumValue prop
+   * and the last step in the sequence will have it's value equal to maximumValue prop.
+   */
+  value: number;
+  /**
+   * Indicates whether a(any) thumb is currently on that step.
+   * Basically it says whether value of a thumb is equal to value of this step.
+   */
+  marked: boolean;
+};
+
 export type TrackProps = {};
 
 export interface SliderProps extends ViewProps {
@@ -148,6 +167,16 @@ export interface SliderProps extends ViewProps {
    * the minimumTrackColor, middleRangeTrackColor and maximumTrackColor.
    */
   track?: FC<TrackProps>;
+
+  /**
+   * Renders steps below the track.
+   * NOTE: Is effective only when the `step` prop is set.
+   * true - switches on rendering of default, built-in steps indicators
+   * false - default. Switches the steps rendering off.
+   * component - if a custom component is passed, switches the steps rendering on with
+   *             the given component used to render each step.
+   */
+  stepMarkers?: boolean | FC<StepsProps>;
 }
 
 /**

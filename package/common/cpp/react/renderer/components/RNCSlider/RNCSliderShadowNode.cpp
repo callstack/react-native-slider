@@ -36,25 +36,42 @@ namespace facebook {
             auto children = std::make_shared<std::vector<std::shared_ptr<const ShadowNode>>>();
             children->reserve(getChildren().size());
 
+            // The children come in a fixed order - the track, the thumbs, and
+            // then the step markers - and the props say how many of the first
+            // two there are.
+            const auto trackCount = props.customTrack ? 1 : 0;
+            const auto thumbCount = props.customThumb ? (props.ranged ? 2 : 1) : 0;
+            const auto vertical = props.orientation == RNCSliderOrientation::Vertical;
+
             for (const auto &child : getChildren()) {
-                if (props.customTrack && children->empty()) {
+                const auto index = static_cast<int>(children->size());
+
+                if (index < trackCount) {
                     children->push_back(layoutTrack(*child, layoutContext));
                     continue;
                 }
 
-                auto thumb = child->clone({});
+                const auto isStepMarker = index >= trackCount + thumbCount &&
+                        props.stepMarkers == RNCSliderStepMarkers::Custom;
 
-                if (auto layoutableThumb = dynamic_cast<LayoutableShadowNode *>(thumb.get())) {
-                    layoutableThumb->layoutTree(layoutContext, thumbConstraints);
+                auto laidOutChild = child->clone({});
 
-                    // Centred on the slider's origin rather than placed at the thumb:
-                    // the thumb moves with every drag, which the native view follows without asking JS for a new layout.
-                    auto thumbMetrics = layoutableThumb->getLayoutMetrics();
-                    thumbMetrics.frame.origin = centredOnOrigin(thumbMetrics.frame.size, layoutContext);
-                    layoutableThumb->setLayoutMetrics(thumbMetrics);
+                if (auto layoutableChild = dynamic_cast<LayoutableShadowNode *>(laidOutChild.get())) {
+                    // A step marker is as big as it makes itself, the way a thumb is.
+                    layoutableChild->layoutTree(layoutContext, thumbConstraints);
+
+                    // Placed against the slider's origin rather than where it shows:
+                    // a thumb moves with every drag, and a step marker with the
+                    // geometry of the native slider, and the native view follows
+                    // both without asking JS for a new layout.
+                    auto childMetrics = layoutableChild->getLayoutMetrics();
+                    childMetrics.frame.origin = isStepMarker
+                            ? hungFromOrigin(childMetrics.frame.size, vertical, layoutContext)
+                            : centredOnOrigin(childMetrics.frame.size, layoutContext);
+                    layoutableChild->setLayoutMetrics(childMetrics);
                 }
 
-                children->push_back(std::move(thumb));
+                children->push_back(std::move(laidOutChild));
             }
 
             children_ = std::move(children);
@@ -126,6 +143,12 @@ namespace facebook {
                     layoutContext.pointScaleFactor);
         }
 
+        Point RNCSliderShadowNode::hungFromOrigin(Size size, bool vertical, LayoutContext layoutContext) {
+            return roundToPixel<&std::round>(
+                    vertical ? Point{0, -size.height / 2} : Point{-size.width / 2, 0},
+                    layoutContext.pointScaleFactor);
+        }
+
 #ifdef ANDROID
         void RNCSliderShadowNode::setSliderMeasurementsManager(
                 const std::shared_ptr<RNCSliderMeasurementsManager> &
@@ -139,8 +162,16 @@ namespace facebook {
         Size RNCSliderShadowNode::measureContent(
                 const LayoutContext & /*layoutContext*/,
                 const LayoutConstraints &layoutConstraints) const {
-            return sizeForOrientation(
-                    measurementsManager_->measure(getSurfaceId(), layoutConstraints));
+            // The step-marked measurement is only the room the markers need, which
+            // a slider measured any taller already has.
+            auto horizontalSize = measurementsManager_->measure(getSurfaceId(), layoutConstraints, false);
+            if (drawsStepMarkers()) {
+                horizontalSize = sizeForStepMarkers(
+                        horizontalSize,
+                        measurementsManager_->measure(getSurfaceId(), layoutConstraints, true).height);
+            }
+
+            return sizeForOrientation(horizontalSize);
         }
 #endif
 
