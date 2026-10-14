@@ -1726,7 +1726,7 @@ DEPENDENCIES:
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - React-mutationobservernativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
-  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - "react-native-slider (from `../node_modules/@callstack/slider`)"
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../node_modules/react-native/ReactCommon/react/networking`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -1865,7 +1865,7 @@ EXTERNAL SOURCES:
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-slider:
-    :path: "../node_modules/@react-native-community/slider"
+    :path: "../node_modules/@callstack/slider"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-networking:
@@ -1992,7 +1992,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 512d9f7c6b66574d90832a6b10b6102d4a8fdf30
   React-mutationobservernativemodule: 2c5abeb9a4ae316ba6d9420ef8d9baa81faa9d56
   react-native-pager-view: e05e9fb5bfc04445320204b33fa6ee30d84efc2a
-  react-native-slider: 2d1e7da518ac863e4804deace6b51957368f2f23
+  react-native-slider: c3570061be04ad2e6469baf7808849fd73e6fab2
   React-NativeModulesApple: 22b2f3e1538ceb1aab1ab182ccb0666ea2ec36ad
   React-networking: b58b3098d4a626f88bbaeaf6bf5e67b18ff39089
   React-oscompat: 72573ceb65b6c6c6bc34e51e0df8f44c91081a6d

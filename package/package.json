@@ -1,8 +1,8 @@
 {
-  "name": "@react-native-community/slider",
+  "name": "@callstack/slider",
   "version": "6.0.0",
   "license": "MIT",
-  "author": "react-native-community",
+  "author": "BartoszKlonowski <bartosz.klonowski@callstack.com>",
   "homepage": "https://github.com/callstack/react-native-slider#readme",
   "description": "React Native component used to select a single value from a range of values.",
   "publishConfig": {

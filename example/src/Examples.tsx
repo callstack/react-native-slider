@@ -4,7 +4,7 @@ import Slider, {
   SliderProps,
   StepsProps,
   ThumbProps,
-} from '@react-native-community/slider';
+} from '@callstack/slider';
 
 export interface Props {
   title: string;
