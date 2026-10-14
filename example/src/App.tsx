@@ -1,28 +1,22 @@
 import React from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {examples} from './Examples';
 
 const App = () => {
   return (
-    <SafeAreaView style={styles.homeScreenContainer}>
-      <View>
-        <Text testID="testTextId" style={styles.title}>
-          {'Examples'}
-        </Text>
-      </View>
-      <View>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.container}>
-          {examples.map((e, i) => (
-            <View key={`slider${i}`} style={styles.sliderWidget}>
-              <Text style={styles.instructions}>{e.title}</Text>
-              {e.render()}
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text testID="testTextId" style={styles.title}>
+        {'Examples'}
+      </Text>
+      <ScrollView style={styles.scrollView}>
+        {examples.map((e, i) => (
+          <View key={`slider${i}`} style={styles.sliderWidget}>
+            <Text style={styles.instructions}>{e.title}</Text>
+            {e.render()}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -37,22 +31,11 @@ const pageViewPositionSlider = {
 };
 
 const styles = StyleSheet.create({
-  slider: {
-    width: '100%' as const,
-  },
-  pagerViewContainer: {
-    flex: 1,
-  },
-  homeScreenContainer: {
-    flex: 1,
-  },
   scrollView: {
     backgroundColor: '#F5FCFF',
   },
   container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
+    flex: 1,
   },
   title: {
     fontSize: 30,

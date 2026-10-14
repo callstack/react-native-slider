@@ -1,6 +1,10 @@
 import React, {JSX, useState} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-import Slider, {SliderProps, ThumbProps} from '@react-native-community/slider';
+import Slider, {
+  SliderProps,
+  StepsProps,
+  ThumbProps,
+} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
@@ -304,6 +308,34 @@ export const examples: Props[] = [
           minimumTrackColor={'#123456'}
           middleRangeTrackColor={'purple'}
           maximumTrackColor={'#ABCDEF'}
+        />
+      );
+    },
+  },
+  {
+    title: 'Default step markers',
+    render() {
+      return (
+        <SliderExample
+          minimumValue={0}
+          maximumValue={50}
+          step={2}
+          stepMarkers
+        />
+      );
+    },
+  },
+  {
+    title: 'Custom step markers',
+    render() {
+      return (
+        <SliderExample
+          minimumValue={50}
+          maximumValue={60}
+          step={1}
+          stepMarkers={({index, value, marked}: StepsProps) => (
+            <View>{marked ? <Text>{index}</Text> : <Text>{value}</Text>}</View>
+          )}
         />
       );
     },
