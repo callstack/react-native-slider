@@ -59,6 +59,13 @@
   },
   "jest": {
     "preset": "react-native",
+    "testEnvironment": "node",
+    "testEnvironmentOptions": {
+      "customExportConditions": [
+        "require",
+        "react-native"
+      ]
+    },
     "verbose": true,
     "modulePathIgnorePatterns": [
       "/e2e/"
