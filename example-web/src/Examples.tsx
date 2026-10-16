@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 // @ts-ignore
-import {Text, View, StyleSheet, ScrollView} from 'react-native';
+import {Text, View, StyleSheet, ScrollView, Button} from 'react-native';
 // @ts-ignore
-import Slider, {SliderProps} from '@react-native-community/slider';
+import Slider, {SliderProps, SliderRef} from '@react-native-community/slider';
 
 export interface Props {
   title: string;
@@ -65,6 +65,31 @@ const SlidingCompleteExample = (props: SliderProps) => {
 
 export default SliderExample;
 
+
+export function ControlledSliderExample() {
+    const ref = useRef<SliderRef>(null);
+    const [value, setValue] = useState(50);
+    return (
+        <View>
+            <Text style={styles.instructions}>Controlled Slider</Text>
+            <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
+            <Slider
+                style={styles.slider}
+                onValueChange={setValue}
+                value={value}
+                minimumValue={0}
+                maximumValue={100}
+                step={1}
+                ref={ref}
+            />
+            <View style={styles.actions}>
+                <Button title="-10" onPress={() => ref.current?.updateValue(value - 10)} />
+                <Button title="+10" onPress={() => ref.current?.updateValue(value + 10)} />
+            </View>
+        </View>
+    )
+}
+
 const styles = StyleSheet.create({
   slider: {
     width: 300,
@@ -77,6 +102,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
     margin: 0,
+  },
+  instructions: {
+      textAlign: 'center',
+      color: '#333333',
+      marginBottom: 5,
+      fontSize: 20,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
 });
 
