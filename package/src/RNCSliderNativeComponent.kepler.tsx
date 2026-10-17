@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  StyleSheet,
   View,
   ColorValue,
   ViewStyle,
@@ -213,7 +214,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
         ref={forwardedRef}
         {...others}
         testID={testID}
-        style={[{justifyContent: 'center', minHeight: THUMB_SIZE * 2}, style]}
+        style={[styles.root, style]}
         focusable={!disabled}
         accessible={true}
         accessibilityRole="adjustable"
@@ -237,11 +238,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
         }}>
         <View
           testID={testID ? `${testID}-track` : undefined}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            height: THUMB_SIZE * 2,
-          }}
+          style={styles.track}
           onLayout={({nativeEvent: {layout}}: LayoutChangeEvent) => {
             trackWidth.current = layout.width;
           }}
@@ -259,51 +256,64 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
           }}>
           <View
             pointerEvents="none"
-            style={{
-              flex: filled,
-              height: TRACK_HEIGHT,
-              borderRadius: TRACK_HEIGHT / 2,
-              backgroundColor: inverted
-                ? maximumTrackTintColor
-                : minimumTrackTintColor,
-            }}
+            style={[
+              styles.line,
+              {
+                flex: filled,
+                backgroundColor: inverted
+                  ? maximumTrackTintColor
+                  : minimumTrackTintColor,
+              },
+            ]}
           />
           <View
             pointerEvents="none"
-            style={{
-              width: thumbSize,
-              height: thumbSize,
-              borderRadius: thumbSize / 2,
-              backgroundColor: thumbTintColor,
+            style={[
+              styles.thumb,
+              {
+                width: thumbSize,
+                height: thumbSize,
+                borderRadius: thumbSize / 2,
+                backgroundColor: thumbTintColor,
+              },
               // A ring shows the D-pad focus from across the room.
-              borderWidth: focused ? 3 : 0,
-              borderColor: '#ffffff',
-              opacity: disabled ? 0.5 : 1,
-              overflow: 'hidden',
-            }}>
+              focused && styles.focusRing,
+              disabled && styles.disabled,
+            ]}>
             {thumbImage !== undefined ? (
               <Image
                 source={thumbImage as ImageSourcePropType}
-                style={{width: '100%', height: '100%'}}
+                style={styles.thumbImage}
               />
             ) : null}
           </View>
           <View
             pointerEvents="none"
-            style={{
-              flex: 1 - filled,
-              height: TRACK_HEIGHT,
-              borderRadius: TRACK_HEIGHT / 2,
-              backgroundColor: inverted
-                ? minimumTrackTintColor
-                : maximumTrackTintColor,
-            }}
+            style={[
+              styles.line,
+              {
+                flex: 1 - filled,
+                backgroundColor: inverted
+                  ? minimumTrackTintColor
+                  : maximumTrackTintColor,
+              },
+            ]}
           />
         </View>
       </View>
     );
   },
 );
+
+const styles = StyleSheet.create({
+  root: {justifyContent: 'center', minHeight: THUMB_SIZE * 2},
+  track: {flexDirection: 'row', alignItems: 'center', height: THUMB_SIZE * 2},
+  line: {height: TRACK_HEIGHT, borderRadius: TRACK_HEIGHT / 2},
+  thumb: {overflow: 'hidden'},
+  focusRing: {borderWidth: 3, borderColor: '#ffffff'},
+  disabled: {opacity: 0.5},
+  thumbImage: {width: '100%', height: '100%'},
+});
 
 RCTSliderKeplerComponent.displayName = 'RCTSliderKeplerComponent';
 
