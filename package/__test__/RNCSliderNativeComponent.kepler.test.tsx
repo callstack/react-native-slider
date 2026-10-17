@@ -240,3 +240,24 @@ test('touch: the value follows the finger on the track', () => {
     ['complete', 9],
   ]);
 });
+
+test('touch: the value snaps to the nearest step counted from the minimum', () => {
+  // Steps 1 and 3 (minimumValue 1, step 2). x = 70 is 1.9: nearer to 1 than to 3.
+  const {screen, now} = setup({
+    value: 3,
+    minimumValue: 1,
+    maximumValue: 4,
+    step: 2,
+  });
+  const track = screen.getByTestId('slider-track');
+  act(() =>
+    fireEvent(track, 'layout', {
+      nativeEvent: {layout: {width: 220, height: 40}},
+    }),
+  );
+  act(() => fireEvent(track, 'responderGrant', {nativeEvent: {locationX: 70}}));
+  act(() =>
+    fireEvent(track, 'responderRelease', {nativeEvent: {locationX: 70}}),
+  );
+  expect(now()).toBe(1);
+});

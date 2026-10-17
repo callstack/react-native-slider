@@ -196,10 +196,10 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
     const valueAt = (x: number) => {
       const usable = Math.max(1, trackWidth.current - THUMB_SIZE);
       const share = Math.min(1, Math.max(0, (x - THUMB_SIZE / 2) / usable));
-      const raw =
+      return (
         minimumValue +
-        (inverted ? 1 - share : share) * (maximumValue - minimumValue);
-      return step > 0 ? Math.round(raw / step) * step : raw;
+        (inverted ? 1 - share : share) * (maximumValue - minimumValue)
+      );
     };
     const onTouch = ({nativeEvent}: GestureResponderEvent) =>
       moveTo(valueAt(nativeEvent.locationX));
