@@ -15,7 +15,7 @@ import {
 import type {ImageSource} from 'react-native/Libraries/Image/ImageSource';
 import {constants} from './utils/constants';
 
-// React Native for Vega exports useTVEventHandler; the React Native typings do not.
+// Vega has useTVEventHandler, but the React Native typings do not.
 const {useTVEventHandler} = require('react-native') as {
   useTVEventHandler: (handler: (event: RemoteEvent) => void) => void;
 };
@@ -65,10 +65,8 @@ const KEY_FRACTION = 0.01;
 const tidy = (value: number) => Number.parseFloat(value.toFixed(10));
 
 /**
- * The slider on Vega OS (Fire TV). Vega has no native slider view, so this one is drawn in
- * React Native: a track and a thumb that take D-pad focus. While it has focus, Left and Right
- * move the value by one step (1 % of the range without a step), and VoiceView reads it as an
- * adjustable control. Touch works on devices that have it.
+ * Slider for Vega OS (Fire TV), drawn in JS because Vega has no native slider view.
+ * With D-pad focus, Left/Right move one step (1 % of the range without a step).
  */
 const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
   (
@@ -123,7 +121,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
         onRNCSliderSlidingStart?.(valueToEvent(valueRef.current));
       }
     };
-    /** The nearest value on the step grid (minimumValue + k * step) inside the limits. */
+    /** Nearest step value (minimumValue + k * step) within the limits. */
     const onGrid = (next: number) => {
       if (!(step > 0)) {
         return clamp(next);

@@ -1,8 +1,8 @@
 import React from 'react';
 import {act, fireEvent, render} from '@testing-library/react-native';
 
-// Vega OS sends the remote's keys through useTVEventHandler. React Native core has no such
-// hook, so the tests keep the handler the component registers and press keys through it.
+// React Native core has no useTVEventHandler: the mock keeps the component's handler,
+// and the tests press remote keys through it.
 let mockKeyHandler:
   | ((event: {eventType: string; eventKeyAction?: number}) => void)
   | null = null;
