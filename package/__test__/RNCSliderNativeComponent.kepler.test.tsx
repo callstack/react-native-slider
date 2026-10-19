@@ -65,7 +65,17 @@ beforeEach(() => {
 test('is an adjustable control with its range and value for VoiceView', () => {
   const {slider} = setup();
   expect(slider.props.accessibilityRole).toBe('adjustable');
-  expect(slider.props.accessibilityValue).toEqual({min: 0, max: 10, now: 5});
+  expect(slider.props.accessibilityValue).toEqual({
+    min: 0,
+    max: 10,
+    now: 5,
+    text: '5',
+  });
+});
+
+test('gives VoiceView the value as text, so 53 is not read as "53.0"', () => {
+  const {slider} = setup({value: 0.1 + 0.2, step: 0.1, maximumValue: 1});
+  expect(slider.props.accessibilityValue.text).toBe('0.3');
 });
 
 test('right and left change the value by one step while the slider has focus', () => {

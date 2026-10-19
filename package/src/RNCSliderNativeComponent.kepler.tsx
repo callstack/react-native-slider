@@ -217,7 +217,13 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
         accessible={true}
         accessibilityRole="adjustable"
         accessibilityState={{disabled}}
-        accessibilityValue={{min: minimumValue, max: maximumValue, now: value}}
+        accessibilityValue={{
+          min: minimumValue,
+          max: maximumValue,
+          now: value,
+          // VoiceView reads `now` as "53.0". The text makes it "53".
+          text: String(value),
+        }}
         accessibilityActions={[
           {name: 'increment', label: 'increment'},
           {name: 'decrement', label: 'decrement'},
