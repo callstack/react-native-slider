@@ -22,7 +22,7 @@ export interface NativeProps extends ViewProps {
   tapToSeek?: WithDefault<boolean, false>;
   maximumTrackImage?: ImageSource;
   maximumTrackTintColor?: ColorValue;
-  maximumValue?: Double;
+  maximumValue?: WithDefault<Double, 1>;
   minimumTrackImage?: ImageSource;
   minimumTrackTintColor?: ColorValue;
   minimumValue?: Double;

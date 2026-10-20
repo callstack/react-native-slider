@@ -559,6 +559,19 @@ export const examples: Props[] = [
     },
   },
   {
+    title: 'minimumValue: -10, maximumValue: 0',
+    render(): React.ReactElement {
+      return (
+        <SliderExample
+          accessibilityLabel="Zero maximum slider"
+          minimumValue={-10}
+          maximumValue={0}
+          value={-5}
+        />
+      );
+    },
+  },
+  {
     title: 'step: 0.25, tap to seek on iOS',
     render(): React.ReactElement {
       return <SliderExample step={0.25} tapToSeek={true} />;
