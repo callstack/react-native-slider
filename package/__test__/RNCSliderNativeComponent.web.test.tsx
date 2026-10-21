@@ -33,6 +33,24 @@ describe('RCTSliderWebComponent', () => {
     return onSlidingComplete.mock.calls[0][0].nativeEvent.value;
   };
 
+  // Accessibility actions don't report a value change, so the value is
+  // read from the sliding start event that the next touch emits
+  const valueAfterAction = (props: object, actionName: string) => {
+    const onSlidingStart = jest.fn();
+    const {getByTestId} = render(
+      <WebSlider
+        testID="slider"
+        onRNCSliderSlidingStart={onSlidingStart}
+        {...props}
+      />,
+    );
+    fireEvent(getByTestId('slider'), 'accessibilityAction', {
+      nativeEvent: {actionName},
+    });
+    fireEvent(getByTestId('slider'), 'responderGrant');
+    return onSlidingStart.mock.calls[0][0].nativeEvent.value;
+  };
+
   it('Counts steps from the minimum value', () => {
     const props = {
       minimumValue: 1,
@@ -58,5 +76,20 @@ describe('RCTSliderWebComponent', () => {
     };
     // 10 - 9 * 0.75 = 3.25, the nearest step is 3
     expect(releaseAt(props, 0.75)).toBe(3);
+  });
+
+  it('Counts accessibility action steps from the minimum value', () => {
+    const props = {
+      value: 5,
+      minimumValue: 1,
+      maximumValue: 13,
+      lowerLimit: 1,
+      upperLimit: 13,
+      step: 3,
+    };
+    // 5 + 3 = 8, the nearest step is 7
+    expect(valueAfterAction(props, 'increment')).toBe(7);
+    // 5 - 3 = 2, the nearest step is 1
+    expect(valueAfterAction(props, 'decrement')).toBe(1);
   });
 });
