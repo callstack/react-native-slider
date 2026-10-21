@@ -290,8 +290,9 @@ const RCTSliderWebComponent = React.forwardRef(
           ? maximumValue - ((maximumValue - minimumValue) * x) / width
           : minimumValue + ((maximumValue - minimumValue) * x) / width;
 
+        // Steps are counted from minimumValue, as on the native platforms
         const valueAfterStep = step
-          ? Math.round(newValue / step) * step
+          ? minimumValue + Math.round((newValue - minimumValue) / step) * step
           : newValue;
         const valueAfterLowerLimit =
           valueAfterStep < lowerLimit ? lowerLimit : valueAfterStep;
