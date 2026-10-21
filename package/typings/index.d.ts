@@ -12,7 +12,11 @@ export interface SliderPropsAndroid extends ReactNative.ViewProps {
 
 export interface SliderRef {
   updateValue(value: number): void;
+  updateValues(values: RangeValue): void;
 }
+
+export type RangeValue = [number, number];
+export type RangeThumbIndex = 0 | 1;
 
 export type TrackMarksProps = {
   isTrue: boolean;
@@ -101,6 +105,13 @@ export interface SliderProps
   upperLimit?: number;
 
   /**
+   * Minimum distance between the lower and upper range thumbs.
+   * Used when `range` is true.
+   * Default value is 0.
+   */
+  minimumRange?: number;
+
+  /**
    * The color used for the track to the left of the button.
    * Overrides the default blue gradient image.
    */
@@ -118,14 +129,38 @@ export interface SliderProps
   onSlidingStart?: (value: number) => void;
 
   /**
+   * Callback that is called when the user touches either range thumb.
+   * Used when `range` is true.
+   */
+  onRangeSlidingStart?: (
+    values: RangeValue,
+    thumbIndex: RangeThumbIndex,
+  ) => void;
+
+  /**
    * Callback called when the user finishes changing the value (e.g. when the slider is released).
    */
   onSlidingComplete?: (value: number) => void;
 
   /**
+   * Callback that is called when the user releases either range thumb.
+   * Used when `range` is true.
+   */
+  onRangeSlidingComplete?: (
+    values: RangeValue,
+    thumbIndex: RangeThumbIndex,
+  ) => void;
+
+  /**
    * Callback continuously called while the user is dragging the slider.
    */
   onValueChange?: (value: number) => void;
+
+  /**
+   * Callback continuously called while the user is dragging either range thumb.
+   * Used when `range` is true.
+   */
+  onValuesChange?: (values: RangeValue, thumbIndex: RangeThumbIndex) => void;
 
   /**
    * Step value of the slider. The value should be between 0 and (maximumValue - minimumValue). Default value is 0.
@@ -154,6 +189,18 @@ export interface SliderProps
    * value during dragging.
    */
   value?: number;
+
+  /**
+   * Enables two-thumb range selection.
+   * Default value is false.
+   */
+  range?: boolean;
+
+  /**
+   * Write-only property representing the lower and upper values of the range slider.
+   * Used when `range` is true.
+   */
+  values?: RangeValue;
 
   /**
    * Reverses the direction of the slider.
