@@ -57,7 +57,9 @@ export interface Props {
 const valueToEvent = (value: number): Event => ({nativeEvent: {value}});
 
 const TRACK_HEIGHT = 4;
-const THUMB_SIZE = constants.THUMB_SIZE;
+/** Vega lays out the TV screen as 960x540 dp: a 16 dp thumb, 20 dp with focus. */
+const THUMB_SIZE = 16;
+const FOCUSED_THUMB_SIZE = 20;
 /** Without a step, one key press moves this share of the range. */
 const KEY_FRACTION = 0.01;
 
@@ -205,7 +207,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
     const range = maximumValue - minimumValue || 1;
     const share = Math.min(1, Math.max(0, (value - minimumValue) / range));
     const filled = inverted ? 1 - share : share;
-    const thumbSize = focused ? THUMB_SIZE * 1.4 : THUMB_SIZE;
+    const thumbSize = focused ? FOCUSED_THUMB_SIZE : THUMB_SIZE;
 
     return (
       <View
@@ -271,6 +273,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
             ]}
           />
           <View
+            testID={testID ? `${testID}-thumb` : undefined}
             pointerEvents="none"
             style={[
               styles.thumb,

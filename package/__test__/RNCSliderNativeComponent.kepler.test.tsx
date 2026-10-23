@@ -1,5 +1,6 @@
 import React from 'react';
 import {act, fireEvent, render} from '@testing-library/react-native';
+import {StyleSheet} from 'react-native';
 
 // React Native core has no useTVEventHandler: the mock keeps the component's handler,
 // and the tests press remote keys through it.
@@ -270,4 +271,13 @@ test('touch: the value snaps to the nearest step counted from the minimum', () =
     fireEvent(track, 'responderRelease', {nativeEvent: {locationX: 70}}),
   );
   expect(now()).toBe(1);
+});
+
+test('the thumb is 16 dp, 20 dp with focus: Vega lays out the TV screen as 960x540 dp', () => {
+  const {screen, focus} = setup();
+  const size = () =>
+    StyleSheet.flatten(screen.getByTestId('slider-thumb').props.style).width;
+  expect(size()).toBe(16);
+  focus();
+  expect(size()).toBe(20);
 });
