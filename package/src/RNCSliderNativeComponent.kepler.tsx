@@ -43,6 +43,8 @@ export interface Props {
   maximumTrackTintColor?: ColorValue;
   thumbTintColor?: ColorValue;
   thumbImage?: ImageSource;
+  /** Diameter of the thumb in dp. Default 16. Focus adds 4 dp. */
+  thumbSize?: number;
   style?: StyleProp<ViewStyle>;
   inverted?: boolean;
   disabled?: boolean;
@@ -57,9 +59,9 @@ export interface Props {
 const valueToEvent = (value: number): Event => ({nativeEvent: {value}});
 
 const TRACK_HEIGHT = 4;
-/** Vega lays out the TV screen as 960x540 dp: a 16 dp thumb, 20 dp with focus. */
+/** Vega lays out the TV screen as 960x540 dp: a 16 dp thumb by default. Focus adds 4 dp. */
 const THUMB_SIZE = 16;
-const FOCUSED_THUMB_SIZE = 20;
+const FOCUS_GROWTH = 4;
 /** Without a step, one key press moves this share of the range. */
 const KEY_FRACTION = 0.01;
 
@@ -83,6 +85,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
       maximumTrackTintColor = '#939393',
       thumbTintColor = '#009688',
       thumbImage,
+      thumbSize: size = THUMB_SIZE,
       style,
       inverted = false,
       disabled = false,
@@ -192,10 +195,10 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
       complete();
     };
 
-    // Touch: the thumb centre runs from THUMB_SIZE / 2 to width - THUMB_SIZE / 2.
+    // Touch: the thumb centre runs from size / 2 to width - size / 2.
     const valueAt = (x: number) => {
-      const usable = Math.max(1, trackWidth.current - THUMB_SIZE);
-      const share = Math.min(1, Math.max(0, (x - THUMB_SIZE / 2) / usable));
+      const usable = Math.max(1, trackWidth.current - size);
+      const share = Math.min(1, Math.max(0, (x - size / 2) / usable));
       return (
         minimumValue +
         (inverted ? 1 - share : share) * (maximumValue - minimumValue)
@@ -207,7 +210,7 @@ const RCTSliderKeplerComponent = React.forwardRef<View, Props>(
     const range = maximumValue - minimumValue || 1;
     const share = Math.min(1, Math.max(0, (value - minimumValue) / range));
     const filled = inverted ? 1 - share : share;
-    const thumbSize = focused ? FOCUSED_THUMB_SIZE : THUMB_SIZE;
+    const thumbSize = focused ? size + FOCUS_GROWTH : size;
 
     return (
       <View

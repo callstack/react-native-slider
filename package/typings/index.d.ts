@@ -69,10 +69,19 @@ export interface SliderPropsWindows extends ReactNative.ViewProps {
   vertical?: boolean;
 }
 
+export interface SliderPropsVega extends ReactNative.ViewProps {
+  /**
+   * Vega OS (Fire TV) only: diameter of the thumb in dp. Default 16.
+   * D-pad focus adds 4 dp.
+   */
+  thumbSize?: number;
+}
+
 export interface SliderProps
   extends SliderPropsIOS,
     SliderPropsAndroid,
-    SliderPropsWindows {
+    SliderPropsWindows,
+    SliderPropsVega {
   /**
    * If true the user won't be able to move the slider.
    * Default value is false.

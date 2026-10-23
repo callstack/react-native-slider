@@ -281,3 +281,12 @@ test('the thumb is 16 dp, 20 dp with focus: Vega lays out the TV screen as 960x5
   focus();
   expect(size()).toBe(20);
 });
+
+test('thumbSize sets the thumb, and focus adds 4 dp', () => {
+  const {screen, focus} = setup({thumbSize: 12});
+  const size = () =>
+    StyleSheet.flatten(screen.getByTestId('slider-thumb').props.style).width;
+  expect(size()).toBe(12);
+  focus();
+  expect(size()).toBe(16);
+});
