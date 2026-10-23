@@ -77,6 +77,9 @@
     "bracketSpacing": false,
     "jsxBracketSameLine": true
   },
+  "swiftpmConfig": {
+    "name": "react-native-slider"
+  },
   "codegenConfig": {
     "name": "RNCSlider",
     "type": "components",

@@ -8,10 +8,18 @@
 #import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
 #import <React/RCTBridge+Private.h>
 #import <React/RCTI18nUtil.h>
+#if __has_include(<react/renderer/imagemanager/RCTImagePrimitivesConversions.h>)
+#import <react/renderer/imagemanager/RCTImagePrimitivesConversions.h>
+#else
 #import "RCTImagePrimitivesConversions.h"
+#endif
 #import <React/RCTImageLoaderProtocol.h>
 #import <React/RCTUtils.h>
+#if __has_include(<React/RCTFabricComponentsPlugins.h>)
+#import <React/RCTFabricComponentsPlugins.h>
+#else
 #import "RCTFabricComponentsPlugins.h"
+#endif
 #import "RNCSlider.h"
 
 using namespace facebook::react;
