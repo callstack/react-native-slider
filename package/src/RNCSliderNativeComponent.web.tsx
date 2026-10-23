@@ -78,7 +78,12 @@ const RCTSliderWebComponent = React.forwardRef(
     const containerPositionX = React.useRef(0);
     const containerRef = forwardedRef || React.createRef();
     const containerPositionInvalidated = React.useRef(false);
-    const [value, setValue] = React.useState(initialValue || minimumValue);
+    // `0` is a valid starting value when the range includes it (e.g. -8...8),
+    // so only fall back to `minimumValue` when it lies outside the range.
+    const [value, setValue] = React.useState(
+      initialValue ||
+        (minimumValue <= 0 && maximumValue >= 0 ? 0 : minimumValue),
+    );
     const lastInitialValue = React.useRef<number>(0);
     const animationValues = React.useRef<AnimationValues>({
       val: new Animated.Value(value),
