@@ -291,7 +291,7 @@ const RCTSliderWebComponent = React.forwardRef(
           : minimumValue + ((maximumValue - minimumValue) * x) / width;
 
         const valueAfterStep = step
-          ? Math.round(newValue / step) * step
+          ? minimumValue + Math.round((newValue - minimumValue) / step) * step
           : newValue;
         const valueAfterLowerLimit =
           valueAfterStep < lowerLimit ? lowerLimit : valueAfterStep;
@@ -317,10 +317,20 @@ const RCTSliderWebComponent = React.forwardRef(
       const tenth = (maximumValue - minimumValue) / 10;
       switch (event.nativeEvent.actionName) {
         case 'increment':
-          updateValue(value + (step || tenth));
+          updateValue(
+            step
+              ? Math.round((value + step - minimumValue) / step) * step +
+                  minimumValue
+              : value + tenth,
+          );
           break;
         case 'decrement':
-          updateValue(value - (step || tenth));
+          updateValue(
+            step
+              ? Math.round((value - step - minimumValue) / step) * step +
+                  minimumValue
+              : value - tenth,
+          );
           break;
       }
     };
