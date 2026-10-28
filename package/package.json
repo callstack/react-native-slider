@@ -70,5 +70,8 @@
     "android": {
       "javaPackageName": "com.reactnativecommunity.slider"
     }
+  },
+  "swiftpmConfig": {
+    "name": "ReactNativeSlider"
   }
 }
