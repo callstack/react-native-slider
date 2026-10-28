@@ -72,6 +72,10 @@ To use this library you need to ensure you are using the correct version of Reac
 | [`1.x.x`](https://github.com/react-native-community/react-native-slider/tree/937f0942f1fffc6ed88b5cf7c88d73b7878f00f0) | `<= 0.59` |
 
 
+### Vega OS (Fire TV)
+
+On Vega OS (Amazon Fire TV, React Native for Vega) the slider is drawn in React Native, as on the web: Vega has no native slider view. It takes D-pad focus, and while it has focus Left and Right move the value by one `step` (1 % of the range without a `step`), with `onSlidingStart`, `onValueChange` and `onSlidingComplete` as with a finger. A white ring on the thumb shows the focus. VoiceView reads it as an adjustable control, and its increment and decrement actions move one step. `minimumValue`, `maximumValue`, `step`, `lowerLimit`, `upperLimit`, `inverted`, `disabled`, the tint colors and `thumbImage` work; `vertical`, `tapToSeek`, the track images and `StepMarker` do not yet. Metro picks the Vega file by itself (platform `kepler`), so no setup is needed.
+
 ## Properties
 
 | Property | Description | Type | Platform |

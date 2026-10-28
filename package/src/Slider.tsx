@@ -64,9 +64,18 @@ type IOSProps = Readonly<{
   tapToSeek?: boolean;
 }>;
 
+type VegaProps = Readonly<{
+  /**
+   * Vega OS (Fire TV) only: diameter of the thumb in dp. Default 16.
+   * D-pad focus adds 4 dp.
+   */
+  thumbSize?: number;
+}>;
+
 type Props = ViewProps &
   IOSProps &
   WindowsProps &
+  VegaProps &
   Readonly<{
     /**
      * Used to style and layout the `Slider`.  See `StyleSheet.js` and
