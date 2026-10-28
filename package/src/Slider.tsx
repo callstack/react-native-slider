@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Image,
   Platform,
@@ -239,11 +239,15 @@ const SliderComponent = (
   const defaultStep = (maximumValue - minimumValue) / stepResolution;
   const stepLength = step || defaultStep;
 
-  const options = Array.from(
-    {
-      length: (step ? defaultStep : stepResolution) + 1,
-    },
-    (_, index) => minimumValue + index * stepLength,
+  const options = useMemo(
+    () =>
+      Array.from(
+        {
+          length: (step ? defaultStep : stepResolution) + 1,
+        },
+        (_, index) => minimumValue + index * stepLength,
+      ),
+    [step, defaultStep, stepResolution, minimumValue, stepLength],
   );
 
   const defaultStyle =
@@ -284,6 +288,16 @@ const SliderComponent = (
 
   const passedValue = Number.isNaN(value) || !value ? undefined : value;
 
+  const resolvedThumbImage = useMemo(
+    () =>
+      Platform.OS === 'web'
+        ? props.thumbImage
+        : props.StepMarker || !props.thumbImage
+        ? undefined
+        : Image.resolveAssetSource(props.thumbImage as ImageSourcePropType),
+    [props.thumbImage, props.StepMarker],
+  );
+
   useEffect(() => {
     if (lowerLimit >= upperLimit) {
       console.warn(
@@ -320,13 +334,7 @@ const SliderComponent = (
         lowerLimit={lowerLimit}
         upperLimit={upperLimit}
         accessibilityState={_accessibilityState}
-        thumbImage={
-          Platform.OS === 'web'
-            ? props.thumbImage
-            : props.StepMarker || !props.thumbImage
-            ? undefined
-            : Image.resolveAssetSource(props.thumbImage as ImageSourcePropType)
-        }
+        thumbImage={resolvedThumbImage}
         ref={forwardedRef}
         style={[
           sliderStyle,
