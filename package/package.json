@@ -89,5 +89,8 @@
         "RNCSlider": "RNCSliderComponentView"
       }
     }
+  },
+  "swiftpmConfig": {
+    "name": "ReactNativeSlider"
   }
 }
