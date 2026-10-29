@@ -77,7 +77,10 @@ const stepValues = (
   }
 
   const DECIMAL_FACTOR = 10;
-  const scale = Math.pow(DECIMAL_FACTOR, Math.max(decimals(step), decimals(minimumValue)));
+  const scale = Math.pow(
+    DECIMAL_FACTOR,
+    Math.max(decimals(step), decimals(minimumValue)),
+  );
   const wholeSteps = Math.floor(span / step + STEP_TOLERANCE);
   const values = Array.from(
     {length: wholeSteps + 1},

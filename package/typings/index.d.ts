@@ -57,8 +57,6 @@ export interface SliderProps extends ViewProps {
   /**
    * Whether the slider selects a span of its range with two thumbs, rather
    * than a single value with one. Default value is false.
-   *
-   * Supported on iOS.
    */
   ranged?: boolean;
 
