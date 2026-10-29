@@ -16,57 +16,53 @@ final class RNCSliderModel: ObservableObject {
   @Published var valueLeft: Double = 0
   @Published var valueRight: Double = 1
 
-  /// Granularity of the values the slider reports: every one of them is a
-  /// multiple of this. Zero means no granularity.
+  /// Granularity of the values the slider reports: every one of them is a multiple of
+  /// this. Zero means no granularity.
   @Published var step: Double = 0
 
-  /// Bounds the thumbs can be dragged between. The track is drawn across the
-  /// whole range regardless: a limit takes away the values a thumb can reach,
-  /// not the ones the slider shows.
+  /// Bounds the thumbs can be dragged between. The track is drawn across the whole
+  /// range regardless: a limit takes away the values a thumb can reach, not the ones
+  /// the slider shows.
   @Published var lowerLimit: Double = 0
   @Published var upperLimit: Double = 1
 
-  /// Whether the slider runs up the view rather than across it, with the
-  /// minimum at the bottom and the maximum at the top.
-  ///
-  /// Only the geometry changes with it: the range, the step, the limits, the
-  /// two thumbs and the events they report are the same either way round.
+  /// Whether the slider runs up the view rather than across it, with the minimum at
+  /// the bottom and the maximum at the top. Only the geometry changes with it.
   @Published var vertical: Bool = false
 
-  /// Tints of the three parts the thumbs cut the track into: below the thumb (or
-  /// the left thumb), between the two thumbs of a ranged slider, and above the
-  /// thumb (or the right thumb). `nil` leaves a part looking the way `Slider`
-  /// draws it - see `RNCRangedSliderContent.trackSegments`.
+  /// Tints of the three parts the thumbs cut the track into: below the thumb (or the
+  /// left thumb), between the two thumbs of a ranged slider, and above the thumb (or
+  /// the right thumb). `nil` leaves a part looking the way `Slider` draws it.
   @Published var minimumTrackColor: UIColor?
   @Published var middleRangeTrackColor: UIColor?
   @Published var maximumTrackColor: UIColor?
 
-  /// How many of the thumbs JS has replaced with views of its own, counted from
-  /// the left one - which the single thumb counts as. A replaced thumb is still
-  /// there to be dragged, it is just no longer drawn; `RNCSliderView` lays the
-  /// view JS gave over it instead.
+  /// How many of the thumbs JS has replaced with views of its own, counted from the
+  /// left one - which the single thumb counts as. A replaced thumb is still there to
+  /// be dragged, it is just no longer drawn; `RNCSliderView` lays the view JS gave
+  /// over it instead.
   @Published var customThumbCount: Int = 0
 
-  /// Whether JS has replaced the track with a view of its own. The slider then
-  /// draws no track at all, whatever its tints - `RNCSliderView` lays the view
-  /// JS gave underneath it instead.
+  /// Whether JS has replaced the track with a view of its own. The slider then draws
+  /// no track at all, whatever its tints - `RNCSliderView` lays the view JS gave
+  /// underneath it instead.
   @Published var customTrack: Bool = false
 
   /// Whether the steps are marked below the track - see `stepMarkerValues`.
   @Published var stepMarkers: Bool = false
 
-  /// Whether JS has replaced the step markers with views of its own, one for
-  /// each of `stepMarkerValues`. The slider then draws none of its own -
-  /// `RNCSliderView` hangs the views JS gave below the steps instead.
+  /// Whether JS has replaced the step markers with views of its own, one for each of
+  /// `stepMarkerValues`. The slider then draws none of its own - `RNCSliderView` hangs
+  /// the views JS gave below the steps instead.
   @Published var customStepMarkers: Bool = false
 
-  /// The values the steps stand at: every step from the minimum, and the
-  /// maximum itself when the step does not divide the range, which is how a
-  /// thumb can still reach it. A slider with no step has no steps to mark.
+  /// The values the steps stand at: every step from the minimum, and the maximum
+  /// itself when the step does not divide the range, which is how a thumb can still
+  /// reach it. A slider with no step has no steps to mark.
   ///
-  /// JS works out the very same values to render its own step markers by, and
-  /// has to come to as many of them as this does - so the two are worked out
-  /// the same way, down to the tolerance.
+  /// JS works out the very same values to render its own step markers by, and has to
+  /// come to as many of them as this does - so the two are worked out the same way,
+  /// down to the tolerance.
   var stepMarkerValues: [Double] {
     let span = maximumValue - minimumValue
     guard step > 0, span > 0 else { return [] }
@@ -81,8 +77,8 @@ final class RNCSliderModel: ObservableObject {
     return values
   }
 
-  /// Whether a thumb stands on the step at the given value - which is what
-  /// `marked` tells a step marker JS renders, too.
+  /// Whether a thumb stands on the step at the given value - which is what `marked`
+  /// tells a step marker JS renders, too.
   func isMarked(_ stepValue: Double) -> Bool {
     let thumbValues = ranged ? [valueLeft, valueRight] : [value]
 
@@ -92,9 +88,9 @@ final class RNCSliderModel: ObservableObject {
   /// Leeway, as a fraction of a step, for a value to count as landing on one.
   static let stepTolerance = 1e-9
 
-  /// Which end of the range a thumb drags. The single thumb of a slider that is
-  /// not ranged counts as the left one, which is how it shares the drag origins
-  /// and the clamping below with a ranged slider's.
+  /// Which end of the range a thumb drags. The single thumb of a slider that is not
+  /// ranged counts as the left one, which is how it shares the drag origins and the
+  /// clamping below with a ranged slider's.
   enum Thumb {
     case single
     case left
@@ -110,18 +106,17 @@ final class RNCSliderModel: ObservableObject {
     }
   }
 
-  /// Takes a thumb to the given value, keeping it inside the limits and on its
-  /// own side of the other thumb, and reports it to JS. The two thumbs cannot
-  /// swap places.
+  /// Takes a thumb to the given value, keeping it inside the limits and on its own
+  /// side of the other thumb, and reports it to JS. The two thumbs cannot swap places.
   ///
-  /// A thumb held against a limit stops moving, and a value that has not moved
-  /// is not reported, so JS hears nothing of a drag carrying on beyond it.
+  /// A thumb held against a limit stops moving, and a value that has not moved is not
+  /// reported, so JS hears nothing of a drag carrying on beyond it.
   ///
   /// Answers whether the thumb moved anywhere, which is what the thumb is worth
   /// reporting for.
   ///
-  /// Both the way a thumb is dragged and the way a thumb jumps to a tap on the
-  /// track go through here, so the two cannot disagree on where a value lands.
+  /// Both the way a thumb is dragged and the way a thumb jumps to a tap on the track go
+  /// through here, so the two cannot disagree on where a value lands.
   @discardableResult
   func set(_ newValue: Double, of thumb: Thumb) -> Bool {
     let stepped = newValue.snapped(to: step)
@@ -152,26 +147,22 @@ final class RNCSliderModel: ObservableObject {
     return true
   }
 
-  /// The value a thumb had when the drag in progress began, or `nil` when that
-  /// thumb is not being dragged. The single thumb keeps its origin in the left
-  /// one of the two.
+  /// The value a thumb had when the drag in progress began, or `nil` when that thumb is
+  /// not being dragged. The single thumb keeps its origin in the left one of the two.
   ///
-  /// A drag is tracked by how far it has travelled rather than by where the
-  /// finger is, so grabbing a thumb off-centre does not snap it under the finger.
+  /// A drag is tracked by how far it has travelled rather than by where the finger is,
+  /// so grabbing a thumb off-centre does not snap it under the finger.
   var leftDragOrigin: Double?
   var rightDragOrigin: Double?
 
   /// Whether the user has hold of a thumb, which is simply whether either of the
   /// origins above is set.
   ///
-  /// While the user drags, the thumb position is owned by this view. Value
-  /// updates coming from JS in the meantime would fight the gesture, so they are
-  /// ignored - the slider is uncontrolled for the duration of the drag.
+  /// While the user drags, the thumb position is owned by this view. Value updates
+  /// coming from JS in the meantime would fight the gesture, so they are ignored - the
+  /// slider is uncontrolled for the duration of the drag.
   var isSliding: Bool { leftDragOrigin != nil || rightDragOrigin != nil }
 
-  /// The drag origin of the given thumb - see `leftDragOrigin` and
-  /// `rightDragOrigin`. Whether that is nil is also whether the thumb is being
-  /// dragged, which is what `isSliding` reads.
   func dragOrigin(of thumb: Thumb) -> Double? {
     switch thumb {
     case .single, .left: return leftDragOrigin
@@ -179,8 +170,7 @@ final class RNCSliderModel: ObservableObject {
     }
   }
 
-  /// Takes hold of a thumb, by remembering the value it is held at, or lets go of
-  /// it - see `dragOrigin(of:)`.
+  /// Takes hold of a thumb, by remembering the value it is held at, or lets go of it.
   func setDragOrigin(_ origin: Double?, of thumb: Thumb) {
     switch thumb {
     case .single, .left: leftDragOrigin = origin
@@ -188,14 +178,14 @@ final class RNCSliderModel: ObservableObject {
     }
   }
 
-  /// The thumb a hold on the track has picked up, and `nil` when the track is not
-  /// held: one thumb at a time, for as long as the finger is down.
+  /// The thumb a hold on the track has picked up, and `nil` when the track is not held:
+  /// one thumb at a time, for as long as the finger is down.
   ///
   /// The thumbs' own drags report being pressed through `@GestureState` inside
-  /// `RNCRangedSliderContent`, which resets itself however a gesture ends. This is
-  /// the track's half of the same look, written by UIKit and so published here for
-  /// the hosted slider to draw - and read back by `RNCSliderView` as the hold it
-  /// has in progress, there being no second place to keep it.
+  /// `RNCRangedSliderContent`, which resets itself however a gesture ends. This is the
+  /// track's half of the same look, written by UIKit and so published here for the
+  /// hosted slider to draw - and read back by `RNCSliderView` as the hold it has in
+  /// progress, there being no second place to keep it.
   @Published var heldThumb: Thumb?
 
   /// Whether a hold on the track has a thumb in hand.
@@ -204,27 +194,26 @@ final class RNCSliderModel: ObservableObject {
   /// Invoked continuously while the user drags the thumb.
   var onValueChange: ((Double) -> Void)?
 
-  /// Invoked continuously while the user drags the respective thumb of a ranged
-  /// slider.
+  /// Invoked continuously while the user drags the respective thumb of a ranged slider.
   var onLeftValueChange: ((Double) -> Void)?
   var onRightValueChange: ((Double) -> Void)?
 
-  /// Invoked once the user takes hold of a thumb, and again once they let go of
-  /// it - whether or not the drag in between moved it anywhere.
+  /// Invoked once the user takes hold of a thumb, and again once they let go of it -
+  /// whether or not the drag in between moved it anywhere.
   var onSlidingStart: (() -> Void)?
   var onSlidingComplete: (() -> Void)?
 
-  /// SwiftUI traps on an empty or descending range. Props arrive one at a time,
-  /// so a momentarily inverted range is expected rather than exceptional.
+  /// SwiftUI traps on an empty or descending range. Props arrive one at a time, so a
+  /// momentarily inverted range is expected rather than exceptional.
   var range: ClosedRange<Double> {
     maximumValue > minimumValue ? minimumValue...maximumValue : minimumValue...(minimumValue + 1)
   }
 
   /// The range narrowed down to the part of it the thumbs can be dragged across.
   ///
-  /// A limit that cannot be honoured is dropped: limits that have crossed leave
-  /// the slider unlimited, and one reaching out of the range limits only as far
-  /// as the range itself goes.
+  /// A limit that cannot be honoured is dropped: limits that have crossed leave the
+  /// slider unlimited, and one reaching out of the range limits only as far as the
+  /// range itself goes.
   var limits: ClosedRange<Double> {
     let range = self.range
     guard lowerLimit <= upperLimit else { return range }
@@ -235,15 +224,14 @@ final class RNCSliderModel: ObservableObject {
 
 /// Where the thumbs of the slider sit in a view of the given size.
 ///
-/// The slider draws the thumbs, but a custom thumb from JS is a UIKit view laid
-/// over it, so both of them read the geometry from here to agree on where a
-/// thumb is.
+/// The slider draws the thumbs, but a custom thumb from JS is a UIKit view laid over
+/// it, so both of them read the geometry from here to agree on where a thumb is.
 ///
-/// The geometry is written along two axes rather than across the view: values
-/// are spread along its *length*, and the thumbs are as thick as its *breadth*
-/// allows. A thumb has a length and a thickness of its own too, as the thumb
-/// `Slider` draws is not round everywhere - see `thumbLength`. Which of the view's two sides each of those is comes from
-/// `RNCSliderModel.vertical`.
+/// The geometry is written along two axes rather than across the view: values are
+/// spread along its *length*, and the thumbs are as thick as its *breadth* allows. A
+/// thumb has a length and a thickness of its own too, as the thumb `Slider` draws is
+/// not round everywhere - see `thumbLength`. Which of the view's two sides each of
+/// those is comes from `RNCSliderModel.vertical`.
 struct RNCSliderGeometry {
   let size: CGSize
   let vertical: Bool
@@ -254,20 +242,18 @@ struct RNCSliderGeometry {
 
   /// The extent of a thumb along the slider and across it.
   ///
-  /// A thumb is never thicker than the slider itself: JS decides how much room
-  /// there is across it, and a thumb spilling out would draw over its
-  /// neighbours. One that has to be thinner is shrunk as a whole, keeping its
-  /// shape.
+  /// A thumb is never thicker than the slider itself: JS decides how much room there
+  /// is across it, and a thumb spilling out would draw over its neighbours. One that
+  /// has to be thinner is shrunk as a whole, keeping its shape.
   let thumbLength: CGFloat
   let thumbThickness: CGFloat
 
-  /// The span the near edge of a thumb moves across. The thumbs of a ranged
-  /// slider stay fully inside the view, so it is short of the length by one
-  /// thumb there.
+  /// The span the near edge of a thumb moves across. The thumbs of a ranged slider
+  /// stay fully inside the view, so it is short of the length by one thumb there.
   let travel: CGFloat
 
-  /// Distance from the end of the view the minimum value sits at to the near
-  /// edge of the left (or single) and of the right thumb.
+  /// Distance from the end of the view the minimum value sits at to the near edge of
+  /// the left (or single) and of the right thumb.
   let leftOffset: CGFloat
   let rightOffset: CGFloat
 
@@ -286,8 +272,9 @@ struct RNCSliderGeometry {
     rightOffset = CGFloat(Self.fraction(of: model.valueRight, in: range)) * travel
   }
 
-  // Centre of the thumb whose near edge sits the given distance along the slider, in the coordinates of the view.
-  // The thumbs lie along the middle of the view, and a vertical slider grows upwards.
+  // Centre of the thumb whose near edge sits the given distance along the slider, in
+  // the coordinates of the view. The thumbs lie along the middle of the view, and a
+  // vertical slider grows upwards.
   func thumbCenter(atOffset offset: CGFloat) -> CGPoint {
     let along = offset + thumbLength / 2
 
@@ -296,13 +283,13 @@ struct RNCSliderGeometry {
       : CGPoint(x: along, y: size.height / 2)
   }
 
-  /// The point the marker of the step at the given value hangs from: the middle
-  /// of its top edge, right under where the thumb stands on that step and clear
-  /// of it, so that the marker of the step a thumb is on stays in sight.
+  /// The point the marker of the step at the given value hangs from: the middle of its
+  /// top edge, right under where the thumb stands on that step and clear of it, so
+  /// that the marker of the step a thumb is on stays in sight.
   ///
-  /// A vertical slider has its markers to the right of the track instead, the
-  /// point being the middle of their left edge - they are not turned round with
-  /// the slider, which keeps whatever they read the right way up.
+  /// A vertical slider has its markers to the right of the track instead, the point
+  /// being the middle of their left edge - they are not turned round with the slider,
+  /// which keeps whatever they read the right way up.
   func stepMarkerAnchor(at value: Double) -> CGPoint {
     let along = CGFloat(Self.fraction(of: value, in: range)) * travel + thumbLength / 2
     let across = breadth / 2 + thumbThickness / 2 + Self.stepMarkerGap
@@ -318,9 +305,9 @@ struct RNCSliderGeometry {
   /// The diameter of a built-in step marker.
   static let stepMarkerSize: CGFloat = 4
 
-  /// How thick a slider has to be across for the built-in step markers to fit
-  /// inside it: a full-sized thumb, with a marker and its gap on either side of
-  /// it, as the track stays in the middle of the slider.
+  /// How thick a slider has to be across for the built-in step markers to fit inside
+  /// it: a full-sized thumb, with a marker and its gap on either side of it, as the
+  /// track stays in the middle of the slider.
   static var stepMarkedThickness: CGFloat {
     thumbThickness + (stepMarkerGap + stepMarkerSize) * 2
   }
@@ -332,8 +319,8 @@ struct RNCSliderGeometry {
     return ((value - range.lowerBound) / span).clamped(to: 0...1)
   }
 
-  /// Match the thumb `UISlider` draws: a capsule lying along the track since
-  /// iOS 26, and a circle before it.
+  /// Match the thumb `UISlider` draws: a capsule lying along the track since iOS 26,
+  /// and a circle before it.
   static var thumbLength: CGFloat {
     if #available(iOS 26.0, *) {
       return 38
@@ -348,10 +335,10 @@ struct RNCSliderGeometry {
     return 28
   }
 
-  /// The value asked for by a tap on the given point of the view: the one whose
-  /// thumb is placed under the finger, rather than pulled up beside it. Where
-  /// the step leaves that value is no concern of the geometry - the thumb being
-  /// moved answers for that, exactly as it does for a drag.
+  /// The value asked for by a tap on the given point of the view: the one whose thumb
+  /// is placed under the finger, rather than pulled up beside it. Where the step
+  /// leaves that value is no concern of the geometry - the thumb being moved answers
+  /// for that, exactly as it does for a drag.
   func value(tappedAt point: CGPoint) -> Double {
     let span = range.upperBound - range.lowerBound
     guard travel > 0, span > 0 else { return range.lowerBound }
@@ -361,17 +348,17 @@ struct RNCSliderGeometry {
     return range.lowerBound + Double(along / travel) * span
   }
 
-  /// How far along the slider the given point of the view is, measured from the
-  /// end the minimum value sits at - the same measure `leftOffset` and
-  /// `rightOffset` place the thumbs by. A vertical slider grows upwards, which
-  /// the coordinates of the view run backwards along.
+  /// How far along the slider the given point of the view is, measured from the end
+  /// the minimum value sits at - the same measure `leftOffset` and `rightOffset` place
+  /// the thumbs by. A vertical slider grows upwards, which the coordinates of the view
+  /// run backwards along.
   func offset(of point: CGPoint) -> CGFloat {
     min(max(vertical ? size.height - point.y : point.x, 0), length)
   }
 
-  /// The thumb a tap on the given point of the view should carry to it: the
-  /// closest one, unless the tap lands on a thumb to begin with. A thumb that
-  /// has nowhere to travel to has nowhere to be sought to either.
+  /// The thumb a tap on the given point of the view should carry to it: the closest
+  /// one, unless the tap lands on a thumb to begin with. A thumb that has nowhere to
+  /// travel to has nowhere to be sought to either.
   func thumb(tappedAt point: CGPoint) -> RNCSliderModel.Thumb? {
     guard travel > 0, !touchesThumb(at: point) else { return nil }
 
@@ -382,18 +369,18 @@ struct RNCSliderGeometry {
     }?.thumb
   }
 
-  /// Whether the given point of the view is one a thumb is drawn to catch. A
-  /// touch falling there belongs to that thumb rather than to the track, which
-  /// is exactly what `RNCRangedSliderContent` makes of it too - so that a tap
-  /// answers either as a thumb or as the track, never as both nor as neither.
+  /// Whether the given point of the view is one a thumb is drawn to catch. A touch
+  /// falling there belongs to that thumb rather than to the track, which is exactly
+  /// what `RNCRangedSliderContent` makes of it too - so that a tap answers either as a
+  /// thumb or as the track, never as both nor as neither.
   func touchesThumb(at point: CGPoint) -> Bool {
     thumbs.contains { thumbTouchRect(atOffset: $0.offset).contains(point) }
   }
 
-  /// The rectangle a thumb whose near edge sits at the given offset answers
-  /// touches over: itself grown on either side of each axis to the touch target
-  /// Apple asks for - the padding `RNCRangedSliderContent` gives a thumb, so
-  /// that a thumb is answered wherever it catches a drag and nowhere else.
+  /// The rectangle a thumb whose near edge sits at the given offset answers touches
+  /// over: itself grown on either side of each axis to the touch target Apple asks for
+  /// - the padding `RNCRangedSliderContent` gives a thumb, so that a thumb is answered
+  /// wherever it catches a drag and nowhere else.
   func thumbTouchRect(atOffset offset: CGFloat) -> CGRect {
     let center = thumbCenter(atOffset: offset)
     let along = Self.touchSlop(around: thumbLength)
@@ -415,16 +402,16 @@ struct RNCSliderGeometry {
   }
 
   /// The thumbs there are to be moved, and how far along the slider each of them
-  /// stands. The single thumb of a slider that is not ranged is the left one, as
-  /// it is everywhere else.
+  /// stands. The single thumb of a slider that is not ranged is the left one, as it is
+  /// everywhere else.
   private var thumbs: [(thumb: RNCSliderModel.Thumb, offset: CGFloat)] {
     ranged
       ? [(.left, leftOffset), (.right, rightOffset)]
       : [(.single, leftOffset)]
   }
 
-  /// How much to grow a thumb on either side of the given extent of it to reach
-  /// the touch target Apple asks for.
+  /// How much to grow a thumb on either side of the given extent of it to reach the
+  /// touch target Apple asks for.
   static func touchSlop(around extent: CGFloat) -> CGFloat {
     max((minimumTouchTarget - extent) / 2, 0)
   }
@@ -460,26 +447,25 @@ struct RNCSingleSliderContent: View {
   }
 }
 
-/// SwiftUI has no two-thumb slider and no vertical one, so the slider is drawn
-/// here: a track, the selected span, and a thumb at each end of it. The shape
-/// follows `Slider` - a capsule track with the selected part tinted, and a white
-/// capsule thumb that turns to Liquid Glass while it is held on iOS 26 - so that
-/// this slider does not look foreign next to a plain one.
+/// SwiftUI has no two-thumb slider and no vertical one, so the slider is drawn here: a
+/// track, the selected span, and a thumb at each end of it. The shape follows `Slider` -
+/// a capsule track with the selected part tinted, and a white capsule thumb that turns
+/// to Liquid Glass while it is held on iOS 26 - so that this slider does not look
+/// foreign next to a plain one.
 ///
-/// Where everything goes is worked out by `RNCSliderGeometry` - and on a
-/// vertical slider the left thumb is the bottom one, the direction its value
-/// grows in being the only thing that changes.
+/// Where everything goes is worked out by `RNCSliderGeometry` - and on a vertical slider
+/// the left thumb is the bottom one, the direction its value grows in being the only
+/// thing that changes.
 struct RNCRangedSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
-  /// The two shapes a thumb takes are one and the same thing to this view, to
-  /// the thumb being dragged and to the one a tap on the track jumps.
+  /// The two shapes a thumb takes are one and the same thing to this view, to the thumb
+  /// being dragged and to the one a tap on the track jumps.
   private typealias Thumb = RNCSliderModel.Thumb
 
-  /// Whether the user has hold of the left (or single) and of the right thumb,
-  /// which is what turns it to glass. Kept apart from the drag origins in the
-  /// model, as a gesture state resets itself however the touch ends - a
-  /// cancelled one included.
+  /// Whether the user has hold of the left (or single) and of the right thumb, which is
+  /// what turns it to glass. Kept apart from the drag origins in the model, as a
+  /// gesture state resets itself however the touch ends - a cancelled one included.
   @GestureState private var isLeftThumbPressed = false
   @GestureState private var isRightThumbPressed = false
 
@@ -491,47 +477,41 @@ struct RNCRangedSliderContent: View {
         width: model.vertical ? geometry.thumbThickness : geometry.thumbLength,
         height: model.vertical ? geometry.thumbLength : geometry.thumbThickness
       )
-      let travel = geometry.travel
-      let leftOffset = geometry.leftOffset
-      let rightOffset = geometry.rightOffset
-
-      let trackFillLength = model.ranged ? max(rightOffset - leftOffset, 0) : leftOffset
-      let trackFillStartPoint = min(leftOffset, rightOffset) + geometry.thumbLength / 2
-      let trackUpperStartPoint = model.ranged ? rightOffset : leftOffset
-      let trackEndLength = model.ranged ? geometry.length - rightOffset : geometry.length - leftOffset
 
       let lowerColor = tint(model.minimumTrackColor, or: model.ranged ? Self.trackColor : .accentColor)
       let middleColor = tint(model.middleRangeTrackColor, or: .accentColor)
       let upperColor = tint(model.maximumTrackColor, or: Self.trackColor)
+      let upperStart = model.ranged ? geometry.rightOffset : geometry.leftOffset
 
-      // Everything is placed by how far along the slider it sits, so the stack
-      // is anchored at the end the minimum value is at: the leading edge across
-      // the view, and the bottom one up it.
+      // Everything is placed by how far along the slider it sits, so the stack is
+      // anchored at the end the minimum value is at: the leading edge across the view,
+      // and the bottom one up it.
       ZStack(alignment: model.vertical ? .bottom : .leading) {
         if !model.customTrack {
           track(Self.trackColor, length: nil)
 
-          track(lowerColor, length: leftOffset)
-          // Drawn between the two thumb centres, which is why it is inset by half
-          // a thumb. `max` keeps it from inverting on values crossed by JS.
+          track(lowerColor, length: geometry.leftOffset)
+
+          // Drawn between the two thumb centres, which is why it is inset by half a
+          // thumb. `max` keeps it from inverting on values crossed by JS.
           if model.ranged {
-            track(middleColor, length: trackFillLength)
-              .offset(offsetAlong(trackFillStartPoint))
+            track(middleColor, length: max(geometry.rightOffset - geometry.leftOffset, 0))
+              .offset(offsetAlong(min(geometry.leftOffset, geometry.rightOffset) + geometry.thumbLength / 2))
           }
 
-          track(upperColor, length: trackEndLength).offset(offsetAlong(trackUpperStartPoint))
+          track(upperColor, length: geometry.length - upperStart).offset(offsetAlong(upperStart))
         }
         if model.ranged {
-          thumb(.right, size: thumbSize, offset: rightOffset, range: range, travel: travel)
-          thumb(.left, size: thumbSize, offset: leftOffset, range: range, travel: travel)
+          thumb(.right, size: thumbSize, offset: geometry.rightOffset, range: range, travel: geometry.travel)
+          thumb(.left, size: thumbSize, offset: geometry.leftOffset, range: range, travel: geometry.travel)
             .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
         } else {
-          thumb(.single, size: thumbSize, offset: leftOffset, range: range, travel: travel)
+          thumb(.single, size: thumbSize, offset: geometry.leftOffset, range: range, travel: geometry.travel)
         }
       }
-      // Anchored at the same end as the stack, which is only as big as what it
-      // holds: with the track replaced that is just the thumbs, and a stack
-      // centred in the view would have them start out from its middle.
+      // Anchored at the same end as the stack, which is only as big as what it holds:
+      // with the track replaced that is just the thumbs, and a stack centred in the
+      // view would have them start out from its middle.
       .frame(
         width: proxy.size.width,
         height: proxy.size.height,
@@ -547,13 +527,13 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  /// The markers of the steps, drawn as dots hanging below the thumbs, in the
-  /// tint of the selected part of the track for a step a thumb is on and in that
-  /// of the rest of it otherwise.
+  /// The markers of the steps, drawn as dots hanging below the thumbs, in the tint of
+  /// the selected part of the track for a step a thumb is on and in that of the rest of
+  /// it otherwise.
   ///
-  /// Each set of dots is a single path, so that a slider with many steps does not
-  /// cost a view apiece - and a path draws wherever its points are, so that the
-  /// dots are not cut off on a slider too thin to hold them.
+  /// Each set of dots is a single path, so that a slider with many steps does not cost a
+  /// view apiece - and a path draws wherever its points are, so that the dots are not
+  /// cut off on a slider too thin to hold them.
   @ViewBuilder
   private func stepMarkers(_ geometry: RNCSliderGeometry, marked: Color, unmarked: Color) -> some View {
     if model.stepMarkers, !model.customStepMarkers {
@@ -602,11 +582,10 @@ struct RNCRangedSliderContent: View {
     range: ClosedRange<Double>,
     travel: CGFloat
   ) -> some View {
-    // A thumb is a small thing to grab, and the two of them can end up right
-    // next to each other, so the area that answers to a touch is padded out to
-    // the 44pt Apple asks for, on whichever side of the thumb falls short of it.
-    // The padding is then shifted back off the offset, leaving the thumb itself
-    // where the value puts it.
+    // A thumb is a small thing to grab, and the two of them can end up right next to
+    // each other, so the area that answers to a touch is padded out to the 44pt Apple
+    // asks for, on whichever side of the thumb falls short of it. The padding is then
+    // shifted back off the offset, leaving the thumb itself where the value puts it.
     let horizontalSlop = RNCSliderGeometry.touchSlop(around: size.width)
     let verticalSlop = RNCSliderGeometry.touchSlop(around: size.height)
     let alongSlop = model.vertical ? verticalSlop : horizontalSlop
@@ -630,10 +609,9 @@ struct RNCRangedSliderContent: View {
           }
           .onEnded { _ in endDrag(of: thumb) }
       )
-      // Drawn rather than built from a UIKit control, so VoiceOver has to be
-      // told what this is by hand. An adjustment moves the thumb by one step,
-      // or by 10% of the range when the slider has none - which is what
-      // `UISlider` does.
+      // Drawn rather than built from a UIKit control, so VoiceOver has to be told what
+      // this is by hand. An adjustment moves the thumb by one step, or by 10% of the
+      // range when the slider has none - which is what `UISlider` does.
       .accessibilityElement()
       .accessibilityValue(Text(percentage(of: model.value(of: thumb), in: range)))
       .accessibilityAdjustableAction { direction in
@@ -649,13 +627,13 @@ struct RNCRangedSliderContent: View {
       }
   }
 
-  /// What a thumb looks like. A thumb JS has replaced is still here to be
-  /// dragged, only undrawn - the clear capsule keeps its place.
+  /// What a thumb looks like. A thumb JS has replaced is still here to be dragged, only
+  /// undrawn - the clear capsule keeps its place.
   ///
-  /// On iOS 26 a thumb that is held grows and turns to clear glass, the track
-  /// showing through it, the way the thumb of `Slider` does. The glass only
-  /// grows the thumb as it is drawn, so neither the touch area nor where the
-  /// value puts the thumb move with it.
+  /// On iOS 26 a thumb that is held grows and turns to clear glass, the track showing
+  /// through it, the way the thumb of `Slider` does. The glass only grows the thumb as
+  /// it is drawn, so neither the touch area nor where the value puts the thumb move
+  /// with it.
   @ViewBuilder
   private func thumbFace(isReplaced: Bool, isPressed: Bool) -> some View {
     if isReplaced {
@@ -682,9 +660,9 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  /// Whether the given thumb should be drawn held: while its own gesture has
-  /// hold of it, or while a hold on the track has picked it up. The latter comes
-  /// from UIKit, which cannot feed a SwiftUI gesture state.
+  /// Whether the given thumb should be drawn held: while its own gesture has hold of
+  /// it, or while a hold on the track has picked it up. The latter comes from UIKit,
+  /// which cannot feed a SwiftUI gesture state.
   private func isPressed(_ thumb: Thumb) -> Bool {
     if model.heldThumb == thumb { return true }
 
@@ -708,13 +686,12 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  /// Takes hold of a thumb, remembering where it stood so that the drag can be
-  /// tracked by how far it travels, and tells JS that a drag has begun.
+  /// Takes hold of a thumb, remembering where it stood so that the drag can be tracked
+  /// by how far it travels, and tells JS that a drag has begun.
   ///
-  /// Only the thumb grabbed first reports a start: a second finger landing on the
-  /// other thumb of a ranged slider joins the drag already in progress rather
-  /// than beginning one of its own, so that every start is answered by exactly
-  /// one complete.
+  /// Only the thumb grabbed first reports a start: a second finger landing on the other
+  /// thumb of a ranged slider joins the drag already in progress rather than beginning
+  /// one of its own, so that every start is answered by exactly one complete.
   private func beginDrag(of thumb: Thumb) -> Double {
     let wasSliding = model.isSliding
     let origin = model.value(of: thumb)
@@ -727,11 +704,11 @@ struct RNCRangedSliderContent: View {
     return origin
   }
 
-  /// Lets go of a thumb, and tells JS the drag is over once the last thumb has
-  /// been let go of - whether or not it moved anywhere in between.
+  /// Lets go of a thumb, and tells JS the drag is over once the last thumb has been let
+  /// go of - whether or not it moved anywhere in between.
   private func endDrag(of thumb: Thumb) {
-    // A drag that was never begun - a gesture that ended without ever having
-    // changed - has nothing to report.
+    // A drag that was never begun - a gesture that ended without ever having changed -
+    // has nothing to report.
     guard model.dragOrigin(of: thumb) != nil else { return }
 
     model.setDragOrigin(nil, of: thumb)
@@ -745,16 +722,15 @@ struct RNCRangedSliderContent: View {
     range.upperBound - range.lowerBound
   }
 
-  /// How far a drag has carried a thumb along the slider, towards the maximum
-  /// value. A vertical slider grows upwards, which SwiftUI's vertical
-  /// coordinates run backwards along.
+  /// How far a drag has carried a thumb along the slider, towards the maximum value. A
+  /// vertical slider grows upwards, which SwiftUI's vertical coordinates run backwards
+  /// along.
   private func dragDistance(of gesture: DragGesture.Value) -> CGFloat {
     model.vertical ? -gesture.translation.height : gesture.translation.width
   }
 
-  /// A shift of the given distance along the slider, away from the end its
-  /// minimum value sits at - the same direction `dragDistance(of:)` measures a
-  /// drag in.
+  /// A shift of the given distance along the slider, away from the end its minimum
+  /// value sits at - the same direction `dragDistance(of:)` measures a drag in.
   private func offsetAlong(_ distance: CGFloat) -> CGSize {
     model.vertical ? CGSize(width: 0, height: -distance) : CGSize(width: distance, height: 0)
   }
@@ -774,38 +750,35 @@ struct RNCRangedSliderContent: View {
   /// What `Slider` leaves the unselected part of its track looking like.
   private static let trackColor = Color(uiColor: .systemFill)
 
-  /// What a built-in step marker no thumb is on looks like, which has to stand
-  /// out against whatever the slider is laid on rather than against the track.
+  /// What a built-in step marker no thumb is on looks like, which has to stand out
+  /// against whatever the slider is laid on rather than against the track.
   private static let stepMarkerColor = Color(uiColor: .tertiaryLabel)
 }
 
 /// Hosts the SwiftUI slider inside the UIKit view hierarchy Fabric mounts.
 ///
-/// The hosting controller is parented to the closest view controller once this
-/// view reaches a window: SwiftUI needs a controller in the hierarchy for
-/// environment propagation, and Fabric hands us a plain view with no controller
-/// of its own.
+/// The hosting controller is parented to the closest view controller once this view
+/// reaches a window: SwiftUI needs a controller in the hierarchy for environment
+/// propagation, and Fabric hands us a plain view with no controller of its own.
 @objc(RNCSliderView)
 public final class RNCSliderView: UIView {
 
   private let model: RNCSliderModel
   private let hostingController: UIHostingController<RNCSliderContent>
 
-  /// The views JS rendered as the slider's children, in the order it rendered
-  /// them: the track, when `customTrack` says JS replaced it, then the single
-  /// thumb, or the left and then the right one, when `customThumb` says JS
-  /// replaced them, and then a step marker for each step, when
-  /// `customStepMarkers` says JS replaced those.
+  /// The views JS rendered as the slider's children, in the order it rendered them: the
+  /// track, when `customTrack` says JS replaced it, then the single thumb, or the left
+  /// and then the right one, when `customThumb` says JS replaced them, and then a step
+  /// marker for each step, when `customStepMarkers` says JS replaced those.
   private var childViews: [UIView] = []
 
-  /// Whether JS replaced the thumbs with views of its own, which is what tells
-  /// the thumbs apart from the step markers that follow them.
+  /// Whether JS replaced the thumbs with views of its own, which is what tells the
+  /// thumbs apart from the step markers that follow them.
   private var hasCustomThumb = false
 
-  /// One for each thumb there can be, holding the view that replaces it. Each
-  /// is kept centred on its thumb and takes up no room of its own: the shadow
-  /// node centres the view it holds on its origin, so the view ends up centred
-  /// on the thumb too.
+  /// One for each thumb there can be, holding the view that replaces it. Each is kept
+  /// centred on its thumb and takes up no room of its own: the shadow node centres the
+  /// view it holds on its origin, so the view ends up centred on the thumb too.
   ///
   /// They take no touches, which leaves every drag to the slider underneath.
   private let thumbContainers: [UIView] = (0..<2).map { _ in
@@ -814,13 +787,13 @@ public final class RNCSliderView: UIView {
     return container
   }
 
-  /// Holds the view that replaces the track, the way `thumbContainers` hold
-  /// the thumbs: centred on the middle of the slider, and turned a quarter turn
-  /// anticlockwise on a vertical one, which carries the start of the track down
-  /// to the bottom, where the minimum is.
+  /// Holds the view that replaces the track, the way `thumbContainers` hold the thumbs:
+  /// centred on the middle of the slider, and turned a quarter turn anticlockwise on a
+  /// vertical one, which carries the start of the track down to the bottom, where the
+  /// minimum is.
   ///
-  /// It lies underneath the slider rather than over it, so that the thumbs
-  /// the slider draws stay on top of the track.
+  /// It lies underneath the slider rather than over it, so that the thumbs the slider
+  /// draws stay on top of the track.
   private let trackContainer: UIView = {
     let container = UIView()
     container.isUserInteractionEnabled = false
@@ -828,29 +801,27 @@ public final class RNCSliderView: UIView {
   }()
 
   /// One for each step JS renders a marker for, holding that marker the way
-  /// `thumbContainers` hold the thumbs - except that each is kept at the point
-  /// its marker hangs from, see `RNCSliderGeometry.stepMarkerAnchor(at:)`.
+  /// `thumbContainers` hold the thumbs - except that each is kept at the point its
+  /// marker hangs from, see `RNCSliderGeometry.stepMarkerAnchor(at:)`.
   ///
-  /// There are as many of them as there are markers, so they are made as the
-  /// markers come, and lie between the slider and the thumbs.
+  /// There are as many of them as there are markers, so they are made as the markers
+  /// come, and lie between the slider and the thumbs.
   private var stepMarkerContainers: [UIView] = []
 
   /// Keeps the custom thumbs moving with the slider - see `layoutSubviews`.
   private var modelObservation: AnyCancellable?
 
-  /// Reads a tap anywhere on the slider as the track being tapped to move the
-  /// thumb to - the way `UISlider` behaves, which this slider is drawn to
-  /// stand in for.
+  /// Reads a tap anywhere on the slider as the track being tapped to move the thumb
+  /// to - the way `UISlider` behaves, which this slider is drawn to stand in for.
   ///
-  /// It sits on this view rather than being a gesture of the hosted slider, as
-  /// the whole of the track has to answer it while the thumbs keep their own
-  /// gestures: a tap is a thing of the slider's, and a drag of a thumb is a
-  /// thing of the thumb's.
+  /// It sits on this view rather than being a gesture of the hosted slider, as the
+  /// whole of the track has to answer it while the thumbs keep their own gestures: a
+  /// tap is a thing of the slider's, and a drag of a thumb is a thing of the thumb's.
   ///
-  /// The touches are left to carry on underneath it, so that the drags of the
-  /// hosted slider go on seeing the whole of a touch even when a tap ends up
-  /// being read out of it - a thumb held without ever moving would otherwise
-  /// never be told it has been let go of.
+  /// The touches are left to carry on underneath it, so that the drags of the hosted
+  /// slider go on seeing the whole of a touch even when a tap ends up being read out of
+  /// it - a thumb held without ever moving would otherwise never be told it has been
+  /// let go of.
   private lazy var tapToSeek: UITapGestureRecognizer = {
     let recognizer = UITapGestureRecognizer(target: self, action: #selector(seekToTap(_:)))
     recognizer.cancelsTouchesInView = false
@@ -858,22 +829,22 @@ public final class RNCSliderView: UIView {
     return recognizer
   }()
 
-  /// Takes over a touch held on the track, after a moment, and drags the thumb
-  /// nearest the finger for as long as it is held.
+  /// Takes over a touch held on the track, after a moment, and drags the thumb nearest
+  /// the finger for as long as it is held.
   ///
-  /// The same thing as the tap above done slowly, so the two share
-  /// `beginSeek(at:)`, `continueSeek(at:)` and `endSeek()`, and it sits on the
-  /// very same track for the very same reason.
+  /// The same thing as the tap above done slowly, so the two share `beginSeek(at:)`,
+  /// `continueSeek(at:)` and `endSeek()`, and it sits on the very same track for the
+  /// very same reason.
   ///
-  /// The hold is short enough to feel immediate, which asks something of a finger
-  /// that means to scroll instead: `allowableMovement` is left at what UIKit asks
-  /// for, so a finger already sliding as it lands is left to whatever the slider
-  /// sits in, and only a finger that comes to rest on the track picks a thumb up.
-  /// Once the hold has begun the finger is free to travel the whole track.
+  /// The hold is short enough to feel immediate, which asks something of a finger that
+  /// means to scroll instead: `allowableMovement` is left at what UIKit asks for, so a
+  /// finger already sliding as it lands is left to whatever the slider sits in, and
+  /// only a finger that comes to rest on the track picks a thumb up. Once the hold has
+  /// begun the finger is free to travel the whole track.
   ///
-  /// The touches are left to carry on underneath it, exactly as they are under
-  /// the tap, so that a finger which moved before the hold began is still handed
-  /// to the hosted slider.
+  /// The touches are left to carry on underneath it, exactly as they are under the tap,
+  /// so that a finger which moved before the hold began is still handed to the hosted
+  /// slider.
   private lazy var holdToSeek: UILongPressGestureRecognizer = {
     let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(seekToHold(_:)))
     recognizer.minimumPressDuration = Self.seekHoldDuration
@@ -886,12 +857,11 @@ public final class RNCSliderView: UIView {
   /// enough that picking one up this way feels like it begins at once.
   private static let seekHoldDuration: TimeInterval = 0.15
 
-  /// Installs the two reads of the track, and keeps them from answering the same
-  /// touch twice: a tap recognizes on release however long the finger was down,
-  /// so without this a press held past the hold duration would be answered by the
-  /// hold and then again by the tap - a second start and complete carrying no
-  /// value. A quick tap fails the hold the moment it is released, which is too
-  /// soon to be felt.
+  /// Installs the two reads of the track, and keeps them from answering the same touch
+  /// twice: a tap recognizes on release however long the finger was down, so without
+  /// this a press held past the hold duration would be answered by the hold and then
+  /// again by the tap - a second start and complete carrying no value. A quick tap
+  /// fails the hold the moment it is released, which is too soon to be felt.
   private func installSeekGestures() {
     tapToSeek.require(toFail: holdToSeek)
     addGestureRecognizer(tapToSeek)
@@ -916,31 +886,31 @@ public final class RNCSliderView: UIView {
 
   /// Takes the thumb nearest a tap on the track to where the tap landed.
   ///
-  /// A tap landing on a thumb is left to the hosted slider, which reads it the
-  /// same way it reads a drag begun there: as a thumb being taken hold of. A tap
-  /// arriving while a thumb is already being dragged is left too, and a value
-  /// pushed from JS in between is held off the way one pushed mid-drag is.
+  /// A tap landing on a thumb is left to the hosted slider, which reads it the same way
+  /// it reads a drag begun there: as a thumb being taken hold of. A tap arriving while a
+  /// thumb is already being dragged is left too, and a value pushed from JS in between
+  /// is held off the way one pushed mid-drag is.
   ///
-  /// A tap is reported the way a drag of the same distance would have been: a
-  /// start, the value, and a complete.
+  /// A tap is reported the way a drag of the same distance would have been: a start,
+  /// the value, and a complete.
   @objc private func seekToTap(_ recognizer: UITapGestureRecognizer) {
-    // The hosted slider is laid out to fill this view, so the tap is read in its
-    // own bounds - the same bounds `RNCRangedSliderContent` is drawn in.
+    // The hosted slider is laid out to fill this view, so the tap is read in its own
+    // bounds - the same bounds `RNCRangedSliderContent` is drawn in.
     beginSeek(at: recognizer.location(in: hostingController.view))
     endSeek()
   }
 
-  /// Takes the thumb nearest the given point of the slider to it, and keeps it
-  /// there for as long as the finger holds.
+  /// Takes the thumb nearest the given point of the slider to it, and keeps it there for
+  /// as long as the finger holds.
   ///
-  /// Unlike a thumb taken hold of directly, which is then dragged by how far the
-  /// finger travels, a thumb picked up off the track follows where the finger
-  /// *is*, from the moment it is grabbed: there is nothing to have travelled from
-  /// when the finger was never on the thumb to begin with.
+  /// Unlike a thumb taken hold of directly, which is then dragged by how far the finger
+  /// travels, a thumb picked up off the track follows where the finger *is*, from the
+  /// moment it is grabbed: there is nothing to have travelled from when the finger was
+  /// never on the thumb to begin with.
   ///
-  /// Answers whether the hold began: a thumb already being dragged, or a hold
-  /// beginning on one, is left to the hosted slider, and a hold beginning where
-  /// the thumbs cannot travel has no thumb to pick up.
+  /// Answers whether the hold began: a thumb already being dragged, or a hold beginning
+  /// on one, is left to the hosted slider, and a hold beginning where the thumbs cannot
+  /// travel has no thumb to pick up.
   @discardableResult
   private func beginSeek(at point: CGPoint) -> Bool {
     guard !model.isSliding, !model.isHeld else { return false }
@@ -948,12 +918,12 @@ public final class RNCSliderView: UIView {
     let geometry = seekGeometry()
     guard let thumb = geometry.thumb(tappedAt: point) else { return false }
 
-    // The origin marks the thumb as held, so that a value pushed from JS is kept
-    // off it for as long as the finger is down. The seek never reads the value
-    // back, as it is the finger that decides where the thumb goes.
+    // The origin marks the thumb as held, so that a value pushed from JS is kept off it
+    // for as long as the finger is down. The seek never reads the value back, as it is
+    // the finger that decides where the thumb goes.
     model.setDragOrigin(model.value(of: thumb), of: thumb)
-    // Which also grows the thumb and turns it to glass, the way it does when it
-    // is taken hold of directly.
+    // Which also grows the thumb and turns it to glass, the way it does when it is taken
+    // hold of directly.
     model.heldThumb = thumb
     model.onSlidingStart?()
     continueSeek(at: point)
@@ -965,30 +935,29 @@ public final class RNCSliderView: UIView {
   private func continueSeek(at point: CGPoint) {
     guard let thumb = model.heldThumb else { return }
 
-    // The value the finger asks for can still be refused: it can be outside the
-    // limits or on the far side of the other thumb, and a thumb held against one
-    // of those does not move - exactly as it would not if it were dragged there.
+    // The value the finger asks for can still be refused: it can be outside the limits
+    // or on the far side of the other thumb, and a thumb held against one of those does
+    // not move - exactly as it would not if it were dragged there.
     model.set(seekGeometry().value(tappedAt: point), of: thumb)
   }
 
-  /// Lets go of a thumb held on the track, and answers the beginning of the hold
-  /// with its completion.
+  /// Lets go of a thumb held on the track, and answers the beginning of the hold with
+  /// its completion.
   private func endSeek() {
     guard let thumb = model.heldThumb else { return }
     model.heldThumb = nil
 
-    // A second finger that took hold of the same thumb, and let go of it first,
-    // has already reported the completion. A hold can begin once that drag is
-    // over, so reporting one here too would answer a start that is no longer
-    // there.
+    // A second finger that took hold of the same thumb, and let go of it first, has
+    // already reported the completion. A hold can begin once that drag is over, so
+    // reporting one here too would answer a start that is no longer there.
     if model.dragOrigin(of: thumb) != nil {
       model.setDragOrigin(nil, of: thumb)
       model.onSlidingComplete?()
     }
   }
 
-  /// The geometry of the slider as the hosted view draws it, which fills this
-  /// view - so the track is sought where it is drawn.
+  /// The geometry of the slider as the hosted view draws it, which fills this view - so
+  /// the track is sought where it is drawn.
   private func seekGeometry() -> RNCSliderGeometry {
     RNCSliderGeometry(model: model, size: hostingController.view.bounds.size)
   }
@@ -1003,8 +972,7 @@ public final class RNCSliderView: UIView {
     set { model.maximumValue = newValue }
   }
 
-  /// Setting this while the user is dragging is a no-op - see
-  /// `RNCSliderModel.isSliding`.
+  /// Setting this while the user is dragging is a no-op - see `RNCSliderModel.isSliding`.
   @objc public var value: Double {
     get { model.value }
     set {
@@ -1013,9 +981,9 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Whether the slider selects a span of the range with two thumbs, rather
-  /// than a single value with one. `value` and `valueLeft`/`valueRight` belong
-  /// to the two shapes respectively, and the unused pair is simply not drawn.
+  /// Whether the slider selects a span of the range with two thumbs, rather than a
+  /// single value with one. `value` and `valueLeft`/`valueRight` belong to the two
+  /// shapes respectively, and the unused pair is simply not drawn.
   @objc public var ranged: Bool {
     get { model.ranged }
     set {
@@ -1026,8 +994,8 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Setting either of these while the matching thumb is being dragged is a
-  /// no-op - see `RNCSliderModel.leftDragOrigin`.
+  /// Setting either of these while the matching thumb is being dragged is a no-op - see
+  /// `RNCSliderModel.leftDragOrigin`.
   @objc public var valueLeft: Double {
     get { model.valueLeft }
     set {
@@ -1044,17 +1012,17 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Granularity of the values the slider reports - see
-  /// `RNCSliderModel.step`. A value pushed from JS is taken as it comes, so
-  /// only the values the slider arrives at itself are snapped.
+  /// Granularity of the values the slider reports - see `RNCSliderModel.step`. A value
+  /// pushed from JS is taken as it comes, so only the values the slider arrives at
+  /// itself are snapped.
   @objc public var step: Double {
     get { model.step }
     set { model.step = newValue }
   }
 
-  /// Bounds the thumbs can be dragged between - see `RNCSliderModel.limits`. A
-  /// value pushed from JS is taken as it comes, so only the values the slider
-  /// arrives at itself are held to the limits.
+  /// Bounds the thumbs can be dragged between - see `RNCSliderModel.limits`. A value
+  /// pushed from JS is taken as it comes, so only the values the slider arrives at
+  /// itself are held to the limits.
   @objc public var lowerLimit: Double {
     get { model.lowerLimit }
     set { model.lowerLimit = newValue }
@@ -1066,8 +1034,8 @@ public final class RNCSliderView: UIView {
   }
 
   /// Whether the slider runs up the view rather than across it - see
-  /// `RNCSliderModel.vertical`. The shadow node measures a vertical slider the
-  /// other way round to match, so this only decides how it is drawn and dragged.
+  /// `RNCSliderModel.vertical`. The shadow node measures a vertical slider the other
+  /// way round to match, so this only decides how it is drawn and dragged.
   @objc public var vertical: Bool {
     get { model.vertical }
     set { model.vertical = newValue }
@@ -1089,8 +1057,8 @@ public final class RNCSliderView: UIView {
     set { model.maximumTrackColor = newValue }
   }
 
-  /// Whether the first of the views JS mounts is a track rather than a thumb -
-  /// see `RNCSliderModel.customTrack`.
+  /// Whether the first of the views JS mounts is a track rather than a thumb - see
+  /// `RNCSliderModel.customTrack`.
   @objc public var customTrack: Bool {
     get { model.customTrack }
     set {
@@ -1100,8 +1068,7 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Whether the views JS mounts after the track include the thumbs - see
-  /// `childViews`.
+  /// Whether the views JS mounts after the track include the thumbs - see `childViews`.
   @objc public var customThumb: Bool {
     get { hasCustomThumb }
     set {
@@ -1111,8 +1078,7 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Whether the steps are marked below the track - see
-  /// `RNCSliderModel.stepMarkers`.
+  /// Whether the steps are marked below the track - see `RNCSliderModel.stepMarkers`.
   @objc public var stepMarkers: Bool {
     get { model.stepMarkers }
     set { model.stepMarkers = newValue }
@@ -1164,8 +1130,8 @@ public final class RNCSliderView: UIView {
     hostingController.view.backgroundColor = .clear
     hostingController.view.frame = bounds
     if #available(iOS 16.4, visionOS 1.0, *) {
-      // Fabric already positions this view inside the safe area; letting the
-      // hosting controller inset the slider a second time would shift it.
+      // Fabric already positions this view inside the safe area; letting the hosting
+      // controller inset the slider a second time would shift it.
       hostingController.safeAreaRegions = []
     }
     addSubview(trackContainer)
@@ -1173,9 +1139,9 @@ public final class RNCSliderView: UIView {
     thumbContainers.forEach(addSubview)
     installSeekGestures()
 
-    // Every change the slider could redraw its thumbs for may have moved them,
-    // a drag above all. It is only announced before it lands, so the custom
-    // thumbs are moved in the layout pass that follows it.
+    // Every change the slider could redraw its thumbs for may have moved them, a drag
+    // above all. It is only announced before it lands, so the custom thumbs are moved in
+    // the layout pass that follows it.
     modelObservation = model.objectWillChange.sink { [weak self] _ in
       self?.setNeedsLayout()
     }
@@ -1188,16 +1154,15 @@ public final class RNCSliderView: UIView {
 
   /// The size a slider takes when JS gives it none.
   ///
-  /// The height is whatever SwiftUI asks for, so it tracks the platform instead
-  /// of a number written down here. The width is only a hint - a SwiftUI
-  /// `Slider` has no width of its own to report, and flexbox is what actually
-  /// stretches it.
+  /// The height is whatever SwiftUI asks for, so it tracks the platform instead of a
+  /// number written down here. The width is only a hint - a SwiftUI `Slider` has no
+  /// width of its own to report, and flexbox is what actually stretches it.
   ///
-  /// A ranged slider is deliberately measured the same way, from the single
-  /// thumb: it is laid out inside whatever height it is given, and taking the
-  /// platform's own slider height keeps the two the same size. A vertical
-  /// slider is too - it is the same control on its side, so its shadow node
-  /// turns this size round rather than measuring a second one.
+  /// A ranged slider is deliberately measured the same way, from the single thumb: it is
+  /// laid out inside whatever height it is given, and taking the platform's own slider
+  /// height keeps the two the same size. A vertical slider is too - it is the same
+  /// control on its side, so its shadow node turns this size round rather than measuring
+  /// a second one.
   ///
   /// Must be called on the main thread.
   @objc public static func measuredIntrinsicSize() -> CGSize {
@@ -1206,9 +1171,9 @@ public final class RNCSliderView: UIView {
       in: CGSize(width: intrinsicWidth, height: .greatestFiniteMagnitude)
     )
 
-    // An unbounded proposal is meant to come back as the ideal height, but a
-    // slider laid out to an infinite height would disappear rather than look
-    // wrong, so don't take SwiftUI's word for it unconditionally.
+    // An unbounded proposal is meant to come back as the ideal height, but a slider laid
+    // out to an infinite height would disappear rather than look wrong, so don't take
+    // SwiftUI's word for it unconditionally.
     let height = fitted.height.isFinite && fitted.height > 0 ? fitted.height : fallbackHeight
 
     return CGSize(width: intrinsicWidth, height: height)
@@ -1216,9 +1181,9 @@ public final class RNCSliderView: UIView {
 
   private static let intrinsicWidth: CGFloat = 200
 
-  /// How thick a slider drawing its own step markers has to be across for them
-  /// to fit inside it - see `RNCSliderGeometry.stepMarkedThickness`. The shadow
-  /// node grows a slider measured any thinner to it.
+  /// How thick a slider drawing its own step markers has to be across for them to fit
+  /// inside it - see `RNCSliderGeometry.stepMarkedThickness`. The shadow node grows a
+  /// slider measured any thinner to it.
   @objc public static func stepMarkedThickness() -> CGFloat {
     RNCSliderGeometry.stepMarkedThickness
   }
@@ -1226,9 +1191,9 @@ public final class RNCSliderView: UIView {
   /// The smallest control Apple's guidelines will accept as a touch target.
   private static let fallbackHeight: CGFloat = 44
 
-  /// Drops any drag in progress, so that a value pushed straight after is not
-  /// swallowed by the rule above. Fabric recycles component views, and one
-  /// retired mid-drag would otherwise stay deaf to updates for good.
+  /// Drops any drag in progress, so that a value pushed straight after is not swallowed
+  /// by the rule above. Fabric recycles component views, and one retired mid-drag would
+  /// otherwise stay deaf to updates for good.
   ///
   /// The drag is abandoned rather than ended: the JS that would have heard the
   /// completion is no longer mounted on this view.
@@ -1238,8 +1203,8 @@ public final class RNCSliderView: UIView {
     model.rightDragOrigin = nil
   }
 
-  /// Takes a view JS rendered in place of the built-in track or of a
-  /// built-in thumb - see `childViews`.
+  /// Takes a view JS rendered in place of the built-in track or of a built-in thumb -
+  /// see `childViews`.
   @objc(mountChildView:atIndex:)
   public func mountChildView(_ view: UIView, at index: Int) {
     childViews.insert(view, at: min(index, childViews.count))
@@ -1253,10 +1218,10 @@ public final class RNCSliderView: UIView {
     childViewsDidChange()
   }
 
-  /// Hands every child to the container it belongs in. Which one that is
-  /// depends on which of the track, the thumbs and the step markers JS
-  /// replaced, which can change before or after the children it concerns are
-  /// mounted - so it is worked out afresh whenever either does.
+  /// Hands every child to the container it belongs in. Which one that is depends on
+  /// which of the track, the thumbs and the step markers JS replaced, which can change
+  /// before or after the children it concerns are mounted - so it is worked out afresh
+  /// whenever either does.
   private func childViewsDidChange() {
     let trackView = model.customTrack ? childViews.first : nil
     let remainingViews = childViews.dropFirst(trackView == nil ? 0 : 1)
@@ -1272,8 +1237,8 @@ public final class RNCSliderView: UIView {
       placements.append((trackView, trackContainer))
     }
 
-    // A view inserted ahead of another moves that one onto the next container,
-    // and one left without a container is not shown anywhere.
+    // A view inserted ahead of another moves that one onto the next container, and one
+    // left without a container is not shown anywhere.
     for view in childViews where !placements.contains(where: { $0.0 === view }) {
       view.removeFromSuperview()
     }
@@ -1285,9 +1250,9 @@ public final class RNCSliderView: UIView {
     setNeedsLayout()
   }
 
-  /// Makes or drops step marker containers until there is one for each of the
-  /// given number of markers. A dropped container takes the marker it held with
-  /// it, which `childViewsDidChange` then hands to another one.
+  /// Makes or drops step marker containers until there is one for each of the given
+  /// number of markers. A dropped container takes the marker it held with it, which
+  /// `childViewsDidChange` then hands to another one.
   private func setStepMarkerContainerCount(_ count: Int) {
     while stepMarkerContainers.count > count {
       stepMarkerContainers.removeLast().removeFromSuperview()
@@ -1310,8 +1275,8 @@ public final class RNCSliderView: UIView {
     thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)
 
     // A marker JS renders for a step the slider does not have - the two being
-    // momentarily out of step while props and children arrive - is left hidden
-    // rather than piled up somewhere.
+    // momentarily out of step while props and children arrive - is left hidden rather
+    // than piled up somewhere.
     let stepValues = model.stepMarkerValues
     for (index, container) in stepMarkerContainers.enumerated() {
       container.isHidden = index >= stepValues.count
@@ -1320,8 +1285,8 @@ public final class RNCSliderView: UIView {
       }
     }
 
-    // The shadow node centres the track on the origin of its container, laid
-    // out along the slider's length - which is its height on a vertical one.
+    // The shadow node centres the track on the origin of its container, laid out along
+    // the slider's length - which is its height on a vertical one.
     trackContainer.center = CGPoint(x: bounds.midX, y: bounds.midY)
     trackContainer.transform = model.vertical ? CGAffineTransform(rotationAngle: -.pi / 2) : .identity
   }
@@ -1342,8 +1307,8 @@ public final class RNCSliderView: UIView {
       return
     }
 
-    // The hosted view is already a subview, so only the controller containment
-    // half of the usual dance is left to do.
+    // The hosted view is already a subview, so only the controller containment half of
+    // the usual dance is left to do.
     parent.addChild(hostingController)
     hostingController.didMove(toParent: parent)
   }
@@ -1374,26 +1339,24 @@ private extension Double {
     min(max(self, range.lowerBound), range.upperBound)
   }
 
-  /// Rounds to the nearest multiple of the given step, which is the granularity
-  /// JS is promised. A step of zero leaves the value alone.
+  /// Rounds to the nearest multiple of the given step, which is the granularity JS is
+  /// promised. A step of zero leaves the value alone.
   ///
-  /// Clamping is left to the caller: a snapped value can land outside the limits
-  /// or past the other thumb, and each thumb answers for that differently. The
-  /// ends stay reachable that way, whether or not the step divides the range
-  /// evenly.
+  /// Clamping is left to the caller: a snapped value can land outside the limits or past
+  /// the other thumb, and each thumb answers for that differently. The ends stay
+  /// reachable that way, whether or not the step divides the range evenly.
   func snapped(to step: Double) -> Double {
     guard step > 0 else { return self }
 
-    // Multiplying the step back out misses the mark by a fraction whenever the
-    // step is one that binary floating point cannot hold - three tenths
-    // arriving as 0.30000000000000004 - so the product is rounded to the
-    // decimals the step itself is written with, and reaches JS reading the way
-    // the step was written.
+    // Multiplying the step back out misses the mark by a fraction whenever the step is
+    // one that binary floating point cannot hold - three tenths arriving as
+    // 0.30000000000000004 - so the product is rounded to the decimals the step itself is
+    // written with, and reaches JS reading the way the step was written.
     return ((self / step).rounded() * step).rounded(toDecimals: step.decimals)
   }
 
-  /// How many decimals it takes to write this value out, capped at the digits a
-  /// `Double` can be trusted with.
+  /// How many decimals it takes to write this value out, capped at the digits a `Double`
+  /// can be trusted with.
   var decimals: Int {
     var decimals = 0
     var scaled = magnitude

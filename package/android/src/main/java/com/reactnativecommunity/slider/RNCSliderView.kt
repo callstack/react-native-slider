@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -76,30 +76,25 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var exactMinimumValue by mutableDoubleStateOf(DEFAULT_MINIMUM_VALUE.toDouble())
   private var exactMaximumValue by mutableDoubleStateOf(DEFAULT_MAXIMUM_VALUE.toDouble())
 
-  /**
-   * Whether the slider selects a span of its range with two thumbs, rather than a
-   * single value with one. [sliderValue] and [valueLeft]/[valueRight] belong to the
-   * two shapes respectively, and the unused ones are simply not read.
-   */
   private var selectsRange by mutableStateOf(DEFAULT_RANGED)
   private var valueLeft by mutableFloatStateOf(DEFAULT_VALUE_LEFT)
   private var valueRight by mutableFloatStateOf(DEFAULT_VALUE_RIGHT)
 
   /**
-   * Granularity of the values the slider reports: every one of them is a multiple
-   * of this. Zero means no granularity.
+   * Granularity of the values the slider reports: every one of them is a multiple of
+   * this. Zero means no granularity.
    *
-   * Kept as a [Double] where the rest of the state is a [Float], because it is
-   * the reported values that are snapped to it rather than the thumb position -
-   * see [snapped]. Named the way [sliderValue] is, because a property called
-   * `step` would come with a `setStep` of its own for [setStep] to clash with.
+   * Kept as a [Double] where the rest of the state is a [Float], because it is the
+   * reported values that are snapped to it rather than the thumb position - see
+   * [snapped]. Named the way [sliderValue] is, because a property called `step` would
+   * come with a `setStep` of its own for [setStep] to clash with.
    */
   private var stepValue by mutableDoubleStateOf(DEFAULT_STEP)
 
   /**
-   * Bounds the thumbs can be dragged between. The track is drawn across the whole
-   * range regardless: a limit takes away the values a thumb can reach, not the
-   * ones the slider shows.
+   * Bounds the thumbs can be dragged between. The track is drawn across the whole range
+   * regardless: a limit takes away the values a thumb can reach, not the ones the slider
+   * shows.
    *
    * Named the way [stepValue] is, and for the same reason.
    */
@@ -154,8 +149,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * Whether JS has replaced the track with a view of its own. The slider then draws
    * no track at all, whatever its tints - the view JS gave lies underneath it
    * instead, see [trackContainer].
-   *
-   * Named the way [stepValue] is, and for the same reason.
    */
   private var hasCustomTrack by mutableStateOf(DEFAULT_CUSTOM_TRACK)
 
@@ -165,7 +158,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    */
   private var hasCustomThumb = DEFAULT_CUSTOM_THUMB
 
-  /** Whether the steps are marked below the track - see [stepMarkerValues]. */
   private var showsStepMarkers by mutableStateOf(false)
 
   /**
@@ -177,9 +169,8 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   /**
    * How thick the thumb Material 3 draws is across the track, which the step
-   * markers keep clear of. Read off the thumb itself rather than written down
-   * here, as the thumb is a different shape from one version of Material 3 to the
-   * next.
+   * markers keep clear of. Read off the thumb itself rather than written down here,
+   * as the thumb is a different shape from one version of Material 3 to the next.
    */
   private var thumbThickness by mutableIntStateOf(0)
 
@@ -213,11 +204,11 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   /**
    * Holds the view that replaces the track, the way [thumbContainers] hold the
    * thumbs: its origin stays on the middle of the slider, and it is turned a quarter
-   * turn anticlockwise about it on a vertical slider, which carries the start of
-   * the track down to the bottom, where the minimum is - see [placeTrackContainer].
+   * turn anticlockwise about it on a vertical slider, which carries the start of the
+   * track down to the bottom, where the minimum is - see [placeTrackContainer].
    *
-   * It lies underneath the slider rather than over it, so that the thumbs the
-   * slider draws stay on top of the track.
+   * It lies underneath the slider rather than over it, so that the thumbs the slider
+   * draws stay on top of the track.
    */
   private val trackContainer =
     ChildContainer(context).apply {
@@ -227,11 +218,11 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   /**
    * One for each step JS renders a marker for, holding that marker the way
-   * [thumbContainers] hold the thumbs - except that the origin of each is kept at
-   * the point its marker hangs from, see [placeStepMarkerContainers].
+   * [thumbContainers] hold the thumbs - except that the origin of each is kept at the
+   * point its marker hangs from, see [placeStepMarkerContainers].
    *
-   * There are as many of them as there are markers, so they are made as the
-   * markers come, and lie between the slider and the thumbs.
+   * There are as many of them as there are markers, so they are made as the markers
+   * come, and lie between the slider and the thumbs.
    */
   private val stepMarkerContainers = mutableListOf<ChildContainer>()
 
@@ -242,13 +233,12 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   var onRightValueChange: ((Double) -> Unit)? = null
 
   /**
-   * Invoked once the user takes hold of a thumb, and again once they let go of
-   * it - whether or not the drag in between moved it anywhere.
+   * Invoked once the user takes hold of a thumb, and again once they let go of it -
+   * whether or not the drag in between moved it anywhere.
    *
-   * The two always come in pairs: [isSliding] is what a drag is recognised by,
-   * so a thumb grabbed while another is already being dragged does not begin a
-   * second drag, and neither does a value pushed from JS end the one in
-   * progress.
+   * The two always come in pairs: [isSliding] is what a drag is recognised by, so a
+   * thumb grabbed while another is already being dragged does not begin a second drag,
+   * and neither does a value pushed from JS end the one in progress.
    */
   var onSlidingStart: (() -> Unit)? = null
   var onSlidingComplete: (() -> Unit)? = null
@@ -260,17 +250,17 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
         ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
       )
       setContent { SliderContent() }
-      // The step markers hang below the thumbs, which takes them past the bottom
-      // of a slider laid out at its own height.
+      // The step markers hang below the thumbs, which takes them past the bottom of
+      // a slider laid out at its own height.
       clipChildren = false
     }
 
   init {
     addView(composeView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
-    // A custom thumb is centred on the origin of its container, and so hangs off
-    // it - and off the slider too, at either end of the track. So does the custom
-    // track, which is centred the same way.
+    // A custom thumb is centred on the origin of its container, and so hangs off it
+    // - and off the slider too, at either end of the track. So does the custom track,
+    // which is centred the same way.
     clipChildren = false
     addView(trackContainer, 0, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     thumbContainers.forEach {
@@ -386,7 +376,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     }
   }
 
-  /** Whether the views JS adds after the track include the thumbs. */
   fun setCustomThumb(value: Boolean) {
     if (value == hasCustomThumb) {
       return
@@ -406,7 +395,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     onChildViewsChanged()
   }
 
-  /** Whether the first of the views JS adds is a track rather than a thumb. */
   fun setCustomTrack(value: Boolean) {
     if (value == hasCustomTrack) {
       return
@@ -511,8 +499,8 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
   /**
    * Moves the origin of [trackContainer] onto the middle of the slider, where the
-   * shadow node centres the track on - laid out along the slider's length, which
-   * is its height on a vertical one.
+   * shadow node centres the track on - laid out along the slider's length, which is
+   * its height on a vertical one.
    */
   private fun placeTrackContainer() {
     trackContainer.translationX = width / 2f
@@ -554,30 +542,141 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * slider unlimited, and one reaching out of the range limits only as far as the
    * range itself goes.
    */
-  private fun limits(
-    range: ClosedFloatingPointRange<Float>
-  ): ClosedFloatingPointRange<Float> {
+  private fun limits(range: ClosedFloatingPointRange<Float>): ClosedFloatingPointRange<Float> =
     if (lowerLimitValue > upperLimitValue) {
-      return range
+      range
+    } else {
+      lowerLimitValue.coerceIn(range)..upperLimitValue.coerceIn(range)
     }
 
-    return lowerLimitValue.coerceIn(range)..upperLimitValue.coerceIn(range)
-  }
-
-  private fun selectedRange(
-    range: ClosedFloatingPointRange<Float>
-  ): ClosedFloatingPointRange<Float> {
-    val left = valueLeft.coerceIn(range.start, range.endInclusive)
-    val right = valueRight.coerceIn(range.start, range.endInclusive)
+  private fun selectedRange(range: ClosedFloatingPointRange<Float>): ClosedFloatingPointRange<Float> {
+    val left = valueLeft.coerceIn(range)
+    val right = valueRight.coerceIn(range)
 
     return minOf(left, right)..maxOf(left, right)
   }
 
+  /**
+   * The values the steps stand at: every step from the minimum, and the maximum
+   * itself when the step does not divide the range, which is how a thumb can still
+   * reach it. A slider with no step has no steps to mark.
+   *
+   * JS works out the very same values to render its own step markers by, and has to
+   * come to as many of them as this does - so the two are worked out the same way,
+   * down to the tolerance.
+   */
+  private fun stepMarkerValues(): List<Double> {
+    val span = exactMaximumValue - exactMinimumValue
+    if (stepValue <= 0 || span <= 0) {
+      return emptyList()
+    }
+
+    val wholeSteps = floor(span / stepValue + STEP_TOLERANCE).toInt()
+    val values = List(wholeSteps + 1) { exactMinimumValue + it * stepValue }
+
+    return if (span - wholeSteps * stepValue > stepValue * STEP_TOLERANCE) {
+      values + exactMaximumValue
+    } else {
+      values
+    }
+  }
+
+  /**
+   * Whether a thumb stands on the step at the given value - which is what `marked`
+   * tells a step marker JS renders, too. The thumbs are held as a [Float], so a
+   * thumb is let off by as much as that rounds it by.
+   */
+  private fun isMarked(value: Double): Boolean {
+    val thumbValues = if (selectsRange) listOf(valueLeft, valueRight) else listOf(sliderValue)
+
+    return thumbValues.any { thumbValue ->
+      val tolerance = max(stepValue * STEP_TOLERANCE, Math.ulp(thumbValue).toDouble())
+      abs(thumbValue - value) <= tolerance
+    }
+  }
+
+  /**
+   * Takes the value a drag has moved the thumb to and reports it snapped to the step
+   * and held to the limits. A stepped or limited slider hears from Compose far more
+   * often than it moves, so a value that came back as the one already showing is
+   * dropped rather than reported to JS again - which is also how a drag carrying on
+   * beyond a limit stays unheard of.
+   */
+  private fun onSliderValueChange(value: Float, limits: ClosedFloatingPointRange<Float>) {
+    val stepped = snapped(value, limits)
+
+    if (stepped.toFloat() == sliderValue) {
+      return
+    }
+
+    sliderValue = stepped.toFloat()
+    onValueChange?.invoke(stepped)
+  }
+
+  /**
+   * Takes the span a drag has moved the thumbs to and reports the ends that actually
+   * moved, snapped to the step, so that JS hears about the thumb under the finger and
+   * not about the one standing still.
+   */
+  private fun onSelectedRangeChange(
+    from: ClosedFloatingPointRange<Float>,
+    to: ClosedFloatingPointRange<Float>,
+    limits: ClosedFloatingPointRange<Float>,
+  ) {
+    val left = snapped(to.start, limits)
+    if (left.toFloat() != from.start) {
+      valueLeft = left.toFloat()
+      onLeftValueChange?.invoke(left)
+    }
+
+    val right = snapped(to.endInclusive, limits)
+    if (right.toFloat() != from.endInclusive) {
+      valueRight = right.toFloat()
+      onRightValueChange?.invoke(right)
+    }
+  }
+
+  /**
+   * Rounds a value to the nearest multiple of the step and back into the part of
+   * the range the thumbs are limited to, which is the granularity JS is promised.
+   * A step of zero leaves the value where it is.
+   *
+   * Compose has a step of its own, but it counts ticks spread evenly across the range
+   * and lands the value a whole number of steps away from `minimumValue` rather than
+   * on a multiple of the step, and it needs the step to divide the range evenly to do
+   * even that. Snapping here answers for both, and answers the same way iOS does.
+   */
+  private fun snapped(value: Float, limits: ClosedFloatingPointRange<Float>): Double {
+    val stepped =
+      if (stepValue > 0) value.toDouble().roundedToMultipleOf(stepValue) else value.toDouble()
+
+    return stepped.coerceIn(limits.start.toDouble(), limits.endInclusive.toDouble())
+  }
+
+  /**
+   * How far along a track of the given width the step at the given value is,
+   * counted from its left edge - which the minimum value is at the other end of in a
+   * right-to-left layout.
+   */
+  private fun alongTrack(value: Double, width: Float, layoutDirection: LayoutDirection): Float {
+    val span = exactMaximumValue - exactMinimumValue
+    val fraction = if (span > 0) ((value - exactMinimumValue) / span).coerceIn(0.0, 1.0).toFloat() else 0f
+
+    return width * if (layoutDirection == LayoutDirection.Rtl) 1f - fraction else fraction
+  }
+
+  /**
+   * How far below the top of a track of the given height a step marker begins: past
+   * the thumb, which is centred on the track, and a gap after it.
+   */
+  private fun stepMarkerOffset(trackHeight: Float, density: Float): Float =
+    trackHeight / 2f + thumbThickness / 2f + STEP_MARKER_GAP_DP * density
+
   @Composable
   private fun SliderContent() {
-    // The slider is only ever as thick as the control itself, and a vertical one
-    // is far narrower than the view is wide, so it sits in the middle of whatever
-    // room JS has given it rather than against one edge.
+    // The slider is only ever as thick as the control itself, and a vertical one is
+    // far narrower than the view is wide, so it sits in the middle of whatever room
+    // JS has given it rather than against one edge.
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       if (selectsRange) {
         RangedSliderContent()
@@ -588,15 +687,15 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   /**
-   * Lays the slider out along the axis the orientation asks for, stretched across
-   * the view.
+   * Lays the slider out along the axis the orientation asks for, stretched across the
+   * view.
    *
    * Material 3 has no vertical slider, so a vertical one here is its horizontal
-   * slider turned a quarter turn anticlockwise, which puts the larger values at
-   * the top. Everything the rotation encloses is the same control as ever - the
-   * range and the step, both thumbs of a ranged slider, the gestures [slidingGestures]
-   * listens to and the accessibility the platform's own slider comes with - it is
-   * only measured and drawn the other way round.
+   * slider turned a quarter turn anticlockwise, which puts the larger values at the
+   * top. Everything the rotation encloses is the same control as ever - the range and
+   * the step, both thumbs of a ranged slider, the gestures [slidingGestures] listens
+   * to and the accessibility the platform's own slider comes with - it is only
+   * measured and drawn the other way round.
    */
   private fun Modifier.sliderAxis(): Modifier =
     if (!isVertical) {
@@ -620,11 +719,11 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
           // come back into place - filling a box with its two sides swapped.
           //
           // The rotation is applied here, on the slider inside the box, rather than
-          // on the box itself: touches are hit-tested against the bounds of every
-          // node on their way in, with each one's rotation undone. Rotating the box
-          // would leave the slider laid out off to the side of it, outside the
-          // bounds the touch is checked against, and all but a sliver at the very
-          // edge of the box would miss the slider altogether.
+          // on the box itself: touches are hit-tested against the bounds of every node
+          // on their way in, with each one's rotation undone. Rotating the box would
+          // leave the slider laid out off to the side of it, outside the bounds the
+          // touch is checked against, and all but a sliver at the very edge of the box
+          // would miss the slider altogether.
           layout(placeable.height, placeable.width) {
             placeable.placeWithLayer(0, placeable.width) {
               rotationZ = -90f
@@ -668,141 +767,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   /**
-   * The slider's own colours, with the parts of the track JS has tinted swapped for
-   * the tints it gave. Material 3 fills in whatever is left [Color.Unspecified].
-   */
-  @Composable
-  private fun trackColors(active: Color, inactive: Color): SliderColors =
-    SliderDefaults.colors(activeTrackColor = active, inactiveTrackColor = inactive)
-
-  /**
-   * The built-in thumb, or - once JS has replaced it - the same thumb left undrawn,
-   * so that it keeps its place in the slider's geometry and the view that replaces
-   * it has a centre to follow.
-   *
-   * The centre is read off the thumb itself rather than worked out from the value,
-   * which leaves the geometry to Material 3 and takes the rotation of a vertical
-   * slider along with it.
-   */
-  @Composable
-  private fun Thumb(interactionSource: MutableInteractionSource, index: Int) {
-    val measured = Modifier.onSizeChanged { size ->
-      thumbThickness = size.height
-      placeStepMarkerContainers()
-    }
-
-    if (index >= customThumbCount) {
-      SliderDefaults.Thumb(interactionSource = interactionSource, modifier = measured)
-      return
-    }
-
-    SliderDefaults.Thumb(
-      interactionSource = interactionSource,
-      modifier =
-        measured.alpha(0f).onGloballyPositioned { coordinates ->
-          // The slider is hosted across the whole of this view, so the root of
-          // its composition is this view's own coordinate space.
-          val center =
-            coordinates.localToRoot(
-              Offset(coordinates.size.width / 2f, coordinates.size.height / 2f)
-            )
-          thumbContainers[index].translationX = center.x
-          thumbContainers[index].translationY = center.y
-        },
-    )
-  }
-
-  /**
-   * Reports the beginning and the end of a drag, which JS is promised to hear
-   * about whether or not the drag moved a thumb anywhere.
-   *
-   * Neither Compose slider offers that: `onValueChangeFinished` does fire for a
-   * press that moved nothing, but there is no callback for the press itself, and
-   * the drag interactions the slider publishes only begin once the finger has
-   * travelled past the touch slop - by which point the thumb has already moved.
-   * So the touches are watched here instead, on the initial pass, where they can
-   * be heard before the slider claims them rather than taken away from it.
-   */
-  private fun Modifier.slidingGestures(): Modifier =
-    pointerInput(Unit) {
-      awaitEachGesture {
-        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-        if (isVertical) {
-          claimGesture()
-        }
-        beginSliding()
-
-        try {
-          // The gesture is over once the last finger comes off: a second finger
-          // landing on the other thumb of a ranged slider joins the drag already
-          // in progress rather than starting one of its own.
-          do {
-            val event = awaitPointerEvent(PointerEventPass.Initial)
-          } while (event.changes.any { it.pressed })
-        } finally {
-          // Also reached when the gesture is cancelled out from under us, which
-          // would otherwise leave the slider deaf to values pushed from JS.
-          finishSliding()
-        }
-      }
-    }
-
-  /**
-   * Keeps the views this slider sits in from taking the gesture away from it.
-   *
-   * A vertical slider is dragged along the same axis a vertical scroll view scrolls
-   * along, and the scroll view gets to intercept every move before the slider sees
-   * it. Both wait for the finger to travel past the touch slop, so the scroll view
-   * would win that race and cancel the drag - and a ranged slider, which only picks
-   * the thumb to drag once the slop is crossed, would hardly ever get hold of one.
-   * So the gesture is claimed as soon as it lands on the slider instead.
-   *
-   * A horizontal slider is left to share its touches: it moves across the way a
-   * page scrolls, so the two tell each other apart on their own, and claiming the
-   * press would stop the page scrolling from any touch that happens to start on it.
-   *
-   * The claim lasts until the finger comes off, when Android lets it go by itself.
-   */
-  private fun claimGesture() {
-    parent?.requestDisallowInterceptTouchEvent(true)
-  }
-
-  private fun beginSliding() {
-    if (isSliding) {
-      return
-    }
-
-    isSliding = true
-    onSlidingStart?.invoke()
-  }
-
-  private fun finishSliding() {
-    if (!isSliding) {
-      return
-    }
-
-    isSliding = false
-    onSlidingComplete?.invoke()
-  }
-
-  /**
-   * Takes the value a drag has moved the thumb to and reports it snapped to the
-   * step and held to the limits. A stepped or limited slider hears from Compose far
-   * more often than it moves, so a value that came back as the one already showing
-   * is dropped rather than reported to JS again - which is also how a drag carrying
-   * on beyond a limit stays unheard of.
-   */
-  private fun onSliderValueChange(value: Float, limits: ClosedFloatingPointRange<Float>) {
-    val stepped = snapped(value.toDouble(), limits)
-    if (stepped.toFloat() == sliderValue) {
-      return
-    }
-
-    sliderValue = stepped.toFloat()
-    onValueChange?.invoke(stepped)
-  }
-
-  /**
    * Material 3 has a two-thumb slider of its own, so a ranged slider is that rather
    * than a pair of thumbs assembled here - it comes with the thumbs that cannot swap
    * places, the tinted span between them and the per-thumb accessibility that the
@@ -835,6 +799,52 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   /**
+   * The slider's own colours, with the parts of the track JS has tinted swapped for
+   * the tints it gave. Material 3 fills in whatever is left [Color.Unspecified].
+   */
+  @Composable
+  private fun trackColors(active: Color, inactive: Color): SliderColors =
+    SliderDefaults.colors(activeTrackColor = active, inactiveTrackColor = inactive)
+
+  /**
+   * The built-in thumb, or - once JS has replaced it - the same thumb left undrawn, so
+   * that it keeps its place in the slider's geometry and the view that replaces it has
+   * a centre to follow.
+   *
+   * The centre is read off the thumb itself rather than worked out from the value,
+   * which leaves the geometry to Material 3 and takes the rotation of a vertical
+   * slider along with it.
+   */
+  @Composable
+  private fun Thumb(interactionSource: MutableInteractionSource, index: Int) {
+    val measured =
+      Modifier.onSizeChanged { size ->
+        thumbThickness = size.height
+        placeStepMarkerContainers()
+      }
+
+    if (index >= customThumbCount) {
+      SliderDefaults.Thumb(interactionSource = interactionSource, modifier = measured)
+      return
+    }
+
+    SliderDefaults.Thumb(
+      interactionSource = interactionSource,
+      modifier =
+        measured.alpha(0f).onGloballyPositioned { coordinates ->
+          // The slider is hosted across the whole of this view, so the root of its
+          // composition is this view's own coordinate space.
+          val center =
+            coordinates.localToRoot(
+              Offset(coordinates.size.width / 2f, coordinates.size.height / 2f)
+            )
+          thumbContainers[index].translationX = center.x
+          thumbContainers[index].translationY = center.y
+        },
+    )
+  }
+
+  /**
    * Leaves the built-in track undrawn once JS has replaced it, the way a replaced
    * thumb is - so that it keeps its place in the slider's geometry, and the thumbs
    * travel along the custom track exactly as far as they would along this one.
@@ -842,13 +852,86 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private fun Modifier.trackVisibility(): Modifier = if (hasCustomTrack) alpha(0f) else this
 
   /**
+   * Reports the beginning and the end of a drag, which JS is promised to hear about
+   * whether or not the drag moved a thumb anywhere.
+   *
+   * Neither Compose slider offers that: `onValueChangeFinished` does fire for a press
+   * that moved nothing, but there is no callback for the press itself, and the drag
+   * interactions the slider publishes only begin once the finger has travelled past
+   * the touch slop - by which point the thumb has already moved. So the touches are
+   * watched here instead, on the initial pass, where they can be heard before the
+   * slider claims them rather than taken away from it.
+   */
+  private fun Modifier.slidingGestures(): Modifier =
+    pointerInput(Unit) {
+      awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        if (isVertical) {
+          claimGesture()
+        }
+        beginSliding()
+
+        try {
+          // The gesture is over once the last finger comes off: a second finger
+          // landing on the other thumb of a ranged slider joins the drag already in
+          // progress rather than starting one of its own.
+          do {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+          } while (event.changes.any { it.pressed })
+        } finally {
+          // Also reached when the gesture is cancelled out from under us, which would
+          // otherwise leave the slider deaf to values pushed from JS.
+          finishSliding()
+        }
+      }
+    }
+
+  /**
+   * Keeps the views this slider sits in from taking the gesture away from it.
+   *
+   * A vertical slider is dragged along the same axis a vertical scroll view scrolls
+   * along, and the scroll view gets to intercept every move before the slider sees it.
+   * Both wait for the finger to travel past the touch slop, so the scroll view would
+   * win that race and cancel the drag - and a ranged slider, which only picks the
+   * thumb to drag once the slop is crossed, would hardly ever get hold of one. So the
+   * gesture is claimed as soon as it lands on the slider instead.
+   *
+   * A horizontal slider is left to share its touches: it moves across the way a page
+   * scrolls, so the two tell each other apart on their own, and claiming the press
+   * would stop the page scrolling from any touch that happens to start on it.
+   *
+   * The claim lasts until the finger comes off, when Android lets it go by itself.
+   */
+  private fun claimGesture() {
+    parent?.requestDisallowInterceptTouchEvent(true)
+  }
+
+  private fun beginSliding() {
+    if (isSliding) {
+      return
+    }
+
+    isSliding = true
+    onSlidingStart?.invoke()
+  }
+
+  private fun finishSliding() {
+    if (!isSliding) {
+      return
+    }
+
+    isSliding = false
+    onSlidingComplete?.invoke()
+  }
+
+  /**
    * The track of a ranged slider, tinted in three parts - see [minimumTrackColor].
    *
    * Material 3 draws both parts outside the span in the one inactive colour, so the
    * track is drawn twice over, once in the colours of each end, and each copy is cut
    * down to its own side of the left thumb. The cut runs through the centre of that
-   * thumb, where the track is hidden under it or under the gap it leaves around it,
-   * so the two copies meet unseen.
+   * thumb, where the track is hidden under it or under the gap it leaves around it, so
+   * the two copies meet unseen.
    */
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
@@ -870,16 +953,31 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     }
   }
 
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  private fun RangedTrackPart(state: RangeSliderState, colors: SliderColors, modifier: Modifier) {
+    if (customThumbCount > 0) {
+      SliderDefaults.Track(
+        rangeSliderState = state,
+        modifier = modifier,
+        colors = colors,
+        thumbTrackGapSize = 0.dp,
+      )
+    } else {
+      SliderDefaults.Track(rangeSliderState = state, modifier = modifier, colors = colors)
+    }
+  }
+
   /**
    * The track, with the markers of the steps drawn below it as dots hanging clear of
-   * the thumbs - in the colour of the selected part of the track for a step a thumb
-   * is on, and in that of the rest of it otherwise.
+   * the thumbs - in the colour of the selected part of the track for a step a thumb is
+   * on, and in that of the rest of it otherwise.
    *
    * The markers are drawn around the track rather than over the slider, as the track
-   * spans exactly the distance between the centres of the thumbs at either end of
-   * the range - so a fraction of its width is exactly where a thumb at that fraction
-   * of the range is centred, see [alongTrack]. They are drawn here even when the
-   * track is replaced, which is only ever left undrawn.
+   * spans exactly the distance between the centres of the thumbs at either end of the
+   * range - so a fraction of its width is exactly where a thumb at that fraction of
+   * the range is centred, see [alongTrack]. They are drawn here even when the track is
+   * replaced, which is only ever left undrawn.
    *
    * The track is where custom step markers are hung from too, once it is laid out.
    */
@@ -915,79 +1013,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   /**
-   * The values the steps stand at: every step from the minimum, and the maximum
-   * itself when the step does not divide the range, which is how a thumb can still
-   * reach it. A slider with no step has no steps to mark.
-   *
-   * JS works out the very same values to render its own step markers by, and has to
-   * come to as many of them as this does - so the two are worked out the same way,
-   * down to the tolerance.
-   */
-  private fun stepMarkerValues(): List<Double> {
-    val span = exactMaximumValue - exactMinimumValue
-    if (stepValue <= 0 || span <= 0) {
-      return emptyList()
-    }
-
-    val wholeSteps = floor(span / stepValue + STEP_TOLERANCE).toInt()
-    val values = List(wholeSteps + 1) { exactMinimumValue + it * stepValue }
-
-    return if (span - wholeSteps * stepValue > stepValue * STEP_TOLERANCE) {
-      values + exactMaximumValue
-    } else {
-      values
-    }
-  }
-
-  /**
-   * Whether a thumb stands on the step at the given value - which is what `marked`
-   * tells a step marker JS renders, too. The thumbs are held as a [Float], so a
-   * thumb is let off by as much as that rounds it by.
-   */
-  private fun isMarked(value: Double): Boolean {
-    val thumbValues = if (selectsRange) listOf(valueLeft, valueRight) else listOf(sliderValue)
-
-    return thumbValues.any { thumbValue ->
-      val tolerance = max(stepValue * STEP_TOLERANCE, Math.ulp(thumbValue).toDouble())
-      abs(thumbValue - value) <= tolerance
-    }
-  }
-
-  /**
-   * How far along a track of the given width the step at the given value is,
-   * counted from its left edge - which the minimum value is at the other end of in a
-   * right-to-left layout.
-   */
-  private fun alongTrack(value: Double, width: Float, layoutDirection: LayoutDirection): Float {
-    val span = exactMaximumValue - exactMinimumValue
-    val fraction = if (span > 0) ((value - exactMinimumValue) / span).coerceIn(0.0, 1.0).toFloat() else 0f
-
-    return width * if (layoutDirection == LayoutDirection.Rtl) 1f - fraction else fraction
-  }
-
-  /**
-   * How far below the top of a track of the given height a step marker begins: past
-   * the thumb, which is centred on the track, and a gap after it.
-   */
-  private fun stepMarkerOffset(trackHeight: Float, density: Float): Float =
-    trackHeight / 2f + thumbThickness / 2f + STEP_MARKER_GAP_DP * density
-
-  @OptIn(ExperimentalMaterial3Api::class)
-  @Composable
-  private fun RangedTrackPart(state: RangeSliderState, colors: SliderColors, modifier: Modifier) {
-    if (customThumbCount > 0) {
-      SliderDefaults.Track(
-        rangeSliderState = state,
-        modifier = modifier,
-        colors = colors,
-        thumbTrackGapSize = 0.dp,
-      )
-    } else {
-      SliderDefaults.Track(rangeSliderState = state, modifier = modifier, colors = colors)
-    }
-  }
-
-  /**
    * Draws only the stretch of the track between the two given fractions of it,
    * counted from the end its minimum value is at - which is the right-hand one in a
    * right-to-left layout, the way Material 3 lays the track out too.
@@ -1002,46 +1027,6 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     clipRect(left = left * size.width, right = right * size.width) {
       this@drawWithContent.drawContent()
     }
-  }
-
-  /**
-   * Takes the span a drag has moved the thumbs to and reports the ends that actually
-   * moved, snapped to the step, so that JS hears about the thumb under the finger
-   * and not about the one standing still.
-   */
-  private fun onSelectedRangeChange(
-    from: ClosedFloatingPointRange<Float>,
-    to: ClosedFloatingPointRange<Float>,
-    limits: ClosedFloatingPointRange<Float>,
-  ) {
-    val left = snapped(to.start.toDouble(), limits)
-    if (left.toFloat() != from.start) {
-      valueLeft = left.toFloat()
-      onLeftValueChange?.invoke(left)
-    }
-
-    val right = snapped(to.endInclusive.toDouble(), limits)
-    if (right.toFloat() != from.endInclusive) {
-      valueRight = right.toFloat()
-      onRightValueChange?.invoke(right)
-    }
-  }
-
-  /**
-   * Rounds a value to the nearest multiple of the step and back into the part of
-   * the range the thumbs are limited to, which is the granularity JS is promised.
-   * A step of zero leaves the value where it is.
-   *
-   * Compose has a step of its own, but it counts ticks spread evenly across the
-   * range and lands the value a whole number of steps away from `minimumValue`
-   * rather than on a multiple of the step, and it needs the step to divide the
-   * range evenly to do even that. Snapping here answers for both, and answers
-   * the same way iOS does.
-   */
-  private fun snapped(value: Double, limits: ClosedFloatingPointRange<Float>): Double {
-    val stepped = if (stepValue > 0) value.roundedToMultipleOf(stepValue) else value
-
-    return stepped.coerceIn(limits.start.toDouble(), limits.endInclusive.toDouble())
   }
 
   companion object {
@@ -1100,17 +1085,17 @@ private fun Int?.toTrackColor(): Color = this?.let { Color(it) } ?: Color.Unspec
 /**
  * Rounds this value to the nearest multiple of [step].
  *
- * Multiplying the step back out misses the mark by a fraction whenever the step is
- * one that binary floating point cannot hold - three tenths arriving as
- * 0.30000000000000004 - so the product is rounded to the decimals the step itself
- * is written with, and reaches JS reading the way the step was written.
+ * Multiplying the step back out misses the mark by a fraction whenever the step is one
+ * that binary floating point cannot hold - three tenths arriving as
+ * 0.30000000000000004 - so the product is rounded to the decimals the step itself is
+ * written with, and reaches JS reading the way the step was written.
  */
 private fun Double.roundedToMultipleOf(step: Double): Double =
   (round(this / step) * step).roundedTo(step.decimals())
 
 /**
- * How many decimals it takes to write this value out, capped at the digits a
- * [Double] can be trusted with.
+ * How many decimals it takes to write this value out, capped at the digits a [Double]
+ * can be trusted with.
  */
 private fun Double.decimals(): Int {
   var decimals = 0
