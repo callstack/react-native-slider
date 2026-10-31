@@ -83,13 +83,19 @@ To use this library you need to ensure you are using the correct version of Reac
 | `minimumValue` | Initial minimum value of the slider.<br/>Default value is 0. | number | |
 | `lowerLimit` | Slide lower limit. The user won't be able to slide below this limit. | number | Android, iOS, Web |
 | `upperLimit` | Slide upper limit. The user won't be able to slide above this limit. | number | Android, iOS, Web |
+| `minimumRange` | Minimum distance between lower and upper thumbs when `range` is true.<br/>Default value is 0. | number | |
 | `onSlidingStart` | Callback that is called when the user picks up the slider.<br/>The initial value is passed as an argument to the callback handler. | function | |
 | `onSlidingComplete` | Callback that is called when the user releases the slider, regardless if the value has changed.<br/>The current value is passed as an argument to the callback handler. | function | |
 | `onValueChange` | Callback continuously called while the user is dragging the slider. | function | |
+| `onRangeSlidingStart` | Callback that is called when the user touches either range thumb.<br/>The current values and active thumb index are passed as arguments. Used when `range` is true. | function | |
+| `onRangeSlidingComplete` | Callback that is called when the user releases either range thumb.<br/>The current values and active thumb index are passed as arguments. Used when `range` is true. | function | |
+| `onValuesChange` | Callback continuously called while the user is dragging either range thumb.<br/>The current values and active thumb index are passed as arguments. Used when `range` is true. | function | |
 | `step` | Step value of the slider. The value should be between 0 and (maximumValue - minimumValue). Default value is 0.<br/>On Windows OS the default value is 1% of slider's range (from `minimumValue` to `maximumValue`). | number | |
 | `maximumTrackTintColor` | The color used for the track to the right of the button.<br/>Overrides the default gray gradient image on iOS. | [color](https://reactnative.dev/docs/colors) | |
 | `testID` | Used to locate this view in UI automation tests. | string | |
 | `value` | Write-only property representing the value of the slider. Can be used to programmatically control the position of the thumb. Entered once at the beginning still acts as an initial value. Changing the value programmatically does not trigger any event.<br/>The value should be between minimumValue and maximumValue, which default to 0 and 1 respectively. Default value is 0.<br/>_This is not a controlled component_, you don't need to update the value during dragging. | number | |
+| `range` | Enables two-thumb range selection.<br/>Default value is false. | bool | |
+| `values` | Write-only property representing the lower and upper values of the range slider. Used when `range` is true. | [number, number] | |
 | `tapToSeek` | Permits tapping on the slider track to set the thumb position.<br/>Defaults to false on iOS. No effect on Android or Windows. | bool | iOS |
 | `inverted` | Reverses the direction of the slider.<br/>Default value is false. | bool | |
 | `vertical` | Changes the orientation of the slider to vertical, if set to `true`.<br/>Default value is false. | bool | Windows |

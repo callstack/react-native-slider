@@ -68,6 +68,7 @@
     },
     "verbose": true,
     "modulePathIgnorePatterns": [
+      "/dist/",
       "/e2e/"
     ]
   },
