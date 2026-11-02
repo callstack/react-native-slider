@@ -68,6 +68,7 @@
   "jest": {
     "preset": "@react-native/jest-preset",
     "verbose": true,
+    "watchman": false,
     "modulePathIgnorePatterns": [
       "/e2e/"
     ]
