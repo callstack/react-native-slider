@@ -84,6 +84,11 @@ class RNCSliderViewManager :
     view.setOrientation(value)
   }
 
+  @ReactProp(name = "disabled", defaultBoolean = false)
+  override fun setDisabled(view: RNCSliderView, value: Boolean) {
+    view.setDisabled(value)
+  }
+
   @ReactProp(name = "minimumTrackColor", customType = "Color")
   override fun setMinimumTrackColor(view: RNCSliderView, value: Int?) {
     view.setMinimumTrackColor(value)

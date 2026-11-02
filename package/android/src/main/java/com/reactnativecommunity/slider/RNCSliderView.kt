@@ -112,6 +112,20 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   private var isVertical by mutableStateOf(DEFAULT_VERTICAL)
 
   /**
+   * Whether the slider is switched off: drawn in the disabled look Material 3 gives a
+   * slider nobody can reach, deaf to touches, taps and keyboard, and reporting no
+   * events of its own.
+   *
+   * The values the slider holds are no part of this - a slider switched off still shows
+   * wherever the props put its thumbs, which is why their setters keep taking values
+   * while this is on.
+   *
+   * Named the way [stepValue] is, and for the same reason: a property called `isDisabled`
+   * would come with a `setDisabled` of its own for [setDisabled] to clash with.
+   */
+  private var disabledValue by mutableStateOf(DEFAULT_DISABLED)
+
+  /**
    * Tints of the three parts the thumbs cut the track into: below the thumb (or the
    * left thumb), between the two thumbs of a ranged slider, and above the thumb (or
    * the right thumb). [Color.Unspecified] leaves a part the colour Material 3 gives
@@ -466,6 +480,26 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     placeTrackContainer()
   }
 
+  /**
+   * Switches the slider off, or back on.
+   *
+   * A drag in progress is answered the way a drag coming to an end is, rather than
+   * abandoned along with the touches that were driving it: JS is promised one complete
+   * for every start, and a drag left hanging would keep the values JS pushes from
+   * reaching the thumbs - see [isSliding]. The listener of [slidingGestures] is
+   * restarted by this same change, and finds nothing left for it to answer.
+   *
+   * The values themselves are no part of this, so their setters keep taking them while
+   * the slider is switched off - it only stops showing where they put its thumbs.
+   */
+  fun setDisabled(value: Boolean) {
+    disabledValue = value
+
+    if (value) {
+      finishSliding()
+    }
+  }
+
   fun setMinimumTrackColor(value: Int?) {
     minimumTrackColor = value.toTrackColor()
   }
@@ -603,6 +637,12 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * beyond a limit stays unheard of.
    */
   private fun onSliderValueChange(value: Float, limits: ClosedFloatingPointRange<Float>) {
+    // Asked for of the values as much as of the events: Material stops reporting them
+    // once `enabled` goes, but only from the recomposition that carries it on.
+    if (disabledValue) {
+      return
+    }
+
     val stepped = snapped(value, limits)
 
     if (stepped.toFloat() == sliderValue) {
@@ -623,6 +663,10 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     to: ClosedFloatingPointRange<Float>,
     limits: ClosedFloatingPointRange<Float>,
   ) {
+    if (disabledValue) {
+      return
+    }
+
     val left = snapped(to.start, limits)
     if (left.toFloat() != from.start) {
       valueLeft = left.toFloat()
@@ -743,6 +787,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
     Slider(
       value = sliderValue.coerceIn(range.start, range.endInclusive),
+      enabled = !disabledValue,
       valueRange = range,
       onValueChange = { moved -> onSliderValueChange(moved, limits) },
       modifier = Modifier.sliderAxis().slidingGestures(),
@@ -756,10 +801,16 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
               sliderState = state,
               modifier = Modifier.trackVisibility(),
               colors = colors,
+              enabled = !disabledValue,
               thumbTrackGapSize = 0.dp,
             )
           } else {
-            SliderDefaults.Track(sliderState = state, modifier = Modifier.trackVisibility(), colors = colors)
+            SliderDefaults.Track(
+              sliderState = state,
+              modifier = Modifier.trackVisibility(),
+              colors = colors,
+              enabled = !disabledValue,
+            )
           }
         }
       },
@@ -787,6 +838,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
     RangeSlider(
       value = selected,
+      enabled = !disabledValue,
       valueRange = range,
       onValueChange = { moved -> onSelectedRangeChange(from = selected, to = moved, limits = limits) },
       modifier = Modifier.sliderAxis().slidingGestures(),
@@ -824,12 +876,17 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
       }
 
     if (index >= customThumbCount) {
-      SliderDefaults.Thumb(interactionSource = interactionSource, modifier = measured)
+      SliderDefaults.Thumb(
+        interactionSource = interactionSource,
+        modifier = measured,
+        enabled = !disabledValue,
+      )
       return
     }
 
     SliderDefaults.Thumb(
       interactionSource = interactionSource,
+      enabled = !disabledValue,
       modifier =
         measured.alpha(0f).onGloballyPositioned { coordinates ->
           // The slider is hosted across the whole of this view, so the root of its
@@ -861,9 +918,19 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    * the touch slop - by which point the thumb has already moved. So the touches are
    * watched here instead, on the initial pass, where they can be heard before the
    * slider claims them rather than taken away from it.
+   *
+   * A slider that is switched off watches nothing. Material 3 keeps the touches away
+   * from the control itself, but these are watched one modifier further out, where
+   * they would still be heard - and a start reported there would have to be answered
+   * with a complete, on a slider that had moved nowhere and was asked not to report
+   * anything at all.
    */
   private fun Modifier.slidingGestures(): Modifier =
-    pointerInput(Unit) {
+    pointerInput(disabledValue) {
+      if (disabledValue) {
+        return@pointerInput
+      }
+
       awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
         if (isVertical) {
@@ -907,7 +974,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
   }
 
   private fun beginSliding() {
-    if (isSliding) {
+    if (isSliding || disabledValue) {
       return
     }
 
@@ -961,12 +1028,34 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
         rangeSliderState = state,
         modifier = modifier,
         colors = colors,
+        enabled = !disabledValue,
         thumbTrackGapSize = 0.dp,
       )
     } else {
-      SliderDefaults.Track(rangeSliderState = state, modifier = modifier, colors = colors)
+      SliderDefaults.Track(
+        rangeSliderState = state,
+        modifier = modifier,
+        colors = colors,
+        enabled = !disabledValue,
+      )
     }
   }
+
+  /**
+   * What the markers of the steps look like, marked and unmarked.
+   *
+   * Material 3 tints the track itself once `enabled` is given to [SliderDefaults.Track],
+   * but the markers are dots drawn here, so their colours are looked up by hand - from
+   * the same colours, and asked for the same state. A switched-off slider is drawn in
+   * Material 3's own greys either way, whatever tints JS gave the track, so the markers
+   * and the track they hang under go faint together.
+   */
+  private fun stepMarkerColors(colors: SliderColors): Pair<Color, Color> =
+    if (disabledValue) {
+      colors.disabledActiveTickColor to colors.disabledInactiveTickColor
+    } else {
+      colors.activeTrackColor to colors.inactiveTrackColor
+    }
 
   /**
    * The track, with the markers of the steps drawn below it as dots hanging clear of
@@ -997,11 +1086,12 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
               return@drawBehind
             }
 
+            val (markedColor, unmarkedColor) = stepMarkerColors(colors)
             val radius = STEP_MARKER_SIZE_DP * density / 2f
             val below = stepMarkerOffset(size.height, density) + radius
             stepMarkerValues().forEach { value ->
               drawCircle(
-                color = if (isMarked(value)) colors.activeTrackColor else colors.inactiveTrackColor,
+                color = if (isMarked(value)) markedColor else unmarkedColor,
                 radius = radius,
                 center = Offset(alongTrack(value, size.width, layoutDirection), below),
               )
@@ -1040,6 +1130,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     const val DEFAULT_LOWER_LIMIT = 0f
     const val DEFAULT_UPPER_LIMIT = 1f
     const val DEFAULT_VERTICAL = false
+    const val DEFAULT_DISABLED = false
     const val DEFAULT_CUSTOM_TRACK = false
     const val DEFAULT_CUSTOM_THUMB = false
 

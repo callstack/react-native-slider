@@ -104,6 +104,16 @@ export interface SliderProps extends ViewProps {
   orientation?: "horizontal" | "vertical";
 
   /**
+   * Disables the Slider. When disabled, Slider is still rendered in a way the native Slider
+   * renders the default "disabled" state of it.
+   * Slider is not reachable by clicking, tapping, or keyboard when disabled and does not receive
+   * any events nor controlls.
+   * When disabled, Slider can still be modified by props.
+   * Default value is `false`.
+   */
+  disabled?: boolean;
+
+  /**
    * Callback continuously called while the user is dragging the slider.
    */
   onValueChange?: (value: number) => void;

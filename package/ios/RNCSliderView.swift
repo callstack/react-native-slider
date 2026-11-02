@@ -30,6 +30,14 @@ final class RNCSliderModel: ObservableObject {
   /// the bottom and the maximum at the top. Only the geometry changes with it.
   @Published var vertical: Bool = false
 
+  /// Whether the slider is switched off: washed out to the faintness of a control
+  /// nobody can reach, taking no touches, taps, drags or VoiceOver adjustments, and so
+  /// reporting no events of its own.
+  ///
+  /// The values are no part of this - a slider switched off still shows wherever the
+  /// props put its thumbs, which is why the props keep reaching them while it is off.
+  @Published var disabled: Bool = false
+
   /// Tints of the three parts the thumbs cut the track into: below the thumb (or the
   /// left thumb), between the two thumbs of a ranged slider, and above the thumb (or
   /// the right thumb). `nil` leaves a part looking the way `Slider` draws it.
@@ -119,6 +127,10 @@ final class RNCSliderModel: ObservableObject {
   /// through here, so the two cannot disagree on where a value lands.
   @discardableResult
   func set(_ newValue: Double, of thumb: Thumb) -> Bool {
+    // Asked for of the drags already in flight when the slider is switched off, whose
+    // gestures only stop carrying them once SwiftUI has been told.
+    guard !disabled else { return false }
+
     let stepped = newValue.snapped(to: step)
     let limits = self.limits
 
@@ -190,6 +202,25 @@ final class RNCSliderModel: ObservableObject {
 
   /// Whether a hold on the track has a thumb in hand.
   var isHeld: Bool { heldThumb != nil }
+
+  /// Lets go of every thumb this holds, and answers a drag it was in the middle of with
+  /// the completion JS was promised for it.
+  ///
+  /// Switching a slider off takes the gestures driving its drag away mid-flight, which
+  /// leaves the drag with no end to be read out of it - and leaves the thumb marked as
+  /// held, which would keep every value pushed from JS off that thumb for good.
+  /// `RNCSliderView.cancelSliding` abandons a drag instead, for the one case where the
+  /// JS that would hear about it is gone.
+  func releaseThumbs() {
+    let wasSliding = isSliding || isHeld
+    heldThumb = nil
+    leftDragOrigin = nil
+    rightDragOrigin = nil
+
+    if wasSliding {
+      onSlidingComplete?()
+    }
+  }
 
   /// Invoked continuously while the user drags the thumb.
   var onValueChange: ((Double) -> Void)?
@@ -425,7 +456,19 @@ struct RNCSliderContent: View {
 
   var body: some View {
     RNCRangedSliderContent(model: model)
+      // A slider switched off is the same slider drawn faint, the way `UISlider` draws
+      // itself once it is switched off - the track and the thumbs keeping their shapes
+      // and their places. The values stand wherever the props put them, so nothing here
+      // moves.
+      //
+      // Only the slider this view draws is washed out. A track, a thumb or a step marker
+      // JS rendered is its own view, outside this one, and stays as bright as JS drew it.
+      .opacity(model.disabled ? Self.disabledOpacity : 1)
   }
+
+  /// How faint a slider switched off is drawn, at the faintness a control that cannot be
+  /// reached is drawn at.
+  private static let disabledOpacity: Double = 0.3
 }
 
 struct RNCSingleSliderContent: View {
@@ -614,7 +657,16 @@ struct RNCRangedSliderContent: View {
       // range when the slider has none - which is what `UISlider` does.
       .accessibilityElement()
       .accessibilityValue(Text(percentage(of: model.value(of: thumb), in: range)))
+      // A slider switched off is switched off to VoiceOver as much as to a finger: read
+      // out as dimmed, and with no rotor to adjust it with. The thumb stays readable
+      // either way - a slider whose value nobody can reach is one most worth reading
+      // out, which is how `UISlider` leaves it too.
+      .outOfReach(model.disabled)
       .accessibilityAdjustableAction { direction in
+        // Guarded for its own sake as well, the rotor being left where it was put on a
+        // system too old to hear it taken away.
+        guard !model.disabled else { return }
+
         let step = model.step > 0 ? model.step : span(of: range) / 10
         switch direction {
         case .increment:
@@ -692,9 +744,15 @@ struct RNCRangedSliderContent: View {
   /// Only the thumb grabbed first reports a start: a second finger landing on the other
   /// thumb of a ranged slider joins the drag already in progress rather than beginning
   /// one of its own, so that every start is answered by exactly one complete.
+  ///
+  /// A slider that is switched off begins nothing, and so has nothing to answer with a
+  /// completion either: a gesture already in flight when it was switched off keeps being
+  /// read until SwiftUI is told to stop reading it.
   private func beginDrag(of thumb: Thumb) -> Double {
-    let wasSliding = model.isSliding
     let origin = model.value(of: thumb)
+    guard !model.disabled else { return origin }
+
+    let wasSliding = model.isSliding
     model.setDragOrigin(origin, of: thumb)
 
     if !wasSliding {
@@ -1041,6 +1099,28 @@ public final class RNCSliderView: UIView {
     set { model.vertical = newValue }
   }
 
+  /// Whether the slider is switched off - see `RNCSliderModel.disabled`.
+  ///
+  /// Touches are taken away from this whole view, which leaves the slider nothing to
+  /// report: the drags of the hosted thumbs, the tap and the hold on the track and
+  /// VoiceOver's adjustments all hang off it, and what it is drawn as comes from the
+  /// same flag.
+  @objc public var disabled: Bool {
+    get { model.disabled }
+    set {
+      guard newValue != model.disabled else { return }
+      model.disabled = newValue
+
+      // A drag the slider is in the middle of loses its gesture with the touches, and so
+      // ends with no `onEnded` to read it to an end.
+      if newValue {
+        model.releaseThumbs()
+      }
+
+      isUserInteractionEnabled = !newValue
+    }
+  }
+
   /// Tints of the parts of the track - see `RNCSliderModel.minimumTrackColor`.
   @objc public var minimumTrackColor: UIColor? {
     get { model.minimumTrackColor }
@@ -1331,6 +1411,15 @@ public final class RNCSliderView: UIView {
     }
 
     return nil
+  }
+}
+
+private extension View {
+  /// Says to VoiceOver that this cannot be reached, leaving it readable all the same.
+  /// A slider switched off still holds a value, and the person who cannot reach it is
+  /// the one who most needs that value read out.
+  func outOfReach(_ disabled: Bool) -> some View {
+    accessibilityRespondsToUserInteraction(!disabled)
   }
 }
 

@@ -22,6 +22,21 @@ export interface NativeProps extends ViewProps {
   maximumValue?: CodegenTypes.WithDefault<CodegenTypes.Double, 1>;
 
   /**
+   * Whether the slider is switched off: drawn in the platform's own disabled
+   * look, taking no touches, taps or keyboard, and reporting no events of its
+   * own. The values the props give it still apply, so a disabled slider keeps
+   * showing wherever they put its thumbs.
+   *
+   * Declared ahead of those values on purpose: a native side applies props in
+   * the order they are declared here, and a slider switched off and moved in
+   * the same commit has to be switched off first. Switching off is what ends
+   * the drag a slider believes it owns, and a value it still believes it owns
+   * is a value it keeps off the thumbs - so applied second, the move would be
+   * swallowed by the very rule switching off is there to lift.
+   */
+  disabled?: CodegenTypes.WithDefault<boolean, false>;
+
+  /**
    * Position of the thumb, expressed in the slider's own range.
    */
   value?: CodegenTypes.WithDefault<CodegenTypes.Double, 0>;

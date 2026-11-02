@@ -72,6 +72,7 @@ using namespace facebook::react;
 {
   _sliderView.minimumValue = props.minimumValue;
   _sliderView.maximumValue = props.maximumValue;
+  _sliderView.disabled = props.disabled;
   _sliderView.value = props.value;
   _sliderView.ranged = props.ranged;
   _sliderView.valueLeft = props.valueLeft;
@@ -151,6 +152,14 @@ using namespace facebook::react;
   }
   if (oldViewProps.maximumValue != newViewProps.maximumValue) {
     _sliderView.maximumValue = newViewProps.maximumValue;
+  }
+  // Applied ahead of the values, as it is in `applySliderProps` and in the spec the
+  // Android delegate is generated from. Switching off ends the drag a slider believes
+  // it owns, and a value it still believes it owns is one it keeps off the thumbs - so
+  // a value applied first would be swallowed by that very rule, on a commit that both
+  // switches the slider off and moves it.
+  if (oldViewProps.disabled != newViewProps.disabled) {
+    _sliderView.disabled = newViewProps.disabled;
   }
   if (oldViewProps.value != newViewProps.value) {
     _sliderView.value = newViewProps.value;

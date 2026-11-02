@@ -65,6 +65,38 @@ describe("Slider", () => {
     expect(getByTestId("slider").props.step).toBe(0);
   });
 
+  describe("Disabled", () => {
+    it("Forwards being switched off to the native component", async () => {
+      const {getByTestId} = await render(<Slider testID="slider" disabled />);
+      expect(getByTestId("slider").props.disabled).toBe(true);
+    });
+
+    it("Leaves a slider given no decision to make switched on", async () => {
+      const {getByTestId} = await render(<Slider testID="slider" />);
+      expect(getByTestId("slider").props.disabled).toBeUndefined();
+    });
+
+    it("Keeps forwarding the values a switched-off slider is to be shown at", async () => {
+      const {getByTestId} = await render(
+        <Slider
+          testID="slider"
+          disabled
+          maximumValue={50}
+          step={1}
+          value={20}
+          ranged
+          valueLeft={10}
+          valueRight={40}
+        />,
+      );
+      const slider = getByTestId("slider");
+
+      expect(slider.props.value).toBe(20);
+      expect(slider.props.valueLeft).toBe(10);
+      expect(slider.props.valueRight).toBe(40);
+    });
+  });
+
   describe("Custom thumb", () => {
     it("Renders nothing inside the slider when no thumb is given", async () => {
       const {getByTestId} = await render(<Slider testID="slider" />);
