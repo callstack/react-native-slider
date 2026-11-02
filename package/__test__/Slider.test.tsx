@@ -2,12 +2,25 @@ import React from "react";
 import {Text, ViewProps} from "react-native";
 import {act, fireEvent, render, within} from "@testing-library/react-native";
 import Slider from "../src/Slider";
-import type {StepsProps, ThumbProps} from "../typings";
+import type {StepsProps, ThumbProps, TrackProps} from "../typings";
 
 const StepThumb = ({index}: ThumbProps) => <Text>{`step ${index}`}</Text>;
 
 const StepMarker = ({index, value, marked}: StepsProps) => (
   <Text>{`marker ${index}: ${value}${marked ? " marked" : ""}`}</Text>
+);
+
+/** The three custom elements, each saying out loud whether it was told off. */
+const TrackThatReports = ({disabled}: TrackProps) => (
+  <Text>{`track${disabled ? " disabled" : ""}`}</Text>
+);
+
+const ThumbThatReports = ({index, disabled}: ThumbProps) => (
+  <Text>{`step ${index}${disabled ? " disabled" : ""}`}</Text>
+);
+
+const MarkerThatReports = ({index, disabled}: StepsProps) => (
+  <Text>{`marker ${index}${disabled ? " disabled" : ""}`}</Text>
 );
 
 const markerTexts = (texts: {props: {children?: unknown}}[]) =>
@@ -94,6 +107,96 @@ describe("Slider", () => {
       expect(slider.props.value).toBe(20);
       expect(slider.props.valueLeft).toBe(10);
       expect(slider.props.valueRight).toBe(40);
+    });
+
+    it("Tells a custom track and thumb that the Slider is switched off", async () => {
+      const {getByText} = await render(
+        <Slider
+          disabled
+          maximumValue={1}
+          step={1}
+          track={TrackThatReports}
+          thumb={ThumbThatReports}
+        />,
+      );
+
+      expect(getByText("track disabled")).toBeTruthy();
+      expect(getByText("step 0 disabled")).toBeTruthy();
+    });
+
+    it("Tells every custom step marker that the Slider is switched off", async () => {
+      const {getAllByText} = await render(
+        <Slider
+          disabled
+          maximumValue={2}
+          step={1}
+          stepMarkers={MarkerThatReports}
+        />,
+      );
+
+      expect(markerTexts(getAllByText(/^marker/))).toEqual([
+        "marker 0 disabled",
+        "marker 1 disabled",
+        "marker 2 disabled",
+      ]);
+    });
+
+    it("Tells both thumbs of a switched-off ranged Slider", async () => {
+      const {getAllByText} = await render(
+        <Slider disabled ranged step={1} thumb={ThumbThatReports} />,
+      );
+
+      expect(markerTexts(getAllByText(/^step/))).toEqual([
+        "step 0 disabled",
+        "step 1 disabled",
+      ]);
+    });
+
+    it("Leaves a switched-on Slider's custom elements uninformed", async () => {
+      const {queryByText, getByText} = await render(
+        <Slider
+          maximumValue={1}
+          step={1}
+          track={TrackThatReports}
+          thumb={ThumbThatReports}
+          stepMarkers={MarkerThatReports}
+        />,
+      );
+
+      expect(queryByText("track disabled")).toBeNull();
+      expect(queryByText("step 0 disabled")).toBeNull();
+      expect(queryByText("marker 0 disabled")).toBeNull();
+      expect(getByText("track")).toBeTruthy();
+    });
+
+    it("Switches the custom elements off and back on with the Slider", async () => {
+      const {queryByText, getByText, rerender} = await render(
+        <Slider maximumValue={1} step={1} thumb={ThumbThatReports} />,
+      );
+
+      expect(getByText("step 0")).toBeTruthy();
+
+      await act(async () => {
+        await rerender(
+          <Slider
+            disabled
+            maximumValue={1}
+            step={1}
+            thumb={ThumbThatReports}
+          />,
+        );
+      });
+
+      expect(getByText("step 0 disabled")).toBeTruthy();
+
+      await act(async () => {
+        await rerender(
+          <Slider maximumValue={1} step={1} thumb={ThumbThatReports} />,
+        );
+      });
+
+      expect(queryByText("step 0 disabled")).toBeNull();
+      expect(getByText("step 0")).toBeTruthy();
     });
   });
 

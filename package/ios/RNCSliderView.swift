@@ -93,6 +93,12 @@ final class RNCSliderModel: ObservableObject {
     return thumbValues.contains { abs($0 - stepValue) <= step * Self.stepTolerance }
   }
 
+  /// How faint a slider switched off is drawn, at the faintness a control that cannot be
+  /// reached is drawn at. Shared by the slider `RNCSliderContent` hosts and by the views
+  /// JS renders over it, so that the two go faint together - see
+  /// `RNCSliderView.applyDisabledLook`.
+  static let disabledAlpha: CGFloat = 0.3
+
   /// Leeway, as a fraction of a step, for a value to count as landing on one.
   static let stepTolerance = 1e-9
 
@@ -303,11 +309,23 @@ struct RNCSliderGeometry {
     rightOffset = CGFloat(Self.fraction(of: model.valueRight, in: range)) * travel
   }
 
+  /// How far along the slider the centre of the thumb whose near edge sits at the given
+  /// offset stands.
+  ///
+  /// The offsets place a thumb by its near edge, while a thumb covers the track around
+  /// its *centre* - so that is where the parts of the track have to be cut into, and not
+  /// at the near edge. Cutting at the near edge leaves the strip between the two on show,
+  /// which is only ever covered again by a thumb drawn of its own: a thumb JS replaces
+  /// draws no track, and leaves that strip as a gap of unfilled track beside it.
+  func thumbCenterOffset(at offset: CGFloat) -> CGFloat {
+    offset + thumbLength / 2
+  }
+
   // Centre of the thumb whose near edge sits the given distance along the slider, in
   // the coordinates of the view. The thumbs lie along the middle of the view, and a
   // vertical slider grows upwards.
   func thumbCenter(atOffset offset: CGFloat) -> CGPoint {
-    let along = offset + thumbLength / 2
+    let along = thumbCenterOffset(at: offset)
 
     return vertical
       ? CGPoint(x: size.width / 2, y: size.height - along)
@@ -322,7 +340,8 @@ struct RNCSliderGeometry {
   /// being the middle of their left edge - they are not turned round with the slider,
   /// which keeps whatever they read the right way up.
   func stepMarkerAnchor(at value: Double) -> CGPoint {
-    let along = CGFloat(Self.fraction(of: value, in: range)) * travel + thumbLength / 2
+    let nearEdge = CGFloat(Self.fraction(of: value, in: range)) * travel
+    let along = thumbCenterOffset(at: nearEdge)
     let across = breadth / 2 + thumbThickness / 2 + Self.stepMarkerGap
 
     return vertical
@@ -396,7 +415,8 @@ struct RNCSliderGeometry {
     let offset = offset(of: point)
 
     return thumbs.min {
-      abs($0.offset + thumbLength / 2 - offset) < abs($1.offset + thumbLength / 2 - offset)
+      abs(thumbCenterOffset(at: $0.offset) - offset)
+        < abs(thumbCenterOffset(at: $1.offset) - offset)
     }?.thumb
   }
 
@@ -461,14 +481,11 @@ struct RNCSliderContent: View {
       // and their places. The values stand wherever the props put them, so nothing here
       // moves.
       //
-      // Only the slider this view draws is washed out. A track, a thumb or a step marker
-      // JS rendered is its own view, outside this one, and stays as bright as JS drew it.
-      .opacity(model.disabled ? Self.disabledOpacity : 1)
+      // What is washed out here is only the slider this view draws: a track, a thumb or a
+      // step marker JS rendered is mounted over it, as a view of its own, and is dimmed
+      // to this same faintness there - see `RNCSliderView.applyDisabledLook`.
+      .opacity(model.disabled ? Double(RNCSliderModel.disabledAlpha) : 1)
   }
-
-  /// How faint a slider switched off is drawn, at the faintness a control that cannot be
-  /// reached is drawn at.
-  private static let disabledOpacity: Double = 0.3
 }
 
 struct RNCSingleSliderContent: View {
@@ -524,7 +541,14 @@ struct RNCRangedSliderContent: View {
       let lowerColor = tint(model.minimumTrackColor, or: model.ranged ? Self.trackColor : .accentColor)
       let middleColor = tint(model.middleRangeTrackColor, or: .accentColor)
       let upperColor = tint(model.maximumTrackColor, or: Self.trackColor)
-      let upperStart = model.ranged ? geometry.rightOffset : geometry.leftOffset
+      // The parts of the track are cut where the thumbs cover it, which is at their
+      // centre and not at the near edge the offsets give: cutting any earlier leaves a
+      // strip of the track left untinted beside a thumb - unmistakable once JS replaces
+      // the thumb with a view that draws none of its own.
+      let lowerEnd = geometry.thumbCenterOffset(at: geometry.leftOffset)
+      let upperStart = geometry.thumbCenterOffset(
+        at: model.ranged ? geometry.rightOffset : geometry.leftOffset
+      )
 
       // Everything is placed by how far along the slider it sits, so the stack is
       // anchored at the end the minimum value is at: the leading edge across the view,
@@ -533,13 +557,15 @@ struct RNCRangedSliderContent: View {
         if !model.customTrack {
           track(Self.trackColor, length: nil)
 
-          track(lowerColor, length: geometry.leftOffset)
+          track(lowerColor, length: lowerEnd)
 
-          // Drawn between the two thumb centres, which is why it is inset by half a
-          // thumb. `max` keeps it from inverting on values crossed by JS.
+          // Drawn between the two thumb centres, which is where the parts of the track
+          // are cut - so its length is the gap between the near edges the offsets give,
+          // and it is inset by half a thumb from the nearer of them. `max` keeps it from
+          // inverting on values crossed by JS.
           if model.ranged {
             track(middleColor, length: max(geometry.rightOffset - geometry.leftOffset, 0))
-              .offset(offsetAlong(min(geometry.leftOffset, geometry.rightOffset) + geometry.thumbLength / 2))
+              .offset(offsetAlong(geometry.thumbCenterOffset(at: min(geometry.leftOffset, geometry.rightOffset))))
           }
 
           track(upperColor, length: geometry.length - upperStart).offset(offsetAlong(upperStart))
@@ -1105,6 +1131,9 @@ public final class RNCSliderView: UIView {
   /// report: the drags of the hosted thumbs, the tap and the hold on the track and
   /// VoiceOver's adjustments all hang off it, and what it is drawn as comes from the
   /// same flag.
+  ///
+  /// The views JS renders in place of the track, the thumbs and the step markers are
+  /// switched off along with the rest of the slider - see `applyDisabledLook`.
   @objc public var disabled: Bool {
     get { model.disabled }
     set {
@@ -1118,7 +1147,28 @@ public final class RNCSliderView: UIView {
       }
 
       isUserInteractionEnabled = !newValue
+      applyDisabledLook()
     }
+  }
+
+  /// Draws the views JS rendered in place of the track, of a thumb and of the step
+  /// markers at the faintness of a control nobody can reach.
+  ///
+  /// The hosted slider is the one thing here that switches itself off to be drawn: it
+  /// washes out its own track and thumbs. A view JS renders is mounted over it as a view
+  /// of its own, outside that, and nothing reaches it as a state to draw itself by - so
+  /// the containers holding them are dimmed to the same faintness, and the whole of a
+  /// switched-off slider goes faint together, over whatever JS drew into them.
+  ///
+  /// Run over again whenever the children are handed out afresh: a container made or
+  /// remounted once the slider is already switched off would otherwise stay as bright as
+  /// the slider was before it was.
+  private func applyDisabledLook() {
+    let alpha: CGFloat = model.disabled ? RNCSliderModel.disabledAlpha : 1
+
+    trackContainer.alpha = alpha
+    thumbContainers.forEach { $0.alpha = alpha }
+    stepMarkerContainers.forEach { $0.alpha = alpha }
   }
 
   /// Tints of the parts of the track - see `RNCSliderModel.minimumTrackColor`.
@@ -1327,6 +1377,7 @@ public final class RNCSliderView: UIView {
     }
 
     model.customThumbCount = min(thumbViews.count, thumbContainers.count)
+    applyDisabledLook()
     setNeedsLayout()
   }
 

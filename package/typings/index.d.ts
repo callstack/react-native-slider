@@ -7,6 +7,12 @@ export type ThumbProps = {
    * Contains the exact step number on which this custom Thumb currently is.
    */
   index: number;
+
+  /**
+   * Informs the thumb about the Slider being in a disabled state.
+   * The default is `false`.
+   */
+  disabled?: boolean;
 };
 
 export type StepsProps = {
@@ -26,9 +32,21 @@ export type StepsProps = {
    * Basically it says whether value of a thumb is equal to value of this step.
    */
   marked: boolean;
+
+  /**
+   * Informs the custom step marker about the Slider being in a disabled state.
+   * The default is `false`.
+   */
+  disabled?: boolean;
 };
 
-export type TrackProps = {};
+export type TrackProps = {
+  /**
+   * Informs the custom track about the Slider being in a disabled state.
+   * The default is `false`.
+   */
+  disabled?: boolean;
+};
 
 export interface SliderProps extends ViewProps {
   /**

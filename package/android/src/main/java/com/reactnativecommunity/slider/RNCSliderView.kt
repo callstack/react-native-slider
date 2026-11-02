@@ -335,6 +335,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
     customThumbCount = minOf(thumbViews.size, MAXIMUM_THUMB_COUNT)
     placeStepMarkerContainers()
+    applyDisabledLook()
   }
 
   /**
@@ -491,6 +492,9 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
    *
    * The values themselves are no part of this, so their setters keep taking them while
    * the slider is switched off - it only stops showing where they put its thumbs.
+   *
+   * The views JS renders in place of the track, the thumbs and the step markers are
+   * switched off along with the rest of the slider - see [applyDisabledLook].
    */
   fun setDisabled(value: Boolean) {
     disabledValue = value
@@ -498,6 +502,30 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     if (value) {
       finishSliding()
     }
+
+    applyDisabledLook()
+  }
+
+  /**
+   * Draws the views JS renders in place of the track, of a thumb and of the step markers
+   * at the faintness of a control nobody can reach.
+   *
+   * The slider draws itself in Material 3's own disabled colours once it is switched off,
+   * but a view JS renders is JS's own drawing, mounted over it, and nothing here reaches
+   * it as a state to draw itself by. So the whole of a switched-off slider goes faint
+   * together, the views JS gave included - over whatever JS drew into them, which is why
+   * one that dims itself for being switched off ends up dimmed twice over.
+   *
+   * Run over again whenever the children are handed out afresh: a container made or
+   * remounted once the slider is already switched off would otherwise stay as bright as
+   * the slider was before it was.
+   */
+  private fun applyDisabledLook() {
+    val alpha = if (disabledValue) DISABLED_CHILD_ALPHA else 1f
+
+    trackContainer.alpha = alpha
+    thumbContainers.forEach { container -> container.alpha = alpha }
+    stepMarkerContainers.forEach { container -> container.alpha = alpha }
   }
 
   fun setMinimumTrackColor(value: Int?) {
@@ -1152,6 +1180,14 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
     /** How far a step marker keeps from the thumb. */
     const val STEP_MARKER_GAP_DP = 4f
+
+    /**
+     * How faint a view JS renders in place of the track, a thumb or a step marker is
+     * drawn once the slider is switched off - the alpha Material 3 dims a switched-off
+     * control's own content to, so that the views JS gave go faint along with the
+     * slider they sit on rather than against it.
+     */
+    const val DISABLED_CHILD_ALPHA = 0.38f
   }
 }
 

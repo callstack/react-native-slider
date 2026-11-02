@@ -122,6 +122,7 @@ const Slider = ({
   lowerLimit = minimumValue,
   upperLimit = maximumValue,
   orientation = "horizontal",
+  disabled,
   onValueChange,
   onLeftValueChange,
   onRightValueChange,
@@ -133,6 +134,7 @@ const Slider = ({
   const StepMarker =
     typeof stepMarkers === "function" ? stepMarkers : undefined;
   const followsThumbs = Thumb !== undefined || StepMarker !== undefined;
+  const isDisabled = disabled === true;
 
   const [currentValue, setCurrentValue] = useThumbValue(value);
   const [currentValueLeft, setCurrentValueLeft] = useThumbValue(valueLeft);
@@ -157,6 +159,7 @@ const Slider = ({
       {...props}
       minimumValue={minimumValue}
       maximumValue={maximumValue}
+      disabled={disabled}
       value={value}
       ranged={ranged}
       valueLeft={valueLeft}
@@ -173,7 +176,7 @@ const Slider = ({
       onRightValueChange={valueHandler(handleRightValueChange)}>
       {Track ? (
         <View collapsable={false} pointerEvents="none">
-          <Track />
+          <Track disabled={isDisabled} />
         </View>
       ) : null}
       {Thumb
@@ -181,6 +184,7 @@ const Slider = ({
             <View key={thumbIndex} collapsable={false} pointerEvents="none">
               <Thumb
                 index={stepIndex(thumbValue, minimumValue, maximumValue, step)}
+                disabled={isDisabled}
               />
             </View>
           ))
@@ -196,6 +200,7 @@ const Slider = ({
                     (thumbValue) =>
                       Math.abs(thumbValue - stepValue) <= step * STEP_TOLERANCE,
                   )}
+                  disabled={isDisabled}
                 />
               </View>
             ),
