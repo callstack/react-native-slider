@@ -1,6 +1,10 @@
 import React, {JSX, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import Slider, {SliderProps, StepsProps, ThumbProps} from '@callstack/slider';
+import Slider, {
+  SliderProps,
+  StepsProps,
+  ThumbProps,
+} from '@callstack/slider';
 
 export interface Props {
   title: string;
@@ -280,6 +284,61 @@ export const examples: Props[] = [
       );
     },
   },
+  {
+    title: 'Vertical orientation',
+    render() {
+      // `orientation` lays the very same Slider out along the other axis: it
+      // grows upwards, so the minimum is at the bottom and the maximum at the
+      // top. The step, the values and everything the Slider reports are as they
+      // were - only the axis the thumb travels along has changed.
+      //
+      // The built-in markers come along for the turn, and with them the axis
+      // they are paid for out of: they are laid out *across* the Slider, to the
+      // right of the track, so it is now the width that has to be deep enough to
+      // hold them, where a horizontal Slider spends its height. That height is
+      // what a marked Slider is measured to grow to, and the turn moves that
+      // growth onto the width - which has to be written out here rather than
+      // grown into, as a Slider whose style gives it a size is never asked to
+      // measure itself. See `verticalSlider`.
+      return (
+        <SliderExample
+          {...BOUNDS}
+          value={25}
+          orientation="vertical"
+          stepMarkers
+          style={styles.verticalSlider}
+        />
+      );
+    },
+  },
+  {
+    title: 'Custom thumb and track, vertical',
+    render() {
+      // The track is turned a quarter turn along with the Slider, which is what
+      // carries the first of its dashes down to the bottom, where the minimum
+      // is - so this is the very same `DashedTrack`, written as a row, that the
+      // horizontal examples use. A thumb only ever moves along the Slider, so
+      // it needs nothing at all for the turn.
+      //
+      // `SteppedMarker` is the same component too, and stays the right way up:
+      // the markers hang beside the track instead of turning round with it,
+      // which keeps the numbers under the ticks readable. They hang out to its
+      // right now rather than down out of its bottom, so the room this example
+      // had to give its Slider has moved sides with them - from the height of
+      // `markedSlider` to the width of `verticalMarkedSlider`.
+      return (
+        <SliderExample
+          {...BOUNDS}
+          value={25}
+          thumb={SteppedThumb}
+          track={DashedTrack}
+          stepMarkers={SteppedMarker}
+          orientation="vertical"
+          style={styles.verticalMarkedSlider}
+        />
+      );
+    },
+  },
 ];
 
 const styles = StyleSheet.create({
@@ -289,6 +348,37 @@ const styles = StyleSheet.create({
   slider: {
     width: '90%',
     marginTop: 10,
+  },
+  // A vertical Slider takes its breadth from its width and its length from its
+  // height, so the two have to be given the other way round than `slider` has
+  // them: room to grow upwards, and only as much across as the thumb, the touch
+  // area around it and whatever hangs beside it need. The Slider is centred in
+  // whatever room JS gives it, so a wide one of these only puts the track in the
+  // middle of a wide gap.
+  //
+  // The across side is the one a vertical Slider has to think about once it
+  // marks its steps: the markers hang to the right of the track, half a thumb and
+  // a gap past its middle, which is the room a horizontal Slider spends out of its
+  // height without noticing. Android's thumb is the wider of the two, so it sets
+  // how far out the dots land - and 60 is what a marked Slider measures itself to
+  // there, a Slider being asked to measure itself only when its style gives it no
+  // size to take.
+  verticalSlider: {
+    width: 60,
+    height: 220,
+  },
+  // Roomier across again, for the markers `SteppedMarker` renders. Those start
+  // from the very point a built-in dot starts from, and from the same edge of it,
+  // but a marker is as wide as it makes itself - a tick with a label under it,
+  // against a dot four across - so the whole of it reaches a good deal further
+  // right from that start. Nothing widens the Slider for them either: they hang
+  // out of it, unclipped, exactly as this marker hangs out of the bottom of the
+  // horizontal example. What this width buys is therefore not room the markers
+  // are cut to fit, but room for them to stand beside the track without running
+  // past the Slider into the edge of the page.
+  verticalMarkedSlider: {
+    width: 96,
+    height: 220,
   },
   readout: {
     fontSize: 14,

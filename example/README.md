@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
 
 The app itself keeps this support code in [src/Examples.tsx](src/Examples.tsx) and additionally folds
 what the examples share into two constants — the bounds every example but the first runs on, and the
-three track tints — which is what lets its thirteen entries stay to a few lines each. So the app's
+three track tints — which is what lets each of its entries stay to a few lines. So the app's
 sources read differently from the snippets here, while rendering the same Sliders:
 
 ```tsx
@@ -525,12 +525,63 @@ Each custom component is also passed `disabled` itself, which is how it can draw
 instead of only being dimmed. The two apply on top of each other, so a component that dims itself as
 well ends up dimmed twice over — dim it yourself only instead of the dimming, not on top of it.
 
-## What is not covered here
+### Vertical orientation
 
-`orientation: "vertical"` has no example, and neither has a custom `track` or `thumb` on a vertical
-Slider — the track is turned round with the Slider, while the step markers stay the right way up
-beside it. For those, the [props table](../README.md#properties) is the documentation today.
+`orientation: "vertical"` lays the very same Slider out along the other axis. It grows **upwards**:
+`minimumValue` is at the bottom of the track and `maximumValue` at the top. The step, the limits, the
+values and the events are all unchanged — only the axis the thumb travels along has moved.
 
-When adding an example, append an entry to the `examples` array in
-[src/Examples.tsx](src/Examples.tsx) with a `title` and a `render`, and `App.tsx` will pick it up.
-Keep this README's examples in the same order as that array.
+`stepMarkers` is on, and the built-in dots come along for the turn — one per step, to the **right** of
+the track, at the step each one stands for, tinted once the thumb rests on it.
+
+```tsx
+<Slider
+  minimumValue={0}
+  maximumValue={100}
+  step={5}
+  value={25}
+  orientation="vertical"
+  stepMarkers
+  style={{width: 60, height: 220}}
+/>;
+```
+
+The `style` is the one thing that has to be written differently than for a horizontal Slider. A Slider
+takes its **length** from whichever axis the orientation runs along and its breadth from the other,
+so a vertical one needs its height to be the generous side of the pair and its width the tight one —
+the reverse of the `width: '90%'` every other snippet here carries. What a vertical Slider is given is
+also what it is drawn inside of: the track and thumbs stay centred in the box, so a Slider given a wide
+one shows its track down the middle of a wide gap rather than against an edge.
+
+That swap is also what the markers pay for. The length is what they are spread along, but each one is
+hung **across** the Slider — half a thumb and a gap past the middle of the track — so on a vertical
+Slider they are spending the axis that a horizontal one spends its height on, and that axis is now the
+narrow one. The `60` above is how much of it they need: the width a marked Slider measures itself to
+when given none, Android's wider thumb setting the distance (a thumb of 44 with a 4 marker and its 4 gap
+on either side of it). Give a Slider a width of its own and it is never asked to measure itself, so the
+room is not grown into — it has to be handed over, in either orientation.
+
+### Custom thumb and track, vertical
+
+The same pair on the vertical Slider, this time with `SteppedMarker` marking the steps, and the point
+of the example is what does *not* change: these are the very same `SteppedThumb`, `DashedTrack` and
+`SteppedMarker` the horizontal examples pass, with no orientation-aware code in any of them.
+
+```tsx
+<Slider
+  minimumValue={0}
+  maximumValue={100}
+  step={5}
+  value={25}
+  thumb={SteppedThumb}
+  track={DashedTrack}
+  stepMarkers={SteppedMarker}
+  orientation="vertical"
+  style={{width: 96, height: 220}}
+/>;
+```
+
+A custom track is written as a row of dashes and stretched along the Slider's **length**, and the
+Slider then turns the whole thing a quarter turn with itself — which is what carries the first of the
+dashes down to the bottom, where the minimum is. A custom thumb is never turned at all: it is centred
+on the thumb it stands for, and that thumb only ever moves along the Slider.
