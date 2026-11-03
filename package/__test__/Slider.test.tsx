@@ -1,5 +1,5 @@
 import React from "react";
-import {Text, ViewProps} from "react-native";
+import {StyleSheet, Text, ViewProps} from "react-native";
 import {act, fireEvent, render, within} from "@testing-library/react-native";
 import Slider from "../src/Slider";
 import type {StepsProps, ThumbProps, TrackProps} from "../typings";
@@ -586,6 +586,129 @@ describe("Slider", () => {
       );
 
       expect(getByTestId("slider").props.customThumb).toBe(false);
+    });
+  });
+
+  // The reading direction is handled entirely on the native side, which takes it from
+  // React Native's own layout of the subtree rather than from a prop of its own. What JS
+  // has to keep holding true is the other half of that arrangement: that the direction
+  // reaches the native component at all, and that nothing JS sends is worth mirroring on
+  // the way down. A value reversed here would be reversed a second time by the native
+  // side, and would land the thumb back where it started.
+  describe("Reading direction", () => {
+    /** Everything a slider tells the native side about where its thumbs stand. */
+    const VALUE_PROPS = [
+      "minimumValue",
+      "maximumValue",
+      "value",
+      "ranged",
+      "valueLeft",
+      "valueRight",
+      "step",
+      "lowerLimit",
+      "upperLimit",
+    ] as const;
+
+    const valuesOf = (slider: {props: Record<string, unknown>}) =>
+      VALUE_PROPS.reduce(
+        (values, prop) => ({...values, [prop]: slider.props[prop]}),
+        {} as Record<string, unknown>,
+      );
+
+    it("Carries the direction of its subtree down to the native component", async () => {
+      const {getByTestId} = await render(
+        <Slider testID="slider" style={{direction: "rtl"}} />,
+      );
+
+      expect(StyleSheet.flatten(getByTestId("slider").props.style)).toEqual(
+        expect.objectContaining({direction: "rtl"}),
+      );
+    });
+
+    it("Forwards the same values whichever way the slider reads", async () => {
+      const props = {
+        minimumValue: 10,
+        maximumValue: 90,
+        step: 5,
+        lowerLimit: 20,
+        upperLimit: 80,
+        ranged: true,
+        valueLeft: 30,
+        valueRight: 70,
+      };
+      const {getByTestId: readingLeftToRight} = await render(
+        <Slider testID="slider" {...props} />,
+      );
+      const {getByTestId: readingRightToLeft} = await render(
+        <Slider testID="slider" {...props} style={{direction: "rtl"}} />,
+      );
+
+      expect(valuesOf(readingRightToLeft("slider"))).toEqual(
+        valuesOf(readingLeftToRight("slider")),
+      );
+    });
+
+    it("Counts a custom thumb's step the same whichever way the slider reads", async () => {
+      const thumbForDirection = async (direction?: "rtl") => {
+        const {getByText} = await render(
+          <Slider
+            minimumValue={0}
+            maximumValue={50}
+            step={1}
+            value={20}
+            thumb={StepThumb}
+            style={direction ? {direction} : undefined}
+          />,
+        );
+
+        return getByText(/^step /).props.children;
+      };
+
+      expect(await thumbForDirection("rtl")).toBe(await thumbForDirection());
+    });
+
+    it("Renders the same step markers, in the same order, whichever way the slider reads", async () => {
+      const markersForDirection = async (direction?: "rtl") => {
+        const {getAllByText} = await render(
+          <Slider
+            maximumValue={4}
+            step={1}
+            value={3}
+            stepMarkers={StepMarker}
+            style={direction ? {direction} : undefined}
+          />,
+        );
+
+        return markerTexts(getAllByText(/^marker/));
+      };
+
+      const leftToRight = await markersForDirection();
+
+      expect(leftToRight).toEqual([
+        "marker 0: 0",
+        "marker 1: 1",
+        "marker 2: 2",
+        "marker 3: 3 marked",
+        "marker 4: 4",
+      ]);
+      expect(await markersForDirection("rtl")).toEqual(leftToRight);
+    });
+
+    it("Reports a dragged value to the handlers it was given, reading right-to-left", async () => {
+      const onValueChange = jest.fn();
+      const {getByTestId} = await render(
+        <Slider
+          testID="slider"
+          onValueChange={onValueChange}
+          style={{direction: "rtl"}}
+        />,
+      );
+
+      await fireEvent(getByTestId("slider"), "valueChange", {
+        nativeEvent: {value: 2},
+      });
+
+      expect(onValueChange).toHaveBeenCalledWith(2);
     });
   });
 });

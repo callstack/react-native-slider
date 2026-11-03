@@ -30,6 +30,29 @@ final class RNCSliderModel: ObservableObject {
   /// the bottom and the maximum at the top. Only the geometry changes with it.
   @Published var vertical: Bool = false
 
+  /// Which end of the track the minimum value sits at.
+  ///
+  /// The one place the reading direction is kept. `RNCSliderComponentView` writes it from the
+  /// layout direction React Native resolved for the subtree the slider sits in, and both the
+  /// hosted slider and the `RNCSliderGeometry` the custom elements follow read it back - so
+  /// the two cannot mirror one another and not the other.
+  ///
+  /// A vertical slider is unaffected by it either way: turning a slider a quarter turn takes
+  /// its reading direction along with it, so what read left-to-right now reads bottom-to-top,
+  /// and there is no second reversal left to apply.
+  @Published var direction: Direction = .leftToRight
+
+  /// Which end of a horizontal track the minimum value sits at.
+  enum Direction {
+    case leftToRight
+    case rightToLeft
+  }
+
+  /// Whether values run right-to-left across the view, so that everything laid out along the
+  /// track is measured from its trailing end instead. A vertical slider never reverses on this
+  /// account, whichever way it reads - see `Direction`.
+  var reversesAlongTrack: Bool { direction == .rightToLeft && !vertical }
+
   /// Whether the slider is switched off: washed out to the faintness of a control
   /// nobody can reach, taking no touches, taps, drags or VoiceOver adjustments, and so
   /// reporting no events of its own.
@@ -105,6 +128,11 @@ final class RNCSliderModel: ObservableObject {
   /// Which end of the range a thumb drags. The single thumb of a slider that is not
   /// ranged counts as the left one, which is how it shares the drag origins and the
   /// clamping below with a ranged slider's.
+  ///
+  /// The two names stand for the two ends of the *range* - the lower and the upper value -
+  /// and not for the two ends of the view: on a slider reading right-to-left the left thumb
+  /// is the one drawn further right. The names line up with `valueLeft` and `valueRight`,
+  /// which JS gives the same meaning, and hold it whichever way the slider reads.
   enum Thumb {
     case single
     case left
@@ -269,6 +297,11 @@ final class RNCSliderModel: ObservableObject {
 /// thumb has a length and a thickness of its own too, as the thumb `Slider` draws is
 /// not round everywhere - see `thumbLength`. Which of the view's two sides each of
 /// those is comes from `RNCSliderModel.vertical`.
+///
+/// The *along* axis is read from the end of the track the minimum value sits at, which
+/// `reversed` says which end that is: everything here is measured and returned the same
+/// way round, whichever way the slider reads, so that a caller that only ever asks for
+/// distances along the track never has to know which way round it runs.
 struct RNCSliderGeometry {
   let size: CGSize
   let vertical: Bool
@@ -276,6 +309,10 @@ struct RNCSliderGeometry {
   let range: ClosedRange<Double>
   let length: CGFloat
   let breadth: CGFloat
+
+  /// Whether the minimum value sits at the trailing end of the view rather than the leading
+  /// one - see `RNCSliderModel.reversesAlongTrack`.
+  let reversed: Bool
 
   /// The extent of a thumb along the slider and across it.
   ///
@@ -299,6 +336,7 @@ struct RNCSliderGeometry {
     vertical = model.vertical
     ranged = model.ranged
     range = model.range
+    reversed = model.reversesAlongTrack
     length = vertical ? size.height : size.width
     breadth = vertical ? size.width : size.height
     let thumbScale = min(breadth / Self.thumbThickness, 1)
@@ -321,15 +359,23 @@ struct RNCSliderGeometry {
     offset + thumbLength / 2
   }
 
-  // Centre of the thumb whose near edge sits the given distance along the slider, in
-  // the coordinates of the view. The thumbs lie along the middle of the view, and a
-  // vertical slider grows upwards.
+  /// Centre of the thumb whose near edge sits the given distance along the slider, in
+  /// the coordinates of the view. The thumbs lie along the middle of the view.
+  ///
+  /// The along axis becomes the view's y going upwards on a vertical slider, and its x
+  /// going towards the end its minimum value sits at on a horizontal one - leftwards when
+  /// the slider reads right-to-left.
   func thumbCenter(atOffset offset: CGFloat) -> CGPoint {
     let along = thumbCenterOffset(at: offset)
 
-    return vertical
-      ? CGPoint(x: size.width / 2, y: size.height - along)
-      : CGPoint(x: along, y: size.height / 2)
+    if vertical {
+      return CGPoint(x: size.width / 2, y: size.height - along)
+    }
+
+    return CGPoint(
+      x: reversed ? size.width - along : along,
+      y: size.height / 2
+    )
   }
 
   /// The point the marker of the step at the given value hangs from: the middle of its
@@ -339,14 +385,23 @@ struct RNCSliderGeometry {
   /// A vertical slider has its markers to the right of the track instead, the point
   /// being the middle of their left edge - they are not turned round with the slider,
   /// which keeps whatever they read the right way up.
+  ///
+  /// Where along the track a marker stands follows the reading direction, exactly as
+  /// `thumbCenter(atOffset:)` does for a thumb; how far across it hangs does not, so the
+  /// markers keep to the same side of the track whichever way the slider reads.
   func stepMarkerAnchor(at value: Double) -> CGPoint {
     let nearEdge = CGFloat(Self.fraction(of: value, in: range)) * travel
     let along = thumbCenterOffset(at: nearEdge)
     let across = breadth / 2 + thumbThickness / 2 + Self.stepMarkerGap
 
-    return vertical
-      ? CGPoint(x: across, y: size.height - along)
-      : CGPoint(x: along, y: across)
+    if vertical {
+      return CGPoint(x: across, y: size.height - along)
+    }
+
+    return CGPoint(
+      x: reversed ? size.width - along : along,
+      y: across
+    )
   }
 
   /// How far a step marker keeps from the thumb.
@@ -400,10 +455,13 @@ struct RNCSliderGeometry {
 
   /// How far along the slider the given point of the view is, measured from the end
   /// the minimum value sits at - the same measure `leftOffset` and `rightOffset` place
-  /// the thumbs by. A vertical slider grows upwards, which the coordinates of the view
-  /// run backwards along.
+  /// the thumbs by, and the inverse of `thumbCenter(atOffset:)`. A vertical slider grows
+  /// upwards, which the coordinates of the view run backwards along, and a horizontal one
+  /// reading right-to-left grows leftwards, which they run backwards along too.
   func offset(of point: CGPoint) -> CGFloat {
-    min(max(vertical ? size.height - point.y : point.x, 0), length)
+    let along = vertical ? size.height - point.y : (reversed ? size.width - point.x : point.x)
+
+    return min(max(along, 0), length)
   }
 
   /// The thumb a tap on the given point of the view should carry to it: the closest
@@ -471,6 +529,19 @@ struct RNCSliderGeometry {
   static let minimumTouchTarget: CGFloat = 44
 }
 
+/// The hosted half of the slider.
+///
+/// Everything the slider draws is placed by a distance along the track, and that distance
+/// is turned into a place in the view by `RNCRangedSliderContent.stackAlignment` and
+/// `offsetAlong(_:)` - which is the one place the reading direction is applied. The
+/// environment's own direction is therefore pinned to reading left-to-right, so that the
+/// named alignments and the padding those two lean on resolve the same way whatever
+/// language the app runs in, and cannot turn the track round a second time.
+///
+/// Nothing hosted loses out on that pinning: the track, the thumbs and the markers are
+/// capsules and a path, and the only text here is the percentage VoiceOver reads out, which
+/// is never laid out. What JS renders in place of those is hosted outside this view, by
+/// React Native, and keeps the direction React Native gives it.
 struct RNCSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
@@ -485,9 +556,18 @@ struct RNCSliderContent: View {
       // step marker JS rendered is mounted over it, as a view of its own, and is dimmed
       // to this same faintness there - see `RNCSliderView.applyDisabledLook`.
       .opacity(model.disabled ? Double(RNCSliderModel.disabledAlpha) : 1)
+      .environment(\.layoutDirection, .leftToRight)
   }
 }
 
+/// Apple's slider, asked for nothing but its height.
+///
+/// Only `measuredIntrinsicSize` builds this, to ask SwiftUI how tall its own slider wants
+/// to be, and it is thrown away once the answer comes back. Nothing ever shows it: a
+/// slider of one value is drawn by `RNCRangedSliderContent` too, holding a single thumb.
+///
+/// It is therefore not a second path a reading direction would have to be applied to -
+/// the sliders a user sees are all hosted by `RNCSliderContent`, pinned there.
 struct RNCSingleSliderContent: View {
   @ObservedObject var model: RNCSliderModel
 
@@ -551,9 +631,9 @@ struct RNCRangedSliderContent: View {
       )
 
       // Everything is placed by how far along the slider it sits, so the stack is
-      // anchored at the end the minimum value is at: the leading edge across the view,
-      // and the bottom one up it.
-      ZStack(alignment: model.vertical ? .bottom : .leading) {
+      // anchored at the end the minimum value is at: the leading edge across the view, or
+      // the trailing one when the slider reads right-to-left, and the bottom one up it.
+      ZStack(alignment: stackAlignment) {
         if !model.customTrack {
           track(Self.trackColor, length: nil)
 
@@ -584,7 +664,7 @@ struct RNCRangedSliderContent: View {
       .frame(
         width: proxy.size.width,
         height: proxy.size.height,
-        alignment: model.vertical ? .bottom : .leading
+        alignment: stackAlignment
       )
       .background(
         stepMarkers(
@@ -808,15 +888,39 @@ struct RNCRangedSliderContent: View {
 
   /// How far a drag has carried a thumb along the slider, towards the maximum value. A
   /// vertical slider grows upwards, which SwiftUI's vertical coordinates run backwards
-  /// along.
+  /// along, and a horizontal one reading right-to-left grows leftwards, which they run
+  /// backwards along too.
   private func dragDistance(of gesture: DragGesture.Value) -> CGFloat {
-    model.vertical ? -gesture.translation.height : gesture.translation.width
+    if model.vertical {
+      return -gesture.translation.height
+    }
+
+    return model.reversesAlongTrack ? -gesture.translation.width : gesture.translation.width
   }
 
   /// A shift of the given distance along the slider, away from the end its minimum
-  /// value sits at - the same direction `dragDistance(of:)` measures a drag in.
+  /// value sits at - the same direction `dragDistance(of:)` measures a drag in, and the
+  /// same pair of directions `RNCSliderGeometry` measures offsets in.
   private func offsetAlong(_ distance: CGFloat) -> CGSize {
-    model.vertical ? CGSize(width: 0, height: -distance) : CGSize(width: distance, height: 0)
+    if model.vertical {
+      return CGSize(width: 0, height: -distance)
+    }
+
+    return CGSize(width: model.reversesAlongTrack ? -distance : distance, height: 0)
+  }
+
+  /// The corner of the view the track is anchored at: the end its minimum value sits at,
+  /// laid out along the slider - which is its bottom on a vertical one, and its trailing
+  /// edge on a horizontal one reading right-to-left.
+  ///
+  /// Pairs with `offsetAlong(_:)`, which turns on the same `reversesAlongTrack` and so
+  /// measures the distance from the same end this anchors at.
+  private var stackAlignment: Alignment {
+    if model.vertical {
+      return .bottom
+    }
+
+    return model.reversesAlongTrack ? .trailing : .leading
   }
 
   private func percentage(of value: Double, in range: ClosedRange<Double>) -> String {
@@ -1169,6 +1273,30 @@ public final class RNCSliderView: UIView {
     trackContainer.alpha = alpha
     thumbContainers.forEach { $0.alpha = alpha }
     stepMarkerContainers.forEach { $0.alpha = alpha }
+  }
+
+  /// Which end of the track the minimum value sits at, as React Native laid this slider
+  /// out - written by `RNCSliderComponentView` from the layout direction of the layout
+  /// metrics it is given, which is where React Native puts the answer for the subtree the
+  /// slider sits in: the app's own language, and any `direction` style partway down the
+  /// tree, both arrive here.
+  ///
+  /// The views JS renders in place of the track, a thumb and a step marker are deliberately
+  /// left out of this: they are laid out by React Native wherever the track now puts them,
+  /// and read the app's direction for themselves, exactly as they did before the track
+  /// turned round. Taking the direction any further down into them would apply it a second
+  /// time to views whose layout React Native has already mirrored.
+  @objc public var laysOutRightToLeft: Bool {
+    get { model.direction == .rightToLeft }
+    set {
+      let direction: RNCSliderModel.Direction = newValue ? .rightToLeft : .leftToRight
+      guard direction != model.direction else { return }
+
+      model.direction = direction
+      // The hosted slider redraws itself off the model; the custom thumbs, track and
+      // markers are moved by the layout pass this asks for.
+      setNeedsLayout()
+    }
   }
 
   /// Tints of the parts of the track - see `RNCSliderModel.minimumTrackColor`.

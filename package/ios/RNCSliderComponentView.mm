@@ -142,6 +142,20 @@ using namespace facebook::react;
 
 #pragma mark - RCTComponentViewProtocol
 
+// The reading direction comes from the layout metrics rather than from a prop: React
+// Native resolves it for the subtree the slider sits in - the app's own language and any
+// `direction` style partway down the tree - and hands the answer to every component view
+// it lays out. The base implementation turns it into `semanticContentAttribute` on this
+// view; the slider's own drawing is a hosted SwiftUI view, which reads nothing from that,
+// so the direction is handed to it directly as well.
+- (void)updateLayoutMetrics:(const LayoutMetrics &)layoutMetrics
+           oldLayoutMetrics:(const LayoutMetrics &)oldLayoutMetrics
+{
+  _sliderView.laysOutRightToLeft = layoutMetrics.layoutDirection == LayoutDirection::RightToLeft;
+
+  [super updateLayoutMetrics:layoutMetrics oldLayoutMetrics:oldLayoutMetrics];
+}
+
 - (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
 {
   const auto &oldViewProps = *std::static_pointer_cast<const RNCSliderProps>(_props);

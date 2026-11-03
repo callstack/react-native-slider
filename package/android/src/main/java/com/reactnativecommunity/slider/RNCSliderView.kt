@@ -17,6 +17,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
@@ -749,11 +750,27 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
     // The slider is only ever as thick as the control itself, and a vertical one is
     // far narrower than the view is wide, so it sits in the middle of whatever room
     // JS has given it rather than against one edge.
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      if (selectsRange) {
-        RangedSliderContent()
-      } else {
-        SingleSliderContent()
+    //
+    // A vertical slider is composed as if it read left-to-right, whatever way the app
+    // reads. Material 3 mirrors its slider whenever the direction asks for it, and a
+    // vertical one here is that horizontal slider turned a quarter turn - so the mirror
+    // would land inside the turn and carry the minimum up to the top, where the maximum
+    // belongs. The turn is what takes the reading direction along the slider's own axis
+    // and puts the minimum at the bottom, so it is the only turn a vertical slider needs.
+    //
+    // Held to the whole composed slider, track and thumbs included: the step markers hang
+    // off the track as Material 3 lays it out, inside the same turn, so they have to be
+    // measured against the same direction the track was drawn by - see
+    // [stepMarkerLayoutDirection].
+    val compositionDirection = if (isVertical) LayoutDirection.Ltr else LocalLayoutDirection.current
+
+    CompositionLocalProvider(LocalLayoutDirection provides compositionDirection) {
+      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (selectsRange) {
+          RangedSliderContent()
+        } else {
+          SingleSliderContent()
+        }
       }
     }
   }
