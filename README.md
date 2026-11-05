@@ -23,7 +23,7 @@
 
 |iOS|Android|
 |:-:|:-:|
-|![iOS Screenshot](.github/Examples/Slider-iOS-Example.gif)|![Android Screenshot](.github/Examples/Slider-Android-Example.gif)|
+|![iOS Screenshot](.github/Examples/Slider6-Demo-iOS.gif)|![Android Screenshot](.github/Examples/Slider6-Demo-Android.gif)|
 
 ## Installation & Usage
 
