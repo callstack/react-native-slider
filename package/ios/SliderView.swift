@@ -1,0 +1,1579 @@
+import Combine
+import SwiftUI
+import UIKit
+
+/// Every prop coming from JS is kept here rather than on the SwiftUI view, so a
+/// prop update re-renders just the slider instead of rebuilding the hosted
+/// hierarchy. The literal defaults only stand until the component view pushes the
+/// real props, which it does as soon as it creates the view.
+final class SliderModel: ObservableObject {
+  @Published var minimumValue: Double = 0
+  @Published var maximumValue: Double = 1
+  @Published var value: Double = 0
+  @Published var ranged: Bool = false
+  @Published var valueLeft: Double = 0
+  @Published var valueRight: Double = 1
+
+  /// Granularity of the values the slider reports: every one of them is a multiple of
+  /// this. Zero means no granularity.
+  @Published var step: Double = 0
+
+  /// Bounds the thumbs can be dragged between. The track is drawn across the whole
+  /// range regardless: a limit takes away the values a thumb can reach, not the ones
+  /// the slider shows.
+  @Published var lowerLimit: Double = 0
+  @Published var upperLimit: Double = 1
+
+  /// Whether the slider runs up the view rather than across it, with the minimum at
+  /// the bottom and the maximum at the top. Only the geometry changes with it.
+  @Published var vertical: Bool = false
+
+  /// The one place the reading direction is kept: which end of the track the minimum
+  /// value sits at. `SliderComponentView` writes it from the layout direction React
+  /// Native resolved for the subtree the slider sits in, and both the hosted slider and
+  /// the `SliderGeometry` the custom elements follow read it back - so the two cannot
+  /// mirror one another and not the other.
+  ///
+  /// A vertical slider is unaffected by it either way: turning a slider a quarter turn
+  /// takes its reading direction along with it.
+  @Published var direction: Direction = .leftToRight
+
+  /// Which end of a horizontal track the minimum value sits at.
+  enum Direction {
+    case leftToRight
+    case rightToLeft
+  }
+
+  /// Whether values run right-to-left across the view, so that everything laid out along the
+  /// track is measured from its trailing end instead. A vertical slider never reverses.
+  var reversesAlongTrack: Bool { direction == .rightToLeft && !vertical }
+
+  /// Whether the slider is switched off: washed out to the faintness of a control
+  /// nobody can reach, taking no touches, taps, drags or VoiceOver adjustments, and so
+  /// reporting no events of its own.
+  ///
+  /// The values are no part of this - a slider switched off still shows wherever the
+  /// props put its thumbs, which is why the props keep reaching them while it is off.
+  @Published var disabled: Bool = false
+
+  /// Tints of the three parts the thumbs cut the track into: below the thumb (or the
+  /// left thumb), between the two thumbs of a ranged slider, and above the thumb (or
+  /// the right thumb). `nil` leaves a part looking the way `Slider` draws it.
+  @Published var minimumTrackColor: UIColor?
+  @Published var middleRangeTrackColor: UIColor?
+  @Published var maximumTrackColor: UIColor?
+
+  /// How many of the thumbs JS has replaced with views of its own, counted from the
+  /// left one - which the single thumb counts as. A replaced thumb is still there to
+  /// be dragged, it is just no longer drawn; `SliderView` lays the view JS gave
+  /// over it instead.
+  @Published var customThumbCount: Int = 0
+
+  /// Whether JS has replaced the track with a view of its own. The slider then draws
+  /// no track at all, whatever its tints - `SliderView` lays the view JS gave
+  /// underneath it instead.
+  @Published var customTrack: Bool = false
+
+  /// Whether the steps are marked below the track - see `stepMarkerValues`.
+  @Published var stepMarkers: Bool = false
+
+  /// Whether JS has replaced the step markers with views of its own, one for each of
+  /// `stepMarkerValues`. The slider then draws none of its own - `SliderView` hangs
+  /// the views JS gave below the steps instead.
+  @Published var customStepMarkers: Bool = false
+
+  /// The values the steps stand at: every step from the minimum, and the maximum
+  /// itself when the step does not divide the range, which is how a thumb can still
+  /// reach it. A slider with no step has no steps to mark.
+  ///
+  /// JS works out the very same values to render its own step markers by, and has to
+  /// come to as many of them as this does - so the two are worked out the same way,
+  /// down to the tolerance.
+  var stepMarkerValues: [Double] {
+    let span = maximumValue - minimumValue
+    guard step > 0, span > 0 else { return [] }
+
+    let wholeSteps = Int((span / step + Self.stepTolerance).rounded(.down))
+    var values = (0...wholeSteps).map { minimumValue + Double($0) * step }
+
+    if span - Double(wholeSteps) * step > step * Self.stepTolerance {
+      values.append(maximumValue)
+    }
+
+    return values
+  }
+
+  /// Whether a thumb stands on the step at the given value - which is what `marked`
+  /// tells a step marker JS renders, too.
+  func isMarked(_ stepValue: Double) -> Bool {
+    let thumbValues = ranged ? [valueLeft, valueRight] : [value]
+
+    return thumbValues.contains { abs($0 - stepValue) <= step * Self.stepTolerance }
+  }
+
+  /// How faint a slider switched off is drawn, at the faintness a control that cannot be
+  /// reached is drawn at. Shared by the slider `SliderContent` hosts and by the views
+  /// JS renders over it, so that the two go faint together - see
+  /// `SliderView.applyDisabledLook`.
+  static let disabledAlpha: CGFloat = 0.3
+
+  /// Leeway, as a fraction of a step, for a value to count as landing on one.
+  static let stepTolerance = 1e-9
+
+  /// Which end of the range a thumb drags. The single thumb of a slider that is not
+  /// ranged counts as the left one, which is how it shares the drag origins and the
+  /// clamping below with a ranged slider's.
+  ///
+  /// The two names stand for the two ends of the *range* - the lower and the upper value -
+  /// and not for the two ends of the view: on a slider reading right-to-left the left thumb
+  /// is the one drawn further right. The names line up with `valueLeft` and `valueRight`,
+  /// which JS gives the same meaning, and hold it whichever way the slider reads.
+  enum Thumb {
+    case single
+    case left
+    case right
+  }
+
+  /// The value a thumb holds.
+  func value(of thumb: Thumb) -> Double {
+    switch thumb {
+    case .single: return value
+    case .left: return valueLeft
+    case .right: return valueRight
+    }
+  }
+
+  /// Takes a thumb to the given value, keeping it inside the limits and on its own
+  /// side of the other thumb, and reports it to JS. The two thumbs cannot swap places.
+  ///
+  /// A thumb held against a limit stops moving, and a value that has not moved is not
+  /// reported, so JS hears nothing of a drag carrying on beyond it. Answers whether the
+  /// thumb moved.
+  ///
+  /// Both a drag of a thumb and a tap on the track go through here, so the two cannot
+  /// disagree on where a value lands.
+  @discardableResult
+  func set(_ newValue: Double, of thumb: Thumb) -> Bool {
+    // Drags already in flight when the slider is switched off keep carrying values
+    // until SwiftUI has been told to stop reading them.
+    guard !disabled else { return false }
+
+    let stepped = newValue.snapped(to: step)
+    let limits = self.limits
+
+    switch thumb {
+    case .single:
+      let clamped = stepped.clamped(to: limits)
+      guard clamped != value else { return false }
+      value = clamped
+      onValueChange?(clamped)
+    case .left:
+      let clamped = stepped.clamped(
+        to: limits.lowerBound...valueRight.clamped(to: limits)
+      )
+      guard clamped != valueLeft else { return false }
+      valueLeft = clamped
+      onLeftValueChange?(clamped)
+    case .right:
+      let clamped = stepped.clamped(
+        to: valueLeft.clamped(to: limits)...limits.upperBound
+      )
+      guard clamped != valueRight else { return false }
+      valueRight = clamped
+      onRightValueChange?(clamped)
+    }
+
+    return true
+  }
+
+  /// The value a thumb had when the drag in progress began, or `nil` when that thumb is
+  /// not being dragged. The single thumb keeps its origin in the left one of the two.
+  ///
+  /// A drag is tracked by how far it has travelled rather than by where the finger is,
+  /// so grabbing a thumb off-centre does not snap it under the finger.
+  var leftDragOrigin: Double?
+  var rightDragOrigin: Double?
+
+  /// Whether the user has hold of a thumb, which is simply whether either of the
+  /// origins above is set.
+  ///
+  /// While the user drags, the thumb position is owned by this view. Value updates
+  /// coming from JS in the meantime would fight the gesture, so they are ignored - the
+  /// slider is uncontrolled for the duration of the drag.
+  var isSliding: Bool { leftDragOrigin != nil || rightDragOrigin != nil }
+
+  func dragOrigin(of thumb: Thumb) -> Double? {
+    switch thumb {
+    case .single, .left: return leftDragOrigin
+    case .right: return rightDragOrigin
+    }
+  }
+
+  /// Takes hold of a thumb, by remembering the value it is held at, or lets go of it.
+  func setDragOrigin(_ origin: Double?, of thumb: Thumb) {
+    switch thumb {
+    case .single, .left: leftDragOrigin = origin
+    case .right: rightDragOrigin = origin
+    }
+  }
+
+  /// The thumb a hold on the track has picked up, and `nil` when the track is not held:
+  /// one thumb at a time, for as long as the finger is down.
+  ///
+  /// The thumbs' own drags report being pressed through `@GestureState`, which resets
+  /// itself however a gesture ends. This is the track's half of the same look, written
+  /// by UIKit and so published here for the hosted slider to draw.
+  @Published var heldThumb: Thumb?
+
+  /// Whether a hold on the track has a thumb in hand.
+  var isHeld: Bool { heldThumb != nil }
+
+  /// Lets go of every thumb this holds, and answers a drag it was in the middle of with
+  /// the completion JS was promised for it.
+  ///
+  /// Switching a slider off takes the gestures driving its drag away mid-flight, leaving
+  /// the drag with no end to be read out of it, and leaves the thumb marked as held -
+  /// which would keep every value pushed from JS off that thumb for good.
+  func releaseThumbs() {
+    let wasSliding = isSliding || isHeld
+    heldThumb = nil
+    leftDragOrigin = nil
+    rightDragOrigin = nil
+
+    if wasSliding {
+      onSlidingComplete?()
+    }
+  }
+
+  /// Invoked continuously while the user drags the thumb.
+  var onValueChange: ((Double) -> Void)?
+
+  /// Invoked continuously while the user drags the respective thumb of a ranged slider.
+  var onLeftValueChange: ((Double) -> Void)?
+  var onRightValueChange: ((Double) -> Void)?
+
+  /// Invoked once the user takes hold of a thumb, and again once they let go of it -
+  /// whether or not the drag in between moved it anywhere.
+  var onSlidingStart: (() -> Void)?
+  var onSlidingComplete: (() -> Void)?
+
+  /// SwiftUI traps on an empty or descending range. Props arrive one at a time, so a
+  /// momentarily inverted range is expected rather than exceptional.
+  var range: ClosedRange<Double> {
+    maximumValue > minimumValue ? minimumValue...maximumValue : minimumValue...(minimumValue + 1)
+  }
+
+  /// The range narrowed down to the part of it the thumbs can be dragged across.
+  ///
+  /// A limit that cannot be honoured is dropped: limits that have crossed leave the
+  /// slider unlimited, and one reaching out of the range limits only as far as the
+  /// range itself goes.
+  var limits: ClosedRange<Double> {
+    let range = self.range
+    guard lowerLimit <= upperLimit else { return range }
+
+    return lowerLimit.clamped(to: range)...upperLimit.clamped(to: range)
+  }
+}
+
+/// Where the thumbs of the slider sit in a view of the given size.
+///
+/// The slider draws the thumbs, but a custom thumb from JS is a UIKit view laid over
+/// it, so both of them read the geometry from here to agree on where a thumb is.
+///
+/// The geometry is written along two axes rather than across the view: values are
+/// spread along its *length*, and the thumbs are as thick as its *breadth* allows, with
+/// `SliderModel.vertical` deciding which of the view's sides each of those is.
+///
+/// The *along* axis is read from the end of the track the minimum value sits at, which
+/// `reversed` says which end that is, so that a caller that only ever asks for distances
+/// along the track never has to know which way round it runs.
+struct SliderGeometry {
+  let size: CGSize
+  let vertical: Bool
+  let ranged: Bool
+  let range: ClosedRange<Double>
+  let length: CGFloat
+  let breadth: CGFloat
+
+  /// Whether the minimum value sits at the trailing end of the view rather than the leading
+  /// one - see `SliderModel.reversesAlongTrack`.
+  let reversed: Bool
+
+  /// The extent of a thumb along the slider and across it.
+  ///
+  /// A thumb is never thicker than the slider itself: JS decides how much room there
+  /// is across it, and a thumb spilling out would draw over its neighbours. One that
+  /// has to be thinner is shrunk as a whole, keeping its shape.
+  let thumbLength: CGFloat
+  let thumbThickness: CGFloat
+
+  /// The span the near edge of a thumb moves across. The thumbs of a ranged slider
+  /// stay fully inside the view, so it is short of the length by one thumb there.
+  let travel: CGFloat
+
+  /// Distance from the end of the view the minimum value sits at to the near edge of
+  /// the left (or single) and of the right thumb.
+  let leftOffset: CGFloat
+  let rightOffset: CGFloat
+
+  init(model: SliderModel, size: CGSize) {
+    self.size = size
+    vertical = model.vertical
+    ranged = model.ranged
+    range = model.range
+    reversed = model.reversesAlongTrack
+    length = vertical ? size.height : size.width
+    breadth = vertical ? size.width : size.height
+    let thumbScale = min(breadth / Self.thumbThickness, 1)
+    thumbLength = Self.thumbLength * thumbScale
+    thumbThickness = Self.thumbThickness * thumbScale
+    travel = max(length - thumbLength, 0)
+    leftOffset = CGFloat(Self.fraction(of: model.ranged ? model.valueLeft : model.value, in: range)) * travel
+    rightOffset = CGFloat(Self.fraction(of: model.valueRight, in: range)) * travel
+  }
+
+  /// How far along the slider the centre of the thumb whose near edge sits at the given
+  /// offset stands.
+  ///
+  /// The offsets place a thumb by its near edge, while a thumb covers the track around
+  /// its *centre* - so that is where the parts of the track have to be cut into. Cutting
+  /// at the near edge leaves a strip of it on show beside a thumb JS replaces, which
+  /// draws none of its own.
+  func thumbCenterOffset(at offset: CGFloat) -> CGFloat {
+    offset + thumbLength / 2
+  }
+
+  /// Centre of the thumb whose near edge sits the given distance along the slider, in
+  /// the coordinates of the view. The thumbs lie along the middle of the view.
+  ///
+  /// The along axis becomes the view's y going upwards on a vertical slider, and its x
+  /// going towards the end its minimum value sits at on a horizontal one - leftwards when
+  /// the slider reads right-to-left.
+  func thumbCenter(atOffset offset: CGFloat) -> CGPoint {
+    let along = thumbCenterOffset(at: offset)
+
+    if vertical {
+      return CGPoint(x: size.width / 2, y: size.height - along)
+    }
+
+    return CGPoint(
+      x: reversed ? size.width - along : along,
+      y: size.height / 2
+    )
+  }
+
+  /// The point the marker of the step at the given value hangs from: the middle of its
+  /// top edge, right under where the thumb stands on that step and clear of it. On a
+  /// vertical slider the markers sit to the right of the track instead, at the middle of
+  /// their left edge - they are not turned with the slider, which keeps whatever they
+  /// read the right way up.
+  ///
+  /// Where along the track a marker stands follows the reading direction, exactly as
+  /// `thumbCenter(atOffset:)` does for a thumb; how far across it hangs does not.
+  func stepMarkerAnchor(at value: Double) -> CGPoint {
+    let nearEdge = CGFloat(Self.fraction(of: value, in: range)) * travel
+    let along = thumbCenterOffset(at: nearEdge)
+    let across = breadth / 2 + thumbThickness / 2 + Self.stepMarkerGap
+
+    if vertical {
+      return CGPoint(x: across, y: size.height - along)
+    }
+
+    return CGPoint(
+      x: reversed ? size.width - along : along,
+      y: across
+    )
+  }
+
+  /// How far a step marker keeps from the thumb.
+  static let stepMarkerGap: CGFloat = 4
+
+  /// The diameter of a built-in step marker.
+  static let stepMarkerSize: CGFloat = 4
+
+  /// How thick a slider has to be across for the built-in step markers to fit inside
+  /// it: a full-sized thumb, with a marker and its gap on either side of it, as the
+  /// track stays in the middle of the slider.
+  static var stepMarkedThickness: CGFloat {
+    thumbThickness + (stepMarkerGap + stepMarkerSize) * 2
+  }
+
+  static func fraction(of value: Double, in range: ClosedRange<Double>) -> Double {
+    let span = range.upperBound - range.lowerBound
+    guard span > 0 else { return 0 }
+
+    return ((value - range.lowerBound) / span).clamped(to: 0...1)
+  }
+
+  /// Match the thumb `UISlider` draws: a capsule lying along the track since iOS 26,
+  /// and a circle before it.
+  static var thumbLength: CGFloat {
+    if #available(iOS 26.0, *) {
+      return 38
+    }
+    return 28
+  }
+
+  static var thumbThickness: CGFloat {
+    if #available(iOS 26.0, *) {
+      return 24
+    }
+    return 28
+  }
+
+  /// The value asked for by a tap on the given point of the view: the one whose thumb
+  /// is placed under the finger, rather than pulled up beside it. Where the step
+  /// leaves that value is no concern of the geometry - the thumb being moved answers
+  /// for that, exactly as it does for a drag.
+  func value(tappedAt point: CGPoint) -> Double {
+    let span = range.upperBound - range.lowerBound
+    guard travel > 0, span > 0 else { return range.lowerBound }
+
+    let along = min(max(offset(of: point) - thumbLength / 2, 0), travel)
+
+    return range.lowerBound + Double(along / travel) * span
+  }
+
+  /// How far along the slider the given point of the view is, measured from the end
+  /// the minimum value sits at - the same measure `leftOffset` and `rightOffset` place
+  /// the thumbs by, and the inverse of `thumbCenter(atOffset:)`. A vertical slider grows
+  /// upwards, which the coordinates of the view run backwards along, and a horizontal one
+  /// reading right-to-left grows leftwards, which they run backwards along too.
+  func offset(of point: CGPoint) -> CGFloat {
+    let along = vertical ? size.height - point.y : (reversed ? size.width - point.x : point.x)
+
+    return min(max(along, 0), length)
+  }
+
+  /// The thumb a tap on the given point of the view should carry to it: the closest
+  /// one, unless the tap lands on a thumb to begin with. A thumb that has nowhere to
+  /// travel to has nowhere to be sought to either.
+  func thumb(tappedAt point: CGPoint) -> SliderModel.Thumb? {
+    guard travel > 0, !touchesThumb(at: point) else { return nil }
+
+    let offset = offset(of: point)
+
+    return thumbs.min {
+      abs(thumbCenterOffset(at: $0.offset) - offset)
+        < abs(thumbCenterOffset(at: $1.offset) - offset)
+    }?.thumb
+  }
+
+  /// Whether the given point of the view is one a thumb is drawn to catch. A touch
+  /// falling there belongs to that thumb rather than to the track, which is exactly
+  /// what `RNCRangedSliderContent` makes of it too - so that a tap answers either as a
+  /// thumb or as the track, never as both nor as neither.
+  func touchesThumb(at point: CGPoint) -> Bool {
+    thumbs.contains { thumbTouchRect(atOffset: $0.offset).contains(point) }
+  }
+
+  /// The rectangle a thumb whose near edge sits at the given offset answers touches
+  /// over: itself grown on either side of each axis to the touch target Apple asks for
+  /// - the padding `RNCRangedSliderContent` gives a thumb, so that a thumb is answered
+  /// wherever it catches a drag and nowhere else.
+  func thumbTouchRect(atOffset offset: CGFloat) -> CGRect {
+    let center = thumbCenter(atOffset: offset)
+    let along = Self.touchSlop(around: thumbLength)
+    let across = Self.touchSlop(around: thumbThickness)
+
+    return vertical
+      ? CGRect(
+          x: center.x - thumbThickness / 2 - across,
+          y: center.y - thumbLength / 2 - along,
+          width: thumbThickness + across * 2,
+          height: thumbLength + along * 2
+      )
+      : CGRect(
+          x: center.x - thumbLength / 2 - along,
+          y: center.y - thumbThickness / 2 - across,
+          width: thumbLength + along * 2,
+          height: thumbThickness + across * 2
+      )
+  }
+
+  /// The thumbs there are to be moved, and how far along the slider each of them
+  /// stands. The single thumb of a slider that is not ranged is the left one, as it is
+  /// everywhere else.
+  private var thumbs: [(thumb: SliderModel.Thumb, offset: CGFloat)] {
+    ranged
+      ? [(.left, leftOffset), (.right, rightOffset)]
+      : [(.single, leftOffset)]
+  }
+
+  /// How much to grow a thumb on either side of the given extent of it to reach the
+  /// touch target Apple asks for.
+  static func touchSlop(around extent: CGFloat) -> CGFloat {
+    max((minimumTouchTarget - extent) / 2, 0)
+  }
+
+  /// The smallest control Apple's guidelines will accept as a touch target.
+  static let minimumTouchTarget: CGFloat = 44
+}
+
+/// The hosted half of the slider.
+///
+/// Everything the slider draws is placed by a distance along the track, and that distance
+/// is turned into a place in the view by `RNCRangedSliderContent.stackAlignment` and
+/// `offsetAlong(_:)` - which is the one place the reading direction is applied. The
+/// environment's own direction is therefore pinned to reading left-to-right, so that the
+/// named alignments and the padding those two lean on resolve the same way whatever
+/// language the app runs in, and cannot turn the track round a second time.
+///
+/// Nothing hosted loses out on that pinning: the track, the thumbs and the markers are
+/// capsules and a path, and the only text here is the percentage VoiceOver reads out.
+/// What JS renders in place of those is hosted outside this view, by React Native, and
+/// keeps the direction React Native gives it.
+struct SliderContent: View {
+  @ObservedObject var model: SliderModel
+
+  var body: some View {
+    RNCRangedSliderContent(model: model)
+      // A slider switched off is the same slider drawn faint, the way `UISlider` draws
+      // itself once it is switched off - the track and the thumbs keeping their shapes
+      // and their places.
+      //
+      // Only the slider this view draws is washed out here: what JS rendered is mounted
+      // over it as a view of its own, and is dimmed to this same faintness there - see
+      // `SliderView.applyDisabledLook`.
+      .opacity(model.disabled ? Double(SliderModel.disabledAlpha) : 1)
+      .environment(\.layoutDirection, .leftToRight)
+  }
+}
+
+/// Apple's slider, asked for nothing but its height.
+///
+/// Only `measuredIntrinsicSize` builds this, to ask SwiftUI how tall its own slider wants
+/// to be, and it is thrown away once the answer comes back. Nothing ever shows it: a
+/// slider of one value is drawn by `RNCRangedSliderContent` too, holding a single thumb.
+struct RNCSingleSliderContent: View {
+  @ObservedObject var model: SliderModel
+
+  var body: some View {
+    let range = model.range
+
+    Slider(
+      value: Binding(
+        get: { model.value.clamped(to: range) },
+        set: { newValue in
+          model.value = newValue
+          model.onValueChange?(newValue)
+        }
+      ),
+      in: range
+    )
+  }
+}
+
+/// SwiftUI has no two-thumb slider and no vertical one, so the slider is drawn here: a
+/// track, the selected span, and a thumb at each end of it. The shape follows `Slider` -
+/// a capsule track with the selected part tinted, and a white capsule thumb that turns
+/// to Liquid Glass while it is held on iOS 26 - so that this slider does not look
+/// foreign next to a plain one.
+///
+/// Where everything goes is worked out by `SliderGeometry` - and on a vertical slider
+/// the left thumb is the bottom one, the direction its value grows in being the only
+/// thing that changes.
+struct RNCRangedSliderContent: View {
+  @ObservedObject var model: SliderModel
+
+  /// The two shapes a thumb takes are one and the same thing to this view, to the thumb
+  /// being dragged and to the one a tap on the track jumps.
+  private typealias Thumb = SliderModel.Thumb
+
+  /// Whether the user has hold of the left (or single) and of the right thumb, which is
+  /// what turns it to glass. Kept apart from the drag origins in the model, as a
+  /// gesture state resets itself however the touch ends - a cancelled one included.
+  @GestureState private var isLeftThumbPressed = false
+  @GestureState private var isRightThumbPressed = false
+
+  var body: some View {
+    GeometryReader { proxy in
+      let geometry = SliderGeometry(model: model, size: proxy.size)
+      let range = geometry.range
+      let thumbSize = CGSize(
+        width: model.vertical ? geometry.thumbThickness : geometry.thumbLength,
+        height: model.vertical ? geometry.thumbLength : geometry.thumbThickness
+      )
+
+      let lowerColor = tint(model.minimumTrackColor, or: model.ranged ? Self.trackColor : .accentColor)
+      let middleColor = tint(model.middleRangeTrackColor, or: .accentColor)
+      let upperColor = tint(model.maximumTrackColor, or: Self.trackColor)
+      // The parts of the track are cut at the centre of the thumbs, not at the near
+      // edge the offsets give - see `thumbCenterOffset(at:)`.
+      let lowerEnd = geometry.thumbCenterOffset(at: geometry.leftOffset)
+      let upperStart = geometry.thumbCenterOffset(
+        at: model.ranged ? geometry.rightOffset : geometry.leftOffset
+      )
+
+      // Everything is placed by how far along the slider it sits, so the stack is
+      // anchored at the end the minimum value is at: the leading edge across the view, or
+      // the trailing one when the slider reads right-to-left, and the bottom one up it.
+      ZStack(alignment: stackAlignment) {
+        if !model.customTrack {
+          track(Self.trackColor, length: nil)
+
+          track(lowerColor, length: lowerEnd)
+
+          // Drawn between the two thumb centres, which is where the parts of the track
+          // are cut - so its length is the gap between the near edges the offsets give,
+          // and it is inset by half a thumb from the nearer of them. `max` keeps it from
+          // inverting on values crossed by JS.
+          if model.ranged {
+            track(middleColor, length: max(geometry.rightOffset - geometry.leftOffset, 0))
+              .offset(offsetAlong(geometry.thumbCenterOffset(at: min(geometry.leftOffset, geometry.rightOffset))))
+          }
+
+          track(upperColor, length: geometry.length - upperStart).offset(offsetAlong(upperStart))
+        }
+        if model.ranged {
+          thumb(.right, size: thumbSize, offset: geometry.rightOffset, range: range, travel: geometry.travel)
+          thumb(.left, size: thumbSize, offset: geometry.leftOffset, range: range, travel: geometry.travel)
+            .zIndex(model.valueLeft >= range.upperBound ? 1 : 0)
+        } else {
+          thumb(.single, size: thumbSize, offset: geometry.leftOffset, range: range, travel: geometry.travel)
+        }
+      }
+      // Anchored at the same end as the stack, which is only as big as what it holds:
+      // with the track replaced that is just the thumbs, and a stack centred in the
+      // view would have them start out from its middle.
+      .frame(
+        width: proxy.size.width,
+        height: proxy.size.height,
+        alignment: stackAlignment
+      )
+      .background(
+        stepMarkers(
+          geometry,
+          marked: model.ranged ? middleColor : lowerColor,
+          unmarked: tint(model.maximumTrackColor, or: Self.stepMarkerColor)
+        )
+      )
+    }
+  }
+
+  /// The markers of the steps, drawn as dots hanging below the thumbs, in the tint of
+  /// the selected part of the track for a step a thumb is on and in that of the rest of
+  /// it otherwise.
+  ///
+  /// Each set of dots is a single path, so that a slider with many steps does not cost a
+  /// view apiece - and a path draws wherever its points are, so that the dots are not
+  /// cut off on a slider too thin to hold them.
+  @ViewBuilder
+  private func stepMarkers(_ geometry: SliderGeometry, marked: Color, unmarked: Color) -> some View {
+    if model.stepMarkers, !model.customStepMarkers {
+      let values = model.stepMarkerValues
+
+      ZStack {
+        stepMarkerDots(at: values.filter { !model.isMarked($0) }, in: geometry).fill(unmarked)
+        stepMarkerDots(at: values.filter(model.isMarked), in: geometry).fill(marked)
+      }
+      .allowsHitTesting(false)
+      .accessibilityHidden(true)
+    }
+  }
+
+  private func stepMarkerDots(at values: [Double], in geometry: SliderGeometry) -> Path {
+    let size = SliderGeometry.stepMarkerSize
+
+    return Path { path in
+      for value in values {
+        let anchor = geometry.stepMarkerAnchor(at: value)
+        let origin = model.vertical
+          ? CGPoint(x: anchor.x, y: anchor.y - size / 2)
+          : CGPoint(x: anchor.x - size / 2, y: anchor.y)
+        path.addEllipse(in: CGRect(origin: origin, size: CGSize(width: size, height: size)))
+      }
+    }
+  }
+
+  private func track(_ color: Color, length: CGFloat?) -> some View {
+    Capsule()
+      .fill(color)
+      .frame(
+        width: model.vertical ? Self.trackThickness : length,
+        height: model.vertical ? length : Self.trackThickness
+      )
+  }
+
+  private func tint(_ color: UIColor?, or fallback: Color) -> Color {
+    color.map { Color(uiColor: $0) } ?? fallback
+  }
+
+  private func thumb(
+    _ thumb: Thumb,
+    size: CGSize,
+    offset: CGFloat,
+    range: ClosedRange<Double>,
+    travel: CGFloat
+  ) -> some View {
+    // A thumb is a small thing to grab, and the two of them can end up right next to
+    // each other, so the area that answers to a touch is padded out to the 44pt Apple
+    // asks for, on whichever side of the thumb falls short of it. The padding is then
+    // shifted back off the offset, leaving the thumb itself where the value puts it.
+    let horizontalSlop = SliderGeometry.touchSlop(around: size.width)
+    let verticalSlop = SliderGeometry.touchSlop(around: size.height)
+    let alongSlop = model.vertical ? verticalSlop : horizontalSlop
+
+    return thumbFace(isReplaced: isCustom(thumb), isPressed: isPressed(thumb))
+      .frame(width: size.width, height: size.height)
+      .padding(.horizontal, horizontalSlop)
+      .padding(.vertical, verticalSlop)
+      .contentShape(Rectangle())
+      .offset(offsetAlong(offset - alongSlop))
+      .gesture(
+        DragGesture(minimumDistance: 0)
+          .updating(pressedState(of: thumb)) { _, isPressed, _ in isPressed = true }
+          .onChanged { gesture in
+            let origin = model.dragOrigin(of: thumb) ?? beginDrag(of: thumb)
+
+            let travelled = travel > 0
+              ? Double(dragDistance(of: gesture) / travel) * span(of: range)
+              : 0
+            model.set(origin + travelled, of: thumb)
+          }
+          .onEnded { _ in endDrag(of: thumb) }
+      )
+      // Drawn rather than built from a UIKit control, so VoiceOver has to be told what
+      // this is by hand. An adjustment moves the thumb by one step, or by 10% of the
+      // range when the slider has none - which is what `UISlider` does.
+      .accessibilityElement()
+      .accessibilityValue(Text(percentage(of: model.value(of: thumb), in: range)))
+      .outOfReach(model.disabled)
+      .accessibilityAdjustableAction { direction in
+        // Guarded for its own sake as well, the rotor being left where it was put on a
+        // system too old to hear it taken away.
+        guard !model.disabled else { return }
+
+        let step = model.step > 0 ? model.step : span(of: range) / 10
+        switch direction {
+        case .increment:
+          model.set(model.value(of: thumb) + step, of: thumb)
+        case .decrement:
+          model.set(model.value(of: thumb) - step, of: thumb)
+        @unknown default:
+          break
+        }
+      }
+  }
+
+  /// What a thumb looks like. A thumb JS has replaced is still here to be dragged, only
+  /// undrawn - the clear capsule keeps its place.
+  ///
+  /// On iOS 26 a thumb that is held grows and turns to clear glass, the track showing
+  /// through it, the way the thumb of `Slider` does. The glass only grows the thumb as
+  /// it is drawn, so neither the touch area nor where the value puts the thumb move
+  /// with it.
+  @ViewBuilder
+  private func thumbFace(isReplaced: Bool, isPressed: Bool) -> some View {
+    if isReplaced {
+      Capsule().fill(Color.clear)
+    } else {
+      #if compiler(>=6.2) && os(iOS)
+      if #available(iOS 26.0, *) {
+        Capsule()
+          .fill(isPressed ? Color.clear : Color.white)
+          .shadow(color: .black.opacity(isPressed ? 0 : 0.25), radius: 2, y: 1)
+          .glassEffect(isPressed ? .clear.interactive() : .identity, in: Capsule())
+          .scaleEffect(isPressed ? Self.pressedThumbScale : 1)
+          .animation(.spring(response: 0.3, dampingFraction: 0.65), value: isPressed)
+      } else {
+        Capsule()
+          .fill(Color.white)
+          .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+      }
+      #else
+      Capsule()
+        .fill(Color.white)
+        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+      #endif
+    }
+  }
+
+  /// Whether the given thumb should be drawn held: while its own gesture has hold of
+  /// it, or while a hold on the track has picked it up. The latter comes from UIKit,
+  /// which cannot feed a SwiftUI gesture state.
+  private func isPressed(_ thumb: Thumb) -> Bool {
+    if model.heldThumb == thumb { return true }
+
+    switch thumb {
+    case .single, .left: return isLeftThumbPressed
+    case .right: return isRightThumbPressed
+    }
+  }
+
+  private func pressedState(of thumb: Thumb) -> GestureState<Bool> {
+    switch thumb {
+    case .single, .left: return $isLeftThumbPressed
+    case .right: return $isRightThumbPressed
+    }
+  }
+
+  private func isCustom(_ thumb: Thumb) -> Bool {
+    switch thumb {
+    case .single, .left: return model.customThumbCount > 0
+    case .right: return model.customThumbCount > 1
+    }
+  }
+
+  /// Takes hold of a thumb, remembering where it stood so that the drag can be tracked
+  /// by how far it travels, and tells JS that a drag has begun.
+  ///
+  /// Only the thumb grabbed first reports a start: a second finger landing on the other
+  /// thumb of a ranged slider joins the drag already in progress, so that every start is
+  /// answered by exactly one complete. A slider that is switched off begins nothing.
+  private func beginDrag(of thumb: Thumb) -> Double {
+    let origin = model.value(of: thumb)
+    guard !model.disabled else { return origin }
+
+    let wasSliding = model.isSliding
+    model.setDragOrigin(origin, of: thumb)
+
+    if !wasSliding {
+      model.onSlidingStart?()
+    }
+
+    return origin
+  }
+
+  /// Lets go of a thumb, and tells JS the drag is over once the last thumb has been let
+  /// go of - whether or not it moved anywhere in between.
+  private func endDrag(of thumb: Thumb) {
+    // A drag that was never begun - a gesture that ended without ever having changed -
+    // has nothing to report.
+    guard model.dragOrigin(of: thumb) != nil else { return }
+
+    model.setDragOrigin(nil, of: thumb)
+
+    if !model.isSliding {
+      model.onSlidingComplete?()
+    }
+  }
+
+  private func span(of range: ClosedRange<Double>) -> Double {
+    range.upperBound - range.lowerBound
+  }
+
+  /// How far a drag has carried a thumb along the slider, towards the maximum value. A
+  /// vertical slider grows upwards, which SwiftUI's vertical coordinates run backwards
+  /// along, and a horizontal one reading right-to-left grows leftwards, which they run
+  /// backwards along too.
+  private func dragDistance(of gesture: DragGesture.Value) -> CGFloat {
+    if model.vertical {
+      return -gesture.translation.height
+    }
+
+    return model.reversesAlongTrack ? -gesture.translation.width : gesture.translation.width
+  }
+
+  /// A shift of the given distance along the slider, away from the end its minimum
+  /// value sits at - the same direction `dragDistance(of:)` measures a drag in, and the
+  /// same pair of directions `SliderGeometry` measures offsets in.
+  private func offsetAlong(_ distance: CGFloat) -> CGSize {
+    if model.vertical {
+      return CGSize(width: 0, height: -distance)
+    }
+
+    return CGSize(width: model.reversesAlongTrack ? -distance : distance, height: 0)
+  }
+
+  /// The corner of the view the track is anchored at: the end its minimum value sits at,
+  /// laid out along the slider - which is its bottom on a vertical one, and its trailing
+  /// edge on a horizontal one reading right-to-left.
+  ///
+  /// Pairs with `offsetAlong(_:)`, which turns on the same `reversesAlongTrack` and so
+  /// measures the distance from the same end this anchors at.
+  private var stackAlignment: Alignment {
+    if model.vertical {
+      return .bottom
+    }
+
+    return model.reversesAlongTrack ? .trailing : .leading
+  }
+
+  private func percentage(of value: Double, in range: ClosedRange<Double>) -> String {
+    NumberFormatter.localizedString(
+      from: NSNumber(value: SliderGeometry.fraction(of: value, in: range)),
+      number: .percent
+    )
+  }
+
+  /// How much bigger a held thumb is drawn, as `Slider` grows its own.
+  private static let pressedThumbScale: CGFloat = 1.5
+
+  private static let trackThickness: CGFloat = 4
+
+  /// What `Slider` leaves the unselected part of its track looking like.
+  private static let trackColor = Color(uiColor: .systemFill)
+
+  /// What a built-in step marker no thumb is on looks like, which has to stand out
+  /// against whatever the slider is laid on rather than against the track.
+  private static let stepMarkerColor = Color(uiColor: .tertiaryLabel)
+}
+
+/// Hosts the SwiftUI slider inside the UIKit view hierarchy Fabric mounts.
+///
+/// The hosting controller is parented to the closest view controller once this view
+/// reaches a window: SwiftUI needs a controller in the hierarchy for environment
+/// propagation, and Fabric hands us a plain view with no controller of its own.
+@objc(SliderView)
+public final class SliderView: UIView {
+
+  private let model: SliderModel
+  private let hostingController: UIHostingController<SliderContent>
+
+  /// The views JS rendered as the slider's children, in the order it rendered them: the
+  /// track, when `customTrack` says JS replaced it, then the single thumb, or the left
+  /// and then the right one, when `customThumb` says JS replaced them, and then a step
+  /// marker for each step, when `customStepMarkers` says JS replaced those.
+  private var childViews: [UIView] = []
+
+  /// Whether JS replaced the thumbs with views of its own, which is what tells the
+  /// thumbs apart from the step markers that follow them.
+  private var hasCustomThumb = false
+
+  /// One for each thumb there can be, holding the view that replaces it. Each is kept
+  /// centred on its thumb and takes up no room of its own: the shadow node centres the
+  /// view it holds on its origin, so the view ends up centred on the thumb too.
+  ///
+  /// They take no touches, which leaves every drag to the slider underneath.
+  private let thumbContainers: [UIView] = (0..<2).map { _ in
+    let container = UIView()
+    container.isUserInteractionEnabled = false
+    return container
+  }
+
+  /// Holds the view that replaces the track, the way `thumbContainers` hold the thumbs:
+  /// centred on the middle of the slider, and turned a quarter turn anticlockwise on a
+  /// vertical one, which carries the start of the track down to the bottom, where the
+  /// minimum is.
+  ///
+  /// It lies underneath the slider rather than over it, so that the thumbs the slider
+  /// draws stay on top of the track.
+  private let trackContainer: UIView = {
+    let container = UIView()
+    container.isUserInteractionEnabled = false
+    return container
+  }()
+
+  /// One for each step JS renders a marker for, holding that marker the way
+  /// `thumbContainers` hold the thumbs - except that each is kept at the point its
+  /// marker hangs from, see `SliderGeometry.stepMarkerAnchor(at:)`.
+  ///
+  /// There are as many of them as there are markers, so they are made as the markers
+  /// come, and lie between the slider and the thumbs.
+  private var stepMarkerContainers: [UIView] = []
+
+  /// Keeps the custom thumbs moving with the slider - see `layoutSubviews`.
+  private var modelObservation: AnyCancellable?
+
+  /// Reads a tap anywhere on the slider as the track being tapped to move the thumb
+  /// to - the way `UISlider` behaves, which this slider is drawn to stand in for.
+  ///
+  /// It sits on this view rather than being a gesture of the hosted slider, as the
+  /// whole of the track has to answer it while the thumbs keep their own gestures.
+  ///
+  /// The touches are left to carry on underneath it, so that the drags of the hosted
+  /// slider go on seeing the whole of a touch even when a tap ends up being read out of
+  /// it - a thumb held without ever moving would otherwise never be told it has been
+  /// let go of.
+  private lazy var tapToSeek: UITapGestureRecognizer = {
+    let recognizer = UITapGestureRecognizer(target: self, action: #selector(seekToTap(_:)))
+    recognizer.cancelsTouchesInView = false
+
+    return recognizer
+  }()
+
+  /// Takes over a touch held on the track, after a moment, and drags the thumb nearest
+  /// the finger for as long as it is held. The same thing as the tap above done slowly,
+  /// so the two share `beginSeek(at:)`, `continueSeek(at:)` and `endSeek()`, and it sits
+  /// on the very same track for the very same reason.
+  ///
+  /// `allowableMovement` is left at what UIKit asks for, so a finger already sliding as
+  /// it lands is left to whatever the slider sits in, and only a finger that comes to
+  /// rest on the track picks a thumb up. Once the hold has begun the finger is free to
+  /// travel the whole track.
+  private lazy var holdToSeek: UILongPressGestureRecognizer = {
+    let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(seekToHold(_:)))
+    recognizer.minimumPressDuration = Self.seekHoldDuration
+    recognizer.cancelsTouchesInView = false
+
+    return recognizer
+  }()
+
+  /// How long the track has to be held before a thumb is picked up off it - short
+  /// enough that picking one up this way feels like it begins at once.
+  private static let seekHoldDuration: TimeInterval = 0.15
+
+  /// Installs the two reads of the track, keeping them from answering the same touch
+  /// twice: a tap recognizes on release however long the finger was down, so without
+  /// this a press held past the hold duration would be answered by the hold and then
+  /// again by the tap.
+  private func installSeekGestures() {
+    tapToSeek.require(toFail: holdToSeek)
+    addGestureRecognizer(tapToSeek)
+    addGestureRecognizer(holdToSeek)
+  }
+
+  /// Drags the thumb picked at the start of a hold along with the finger.
+  @objc private func seekToHold(_ recognizer: UILongPressGestureRecognizer) {
+    let point = recognizer.location(in: hostingController.view)
+
+    switch recognizer.state {
+    case .began:
+      beginSeek(at: point)
+    case .changed:
+      continueSeek(at: point)
+    case .ended, .cancelled, .failed:
+      endSeek()
+    default:
+      break
+    }
+  }
+
+  /// Takes the thumb nearest a tap on the track to where the tap landed.
+  ///
+  /// A tap landing on a thumb, or arriving while a thumb is already being dragged, is
+  /// left to the hosted slider.
+  ///
+  /// A tap is reported the way a drag of the same distance would have been: a start,
+  /// the value, and a complete.
+  @objc private func seekToTap(_ recognizer: UITapGestureRecognizer) {
+    beginSeek(at: recognizer.location(in: hostingController.view))
+    endSeek()
+  }
+
+  /// Takes the thumb nearest the given point of the slider to it, and keeps it there for
+  /// as long as the finger holds.
+  ///
+  /// Unlike a thumb taken hold of directly, which is then dragged by how far the finger
+  /// travels, a thumb picked up off the track follows where the finger *is*, from the
+  /// moment it is grabbed: there is nothing to have travelled from when the finger was
+  /// never on the thumb to begin with.
+  ///
+  /// Answers whether the hold began: a thumb already being dragged, or a hold beginning
+  /// on one, is left to the hosted slider, and a hold beginning where the thumbs cannot
+  /// travel has no thumb to pick up.
+  @discardableResult
+  private func beginSeek(at point: CGPoint) -> Bool {
+    guard !model.isSliding, !model.isHeld else { return false }
+
+    let geometry = seekGeometry()
+    guard let thumb = geometry.thumb(tappedAt: point) else { return false }
+
+    // Marks the thumb as held, so that a value pushed from JS is kept off it for as
+    // long as the finger is down. The seek never reads the value back, as it is the
+    // finger that decides where the thumb goes.
+    model.setDragOrigin(model.value(of: thumb), of: thumb)
+    model.heldThumb = thumb
+    model.onSlidingStart?()
+    continueSeek(at: point)
+
+    return true
+  }
+
+  /// Carries the thumb picked up off the track to the given point of it.
+  private func continueSeek(at point: CGPoint) {
+    guard let thumb = model.heldThumb else { return }
+
+    // The value the finger asks for can still be refused: it can be outside the limits
+    // or on the far side of the other thumb, and a thumb held against one of those does
+    // not move - exactly as it would not if it were dragged there.
+    model.set(seekGeometry().value(tappedAt: point), of: thumb)
+  }
+
+  /// Lets go of a thumb held on the track, and answers the beginning of the hold with
+  /// its completion.
+  private func endSeek() {
+    guard let thumb = model.heldThumb else { return }
+    model.heldThumb = nil
+
+    // A second finger that took hold of the same thumb, and let go of it first, has
+    // already reported the completion. A hold can begin once that drag is over, so
+    // reporting one here too would answer a start that is no longer there.
+    if model.dragOrigin(of: thumb) != nil {
+      model.setDragOrigin(nil, of: thumb)
+      model.onSlidingComplete?()
+    }
+  }
+
+  /// The geometry of the slider as the hosted view draws it, which fills this view - so
+  /// the track is sought where it is drawn.
+  private func seekGeometry() -> SliderGeometry {
+    SliderGeometry(model: model, size: hostingController.view.bounds.size)
+  }
+
+  @objc public var minimumValue: Double {
+    get { model.minimumValue }
+    set { model.minimumValue = newValue }
+  }
+
+  @objc public var maximumValue: Double {
+    get { model.maximumValue }
+    set { model.maximumValue = newValue }
+  }
+
+  /// Setting this while the user is dragging is a no-op - see `SliderModel.isSliding`.
+  @objc public var value: Double {
+    get { model.value }
+    set {
+      guard !model.isSliding else { return }
+      model.value = newValue
+    }
+  }
+
+  /// Whether the slider selects a span of the range with two thumbs, rather than a
+  /// single value with one. `value` and `valueLeft`/`valueRight` belong to the two
+  /// shapes respectively, and the unused pair is simply not drawn.
+  @objc public var ranged: Bool {
+    get { model.ranged }
+    set {
+      guard newValue != model.ranged else { return }
+      model.ranged = newValue
+      childViewsDidChange()
+    }
+  }
+
+  /// Setting either of these while the matching thumb is being dragged is a no-op - see
+  /// `SliderModel.leftDragOrigin`.
+  @objc public var valueLeft: Double {
+    get { model.valueLeft }
+    set {
+      guard model.leftDragOrigin == nil else { return }
+      model.valueLeft = newValue
+    }
+  }
+
+  @objc public var valueRight: Double {
+    get { model.valueRight }
+    set {
+      guard model.rightDragOrigin == nil else { return }
+      model.valueRight = newValue
+    }
+  }
+
+  /// Granularity of the values the slider reports - see `SliderModel.step`. A value
+  /// pushed from JS is taken as it comes, so only the values the slider arrives at
+  /// itself are snapped.
+  @objc public var step: Double {
+    get { model.step }
+    set { model.step = newValue }
+  }
+
+  /// Bounds the thumbs can be dragged between - see `SliderModel.limits`. A value
+  /// pushed from JS is taken as it comes, so only the values the slider arrives at
+  /// itself are held to the limits.
+  @objc public var lowerLimit: Double {
+    get { model.lowerLimit }
+    set { model.lowerLimit = newValue }
+  }
+
+  @objc public var upperLimit: Double {
+    get { model.upperLimit }
+    set { model.upperLimit = newValue }
+  }
+
+  /// Whether the slider runs up the view rather than across it - see
+  /// `SliderModel.vertical`. The shadow node measures a vertical slider the other
+  /// way round to match, so this only decides how it is drawn and dragged.
+  @objc public var vertical: Bool {
+    get { model.vertical }
+    set { model.vertical = newValue }
+  }
+
+  /// Whether the slider is switched off - see `SliderModel.disabled`.
+  ///
+  /// Touches are taken away from this whole view, which leaves the slider nothing to
+  /// report, and what it is drawn as comes from the same flag.
+  @objc public var disabled: Bool {
+    get { model.disabled }
+    set {
+      guard newValue != model.disabled else { return }
+      model.disabled = newValue
+
+      // A drag the slider is in the middle of loses its gesture with the touches, and so
+      // ends with no `onEnded` to read it to an end.
+      if newValue {
+        model.releaseThumbs()
+      }
+
+      isUserInteractionEnabled = !newValue
+      applyDisabledLook()
+    }
+  }
+
+  /// Draws the views JS rendered in place of the track, of a thumb and of the step
+  /// markers at the faintness of a control nobody can reach.
+  ///
+  /// The hosted slider washes out its own track and thumbs, but a view JS renders is
+  /// mounted over it as a view of its own, outside that, and nothing reaches it as a
+  /// state to draw itself by - so the containers holding them are dimmed here instead.
+  private func applyDisabledLook() {
+    let alpha: CGFloat = model.disabled ? SliderModel.disabledAlpha : 1
+
+    trackContainer.alpha = alpha
+    thumbContainers.forEach { $0.alpha = alpha }
+    stepMarkerContainers.forEach { $0.alpha = alpha }
+  }
+
+  /// Which end of the track the minimum value sits at, as React Native laid this slider
+  /// out - written by `SliderComponentView` from the layout direction of the layout
+  /// metrics it is given, which is where React Native puts the answer for the subtree
+  /// the slider sits in.
+  ///
+  /// The views JS renders are deliberately left out of this: React Native has already
+  /// mirrored their layout, so taking the direction down into them would apply it twice.
+  @objc public var laysOutRightToLeft: Bool {
+    get { model.direction == .rightToLeft }
+    set {
+      let direction: SliderModel.Direction = newValue ? .rightToLeft : .leftToRight
+      guard direction != model.direction else { return }
+
+      model.direction = direction
+      // The hosted slider redraws itself off the model; the custom thumbs, track and
+      // markers are moved by the layout pass this asks for.
+      setNeedsLayout()
+    }
+  }
+
+  /// Tints of the parts of the track - see `SliderModel.minimumTrackColor`.
+  @objc public var minimumTrackColor: UIColor? {
+    get { model.minimumTrackColor }
+    set { model.minimumTrackColor = newValue }
+  }
+
+  @objc public var middleRangeTrackColor: UIColor? {
+    get { model.middleRangeTrackColor }
+    set { model.middleRangeTrackColor = newValue }
+  }
+
+  @objc public var maximumTrackColor: UIColor? {
+    get { model.maximumTrackColor }
+    set { model.maximumTrackColor = newValue }
+  }
+
+  /// Whether the first of the views JS mounts is a track rather than a thumb - see
+  /// `SliderModel.customTrack`.
+  @objc public var customTrack: Bool {
+    get { model.customTrack }
+    set {
+      guard newValue != model.customTrack else { return }
+      model.customTrack = newValue
+      childViewsDidChange()
+    }
+  }
+
+  /// Whether the views JS mounts after the track include the thumbs - see `childViews`.
+  @objc public var customThumb: Bool {
+    get { hasCustomThumb }
+    set {
+      guard newValue != hasCustomThumb else { return }
+      hasCustomThumb = newValue
+      childViewsDidChange()
+    }
+  }
+
+  /// Whether the steps are marked below the track - see `SliderModel.stepMarkers`.
+  @objc public var stepMarkers: Bool {
+    get { model.stepMarkers }
+    set { model.stepMarkers = newValue }
+  }
+
+  /// Whether the last of the views JS mounts are step markers - see
+  /// `SliderModel.customStepMarkers`.
+  @objc public var customStepMarkers: Bool {
+    get { model.customStepMarkers }
+    set {
+      guard newValue != model.customStepMarkers else { return }
+      model.customStepMarkers = newValue
+      childViewsDidChange()
+    }
+  }
+
+  @objc public var onValueChange: ((Double) -> Void)? {
+    get { model.onValueChange }
+    set { model.onValueChange = newValue }
+  }
+
+  @objc public var onLeftValueChange: ((Double) -> Void)? {
+    get { model.onLeftValueChange }
+    set { model.onLeftValueChange = newValue }
+  }
+
+  @objc public var onRightValueChange: ((Double) -> Void)? {
+    get { model.onRightValueChange }
+    set { model.onRightValueChange = newValue }
+  }
+
+  @objc public var onSlidingStart: (() -> Void)? {
+    get { model.onSlidingStart }
+    set { model.onSlidingStart = newValue }
+  }
+
+  @objc public var onSlidingComplete: (() -> Void)? {
+    get { model.onSlidingComplete }
+    set { model.onSlidingComplete = newValue }
+  }
+
+  public override init(frame: CGRect) {
+    let model = SliderModel()
+    self.model = model
+    hostingController = UIHostingController(rootView: SliderContent(model: model))
+
+    super.init(frame: frame)
+
+    hostingController.view.backgroundColor = .clear
+    hostingController.view.frame = bounds
+    if #available(iOS 16.4, visionOS 1.0, *) {
+      // Fabric already positions this view inside the safe area; letting the hosting
+      // controller inset the slider a second time would shift it.
+      hostingController.safeAreaRegions = []
+    }
+    addSubview(trackContainer)
+    addSubview(hostingController.view)
+    thumbContainers.forEach(addSubview)
+    installSeekGestures()
+
+    // Every change the slider could redraw its thumbs for may have moved them, a drag
+    // above all. It is only announced before it lands, so the custom thumbs are moved in
+    // the layout pass that follows it.
+    modelObservation = model.objectWillChange.sink { [weak self] _ in
+      self?.setNeedsLayout()
+    }
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  /// The size a slider takes when JS gives it none.
+  ///
+  /// The height is whatever SwiftUI asks for, so it tracks the platform instead of a
+  /// number written down here. The width is only a hint - a SwiftUI `Slider` has no
+  /// width of its own to report, and flexbox is what actually stretches it.
+  ///
+  /// A ranged slider is measured the same way, and a vertical one too - it is the same
+  /// control on its side, so its shadow node turns this size round rather than measuring
+  /// a second one.
+  ///
+  /// Must be called on the main thread.
+  @objc public static func measuredIntrinsicSize() -> CGSize {
+    let controller = UIHostingController(rootView: RNCSingleSliderContent(model: SliderModel()))
+    let fitted = controller.sizeThatFits(
+      in: CGSize(width: intrinsicWidth, height: .greatestFiniteMagnitude)
+    )
+
+    // An unbounded proposal is meant to come back as the ideal height, but a slider laid
+    // out to an infinite height would disappear rather than look wrong, so don't take
+    // SwiftUI's word for it unconditionally.
+    let height = fitted.height.isFinite && fitted.height > 0 ? fitted.height : fallbackHeight
+
+    return CGSize(width: intrinsicWidth, height: height)
+  }
+
+  private static let intrinsicWidth: CGFloat = 200
+
+  /// How thick a slider drawing its own step markers has to be across for them to fit
+  /// inside it - see `SliderGeometry.stepMarkedThickness`. The shadow node grows a
+  /// slider measured any thinner to it.
+  @objc public static func stepMarkedThickness() -> CGFloat {
+    SliderGeometry.stepMarkedThickness
+  }
+
+  /// The smallest control Apple's guidelines will accept as a touch target.
+  private static let fallbackHeight: CGFloat = 44
+
+  /// Drops any drag in progress, so that a value pushed straight after is not swallowed
+  /// by the rule above. Fabric recycles component views, and one retired mid-drag would
+  /// otherwise stay deaf to updates for good.
+  ///
+  /// The drag is abandoned rather than ended: the JS that would have heard the
+  /// completion is no longer mounted on this view.
+  @objc public func cancelSliding() {
+    model.heldThumb = nil
+    model.leftDragOrigin = nil
+    model.rightDragOrigin = nil
+  }
+
+  /// Takes a view JS rendered in place of the built-in track or of a built-in thumb -
+  /// see `childViews`.
+  @objc(mountChildView:atIndex:)
+  public func mountChildView(_ view: UIView, at index: Int) {
+    childViews.insert(view, at: min(index, childViews.count))
+    childViewsDidChange()
+  }
+
+  @objc(unmountChildView:)
+  public func unmountChildView(_ view: UIView) {
+    childViews.removeAll { $0 === view }
+    view.removeFromSuperview()
+    childViewsDidChange()
+  }
+
+  /// Hands every child to the container it belongs in. Which one that is depends on
+  /// which of the track, the thumbs and the step markers JS replaced, which can change
+  /// before or after the children it concerns are mounted - so it is worked out afresh
+  /// whenever either does.
+  private func childViewsDidChange() {
+    let trackView = model.customTrack ? childViews.first : nil
+    let remainingViews = childViews.dropFirst(trackView == nil ? 0 : 1)
+    let thumbCount = hasCustomThumb ? (model.ranged ? 2 : 1) : 0
+    let thumbViews = Array(remainingViews.prefix(thumbCount))
+    let stepMarkerViews = model.customStepMarkers ? Array(remainingViews.dropFirst(thumbCount)) : []
+
+    setStepMarkerContainerCount(stepMarkerViews.count)
+
+    var placements = zip(thumbViews, thumbContainers).map { ($0, $1) }
+    placements += zip(stepMarkerViews, stepMarkerContainers).map { ($0, $1) }
+    if let trackView {
+      placements.append((trackView, trackContainer))
+    }
+
+    // A view left without a container is not shown anywhere.
+    for view in childViews where !placements.contains(where: { $0.0 === view }) {
+      view.removeFromSuperview()
+    }
+    for (view, container) in placements where view.superview !== container {
+      container.addSubview(view)
+    }
+
+    model.customThumbCount = min(thumbViews.count, thumbContainers.count)
+    applyDisabledLook()
+    setNeedsLayout()
+  }
+
+  /// Makes or drops step marker containers until there is one for each of the given
+  /// number of markers. A dropped container takes the marker it held with it.
+  private func setStepMarkerContainerCount(_ count: Int) {
+    while stepMarkerContainers.count > count {
+      stepMarkerContainers.removeLast().removeFromSuperview()
+    }
+    while stepMarkerContainers.count < count {
+      let container = UIView()
+      container.isUserInteractionEnabled = false
+      insertSubview(container, belowSubview: thumbContainers[0])
+      stepMarkerContainers.append(container)
+    }
+  }
+
+  public override func layoutSubviews() {
+    super.layoutSubviews()
+    hostingController.view.frame = bounds
+
+    let geometry = SliderGeometry(model: model, size: bounds.size)
+    thumbContainers[0].center = geometry.thumbCenter(atOffset: geometry.leftOffset)
+    thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)
+
+    // A marker JS renders for a step the slider does not have - the two being
+    // momentarily out of step while props and children arrive - is left hidden rather
+    // than piled up somewhere.
+    let stepValues = model.stepMarkerValues
+    for (index, container) in stepMarkerContainers.enumerated() {
+      container.isHidden = index >= stepValues.count
+      if index < stepValues.count {
+        container.center = geometry.stepMarkerAnchor(at: stepValues[index])
+      }
+    }
+
+    // The shadow node centres the track on the origin of its container, laid out along
+    // the slider's length - which is its height on a vertical one.
+    trackContainer.center = CGPoint(x: bounds.midX, y: bounds.midY)
+    trackContainer.transform = model.vertical ? CGAffineTransform(rotationAngle: -.pi / 2) : .identity
+  }
+
+  public override func didMoveToWindow() {
+    super.didMoveToWindow()
+
+    if window == nil {
+      detachFromParentViewController()
+    } else {
+      attachToParentViewController()
+    }
+  }
+
+  private func attachToParentViewController() {
+    guard hostingController.parent == nil,
+          let parent = closestViewController() else {
+      return
+    }
+
+    // The hosted view is already a subview, so only the controller containment half of
+    // the usual dance is left to do.
+    parent.addChild(hostingController)
+    hostingController.didMove(toParent: parent)
+  }
+
+  private func detachFromParentViewController() {
+    guard hostingController.parent != nil else { return }
+
+    hostingController.willMove(toParent: nil)
+    hostingController.removeFromParent()
+  }
+
+  private func closestViewController() -> UIViewController? {
+    var responder: UIResponder? = next
+
+    while let current = responder {
+      if let viewController = current as? UIViewController {
+        return viewController
+      }
+      responder = current.next
+    }
+
+    return nil
+  }
+}
+
+private extension View {
+  /// Says to VoiceOver that this cannot be reached, leaving it readable all the same.
+  /// A slider switched off still holds a value, and the person who cannot reach it is
+  /// the one who most needs that value read out.
+  func outOfReach(_ disabled: Bool) -> some View {
+    accessibilityRespondsToUserInteraction(!disabled)
+  }
+}
+
+private extension Double {
+  func clamped(to range: ClosedRange<Double>) -> Double {
+    min(max(self, range.lowerBound), range.upperBound)
+  }
+
+  /// Rounds to the nearest multiple of the given step, which is the granularity JS is
+  /// promised. A step of zero leaves the value alone.
+  ///
+  /// Clamping is left to the caller: a snapped value can land outside the limits or past
+  /// the other thumb, and each thumb answers for that differently. The ends stay
+  /// reachable that way, whether or not the step divides the range evenly.
+  func snapped(to step: Double) -> Double {
+    guard step > 0 else { return self }
+
+    // Multiplying the step back out misses the mark by a fraction whenever the step is
+    // one that binary floating point cannot hold - three tenths arriving as
+    // 0.30000000000000004 - so the product is rounded to the decimals the step itself is
+    // written with, and reaches JS reading the way the step was written.
+    return ((self / step).rounded() * step).rounded(toDecimals: step.decimals)
+  }
+
+  /// How many decimals it takes to write this value out, capped at the digits a `Double`
+  /// can be trusted with.
+  var decimals: Int {
+    var decimals = 0
+    var scaled = magnitude
+
+    while decimals < Self.maximumDecimals, scaled != scaled.rounded(.down) {
+      scaled *= 10
+      decimals += 1
+    }
+
+    return decimals
+  }
+
+  func rounded(toDecimals decimals: Int) -> Double {
+    let scale = pow(10, Double(decimals))
+
+    return (self * scale).rounded() / scale
+  }
+
+  private static let maximumDecimals = 15
+}

@@ -1,356 +1,212 @@
-import React, {useEffect, useState} from 'react';
-import {
-  Image,
-  Platform,
-  AccessibilityActionEvent,
-  ViewProps,
-  ViewStyle,
-  ColorValue,
-  NativeSyntheticEvent,
-  StyleProp,
-  View,
-  ImageSource,
-  ImageSourcePropType,
-} from 'react-native';
-import RCTSliderNativeComponent from './index';
+import React, {useState} from "react";
+import {View} from "react-native";
+import type {NativeSyntheticEvent} from "react-native";
+import SliderNativeComponent from "./index";
+import {type SliderProps} from "../typings";
 
-import type {FC, Ref} from 'react';
-import {MarkerProps} from './components/TrackMark';
-import {StepsIndicator} from './components/StepsIndicator';
-import {styles} from './utils/styles';
-import {constants} from './utils/constants';
-
-type Event = NativeSyntheticEvent<
+type SliderValueChangeEvent = NativeSyntheticEvent<
   Readonly<{
     value: number;
-    /**
-     * Android Only.
-     */
-    fromUser?: boolean;
   }>
 >;
 
-type WindowsProps = Readonly<{
-  /**
-   * If true the slider will be inverted.
-   * Default value is false.
-   */
-  vertical?: boolean;
-}>;
+/**
+ * A slider with no handler for an event must not pass one down, so that the
+ * native side can leave the event unsent.
+ */
+const valueHandler = (onChange?: (value: number) => void) =>
+  onChange
+    ? (event: SliderValueChangeEvent) => onChange(event.nativeEvent.value)
+    : undefined;
 
-type IOSProps = Readonly<{
-  /**
-   * Assigns a single image for the track. Only static images are supported.
-   * The center pixel of the image will be stretched to fill the track.
-   */
-  trackImage?: ImageSource;
-
-  /**
-   * Assigns a minimum track image. Only static images are supported. The
-   * rightmost pixel of the image will be stretched to fill the track.
-   */
-  minimumTrackImage?: ImageSource;
-
-  /**
-   * Assigns a maximum track image. Only static images are supported. The
-   * leftmost pixel of the image will be stretched to fill the track.
-   */
-  maximumTrackImage?: ImageSource;
-
-  /**
-   * Permits tapping on the slider track to set the thumb position.
-   * Defaults to false on iOS. No effect on Android or Windows.
-   */
-  tapToSeek?: boolean;
-}>;
-
-type Props = ViewProps &
-  IOSProps &
-  WindowsProps &
-  Readonly<{
-    /**
-     * Used to style and layout the `Slider`.  See `StyleSheet.js` and
-     * `DeprecatedViewStylePropTypes.js` for more info.
-     */
-    style?: StyleProp<ViewStyle>;
-
-    /**
-     * Write-only property representing the value of the slider.
-     * Can be used to programmatically control the position of the thumb.
-     * Entered once at the beginning still acts as an initial value.
-     * The value should be between minimumValue and maximumValue,
-     * which default to 0 and 1 respectively.
-     * Default value is 0.
-     *
-     * This is not a controlled component, you don't need to update the
-     * value during dragging.
-     */
-    value?: number;
-
-    /**
-     * Step value of the slider. The value should be
-     * between 0 and (maximumValue - minimumValue).
-     * Default value is 0.
-     */
-    step?: number;
-
-    /**
-     * Initial minimum value of the slider. Default value is 0.
-     */
-    minimumValue?: number;
-
-    /**
-     * Initial maximum value of the slider. Default value is 1.
-     */
-    maximumValue?: number;
-
-    /**
-     * The lower limit value of the slider. The user won't be able to slide below this limit.
-     */
-    lowerLimit?: number;
-
-    /**
-     * The upper limit value of the slider. The user won't be able to slide above this limit.
-     */
-    upperLimit?: number;
-
-    /**
-     * The color used for the track to the left of the button.
-     * Overrides the default blue gradient image on iOS.
-     */
-    minimumTrackTintColor?: ColorValue;
-
-    /**
-     * The color used for the track to the right of the button.
-     * Overrides the default blue gradient image on iOS.
-     */
-    maximumTrackTintColor?: ColorValue;
-    /**
-     * The color used to tint the default thumb images on iOS, or the
-     * color of the foreground switch grip on Android.
-     */
-    thumbTintColor?: ColorValue;
-
-    /**
-     * If true the user won't be able to move the slider.
-     * Default value is false.
-     */
-    disabled?: boolean;
-
-    /**
-     * Callback continuously called while the user is dragging the slider.
-     */
-    onValueChange?: (_value: number) => void;
-
-    /**
-     * Callback that is called when the user touches the slider,
-     * regardless if the value has changed. The current value is passed
-     * as an argument to the callback handler.
-     */
-    onSlidingStart?: (_value: number) => void;
-
-    /**
-     * Callback that is called when the user releases the slider,
-     * regardless if the value has changed. The current value is passed
-     * as an argument to the callback handler.
-     */
-    onSlidingComplete?: (_value: number) => void;
-
-    /**
-     * Used to locate this view in UI automation tests.
-     */
-    testID?: string;
-
-    /**
-     * Sets an image for the thumb. Only static images are supported.
-     */
-    thumbImage?: ImageSource;
-
-    /**
-     * Sets the size (width and height) of the thumb.
-     * If `thumbImage` is provided, it will be scaled to this size.
-     */
-    thumbSize?: number;
-
-    /**
-     * If true the slider will be inverted.
-     * Default value is false.
-     */
-    inverted?: boolean;
-
-    /**
-     * Component to be rendered for each step indicator.
-     */
-    StepMarker?: FC<MarkerProps>;
-
-    /**
-     *
-     */
-    renderStepNumber?: boolean;
-
-    /**
-     * A string of one or more words to be announced by the screen reader.
-     * Otherwise, it will announce the value as a percentage.
-     * Requires passing a value to `accessibilityIncrements` to work correctly.
-     * Should be a plural word, as singular units will be handled.
-     */
-    accessibilityUnits?: string;
-
-    /**
-     * An array of values that represent the different increments displayed
-     * by the slider. All the values passed into this prop must be strings.
-     * Requires passing a value to `accessibilityUnits` to work correctly.
-     * The number of elements must be the same as `maximumValue`.
-     */
-    accessibilityIncrements?: Array<string>;
-  }>;
-
-const SliderComponent = (
-  {
-    onValueChange,
-    onSlidingStart,
-    onSlidingComplete,
-    onAccessibilityAction,
-    value = constants.SLIDER_DEFAULT_INITIAL_VALUE,
-    minimumValue = 0,
-    maximumValue = 1,
-    step = 0,
-    inverted = false,
-    tapToSeek = false,
-    lowerLimit = Platform.select({
-      web: minimumValue,
-      default: constants.LIMIT_MIN_VALUE,
-    }),
-    upperLimit = Platform.select({
-      web: maximumValue,
-      default: constants.LIMIT_MAX_VALUE,
-    }),
-    ...props
-  }: Props,
-  forwardedRef?: Ref<typeof RCTSliderNativeComponent>,
+const stepIndex = (
+  value: number,
+  minimumValue: number,
+  maximumValue: number,
+  step: number,
 ) => {
-  const [currentValue, setCurrentValue] = useState(
-    value ?? minimumValue ?? constants.SLIDER_DEFAULT_INITIAL_VALUE,
-  );
-  const [width, setWidth] = useState(0);
+  if (step <= 0) {
+    return 0;
+  }
 
-  const stepResolution = step ? step : constants.DEFAULT_STEP_RESOLUTION;
-
-  const defaultStep = (maximumValue - minimumValue) / stepResolution;
-  const stepLength = step || defaultStep;
-
-  const options = Array.from(
-    {
-      length: (step ? defaultStep : stepResolution) + 1,
-    },
-    (_, index) => minimumValue + index * stepLength,
+  const clamped = Math.min(
+    Math.max(value, minimumValue),
+    Math.max(maximumValue, minimumValue),
   );
 
-  const defaultStyle =
-    Platform.OS === 'ios' ? styles.defaultSlideriOS : styles.defaultSlider;
-  const sliderStyle = {zIndex: 1, width: width};
-  const style = [defaultStyle, props.style];
+  return Math.round((clamped - minimumValue) / step);
+};
 
-  const onValueChangeEvent = (event: Event) => {
-    onValueChange && onValueChange(event.nativeEvent.value);
-    setCurrentValue(event.nativeEvent.value);
+/**
+ * How many decimals it takes to write the given value out, capped at the
+ * digits a double can be trusted with - see `snapped(to:)` on iOS.
+ */
+const decimals = (value: number) => {
+  let count = 0;
+  let scaled = Math.abs(value);
+
+  while (count < 15 && scaled !== Math.floor(scaled)) {
+    scaled *= 10;
+    count += 1;
+  }
+
+  return count;
+};
+
+/**
+ * Leeway, as a fraction of a step, for a value to count as landing on one.
+ * Mirrored by the native step markers, which have to agree with JS on how
+ * many steps there are.
+ */
+const STEP_TOLERANCE = 1e-9;
+
+/**
+ * The values the steps of a slider stand at, the way the native side lays
+ * them out: every step from the minimum, and the maximum itself when the step
+ * does not divide the range.
+ */
+const stepValues = (
+  minimumValue: number,
+  maximumValue: number,
+  step: number,
+) => {
+  const span = maximumValue - minimumValue;
+  if (step <= 0 || span <= 0) {
+    return [];
+  }
+
+  const DECIMAL_FACTOR = 10;
+  const scale = Math.pow(
+    DECIMAL_FACTOR,
+    Math.max(decimals(step), decimals(minimumValue)),
+  );
+  const wholeSteps = Math.floor(span / step + STEP_TOLERANCE);
+  const values = Array.from(
+    {length: wholeSteps + 1},
+    (_, index) => Math.round((minimumValue + index * step) * scale) / scale,
+  );
+
+  if (span - wholeSteps * step > step * STEP_TOLERANCE) {
+    values.push(maximumValue);
+  }
+
+  return values;
+};
+
+const useThumbValue = (value: number) => {
+  const [dispatched, setDispatched] = useState({given: value, value});
+  const current = dispatched.given === value ? dispatched.value : value;
+
+  return [
+    current,
+    (newValue: number) => setDispatched({given: value, value: newValue}),
+  ] as const;
+};
+
+const thumbValueHandler =
+  (callback: (value: number) => void, onChange?: (value: number) => void) =>
+  (value: number) => {
+    callback(value);
+    onChange?.(value);
   };
 
-  const _disabled =
-    typeof props.disabled === 'boolean'
-      ? props.disabled
-      : props.accessibilityState?.disabled === true;
+const Slider = ({
+  minimumValue = 0,
+  maximumValue = 1,
+  value = 0,
+  ranged = false,
+  valueLeft = minimumValue,
+  valueRight = maximumValue,
+  step = 0,
+  lowerLimit = minimumValue,
+  upperLimit = maximumValue,
+  orientation = "horizontal",
+  disabled,
+  onValueChange,
+  onLeftValueChange,
+  onRightValueChange,
+  thumb: Thumb,
+  track: Track,
+  stepMarkers = false,
+  ...props
+}: SliderProps) => {
+  const StepMarker =
+    typeof stepMarkers === "function" ? stepMarkers : undefined;
+  const followsThumbs = Thumb !== undefined || StepMarker !== undefined;
+  const isDisabled = disabled === true;
 
-  const _accessibilityState =
-    typeof props.disabled === 'boolean'
-      ? {...props.accessibilityState, disabled: props.disabled}
-      : props.accessibilityState;
+  const [currentValue, setCurrentValue] = useThumbValue(value);
+  const [currentValueLeft, setCurrentValueLeft] = useThumbValue(valueLeft);
+  const [currentValueRight, setCurrentValueRight] = useThumbValue(valueRight);
 
-  const onSlidingStartEvent = onSlidingStart
-    ? (event: Event) => {
-        onSlidingStart(event.nativeEvent.value);
-      }
-    : null;
-  const onSlidingCompleteEvent = onSlidingComplete
-    ? (event: Event) => {
-        onSlidingComplete(event.nativeEvent.value);
-      }
-    : null;
-  const onAccessibilityActionEvent = onAccessibilityAction
-    ? (event: AccessibilityActionEvent) => {
-        onAccessibilityAction(event);
-      }
-    : null;
+  const handleValueChange = followsThumbs
+    ? thumbValueHandler(setCurrentValue, onValueChange)
+    : onValueChange;
+  const handleLeftValueChange = followsThumbs
+    ? thumbValueHandler(setCurrentValueLeft, onLeftValueChange)
+    : onLeftValueChange;
+  const handleRightValueChange = followsThumbs
+    ? thumbValueHandler(setCurrentValueRight, onRightValueChange)
+    : onRightValueChange;
 
-  const passedValue = Number.isNaN(value) || !value ? undefined : value;
-
-  useEffect(() => {
-    if (lowerLimit >= upperLimit) {
-      console.warn(
-        'Invalid configuration: lower limit is supposed to be smaller than upper limit',
-      );
-    }
-  }, [lowerLimit, upperLimit]);
+  const thumbValues = ranged
+    ? [currentValueLeft, currentValueRight]
+    : [currentValue];
 
   return (
-    <View
-      onLayout={(event) => {
-        setWidth(event.nativeEvent.layout.width);
-      }}
-      style={[style, {justifyContent: 'center'}]}>
-      {props.StepMarker || !!props.renderStepNumber ? (
-        <StepsIndicator
-          options={options}
-          sliderWidth={width}
-          currentValue={currentValue}
-          renderStepNumber={props.renderStepNumber}
-          thumbImage={props.thumbImage}
-          StepMarker={props.StepMarker}
-          isLTR={inverted}
-        />
+    <SliderNativeComponent
+      {...props}
+      minimumValue={minimumValue}
+      maximumValue={maximumValue}
+      disabled={disabled}
+      value={value}
+      ranged={ranged}
+      valueLeft={valueLeft}
+      valueRight={valueRight}
+      step={step}
+      lowerLimit={lowerLimit}
+      upperLimit={upperLimit}
+      orientation={orientation}
+      customTrack={Track !== undefined}
+      customThumb={Thumb !== undefined}
+      stepMarkers={StepMarker ? "custom" : stepMarkers ? "native" : "none"}
+      onValueChange={valueHandler(handleValueChange)}
+      onLeftValueChange={valueHandler(handleLeftValueChange)}
+      onRightValueChange={valueHandler(handleRightValueChange)}>
+      {Track ? (
+        <View collapsable={false} pointerEvents="none">
+          <Track disabled={isDisabled} />
+        </View>
       ) : null}
-      <RCTSliderNativeComponent
-        {...props}
-        minimumValue={minimumValue}
-        maximumValue={maximumValue}
-        step={step}
-        inverted={inverted}
-        tapToSeek={tapToSeek}
-        value={passedValue}
-        lowerLimit={lowerLimit}
-        upperLimit={upperLimit}
-        accessibilityState={_accessibilityState}
-        thumbImage={
-          Platform.OS === 'web'
-            ? props.thumbImage
-            : props.StepMarker || !props.thumbImage
-            ? undefined
-            : Image.resolveAssetSource(props.thumbImage as ImageSourcePropType)
-        }
-        ref={forwardedRef}
-        style={[
-          sliderStyle,
-          defaultStyle,
-          {alignContent: 'center', alignItems: 'center'},
-        ]}
-        onChange={onValueChangeEvent}
-        onRNCSliderSlidingStart={onSlidingStartEvent}
-        onRNCSliderSlidingComplete={onSlidingCompleteEvent}
-        onRNCSliderValueChange={onValueChangeEvent}
-        disabled={_disabled}
-        onStartShouldSetResponder={() => true}
-        onResponderTerminationRequest={() => false}
-        onRNCSliderAccessibilityAction={onAccessibilityActionEvent}
-        thumbTintColor={
-          props.thumbImage && !!props.StepMarker
-            ? 'transparent'
-            : props.thumbTintColor
-        }
-      />
-    </View>
+      {Thumb
+        ? thumbValues.map((thumbValue, thumbIndex) => (
+            <View key={thumbIndex} collapsable={false} pointerEvents="none">
+              <Thumb
+                index={stepIndex(thumbValue, minimumValue, maximumValue, step)}
+                disabled={isDisabled}
+              />
+            </View>
+          ))
+        : null}
+      {StepMarker
+        ? stepValues(minimumValue, maximumValue, step).map(
+            (stepValue, index) => (
+              <View key={index} collapsable={false} pointerEvents="none">
+                <StepMarker
+                  index={index}
+                  value={stepValue}
+                  marked={thumbValues.some(
+                    (thumbValue) =>
+                      Math.abs(thumbValue - stepValue) <= step * STEP_TOLERANCE,
+                  )}
+                  disabled={isDisabled}
+                />
+              </View>
+            ),
+          )
+        : null}
+    </SliderNativeComponent>
   );
 };
 
-const SliderWithRef = React.forwardRef(SliderComponent);
-
-export default SliderWithRef;
+export default Slider;

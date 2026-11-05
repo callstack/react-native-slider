@@ -27,7 +27,6 @@ namespace winrt::SliderWindows::implementation {
     }
 
     void SliderView::RegisterEvents() {
-        //Set this so that Slider passes on Manipulation* events.
         this->ManipulationMode(xaml::Input::ManipulationModes::All);
 
         m_sliderValueChangedRevoker = this->ValueChanged(winrt::auto_revoke,

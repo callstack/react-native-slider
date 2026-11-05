@@ -1,89 +1,58 @@
-import * as React from 'react';
-import { FC } from 'react';
-import * as ReactNative from 'react-native';
-import { ImageURISource } from 'react-native';
+import * as React from "react";
+import {FC} from "react";
+import {ColorValue, ViewProps} from "react-native";
 
-export interface SliderPropsAndroid extends ReactNative.ViewProps {
+export type ThumbProps = {
   /**
-   * Color of the foreground switch grip.
+   * Contains the exact step number on which this custom Thumb currently is.
    */
-  thumbTintColor?: string;
-}
-
-export interface SliderRef {
-  updateValue(value: number): void;
-}
-
-export type TrackMarksProps = {
-  isTrue: boolean;
   index: number;
-  thumbImage?: ImageURISource;
-  StepMarker?: FC<MarkerProps> | boolean;
-  currentValue: number;
-};
-
-export type MarkerProps = {
-  stepMarked: boolean;
-  currentValue: number;
-  index: number;
-  min: number;
-  max: number;
-};
-
-export interface SliderPropsIOS extends ReactNative.ViewProps {
-  /**
-   * Assigns a maximum track image. Only static images are supported.
-   * The leftmost pixel of the image will be stretched to fill the track.
-   */
-  maximumTrackImage?: ReactNative.ImageURISource;
 
   /**
-   * Assigns a minimum track image. Only static images are supported.
-   * The rightmost pixel of the image will be stretched to fill the track.
-   */
-  minimumTrackImage?: ReactNative.ImageURISource;
-
-  /**
-   * Permits tapping on the slider track to set the thumb position.
-   * Defaults to false on iOS. No effect on Android or Windows.
-   */
-  tapToSeek?: boolean;
-
-  /**
-   * Sets an image for the thumb. Only static images are supported.
-   */
-  thumbImage?: ReactNative.ImageURISource;
-
-  /**
-   * Assigns a single image for the track. Only static images
-   * are supported. The center pixel of the image will be stretched
-   * to fill the track.
-   */
-  trackImage?: ReactNative.ImageURISource;
-}
-
-export interface SliderPropsWindows extends ReactNative.ViewProps {
-  /**
-   * Controls the orientation of the slider, default value is 'false' (horizontal).
-   */
-  vertical?: boolean;
-}
-
-export interface SliderProps
-  extends SliderPropsIOS,
-    SliderPropsAndroid,
-    SliderPropsWindows {
-  /**
-   * If true the user won't be able to move the slider.
-   * Default value is false.
+   * Informs the thumb about the Slider being in a disabled state.
+   * The default is `false`.
    */
   disabled?: boolean;
+};
+
+export type StepsProps = {
+  /**
+   * The sequential number of step.
+   * Always starting from 0, regardless of minimum or maximum value of Slider settings.
+   */
+  index: number;
+  /**
+   * The value that this step represents.
+   * e.g.: the first step in the steps sequence will have it's value equal to minimumValue prop
+   * and the last step in the sequence will have it's value equal to maximumValue prop.
+   */
+  value: number;
+  /**
+   * Indicates whether a(any) thumb is currently on that step.
+   * Basically it says whether value of a thumb is equal to value of this step.
+   */
+  marked: boolean;
 
   /**
-   * The color used for the track to the right of the button.
-   * Overrides the default blue gradient image.
+   * Informs the custom step marker about the Slider being in a disabled state.
+   * The default is `false`.
    */
-  maximumTrackTintColor?: string;
+  disabled?: boolean;
+};
+
+export type TrackProps = {
+  /**
+   * Informs the custom track about the Slider being in a disabled state.
+   * The default is `false`.
+   */
+  disabled?: boolean;
+};
+
+export interface SliderProps extends ViewProps {
+  /**
+   * Initial minimum value of the slider. Default value is 0.
+   */
+  minimumValue?: number;
 
   /**
    * Initial maximum value of the slider. Default value is 1.
@@ -91,36 +60,76 @@ export interface SliderProps
   maximumValue?: number;
 
   /**
-   * The lower limit value of the slider. The user won't be able to slide below this limit.
+   * Value of the slider. Can be used to programmatically control the
+   * position of the thumb, and entered once at the beginning it acts as
+   * the initial value.
+   *
+   * This is not a controlled component, you don't need to update the
+   * value while the user is dragging.
+   *
+   * Ignored by a ranged slider, which is positioned by `valueLeft` and
+   * `valueRight` instead.
+   */
+  value?: number;
+
+  /**
+   * Whether the slider selects a span of its range with two thumbs, rather
+   * than a single value with one. Default value is false.
+   */
+  ranged?: boolean;
+
+  /**
+   * Value of the thumb bounding the selected span from below. Defaults to
+   * `minimumValue`.
+   *
+   * Behaves like `value`, and is only used by a ranged slider. The thumb
+   * cannot be dragged past `valueRight`.
+   */
+  valueLeft?: number;
+
+  /**
+   * Value of the thumb bounding the selected span from above. Defaults to
+   * `maximumValue`.
+   *
+   * Behaves like `value`, and is only used by a ranged slider. The thumb
+   * cannot be dragged past `valueLeft`.
+   */
+  valueRight?: number;
+
+  /**
+   * Limits the avaiable range of the slider to the lower value;
+   *
    */
   lowerLimit?: number;
 
   /**
-   * The upper limit value of the slider. The user won't be able to slide above this limit.
+   * Limits the avaiable range of the slider to the upper value;
    */
   upperLimit?: number;
 
   /**
-   * The color used for the track to the left of the button.
-   * Overrides the default blue gradient image.
+   * Step defines the granularity of the slider. The value of the slider will always be a multiple of the step value.
+   * This works for both single and ranged sliders in the same manner.
+   * The default value is 0, which means no step.
    */
-  minimumTrackTintColor?: string;
+  step?: number;
 
   /**
-   * Initial minimum value of the slider. Default value is 0.
+   * The orientation of Slider.
+   * Default is "horizontal".
+   * Switches the way how Slider is displayed.
    */
-  minimumValue?: number;
+  orientation?: "horizontal" | "vertical";
 
   /**
-   * Callback that is called when the user picks up the slider.
-   * The initial value is passed as an argument to the callback handler.
+   * Disables the Slider. When disabled, Slider is still rendered in a way the native Slider
+   * renders the default "disabled" state of it.
+   * Slider is not reachable by clicking, tapping, or keyboard when disabled and does not receive
+   * any events nor controlls.
+   * When disabled, Slider can still be modified by props.
+   * Default value is `false`.
    */
-  onSlidingStart?: (value: number) => void;
-
-  /**
-   * Callback called when the user finishes changing the value (e.g. when the slider is released).
-   */
-  onSlidingComplete?: (value: number) => void;
+  disabled?: boolean;
 
   /**
    * Callback continuously called while the user is dragging the slider.
@@ -128,76 +137,77 @@ export interface SliderProps
   onValueChange?: (value: number) => void;
 
   /**
-   * Step value of the slider. The value should be between 0 and (maximumValue - minimumValue). Default value is 0.
+   * Callback continuously called while the user is dragging the lower thumb
+   * of a ranged slider.
    */
-  step?: number;
+  onLeftValueChange?: (value: number) => void;
 
   /**
-   * Used to style and layout the Slider. See StyleSheet.js and ViewStylePropTypes.js for more info.
+   * Callback continuously called while the user is dragging the upper thumb
+   * of a ranged slider.
    */
-  style?: ReactNative.StyleProp<ReactNative.ViewStyle>;
+  onRightValueChange?: (value: number) => void;
 
   /**
-   * Used to locate this view in UI automation tests.
+   * Callback called each time user starts dragging.
+   * The event is fired as soon as user holds (long press) any thumb (left or right),
+   * regardless if the drag changed the value or not.
    */
-  testID?: string;
+  onSlidingStart?: () => void;
 
   /**
-   * Write-only property representing the value of the slider.
-   * Can be used to programmatically control the position of the thumb.
-   * Entered once at the beginning still acts as an initial value.
-   * The value should be between minimumValue and maximumValue,
-   * which default to 0 and 1 respectively.
-   * Default value is 0.
-   *
-   * This is not a controlled component, you don't need to update the
-   * value during dragging.
+   * Callback called each time user ends dragging.
+   * The event is fired as soon as user releases any thumb (left or right) after long press,
+   * regardless if the drag changed the value or not.
    */
-  value?: number;
+  onSlidingComplete?: () => void;
 
   /**
-   * Reverses the direction of the slider.
+   * Used to pass a custom component rendered as a thumb of the Slider.
    */
-  inverted?: boolean;
+  thumb?: FC<ThumbProps>;
 
   /**
-   * Sets the size (width and height) of the thumb.
-   * If `thumbImage` is provided, it will be scaled to this size.
+   * Defines the color the track from minimumValue to thumb, or left thumb (when ranged) will be.
    */
-  thumbSize?: number;
+  minimumTrackColor?: ColorValue;
 
   /**
-   * Component to be rendered for each step indicator.
+   * Defines the color the track from left thumb to right thumb (when ranged) will be.
    */
-  StepMarker?: FC<MarkerProps>;
+  middleRangeTrackColor?: ColorValue;
 
   /**
-   * 
+   * Defines the color the track from thumb, or right thumb (when ranged) to maximumValue will be.
    */
-  renderStepNumber?: boolean;
+  maximumTrackColor?: ColorValue;
 
   /**
-   * A string of one or more words to be announced by the screen reader.
-   * Otherwise, it will announce the value as a percentage.
-   * Requires passing a value to `accessibilityIncrements` to work correctly.
-   * Should be a plural word, as singular units will be handled.
+   * Replaces the default (native) track with the given component.
+   * The component will be spread along the whole track by it's X-axis,
+   * meaning that:
+   *  * In horizontal Slider, the width of given component will be increased to the width of the track,
+   *  * In vertical Slider, the width of given component will be increased as well, but the component will
+   *    be transformed in the same 90 degree as vertical Slider is.
+   * NOTE, that the custom track component takes the priority against
+   * the minimumTrackColor, middleRangeTrackColor and maximumTrackColor.
    */
-  accessibilityUnits?: string;
+  track?: FC<TrackProps>;
 
   /**
-   * An array of values that represent the different increments displayed
-   * by the slider. All the values passed into this prop must be strings.
-   * Requires passing a value to `accessibilityUnits` to work correctly.
-   * The number of elements must be the same as `maximumValue`.
+   * Renders steps below the track.
+   * NOTE: Is effective only when the `step` prop is set.
+   * true - switches on rendering of default, built-in steps indicators
+   * false - default. Switches the steps rendering off.
+   * component - if a custom component is passed, switches the steps rendering on with
+   *             the given component used to render each step.
    */
-  accessibilityIncrements?: Array<string>;
+  stepMarkers?: boolean | FC<StepsProps>;
 }
 
 /**
- * A component used to select a single value from a range of values.
+ * A component used to select a single value, or a span of values, from a range
+ * of values.
  */
-declare function Slider(
-  props: SliderProps & {ref?: React.Ref<SliderRef> | undefined},
-): React.ReactNode;
+declare function Slider(props: SliderProps): React.ReactNode;
 export default Slider;
-export type SliderIOS = typeof Slider;

@@ -1,777 +1,456 @@
-import React, {FC, JSX, useCallback, useState} from 'react';
-import {Text, View, StyleSheet, Image} from 'react-native';
-import Slider, {MarkerProps, SliderProps} from '@react-native-community/slider';
+import React, {JSX, useState} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
+import Slider, {SliderProps, StepsProps, ThumbProps} from '@callstack/slider';
 
 export interface Props {
   title: string;
   render(): JSX.Element;
-  platform?: string;
 }
 
-const CONSTANTS = {
-  MAX_VALUE: 100,
-  MIN_VALUE: 10,
-  STEP: 10,
-  DEFAULT_STEP_RESOLUTION: 100,
+/** Material 3's baseline primary, which is what Android tints its Slider with. */
+const ACCENT = '#6750A4';
+
+/**
+ * The three tints of the track, stepped through Material 3's own baseline
+ * purple - tones 40, 80 and 90, the darkest where the value has been reached
+ * and the palest ahead of it. The middle is what a single Slider has none of.
+ */
+const TRACK_COLORS = {
+  minimumTrackColor: ACCENT, // tone 40
+  middleRangeTrackColor: '#D0BCFF', // tone 80
+  maximumTrackColor: '#EADDFF', // tone 90
 } as const;
 
+/**
+ * The bounds shared by every example but the default one, so that each of them
+ * only has to say what it adds on top of them.
+ */
+const BOUNDS = {
+  minimumValue: 0,
+  maximumValue: 100,
+  step: 5,
+} as const;
+
+/** One dash per step of `BOUNDS`, so that the dashes fall where the steps do. */
+const DASHES = (BOUNDS.maximumValue - BOUNDS.minimumValue) / BOUNDS.step + 1;
+
+const rounded = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * A thumb wearing the number of the step it stands on. `index` counts the steps
+ * from `minimumValue`, so the thumb says how far along the range it is - and a
+ * ranged Slider renders the very same component once for each of its thumbs.
+ */
+const SteppedThumb = ({index}: ThumbProps) => (
+  <View style={styles.thumb}>
+    <Text style={styles.thumbLabel}>{index}</Text>
+  </View>
+);
+
+/**
+ * A track of dashes in place of the solid rail. The Slider stretches whatever
+ * `track` renders to its own length, so the dashes stretch with it.
+ *
+ * NOTE: `track` is given no props at all, so it cannot show how far the thumb
+ * has travelled - the readout above each Slider is what reports the value.
+ */
+const DashedTrack = () => (
+  <View style={styles.dashedTrack}>
+    {Array.from({length: DASHES}, (_, index) => (
+      <View
+        key={index}
+        style={[styles.dash, index % 2 === 1 && styles.mutedDash]}
+      />
+    ))}
+  </View>
+);
+
+/**
+ * A step drawn as a tick that fills in once a thumb stands on it. `value` is the
+ * value the step stands for, so the ticks read as the scale the thumb travels
+ * over - and every fourth of them says what it is worth.
+ */
+const SteppedMarker = ({value, marked}: StepsProps) => (
+  <View style={styles.marker}>
+    <View style={[styles.tick, marked && styles.markedTick]} />
+    {value % 20 === 0 && (
+      <Text style={[styles.markerLabel, marked && styles.markedLabel]}>
+        {value}
+      </Text>
+    )}
+  </View>
+);
+
+/**
+ * Stands in front of a Slider of the given props, holding the state an app
+ * around a Slider would: where each of its thumbs stands, and whether one of
+ * them is being dragged. The Slider is not a controlled component, so this only
+ * mirrors what its events report - a drag moves the thumb on its own.
+ */
 const SliderExample = (props: SliderProps) => {
-  const [value, setValue] = useState(props.value ?? 0);
-  return (
-    <View style={{alignItems: 'center'}}>
-      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
-      <Slider
-        step={0.5}
-        style={[styles.slider, props.style]}
-        {...props}
-        value={value}
-        onValueChange={setValue}
-      />
-    </View>
-  );
-};
+  const {ranged, minimumValue = 0, maximumValue = 1} = props;
 
-const SlidingStartExample = (props: SliderProps) => {
-  const [slideStartingValue, setSlideStartingValue] = useState(0);
-  const [slideStartingCount, setSlideStartingCount] = useState(0);
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        onSlidingStart={value => {
-          setSlideStartingValue(value);
-          setSlideStartingCount(prev => prev + 1);
-        }}
-      />
-      <Text>
-        Starts: {slideStartingCount} Value: {slideStartingValue}
-      </Text>
-    </View>
-  );
-};
+  const [value, setValue] = useState(props.value ?? minimumValue);
+  const [left, setLeft] = useState(props.valueLeft ?? minimumValue);
+  const [right, setRight] = useState(props.valueRight ?? maximumValue);
+  const [dragging, setDragging] = useState(false);
 
-const SlidingCompleteExample = (props: SliderProps) => {
-  const [slideCompletionValue, setSlideCompletionValue] = useState(0);
-  const [slideCompletionCount, setSlideCompletionCount] = useState(0);
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        onSlidingComplete={value => {
-          setSlideCompletionValue(value);
-          setSlideCompletionCount(prev => prev + 1);
-        }}
-      />
-      <Text>
-        Completions: {slideCompletionCount} Value: {slideCompletionValue}
-      </Text>
-    </View>
-  );
-};
-
-const SlidingStepsExample = (props: SliderProps) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={styles.outerTrue}>
-        <View style={styles.innerTrue} />
-      </View>
-    ) : (
-      <View style={styles.outer}>
-        <View style={styles.inner} />
-      </View>
-    );
-  }, []);
-
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={4}
-        step={1}
-        tapToSeek
-        StepMarker={renderStepMarker}
-        minimumTrackTintColor={'#112233'}
-        maximumTrackTintColor={'#00FF00'}
-      />
-    </View>
-  );
-};
-
-const SlidingStepsNumbersExample = (props: SliderProps) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={styles.outerTrue}>
-        <View style={styles.innerTrue} />
-      </View>
-    ) : (
-      <View style={styles.outer}>
-        <View style={styles.inner} />
-      </View>
-    );
-  }, []);
-
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={5}
-        step={1}
-        tapToSeek
-        renderStepNumber
-        StepMarker={renderStepMarker}
-        minimumTrackTintColor={'#123456'}
-        maximumTrackTintColor={'#00FF00'}
-      />
-    </View>
-  );
-};
-
-const SlidingStepsSmallNumbersExample = (props: SliderProps) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={styles.outerTrueSmall}>
-        <View style={styles.innerTrueSmall} />
-      </View>
-    ) : (
-      <View style={styles.outerSmall}>
-        <View style={styles.innerSmall} />
-      </View>
-    );
-  }, []);
-
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={5}
-        step={1}
-        tapToSeek
-        renderStepNumber
-        StepMarker={renderStepMarker}
-        minimumTrackTintColor={'#123456'}
-        maximumTrackTintColor={'#00FF00'}
-      />
-    </View>
-  );
-};
-
-const SlidingCustomStepsThumbImageNumbersExample = (props: SliderProps) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={styles.outerTrue}>
-        <View style={styles.innerTrue} />
-      </View>
-    ) : (
-      <View style={styles.outer}>
-        <View style={styles.inner} />
-      </View>
-    );
-  }, []);
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={4}
-        step={1}
-        tapToSeek
-        renderStepNumber
-        thumbImage={require('./resources/ck-icon.png')}
-        StepMarker={renderStepMarker}
-        minimumTrackTintColor={'#123456'}
-        maximumTrackTintColor={'#654321'}
-      />
-    </View>
-  );
-};
-
-const SlidingCustomStepsAnotherThumbImageNumbersExample = (
-  props: SliderProps,
-) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={styles.outerTrueSmall}>
-        <View style={styles.innerTrueSmall} />
-      </View>
-    ) : (
-      <View style={styles.outerSmall}>
-        <View style={styles.innerSmall} />
-      </View>
-    );
-  }, []);
-
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={15}
-        step={1}
-        tapToSeek
-        renderStepNumber
-        thumbImage={require('./resources/twitter-small.png')}
-        StepMarker={renderStepMarker}
-        minimumTrackTintColor={'#123456'}
-        maximumTrackTintColor={'#654321'}
-      />
-    </View>
-  );
-};
-
-const InvertedSliderWithStepMarker = (props: SliderProps) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={styles.outerTrueSmall}>
-        <View style={styles.innerTrueSmall} />
-      </View>
-    ) : (
-      <View style={styles.outerSmall}>
-        <View style={styles.innerSmall} />
-      </View>
-    );
-  }, []);
-
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={15}
-        step={1}
-        tapToSeek
-        renderStepNumber
-        thumbImage={require('./resources/twitter-small.png')}
-        StepMarker={renderStepMarker}
-        inverted
-        minimumTrackTintColor={'#123456'}
-        maximumTrackTintColor={'#654321'}
-      />
-    </View>
-  );
-};
-
-const SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth = (
-  props: SliderProps,
-) => {
-  const renderStepMarker = useCallback(({stepMarked}: MarkerProps) => {
-    return stepMarked ? (
-      <View style={[styles.innerTrue, {top: 3}]} />
-    ) : (
-      <View style={[styles.inner, {top: 3}]} />
-    );
-  }, []);
-
-  return (
-    <View>
-      <SliderExample
-        {...props}
-        minimumValue={0}
-        maximumValue={3}
-        step={1}
-        style={{width: 200}}
-        tapToSeek
-        renderStepNumber
-        StepMarker={renderStepMarker}
-        minimumTrackTintColor={'#ABCDEF'}
-        maximumTrackTintColor={'#001122'}
-      />
-    </View>
-  );
-};
-
-const MyStepMarker: FC<MarkerProps> = ({stepMarked, currentValue}) => {
-  return stepMarked ? (
-    <View style={styles.background}>
-      <View style={styles.separator} />
-      <View style={styles.label}>
-        {currentValue !== undefined ? (
-          <Text>
-            {currentValue % 1 === 0 ? currentValue : currentValue.toFixed(2)}
-          </Text>
-        ) : (
-          <Text>{'-'}</Text>
-        )}
-        <Image
-          style={styles.tinyLogo}
-          source={Image.resolveAssetSource(
-            require('./resources/twitter-small.png'),
-          )}
-        />
-      </View>
-    </View>
-  ) : (
-    <View style={styles.divider} />
-  );
-};
-
-const CustomComponent: FC<MarkerProps> = ({
-  stepMarked,
-  currentValue,
-  index,
-  max,
-}) => {
-  if (stepMarked) {
-    return (
-      <View style={styles.customComponentFrame}>
-        <View style={[styles.customComponentLeftFrame, styles.filled]}>
-          <Text style={styles.trackText}>{index}</Text>
-        </View>
-        <View style={[styles.customComponentRightFrame, styles.empty]}>
-          <Text style={styles.trackText}>{max}</Text>
-        </View>
-        <Text style={[styles.trackText, {position: 'absolute', left: 18}]}>
-          /
-        </Text>
-      </View>
-    );
-  }
-  return currentValue > index ? (
-    <View style={[styles.trackDot, styles.filled]} />
-  ) : (
-    <View style={[styles.trackDot, styles.empty]} />
-  );
-};
-
-const SliderExampleWithCustomMarker = (props: SliderProps) => {
-  const [value, setValue] = useState(props.value ?? CONSTANTS.MIN_VALUE);
+  // A ranged Slider reports its thumbs one by one, and never through
+  // `onValueChange`, which is what a single Slider is reported by.
+  const readout = ranged
+    ? `${rounded(left)} – ${rounded(right)}`
+    : `${rounded(value)}`;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
+      <Text style={styles.readout}>
+        {readout}
+        {dragging ? '  ·  dragging' : ''}
+      </Text>
       <Slider
-        step={CONSTANTS.STEP}
-        style={[styles.slider, props.style]}
-        minimumValue={CONSTANTS.MIN_VALUE}
-        maximumValue={CONSTANTS.MAX_VALUE}
-        thumbImage={require('./resources/empty.png')}
-        tapToSeek
         {...props}
+        style={[styles.slider, props.style]}
         value={value}
+        valueLeft={left}
+        valueRight={right}
         onValueChange={setValue}
-        lowerLimit={1}
-        StepMarker={MyStepMarker}
-        minimumTrackTintColor={'#00629A'}
-        maximumTrackTintColor={'#979EA4'}
+        onLeftValueChange={setLeft}
+        onRightValueChange={setRight}
+        onSlidingStart={() => setDragging(true)}
+        onSlidingComplete={() => setDragging(false)}
       />
     </View>
   );
 };
-const SliderExampleWithCustomComponentAndFilledSteps = (props: SliderProps) => {
-  const [value, setValue] = useState(props.value || 50);
-
-  return (
-    <View style={{alignItems: 'center'}}>
-      <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
-      <Slider
-        step={CONSTANTS.STEP}
-        style={[styles.slider, props.style]}
-        minimumValue={CONSTANTS.MIN_VALUE}
-        maximumValue={CONSTANTS.MAX_VALUE}
-        StepMarker={CustomComponent}
-        {...props}
-        value={value}
-        onValueChange={setValue}
-        minimumTrackTintColor={'#00629A'}
-        maximumTrackTintColor={'#979EA4'}
-      />
-    </View>
-  );
-};
-
-export default SliderExample;
-
-const styles = StyleSheet.create({
-  text: {
-    fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
-    margin: 0,
-  },
-  trackText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    justifyContent: 'center',
-    alignSelf: 'center',
-    top: 12,
-  },
-  trackDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    top: 4,
-  },
-  empty: {
-    backgroundColor: '#B3BFC9',
-  },
-  filled: {
-    backgroundColor: '#00629A',
-  },
-  customComponentFrame: {
-    flex: 1,
-    flexDirection: 'row',
-    top: -10,
-    opacity: 0.95,
-  },
-  customComponentLeftFrame: {
-    height: 40,
-    width: 20,
-    borderTopLeftRadius: 40,
-    borderBottomLeftRadius: 40,
-  },
-  customComponentRightFrame: {
-    height: 40,
-    width: 20,
-    borderTopRightRadius: 40,
-    borderBottomRightRadius: 40,
-  },
-  divider: {
-    width: 2,
-    height: 20,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  separator: {
-    width: 2,
-    height: 20,
-    backgroundColor: '#00629A',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  label: {
-    marginTop: 10,
-    width: 55,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  background: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tinyLogo: {
-    marginVertical: 2,
-    aspectRatio: 1,
-    flex: 1,
-    height: '100%',
-    width: '100%',
-  },
-  minMaxLabel: {
-    flexDirection: 'row',
-    zIndex: -1,
-  },
-  slider: {
-    width: 300,
-    opacity: 1,
-    marginTop: 10,
-  },
-  outer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#11FF11',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  outerTrue: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#0F0FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  inner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#111111',
-  },
-  innerTrue: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#0F0FFF',
-  },
-  container: {
-    alignItems: 'center',
-  },
-  outerSmall: {
-    width: 4,
-    height: 4,
-    top: 6,
-    borderRadius: 2,
-    backgroundColor: '#003366',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  outerTrueSmall: {
-    width: 8,
-    height: 8,
-    borderRadius: 2,
-    backgroundColor: '#ABCDEF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  innerSmall: {
-    width: 7,
-    height: 7,
-    borderRadius: 1,
-    backgroundColor: '#223366',
-  },
-  innerTrueSmall: {
-    width: 7,
-    height: 7,
-    borderRadius: 1,
-    backgroundColor: '#334488',
-  },
-});
 
 export const examples: Props[] = [
   {
-    title: 'Default settings',
+    title: 'Default Slider',
     render() {
-      return <SliderExample />;
-    },
-  },
-  {
-    title: 'Initial value: 0.5',
-    render() {
+      // Only started off centre: with `minimumValue`, `maximumValue` and `step`
+      // left out the thumb travels from 0 to 1 without snapping anywhere.
       return <SliderExample value={0.5} />;
     },
   },
   {
-    title: 'minimumValue: -1, maximumValue: 2',
-    render(): React.ReactElement {
-      return <SliderExample minimumValue={-1} maximumValue={2} />;
+    title: 'minimumValue, maximumValue and step',
+    render() {
+      return <SliderExample {...BOUNDS} value={25} />;
     },
   },
   {
-    title: 'minimumValue: -10, maximumValue: 0',
-    render(): React.ReactElement {
+    title: 'The same, limited from top and bottom',
+    render() {
+      // The thumbs stop at the limits, while the track still spans the whole
+      // range from `minimumValue` to `maximumValue`.
+      return (
+        <SliderExample {...BOUNDS} value={25} lowerLimit={20} upperLimit={80} />
+      );
+    },
+  },
+  {
+    title: 'The same, ranged',
+    render() {
+      // Two thumbs bounding a span, snapping to the very same step.
+      return (
+        <SliderExample {...BOUNDS} ranged valueLeft={20} valueRight={60} />
+      );
+    },
+  },
+  {
+    title: 'The three track colours',
+    render() {
+      // Ranged, because the track only splits into three parts between two
+      // thumbs: up to the left one, the span they bound, and from the right
+      // one to the maximum. A single Slider has no middle to colour.
       return (
         <SliderExample
-          accessibilityLabel="Zero maximum slider"
-          minimumValue={-10}
-          maximumValue={0}
-          value={-5}
+          {...BOUNDS}
+          {...TRACK_COLORS}
+          ranged
+          valueLeft={20}
+          valueRight={60}
         />
       );
     },
   },
   {
-    title: 'step: 0.25, tap to seek on iOS',
-    render(): React.ReactElement {
-      return <SliderExample step={0.25} tapToSeek={true} />;
+    title: 'Custom thumb',
+    render() {
+      return <SliderExample {...BOUNDS} value={25} thumb={SteppedThumb} />;
     },
   },
   {
-    title: 'Limit on positive values [30, 80]',
+    title: 'Default step markers',
+    render() {
+      // The same Slider, with the markers the Slider draws for its own steps
+      // switched on: a dot below each step, tinted once a thumb stands on it.
+      return (
+        <SliderExample
+          {...BOUNDS}
+          value={25}
+          thumb={SteppedThumb}
+          stepMarkers
+        />
+      );
+    },
+  },
+  {
+    title: 'Custom step markers',
+    render() {
+      // A marker hangs below the step it stands for, and says so through
+      // `marked` - the Slider hands each one the value of its step, and whether
+      // a thumb currently stands on it.
+      return (
+        <SliderExample
+          {...BOUNDS}
+          value={25}
+          stepMarkers={SteppedMarker}
+          style={styles.markedSlider}
+        />
+      );
+    },
+  },
+  {
+    title: 'Custom track',
+    render() {
+      return <SliderExample {...BOUNDS} value={25} track={DashedTrack} />;
+    },
+  },
+  {
+    title: 'Custom thumb and track',
     render() {
       return (
         <SliderExample
-          step={1}
-          value={40}
-          minimumValue={0}
-          maximumValue={120}
-          lowerLimit={30}
+          {...BOUNDS}
+          value={25}
+          thumb={SteppedThumb}
+          track={DashedTrack}
+        />
+      );
+    },
+  },
+  {
+    title: 'Custom thumb and track, ranged',
+    render() {
+      // The thumb is rendered twice, once holding the index of each thumb.
+      return (
+        <SliderExample
+          {...BOUNDS}
+          ranged
+          valueLeft={20}
+          valueRight={60}
+          thumb={SteppedThumb}
+          track={DashedTrack}
+        />
+      );
+    },
+  },
+  {
+    title: 'Limited from top and bottom, disabled',
+    render() {
+      // Switched off, the Slider keeps showing wherever the props put the
+      // thumb, but takes no touches and reports no events of its own.
+      return (
+        <SliderExample
+          {...BOUNDS}
+          value={25}
+          lowerLimit={20}
           upperLimit={80}
+          disabled
         />
       );
     },
   },
   {
-    title: 'Limit on negative values [-70, -20]',
+    title: 'Custom thumb and track, disabled',
     render() {
+      // A thumb or a track JS renders is a view of its own, outside the one
+      // the Slider draws, so it cannot be told to look switched off - instead
+      // the Slider dims the room it hangs the view in, and everything goes
+      // faint together.
       return (
         <SliderExample
-          step={1}
-          value={-30}
-          minimumValue={-80}
-          maximumValue={0}
-          lowerLimit={-70}
-          upperLimit={-20}
+          {...BOUNDS}
+          value={25}
+          thumb={SteppedThumb}
+          track={DashedTrack}
+          disabled
         />
       );
     },
   },
   {
-    title: 'onSlidingStart',
-    render(): React.ReactElement {
-      return <SlidingStartExample />;
-    },
-  },
-  {
-    title: 'onSlidingComplete',
+    title: 'Vertical orientation',
     render() {
-      return <SlidingCompleteExample />;
-    },
-  },
-  {
-    title: 'Custom min/max track tint color',
-    render() {
+      // `orientation` lays the very same Slider out along the other axis: it
+      // grows upwards, so the minimum is at the bottom and the maximum at the
+      // top. The step, the values and everything the Slider reports are as they
+      // were - only the axis the thumb travels along has changed.
+      //
+      // The built-in markers come along for the turn, and with them the axis
+      // they are paid for out of: they are laid out *across* the Slider, to the
+      // right of the track, so it is now the width that has to be deep enough to
+      // hold them, where a horizontal Slider spends its height. That height is
+      // what a marked Slider is measured to grow to, and the turn moves that
+      // growth onto the width - which has to be written out here rather than
+      // grown into, as a Slider whose style gives it a size is never asked to
+      // measure itself. See `verticalSlider`.
       return (
         <SliderExample
-          minimumTrackTintColor={'#00FF00'}
-          maximumTrackTintColor={'red'}
-          value={0.5}
+          {...BOUNDS}
+          value={25}
+          orientation="vertical"
+          stepMarkers
+          style={styles.verticalSlider}
         />
       );
     },
   },
   {
-    title: 'Custom thumb tint color',
+    title: 'Custom thumb and track, vertical',
     render() {
-      return <SliderExample thumbTintColor={'magenta'} />;
-    },
-  },
-  {
-    title: 'Custom thumb image',
-    render() {
-      return (
-        <SliderExample thumbImage={require('./resources/uie_thumb_big.png')} />
-      );
-    },
-  },
-  {
-    title: 'Custom thumb (network image)',
-    platform: 'windows',
-    render() {
+      // The track is turned a quarter turn along with the Slider, which is what
+      // carries the first of its dashes down to the bottom, where the minimum
+      // is - so this is the very same `DashedTrack`, written as a row, that the
+      // horizontal examples use. A thumb only ever moves along the Slider, so
+      // it needs nothing at all for the turn.
+      //
+      // `SteppedMarker` is the same component too, and stays the right way up:
+      // the markers hang beside the track instead of turning round with it,
+      // which keeps the numbers under the ticks readable. They hang out to its
+      // right now rather than down out of its bottom, so the room this example
+      // had to give its Slider has moved sides with them - from the height of
+      // `markedSlider` to the width of `verticalMarkedSlider`.
       return (
         <SliderExample
-          thumbImage={{
-            uri: 'https://img.icons8.com/windows/50/000000/bus.png',
-          }}
-        />
-      );
-    },
-  },
-  {
-    title: 'Custom track image',
-    platform: 'ios',
-    render() {
-      return <SliderExample trackImage={require('./resources/slider.png')} />;
-    },
-  },
-  {
-    title: 'Custom min/max track image',
-    platform: 'ios',
-    render() {
-      return (
-        <SliderExample
-          minimumTrackImage={require('./resources/slider-left.png')}
-          maximumTrackImage={require('./resources/slider-right.png')}
-        />
-      );
-    },
-  },
-  {
-    title: 'Slider with customized indicator and no numbers',
-    render() {
-      return <SlidingStepsExample />;
-    },
-  },
-  {
-    title: 'Slider with customized indicator and default numbers',
-    render() {
-      return <SlidingStepsNumbersExample />;
-    },
-  },
-  {
-    title: 'Slider with smaller customized indicator and default numbers',
-    render() {
-      return <SlidingStepsSmallNumbersExample />;
-    },
-  },
-  {
-    title: 'Slider with custom steps, thumbImage and steps numbers',
-    render() {
-      return <SlidingCustomStepsThumbImageNumbersExample />;
-    },
-  },
-  {
-    title: 'Slider with custom steps, different thumbImage and steps numbers',
-    render() {
-      return <SlidingCustomStepsAnotherThumbImageNumbersExample />;
-    },
-  },
-  {
-    title: 'Slider with custom steps, different width and thumbImage',
-    render() {
-      return <SlidingCustomStepsThumbImageWithNumbersAndDifferentWidth />;
-    },
-  },
-  {
-    title: 'Inverted slider direction with steps number and thumbImage',
-    render() {
-      return <InvertedSliderWithStepMarker />;
-    },
-  },
-  {
-    title: 'Custom step marker settings',
-    render() {
-      return <SliderExampleWithCustomMarker />;
-    },
-  },
-  {
-    title: 'Custom component with steps filled when passed',
-    render() {
-      return <SliderExampleWithCustomComponentAndFilledSteps />;
-    },
-  },
-  {
-    title: 'Inverted slider direction',
-    render() {
-      return <SliderExample value={0.6} inverted />;
-    },
-  },
-  {
-    title: 'Vertical slider',
-    platform: 'windows',
-    render() {
-      return <SliderExample value={0.6} vertical />;
-    },
-  },
-  {
-    title: 'Disabled slider',
-    render() {
-      return <SliderExample disabled value={0.6} />;
-    },
-  },
-  {
-    title: 'Slider with accessibilityState disabled',
-    platform: 'android',
-    render() {
-      return <SliderExample disabled value={0.6} />;
-    },
-  },
-  {
-    title: 'Custom thumb size (no image)',
-    render() {
-      return <SliderExample thumbTintColor={'blue'} thumbSize={32} />;
-    },
-  },
-  {
-    title: 'Custom thumb size (scaled image)',
-    render() {
-      return (
-        <SliderExample
-          thumbImage={require('./resources/uie_thumb_big.png')}
-          thumbSize={60}
+          {...BOUNDS}
+          value={25}
+          thumb={SteppedThumb}
+          track={DashedTrack}
+          stepMarkers={SteppedMarker}
+          orientation="vertical"
+          style={styles.verticalMarkedSlider}
         />
       );
     },
   },
 ];
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+  },
+  slider: {
+    width: '90%',
+    marginTop: 10,
+  },
+  // A vertical Slider takes its breadth from its width and its length from its
+  // height, so the two have to be given the other way round than `slider` has
+  // them: room to grow upwards, and only as much across as the thumb, the touch
+  // area around it and whatever hangs beside it need. The Slider is centred in
+  // whatever room JS gives it, so a wide one of these only puts the track in the
+  // middle of a wide gap.
+  //
+  // The across side is the one a vertical Slider has to think about once it
+  // marks its steps: the markers hang to the right of the track, half a thumb and
+  // a gap past its middle, which is the room a horizontal Slider spends out of its
+  // height without noticing. Android's thumb is the wider of the two, so it sets
+  // how far out the dots land - and 60 is what a marked Slider measures itself to
+  // there, a Slider being asked to measure itself only when its style gives it no
+  // size to take.
+  verticalSlider: {
+    width: 60,
+    height: 220,
+  },
+  // Roomier across again, for the markers `SteppedMarker` renders. Those start
+  // from the very point a built-in dot starts from, and from the same edge of it,
+  // but a marker is as wide as it makes itself - a tick with a label under it,
+  // against a dot four across - so the whole of it reaches a good deal further
+  // right from that start. Nothing widens the Slider for them either: they hang
+  // out of it, unclipped, exactly as this marker hangs out of the bottom of the
+  // horizontal example. What this width buys is therefore not room the markers
+  // are cut to fit, but room for them to stand beside the track without running
+  // past the Slider into the edge of the page.
+  verticalMarkedSlider: {
+    width: 96,
+    height: 220,
+  },
+  readout: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    color: '#333333',
+  },
+  thumb: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: ACCENT,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // The lift, taken the way each platform asks for it.
+    elevation: 3,
+    shadowColor: '#000000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: {width: 0, height: 1},
+  },
+  thumbLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: ACCENT,
+  },
+  dashedTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#ECE6F5',
+    flexDirection: 'row',
+  },
+  dash: {
+    flex: 1,
+    marginHorizontal: 2,
+    borderRadius: 5,
+    backgroundColor: ACCENT,
+  },
+  mutedDash: {
+    opacity: 0.35,
+  },
+  // A Slider grows itself to fit the markers it draws, but not the ones JS
+  // renders, so the room those hang into has to be given from here - a marker
+  // hangs from a point below the thumb, and nothing clips it.
+  markedSlider: {
+    height: 112,
+  },
+  marker: {
+    alignItems: 'center',
+  },
+  // The tick only changes its width and its colour when marked: a marker is hung
+  // from the point below its step, so one that grew any taller would push the
+  // label under it down every time a thumb came to rest on it.
+  tick: {
+    width: 2,
+    height: 12,
+    borderRadius: 1,
+    backgroundColor: '#CAC4D0', // M3 outline variant
+  },
+  markedTick: {
+    width: 4,
+    borderRadius: 2,
+    backgroundColor: ACCENT,
+  },
+  markerLabel: {
+    marginTop: 2,
+    fontSize: 9,
+    fontWeight: '500',
+    color: '#79747E', // M3 outline
+  },
+  markedLabel: {
+    color: ACCENT,
+    fontWeight: '600',
+  },
+});
+
+export default SliderExample;
