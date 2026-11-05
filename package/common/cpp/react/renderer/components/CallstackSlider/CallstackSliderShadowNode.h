@@ -2,27 +2,27 @@
 
 #include <algorithm>
 #include <jsi/jsi.h>
-#include <react/renderer/components/RNCSlider/RNCSliderState.h>
-#include <react/renderer/components/RNCSlider/Props.h>
-#include <react/renderer/components/RNCSlider/EventEmitters.h>
+#include <react/renderer/components/CallstackSlider/CallstackSliderState.h>
+#include <react/renderer/components/CallstackSlider/Props.h>
+#include <react/renderer/components/CallstackSlider/EventEmitters.h>
 #include <react/renderer/components/view/ConcreteViewShadowNode.h>
 #include <react/renderer/core/LayoutContext.h>
-#include "RNCSliderMeasurementsManager.h"
+#include "CallstackSliderMeasurementsManager.h"
 
 namespace facebook {
     namespace react {
 
-        JSI_EXPORT extern const char RNCSliderComponentName[];
+        JSI_EXPORT extern const char CallstackSliderComponentName[];
 
 /*
- * `ShadowNode` for <RNCSlider> component.
+ * `ShadowNode` for <CallstackSlider> component.
  */
-        class JSI_EXPORT RNCSliderShadowNode final
+        class JSI_EXPORT CallstackSliderShadowNode final
                 : public ConcreteViewShadowNode<
-                        RNCSliderComponentName,
-                        RNCSliderProps,
-                        RNCSliderEventEmitter,
-                        RNCSliderState> {
+                        CallstackSliderComponentName,
+                        CallstackSliderProps,
+                        CallstackSliderEventEmitter,
+                        CallstackSliderState> {
         public:
             using ConcreteViewShadowNode::ConcreteViewShadowNode;
 
@@ -33,7 +33,7 @@ namespace facebook {
              * which is why neither platform measures it a second time.
              */
             Size sizeForOrientation(Size horizontalSize) const {
-                if (getConcreteProps().orientation != RNCSliderOrientation::Vertical) {
+                if (getConcreteProps().orientation != CallstackSliderOrientation::Vertical) {
                     return horizontalSize;
                 }
 
@@ -47,7 +47,7 @@ namespace facebook {
             bool drawsStepMarkers() const {
                 const auto &props = getConcreteProps();
 
-                return props.stepMarkers == RNCSliderStepMarkers::Native &&
+                return props.stepMarkers == CallstackSliderStepMarkers::Native &&
                         props.step > 0 &&
                         props.maximumValue > props.minimumValue;
             }
@@ -124,7 +124,7 @@ namespace facebook {
         public:
 #ifdef ANDROID
             void setSliderMeasurementsManager(
-                    const std::shared_ptr<RNCSliderMeasurementsManager> &measurementsManager);
+                    const std::shared_ptr<CallstackSliderMeasurementsManager> &measurementsManager);
 
 #pragma mark - LayoutableShadowNode
 
@@ -133,12 +133,12 @@ namespace facebook {
                     const LayoutConstraints &layoutConstraints) const override;
 
         private:
-            std::shared_ptr<RNCSliderMeasurementsManager> measurementsManager_;
+            std::shared_ptr<CallstackSliderMeasurementsManager> measurementsManager_;
 #else
 #pragma mark - LayoutableShadowNode
 
             /*
-             * Implemented in `ios/RNCSliderShadowNode.mm` - the answer comes from
+             * Implemented in `ios/CallstackSliderShadowNode.mm` - the answer comes from
              * SwiftUI, which C++ cannot ask on its own.
              */
             Size measureContent(

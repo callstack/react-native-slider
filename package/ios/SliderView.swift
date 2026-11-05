@@ -8,7 +8,7 @@ import UIKit
 ///
 /// The initial values only stand until the component view pushes the real props,
 /// which it does as soon as it creates the view.
-final class RNCSliderModel: ObservableObject {
+final class SliderModel: ObservableObject {
   @Published var minimumValue: Double = 0
   @Published var maximumValue: Double = 1
   @Published var value: Double = 0
@@ -32,9 +32,9 @@ final class RNCSliderModel: ObservableObject {
 
   /// Which end of the track the minimum value sits at.
   ///
-  /// The one place the reading direction is kept. `RNCSliderComponentView` writes it from the
+  /// The one place the reading direction is kept. `SliderComponentView` writes it from the
   /// layout direction React Native resolved for the subtree the slider sits in, and both the
-  /// hosted slider and the `RNCSliderGeometry` the custom elements follow read it back - so
+  /// hosted slider and the `SliderGeometry` the custom elements follow read it back - so
   /// the two cannot mirror one another and not the other.
   ///
   /// A vertical slider is unaffected by it either way: turning a slider a quarter turn takes
@@ -70,12 +70,12 @@ final class RNCSliderModel: ObservableObject {
 
   /// How many of the thumbs JS has replaced with views of its own, counted from the
   /// left one - which the single thumb counts as. A replaced thumb is still there to
-  /// be dragged, it is just no longer drawn; `RNCSliderView` lays the view JS gave
+  /// be dragged, it is just no longer drawn; `SliderView` lays the view JS gave
   /// over it instead.
   @Published var customThumbCount: Int = 0
 
   /// Whether JS has replaced the track with a view of its own. The slider then draws
-  /// no track at all, whatever its tints - `RNCSliderView` lays the view JS gave
+  /// no track at all, whatever its tints - `SliderView` lays the view JS gave
   /// underneath it instead.
   @Published var customTrack: Bool = false
 
@@ -83,7 +83,7 @@ final class RNCSliderModel: ObservableObject {
   @Published var stepMarkers: Bool = false
 
   /// Whether JS has replaced the step markers with views of its own, one for each of
-  /// `stepMarkerValues`. The slider then draws none of its own - `RNCSliderView` hangs
+  /// `stepMarkerValues`. The slider then draws none of its own - `SliderView` hangs
   /// the views JS gave below the steps instead.
   @Published var customStepMarkers: Bool = false
 
@@ -117,9 +117,9 @@ final class RNCSliderModel: ObservableObject {
   }
 
   /// How faint a slider switched off is drawn, at the faintness a control that cannot be
-  /// reached is drawn at. Shared by the slider `RNCSliderContent` hosts and by the views
+  /// reached is drawn at. Shared by the slider `SliderContent` hosts and by the views
   /// JS renders over it, so that the two go faint together - see
-  /// `RNCSliderView.applyDisabledLook`.
+  /// `SliderView.applyDisabledLook`.
   static let disabledAlpha: CGFloat = 0.3
 
   /// Leeway, as a fraction of a step, for a value to count as landing on one.
@@ -230,7 +230,7 @@ final class RNCSliderModel: ObservableObject {
   /// The thumbs' own drags report being pressed through `@GestureState` inside
   /// `RNCRangedSliderContent`, which resets itself however a gesture ends. This is the
   /// track's half of the same look, written by UIKit and so published here for the
-  /// hosted slider to draw - and read back by `RNCSliderView` as the hold it has in
+  /// hosted slider to draw - and read back by `SliderView` as the hold it has in
   /// progress, there being no second place to keep it.
   @Published var heldThumb: Thumb?
 
@@ -243,7 +243,7 @@ final class RNCSliderModel: ObservableObject {
   /// Switching a slider off takes the gestures driving its drag away mid-flight, which
   /// leaves the drag with no end to be read out of it - and leaves the thumb marked as
   /// held, which would keep every value pushed from JS off that thumb for good.
-  /// `RNCSliderView.cancelSliding` abandons a drag instead, for the one case where the
+  /// `SliderView.cancelSliding` abandons a drag instead, for the one case where the
   /// JS that would hear about it is gone.
   func releaseThumbs() {
     let wasSliding = isSliding || isHeld
@@ -296,13 +296,13 @@ final class RNCSliderModel: ObservableObject {
 /// spread along its *length*, and the thumbs are as thick as its *breadth* allows. A
 /// thumb has a length and a thickness of its own too, as the thumb `Slider` draws is
 /// not round everywhere - see `thumbLength`. Which of the view's two sides each of
-/// those is comes from `RNCSliderModel.vertical`.
+/// those is comes from `SliderModel.vertical`.
 ///
 /// The *along* axis is read from the end of the track the minimum value sits at, which
 /// `reversed` says which end that is: everything here is measured and returned the same
 /// way round, whichever way the slider reads, so that a caller that only ever asks for
 /// distances along the track never has to know which way round it runs.
-struct RNCSliderGeometry {
+struct SliderGeometry {
   let size: CGSize
   let vertical: Bool
   let ranged: Bool
@@ -311,7 +311,7 @@ struct RNCSliderGeometry {
   let breadth: CGFloat
 
   /// Whether the minimum value sits at the trailing end of the view rather than the leading
-  /// one - see `RNCSliderModel.reversesAlongTrack`.
+  /// one - see `SliderModel.reversesAlongTrack`.
   let reversed: Bool
 
   /// The extent of a thumb along the slider and across it.
@@ -331,7 +331,7 @@ struct RNCSliderGeometry {
   let leftOffset: CGFloat
   let rightOffset: CGFloat
 
-  init(model: RNCSliderModel, size: CGSize) {
+  init(model: SliderModel, size: CGSize) {
     self.size = size
     vertical = model.vertical
     ranged = model.ranged
@@ -467,7 +467,7 @@ struct RNCSliderGeometry {
   /// The thumb a tap on the given point of the view should carry to it: the closest
   /// one, unless the tap lands on a thumb to begin with. A thumb that has nowhere to
   /// travel to has nowhere to be sought to either.
-  func thumb(tappedAt point: CGPoint) -> RNCSliderModel.Thumb? {
+  func thumb(tappedAt point: CGPoint) -> SliderModel.Thumb? {
     guard travel > 0, !touchesThumb(at: point) else { return nil }
 
     let offset = offset(of: point)
@@ -513,7 +513,7 @@ struct RNCSliderGeometry {
   /// The thumbs there are to be moved, and how far along the slider each of them
   /// stands. The single thumb of a slider that is not ranged is the left one, as it is
   /// everywhere else.
-  private var thumbs: [(thumb: RNCSliderModel.Thumb, offset: CGFloat)] {
+  private var thumbs: [(thumb: SliderModel.Thumb, offset: CGFloat)] {
     ranged
       ? [(.left, leftOffset), (.right, rightOffset)]
       : [(.single, leftOffset)]
@@ -542,8 +542,8 @@ struct RNCSliderGeometry {
 /// capsules and a path, and the only text here is the percentage VoiceOver reads out, which
 /// is never laid out. What JS renders in place of those is hosted outside this view, by
 /// React Native, and keeps the direction React Native gives it.
-struct RNCSliderContent: View {
-  @ObservedObject var model: RNCSliderModel
+struct SliderContent: View {
+  @ObservedObject var model: SliderModel
 
   var body: some View {
     RNCRangedSliderContent(model: model)
@@ -554,8 +554,8 @@ struct RNCSliderContent: View {
       //
       // What is washed out here is only the slider this view draws: a track, a thumb or a
       // step marker JS rendered is mounted over it, as a view of its own, and is dimmed
-      // to this same faintness there - see `RNCSliderView.applyDisabledLook`.
-      .opacity(model.disabled ? Double(RNCSliderModel.disabledAlpha) : 1)
+      // to this same faintness there - see `SliderView.applyDisabledLook`.
+      .opacity(model.disabled ? Double(SliderModel.disabledAlpha) : 1)
       .environment(\.layoutDirection, .leftToRight)
   }
 }
@@ -567,9 +567,9 @@ struct RNCSliderContent: View {
 /// slider of one value is drawn by `RNCRangedSliderContent` too, holding a single thumb.
 ///
 /// It is therefore not a second path a reading direction would have to be applied to -
-/// the sliders a user sees are all hosted by `RNCSliderContent`, pinned there.
+/// the sliders a user sees are all hosted by `SliderContent`, pinned there.
 struct RNCSingleSliderContent: View {
-  @ObservedObject var model: RNCSliderModel
+  @ObservedObject var model: SliderModel
 
   var body: some View {
     let range = model.range
@@ -593,15 +593,15 @@ struct RNCSingleSliderContent: View {
 /// to Liquid Glass while it is held on iOS 26 - so that this slider does not look
 /// foreign next to a plain one.
 ///
-/// Where everything goes is worked out by `RNCSliderGeometry` - and on a vertical slider
+/// Where everything goes is worked out by `SliderGeometry` - and on a vertical slider
 /// the left thumb is the bottom one, the direction its value grows in being the only
 /// thing that changes.
 struct RNCRangedSliderContent: View {
-  @ObservedObject var model: RNCSliderModel
+  @ObservedObject var model: SliderModel
 
   /// The two shapes a thumb takes are one and the same thing to this view, to the thumb
   /// being dragged and to the one a tap on the track jumps.
-  private typealias Thumb = RNCSliderModel.Thumb
+  private typealias Thumb = SliderModel.Thumb
 
   /// Whether the user has hold of the left (or single) and of the right thumb, which is
   /// what turns it to glass. Kept apart from the drag origins in the model, as a
@@ -611,7 +611,7 @@ struct RNCRangedSliderContent: View {
 
   var body: some View {
     GeometryReader { proxy in
-      let geometry = RNCSliderGeometry(model: model, size: proxy.size)
+      let geometry = SliderGeometry(model: model, size: proxy.size)
       let range = geometry.range
       let thumbSize = CGSize(
         width: model.vertical ? geometry.thumbThickness : geometry.thumbLength,
@@ -684,7 +684,7 @@ struct RNCRangedSliderContent: View {
   /// view apiece - and a path draws wherever its points are, so that the dots are not
   /// cut off on a slider too thin to hold them.
   @ViewBuilder
-  private func stepMarkers(_ geometry: RNCSliderGeometry, marked: Color, unmarked: Color) -> some View {
+  private func stepMarkers(_ geometry: SliderGeometry, marked: Color, unmarked: Color) -> some View {
     if model.stepMarkers, !model.customStepMarkers {
       let values = model.stepMarkerValues
 
@@ -697,8 +697,8 @@ struct RNCRangedSliderContent: View {
     }
   }
 
-  private func stepMarkerDots(at values: [Double], in geometry: RNCSliderGeometry) -> Path {
-    let size = RNCSliderGeometry.stepMarkerSize
+  private func stepMarkerDots(at values: [Double], in geometry: SliderGeometry) -> Path {
+    let size = SliderGeometry.stepMarkerSize
 
     return Path { path in
       for value in values {
@@ -735,8 +735,8 @@ struct RNCRangedSliderContent: View {
     // each other, so the area that answers to a touch is padded out to the 44pt Apple
     // asks for, on whichever side of the thumb falls short of it. The padding is then
     // shifted back off the offset, leaving the thumb itself where the value puts it.
-    let horizontalSlop = RNCSliderGeometry.touchSlop(around: size.width)
-    let verticalSlop = RNCSliderGeometry.touchSlop(around: size.height)
+    let horizontalSlop = SliderGeometry.touchSlop(around: size.width)
+    let verticalSlop = SliderGeometry.touchSlop(around: size.height)
     let alongSlop = model.vertical ? verticalSlop : horizontalSlop
 
     return thumbFace(isReplaced: isCustom(thumb), isPressed: isPressed(thumb))
@@ -900,7 +900,7 @@ struct RNCRangedSliderContent: View {
 
   /// A shift of the given distance along the slider, away from the end its minimum
   /// value sits at - the same direction `dragDistance(of:)` measures a drag in, and the
-  /// same pair of directions `RNCSliderGeometry` measures offsets in.
+  /// same pair of directions `SliderGeometry` measures offsets in.
   private func offsetAlong(_ distance: CGFloat) -> CGSize {
     if model.vertical {
       return CGSize(width: 0, height: -distance)
@@ -925,7 +925,7 @@ struct RNCRangedSliderContent: View {
 
   private func percentage(of value: Double, in range: ClosedRange<Double>) -> String {
     NumberFormatter.localizedString(
-      from: NSNumber(value: RNCSliderGeometry.fraction(of: value, in: range)),
+      from: NSNumber(value: SliderGeometry.fraction(of: value, in: range)),
       number: .percent
     )
   }
@@ -948,11 +948,11 @@ struct RNCRangedSliderContent: View {
 /// The hosting controller is parented to the closest view controller once this view
 /// reaches a window: SwiftUI needs a controller in the hierarchy for environment
 /// propagation, and Fabric hands us a plain view with no controller of its own.
-@objc(RNCSliderView)
-public final class RNCSliderView: UIView {
+@objc(SliderView)
+public final class SliderView: UIView {
 
-  private let model: RNCSliderModel
-  private let hostingController: UIHostingController<RNCSliderContent>
+  private let model: SliderModel
+  private let hostingController: UIHostingController<SliderContent>
 
   /// The views JS rendered as the slider's children, in the order it rendered them: the
   /// track, when `customTrack` says JS replaced it, then the single thumb, or the left
@@ -990,7 +990,7 @@ public final class RNCSliderView: UIView {
 
   /// One for each step JS renders a marker for, holding that marker the way
   /// `thumbContainers` hold the thumbs - except that each is kept at the point its
-  /// marker hangs from, see `RNCSliderGeometry.stepMarkerAnchor(at:)`.
+  /// marker hangs from, see `SliderGeometry.stepMarkerAnchor(at:)`.
   ///
   /// There are as many of them as there are markers, so they are made as the markers
   /// come, and lie between the slider and the thumbs.
@@ -1146,8 +1146,8 @@ public final class RNCSliderView: UIView {
 
   /// The geometry of the slider as the hosted view draws it, which fills this view - so
   /// the track is sought where it is drawn.
-  private func seekGeometry() -> RNCSliderGeometry {
-    RNCSliderGeometry(model: model, size: hostingController.view.bounds.size)
+  private func seekGeometry() -> SliderGeometry {
+    SliderGeometry(model: model, size: hostingController.view.bounds.size)
   }
 
   @objc public var minimumValue: Double {
@@ -1160,7 +1160,7 @@ public final class RNCSliderView: UIView {
     set { model.maximumValue = newValue }
   }
 
-  /// Setting this while the user is dragging is a no-op - see `RNCSliderModel.isSliding`.
+  /// Setting this while the user is dragging is a no-op - see `SliderModel.isSliding`.
   @objc public var value: Double {
     get { model.value }
     set {
@@ -1183,7 +1183,7 @@ public final class RNCSliderView: UIView {
   }
 
   /// Setting either of these while the matching thumb is being dragged is a no-op - see
-  /// `RNCSliderModel.leftDragOrigin`.
+  /// `SliderModel.leftDragOrigin`.
   @objc public var valueLeft: Double {
     get { model.valueLeft }
     set {
@@ -1200,7 +1200,7 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Granularity of the values the slider reports - see `RNCSliderModel.step`. A value
+  /// Granularity of the values the slider reports - see `SliderModel.step`. A value
   /// pushed from JS is taken as it comes, so only the values the slider arrives at
   /// itself are snapped.
   @objc public var step: Double {
@@ -1208,7 +1208,7 @@ public final class RNCSliderView: UIView {
     set { model.step = newValue }
   }
 
-  /// Bounds the thumbs can be dragged between - see `RNCSliderModel.limits`. A value
+  /// Bounds the thumbs can be dragged between - see `SliderModel.limits`. A value
   /// pushed from JS is taken as it comes, so only the values the slider arrives at
   /// itself are held to the limits.
   @objc public var lowerLimit: Double {
@@ -1222,14 +1222,14 @@ public final class RNCSliderView: UIView {
   }
 
   /// Whether the slider runs up the view rather than across it - see
-  /// `RNCSliderModel.vertical`. The shadow node measures a vertical slider the other
+  /// `SliderModel.vertical`. The shadow node measures a vertical slider the other
   /// way round to match, so this only decides how it is drawn and dragged.
   @objc public var vertical: Bool {
     get { model.vertical }
     set { model.vertical = newValue }
   }
 
-  /// Whether the slider is switched off - see `RNCSliderModel.disabled`.
+  /// Whether the slider is switched off - see `SliderModel.disabled`.
   ///
   /// Touches are taken away from this whole view, which leaves the slider nothing to
   /// report: the drags of the hosted thumbs, the tap and the hold on the track and
@@ -1268,7 +1268,7 @@ public final class RNCSliderView: UIView {
   /// remounted once the slider is already switched off would otherwise stay as bright as
   /// the slider was before it was.
   private func applyDisabledLook() {
-    let alpha: CGFloat = model.disabled ? RNCSliderModel.disabledAlpha : 1
+    let alpha: CGFloat = model.disabled ? SliderModel.disabledAlpha : 1
 
     trackContainer.alpha = alpha
     thumbContainers.forEach { $0.alpha = alpha }
@@ -1276,7 +1276,7 @@ public final class RNCSliderView: UIView {
   }
 
   /// Which end of the track the minimum value sits at, as React Native laid this slider
-  /// out - written by `RNCSliderComponentView` from the layout direction of the layout
+  /// out - written by `SliderComponentView` from the layout direction of the layout
   /// metrics it is given, which is where React Native puts the answer for the subtree the
   /// slider sits in: the app's own language, and any `direction` style partway down the
   /// tree, both arrive here.
@@ -1289,7 +1289,7 @@ public final class RNCSliderView: UIView {
   @objc public var laysOutRightToLeft: Bool {
     get { model.direction == .rightToLeft }
     set {
-      let direction: RNCSliderModel.Direction = newValue ? .rightToLeft : .leftToRight
+      let direction: SliderModel.Direction = newValue ? .rightToLeft : .leftToRight
       guard direction != model.direction else { return }
 
       model.direction = direction
@@ -1299,7 +1299,7 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Tints of the parts of the track - see `RNCSliderModel.minimumTrackColor`.
+  /// Tints of the parts of the track - see `SliderModel.minimumTrackColor`.
   @objc public var minimumTrackColor: UIColor? {
     get { model.minimumTrackColor }
     set { model.minimumTrackColor = newValue }
@@ -1316,7 +1316,7 @@ public final class RNCSliderView: UIView {
   }
 
   /// Whether the first of the views JS mounts is a track rather than a thumb - see
-  /// `RNCSliderModel.customTrack`.
+  /// `SliderModel.customTrack`.
   @objc public var customTrack: Bool {
     get { model.customTrack }
     set {
@@ -1336,14 +1336,14 @@ public final class RNCSliderView: UIView {
     }
   }
 
-  /// Whether the steps are marked below the track - see `RNCSliderModel.stepMarkers`.
+  /// Whether the steps are marked below the track - see `SliderModel.stepMarkers`.
   @objc public var stepMarkers: Bool {
     get { model.stepMarkers }
     set { model.stepMarkers = newValue }
   }
 
   /// Whether the last of the views JS mounts are step markers - see
-  /// `RNCSliderModel.customStepMarkers`.
+  /// `SliderModel.customStepMarkers`.
   @objc public var customStepMarkers: Bool {
     get { model.customStepMarkers }
     set {
@@ -1379,9 +1379,9 @@ public final class RNCSliderView: UIView {
   }
 
   public override init(frame: CGRect) {
-    let model = RNCSliderModel()
+    let model = SliderModel()
     self.model = model
-    hostingController = UIHostingController(rootView: RNCSliderContent(model: model))
+    hostingController = UIHostingController(rootView: SliderContent(model: model))
 
     super.init(frame: frame)
 
@@ -1424,7 +1424,7 @@ public final class RNCSliderView: UIView {
   ///
   /// Must be called on the main thread.
   @objc public static func measuredIntrinsicSize() -> CGSize {
-    let controller = UIHostingController(rootView: RNCSingleSliderContent(model: RNCSliderModel()))
+    let controller = UIHostingController(rootView: RNCSingleSliderContent(model: SliderModel()))
     let fitted = controller.sizeThatFits(
       in: CGSize(width: intrinsicWidth, height: .greatestFiniteMagnitude)
     )
@@ -1440,10 +1440,10 @@ public final class RNCSliderView: UIView {
   private static let intrinsicWidth: CGFloat = 200
 
   /// How thick a slider drawing its own step markers has to be across for them to fit
-  /// inside it - see `RNCSliderGeometry.stepMarkedThickness`. The shadow node grows a
+  /// inside it - see `SliderGeometry.stepMarkedThickness`. The shadow node grows a
   /// slider measured any thinner to it.
   @objc public static func stepMarkedThickness() -> CGFloat {
-    RNCSliderGeometry.stepMarkedThickness
+    SliderGeometry.stepMarkedThickness
   }
 
   /// The smallest control Apple's guidelines will accept as a touch target.
@@ -1529,7 +1529,7 @@ public final class RNCSliderView: UIView {
     hostingController.view.frame = bounds
 
     // The hosted slider fills this view, so its geometry is this view's too.
-    let geometry = RNCSliderGeometry(model: model, size: bounds.size)
+    let geometry = SliderGeometry(model: model, size: bounds.size)
     thumbContainers[0].center = geometry.thumbCenter(atOffset: geometry.leftOffset)
     thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)
 

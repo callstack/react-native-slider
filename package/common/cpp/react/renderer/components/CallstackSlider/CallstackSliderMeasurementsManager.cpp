@@ -1,5 +1,5 @@
 #ifdef ANDROID
-#include "RNCSliderMeasurementsManager.h"
+#include "CallstackSliderMeasurementsManager.h"
 
 #include <fbjni/fbjni.h>
 #include <react/jni/ReadableNativeMap.h>
@@ -9,7 +9,7 @@ using namespace facebook::jni;
 
 namespace facebook::react {
 
-Size RNCSliderMeasurementsManager::measure(
+Size CallstackSliderMeasurementsManager::measure(
     SurfaceId surfaceId,
     LayoutConstraints layoutConstraints,
     bool drawsStepMarkers) const {
@@ -40,10 +40,10 @@ Size RNCSliderMeasurementsManager::measure(
   auto minimumSize = layoutConstraints.minimumSize;
   auto maximumSize = layoutConstraints.maximumSize;
 
-  local_ref<JString> componentName = make_jstring("RNCSlider");
+  local_ref<JString> componentName = make_jstring("CallstackSlider");
 
   // The view manager is only told what bears on the size: whether the slider
-  // draws step markers, which `RNCSliderViewManager.measure` makes room for.
+  // draws step markers, which `SliderViewManager.measure` makes room for.
   local_ref<ReadableMap::javaobject> props;
   if (drawsStepMarkers) {
     auto propsRNM = ReadableNativeMap::newObjectCxxArgs(

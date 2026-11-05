@@ -4,13 +4,13 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.events.Event
 
-/** Emitted while the user drags the thumb of a [RNCSliderView]. */
-class RNCSliderValueChangeEvent(
+/** Emitted while the user drags the thumb of a [SliderView]. */
+class SliderValueChangeEvent(
   surfaceId: Int,
   viewId: Int,
   private val thumb: Thumb,
   private val value: Double,
-) : Event<RNCSliderValueChangeEvent>(surfaceId, viewId) {
+) : Event<SliderValueChangeEvent>(surfaceId, viewId) {
 
   override fun getEventName(): String = thumb.eventName
 

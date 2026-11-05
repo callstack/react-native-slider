@@ -10,9 +10,9 @@
 
 namespace facebook::react {
 
-    class RNCSliderMeasurementsManager {
+    class CallstackSliderMeasurementsManager {
     public:
-        RNCSliderMeasurementsManager(
+        CallstackSliderMeasurementsManager(
                 const std::shared_ptr<const ContextContainer> &contextContainer)
                 : contextContainer_(contextContainer) {}
 

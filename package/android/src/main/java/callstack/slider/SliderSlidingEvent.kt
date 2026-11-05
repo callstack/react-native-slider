@@ -5,17 +5,17 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.events.Event
 
 /**
- * Emitted when the user takes hold of a thumb of a [RNCSliderView], and again
+ * Emitted when the user takes hold of a thumb of a [SliderView], and again
  * when they let go of it.
  *
  * It carries no value: it says that a drag began or ended, not where the thumb
- * stands - which is what [RNCSliderValueChangeEvent] is for.
+ * stands - which is what [SliderValueChangeEvent] is for.
  */
-class RNCSliderSlidingEvent(
+class SliderSlidingEvent(
   surfaceId: Int,
   viewId: Int,
   private val phase: Phase,
-) : Event<RNCSliderSlidingEvent>(surfaceId, viewId) {
+) : Event<SliderSlidingEvent>(surfaceId, viewId) {
 
   override fun getEventName(): String = phase.eventName
 

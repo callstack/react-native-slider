@@ -5,7 +5,7 @@ import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
-class RNCSliderPackage : ReactPackage {
+class SliderPackage : ReactPackage {
 
   // This package ships no native modules, so the deprecated eager API is still the
   // cheapest way to satisfy ReactPackage across the supported React Native range.
@@ -14,5 +14,5 @@ class RNCSliderPackage : ReactPackage {
     emptyList()
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =
-    listOf(RNCSliderViewManager())
+    listOf(SliderViewManager())
 }

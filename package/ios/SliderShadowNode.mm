@@ -3,9 +3,9 @@
 
 #import <react/renderer/core/LayoutConstraints.h>
 
-#import <react/renderer/components/RNCSlider/RNCSliderShadowNode.h>
+#import <react/renderer/components/CallstackSlider/CallstackSliderShadowNode.h>
 
-// See `RNCSliderComponentView.mm` for why this import has two spellings.
+// See `SliderComponentView.mm` for why this import has two spellings.
 #if __has_include(<react_native_slider/react_native_slider-Swift.h>)
 #import <react_native_slider/react_native_slider-Swift.h>
 #else
@@ -16,7 +16,7 @@ namespace facebook::react {
 
 #pragma mark - LayoutableShadowNode
 
-Size RNCSliderShadowNode::measureContent(
+Size CallstackSliderShadowNode::measureContent(
     const LayoutContext & /*layoutContext*/,
     const LayoutConstraints &layoutConstraints) const
 {
@@ -35,8 +35,8 @@ Size RNCSliderShadowNode::measureContent(
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     RCTUnsafeExecuteOnMainQueueSync(^{
-      intrinsicSize = [RNCSliderView measuredIntrinsicSize];
-      stepMarkedThickness = [RNCSliderView stepMarkedThickness];
+      intrinsicSize = [SliderView measuredIntrinsicSize];
+      stepMarkedThickness = [SliderView stepMarkedThickness];
     });
   });
 

@@ -4,7 +4,7 @@
   "license": "MIT",
   "author": "BartoszKlonowski <bartosz.klonowski@callstack.com>",
   "homepage": "https://github.com/callstack/react-native-slider#readme",
-  "description": "React Native component used to select a single value from a range of values.",
+  "description": "React Native component allowing to use native Slider in your React Native app.",
   "publishConfig": {
     "access": "public"
   },
@@ -46,7 +46,6 @@
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-native": "^5.0.0",
-    "flow-bin": "^0.334.0",
     "hermes-eslint": "^0.37.0",
     "jest": "^30.5.2",
     "prettier": "^3.9.9",
@@ -54,12 +53,6 @@
     "react-native": "^0.87.1",
     "test-renderer": "~1.2.0",
     "typescript": "^6.0.3"
-  },
-  "overrides": {
-    "eslint-plugin-ft-flow": "^3.0.11",
-    "@istanbuljs/load-nyc-config": {
-      "js-yaml": "^4.3.2"
-    }
   },
   "repository": {
     "type": "git",
@@ -80,7 +73,7 @@
     "bracketSameLine": true
   },
   "codegenConfig": {
-    "name": "RNCSlider",
+    "name": "CallstackSlider",
     "type": "components",
     "jsSrcsDir": "src",
     "android": {
@@ -88,7 +81,7 @@
     },
     "ios": {
       "componentProvider": {
-        "RNCSlider": "RNCSliderComponentView"
+        "CallstackSlider": "SliderComponentView"
       }
     }
   }

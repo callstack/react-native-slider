@@ -9,12 +9,12 @@
 namespace facebook {
 namespace react {
 
-class RNCSliderState {
+class CallstackSliderState {
 public:
-  RNCSliderState() = default;
+  CallstackSliderState() = default;
 
 #ifdef ANDROID
-  RNCSliderState(RNCSliderState const &previousState, folly::dynamic data){};
+  CallstackSliderState(CallstackSliderState const &previousState, folly::dynamic data){};
   folly::dynamic getDynamic() const {
     return {};
   };

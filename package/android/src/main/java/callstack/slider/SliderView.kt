@@ -63,7 +63,7 @@ import kotlin.math.round
  * find a recomposer once it is attached. Measuring the child is therefore deferred
  * until this view has a window - see [onMeasure] and [onAttachedToWindow].
  */
-class RNCSliderView(context: Context) : FrameLayout(context) {
+class SliderView(context: Context) : FrameLayout(context) {
 
   private var minimumValue by mutableFloatStateOf(DEFAULT_MINIMUM_VALUE)
   private var maximumValue by mutableFloatStateOf(DEFAULT_MAXIMUM_VALUE)
@@ -1210,7 +1210,7 @@ class RNCSliderView(context: Context) : FrameLayout(context) {
 
 /**
  * Holds the view JS renders in place of a thumb or of the track - see
- * `RNCSliderView.thumbContainers` and `RNCSliderView.trackContainer`.
+ * `SliderView.thumbContainers` and `SliderView.trackContainer`.
  *
  * Fabric lays that view out itself, so this lays out nothing, and leaves the view
  * drawn wherever it hangs off it.

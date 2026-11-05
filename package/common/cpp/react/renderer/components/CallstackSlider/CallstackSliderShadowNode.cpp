@@ -1,5 +1,5 @@
-#include "RNCSliderShadowNode.h"
-#include "RNCSliderMeasurementsManager.h"
+#include "CallstackSliderShadowNode.h"
+#include "CallstackSliderMeasurementsManager.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -8,11 +8,11 @@
 
 namespace facebook {
     namespace react {
-        extern const char RNCSliderComponentName[] = "RNCSlider";
+        extern const char CallstackSliderComponentName[] = "CallstackSlider";
 
 #pragma mark - LayoutableShadowNode
 
-        void RNCSliderShadowNode::layout(LayoutContext layoutContext) {
+        void CallstackSliderShadowNode::layout(LayoutContext layoutContext) {
             ensureUnsealed();
 
             if (getChildren().empty()) {
@@ -41,7 +41,7 @@ namespace facebook {
             // two there are.
             const auto trackCount = props.customTrack ? 1 : 0;
             const auto thumbCount = props.customThumb ? (props.ranged ? 2 : 1) : 0;
-            const auto vertical = props.orientation == RNCSliderOrientation::Vertical;
+            const auto vertical = props.orientation == CallstackSliderOrientation::Vertical;
 
             for (const auto &child : getChildren()) {
                 const auto index = static_cast<int>(children->size());
@@ -52,7 +52,7 @@ namespace facebook {
                 }
 
                 const auto isStepMarker = index >= trackCount + thumbCount &&
-                        props.stepMarkers == RNCSliderStepMarkers::Custom;
+                        props.stepMarkers == CallstackSliderStepMarkers::Custom;
 
                 auto laidOutChild = child->clone({});
 
@@ -77,14 +77,14 @@ namespace facebook {
             children_ = std::move(children);
         }
 
-        std::shared_ptr<const ShadowNode> RNCSliderShadowNode::layoutTrack(
+        std::shared_ptr<const ShadowNode> CallstackSliderShadowNode::layoutTrack(
                 const ShadowNode &trackHost,
                 LayoutContext layoutContext) const {
             // A track lies along the slider, so it is as long as the slider is,
             // whichever way round that is: a vertical slider turns its track round
             // along with everything else.
             const auto sliderSize = getLayoutMetrics().frame.size;
-            const auto length = getConcreteProps().orientation == RNCSliderOrientation::Vertical
+            const auto length = getConcreteProps().orientation == CallstackSliderOrientation::Vertical
                     ? sliderSize.height
                     : sliderSize.width;
 
@@ -137,21 +137,21 @@ namespace facebook {
             return track;
         }
 
-        Point RNCSliderShadowNode::centredOnOrigin(Size size, LayoutContext layoutContext) {
+        Point CallstackSliderShadowNode::centredOnOrigin(Size size, LayoutContext layoutContext) {
             return roundToPixel<&std::round>(
                     Point{-size.width / 2, -size.height / 2},
                     layoutContext.pointScaleFactor);
         }
 
-        Point RNCSliderShadowNode::hungFromOrigin(Size size, bool vertical, LayoutContext layoutContext) {
+        Point CallstackSliderShadowNode::hungFromOrigin(Size size, bool vertical, LayoutContext layoutContext) {
             return roundToPixel<&std::round>(
                     vertical ? Point{0, -size.height / 2} : Point{-size.width / 2, 0},
                     layoutContext.pointScaleFactor);
         }
 
 #ifdef ANDROID
-        void RNCSliderShadowNode::setSliderMeasurementsManager(
-                const std::shared_ptr<RNCSliderMeasurementsManager> &
+        void CallstackSliderShadowNode::setSliderMeasurementsManager(
+                const std::shared_ptr<CallstackSliderMeasurementsManager> &
                 measurementsManager) {
             ensureUnsealed();
             measurementsManager_ = measurementsManager;
@@ -159,7 +159,7 @@ namespace facebook {
 
 #pragma mark - LayoutableShadowNode
 
-        Size RNCSliderShadowNode::measureContent(
+        Size CallstackSliderShadowNode::measureContent(
                 const LayoutContext & /*layoutContext*/,
                 const LayoutConstraints &layoutConstraints) const {
             // The step-marked measurement is only the room the markers need, which

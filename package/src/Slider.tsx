@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {View} from "react-native";
 import type {NativeSyntheticEvent} from "react-native";
-import RNCSliderNativeComponent from "./index";
+import SliderNativeComponent from "./index";
 import {type SliderProps} from "../typings";
 
 type SliderValueChangeEvent = NativeSyntheticEvent<
@@ -155,7 +155,7 @@ const Slider = ({
     : [currentValue];
 
   return (
-    <RNCSliderNativeComponent
+    <SliderNativeComponent
       {...props}
       minimumValue={minimumValue}
       maximumValue={maximumValue}
@@ -206,7 +206,7 @@ const Slider = ({
             ),
           )
         : null}
-    </RNCSliderNativeComponent>
+    </SliderNativeComponent>
   );
 };
 

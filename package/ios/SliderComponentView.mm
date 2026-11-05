@@ -1,9 +1,9 @@
-#import "RNCSliderComponentView.h"
+#import "SliderComponentView.h"
 
-#import <react/renderer/components/RNCSlider/EventEmitters.h>
-#import <react/renderer/components/RNCSlider/Props.h>
-#import <react/renderer/components/RNCSlider/RCTComponentViewHelpers.h>
-#import <react/renderer/components/RNCSlider/RNCSliderComponentDescriptor.h>
+#import <react/renderer/components/CallstackSlider/EventEmitters.h>
+#import <react/renderer/components/CallstackSlider/Props.h>
+#import <react/renderer/components/CallstackSlider/RCTComponentViewHelpers.h>
+#import <react/renderer/components/CallstackSlider/CallstackSliderComponentDescriptor.h>
 
 #import <React/RCTConversions.h>
 
@@ -20,26 +20,26 @@
 
 using namespace facebook::react;
 
-@interface RNCSliderComponentView () <RCTRNCSliderViewProtocol>
+@interface SliderComponentView () <RCTCallstackSliderViewProtocol>
 
 @end
 
-@implementation RNCSliderComponentView {
-  RNCSliderView *_sliderView;
+@implementation SliderComponentView {
+  SliderView *_sliderView;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
-  return concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>();
+  return concreteComponentDescriptorProvider<CallstackSliderComponentDescriptor>();
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
   if (self = [super initWithFrame:frame]) {
-    static const auto defaultProps = std::make_shared<const RNCSliderProps>();
+    static const auto defaultProps = std::make_shared<const CallstackSliderProps>();
     _props = defaultProps;
 
-    _sliderView = [[RNCSliderView alloc] initWithFrame:self.bounds];
+    _sliderView = [[SliderView alloc] initWithFrame:self.bounds];
     [self applySliderProps:*defaultProps];
 
     // Installed once and kept across recycles: the emitter it reaches for is
@@ -68,7 +68,7 @@ using namespace facebook::react;
   return self;
 }
 
-- (void)applySliderProps:(const RNCSliderProps &)props
+- (void)applySliderProps:(const CallstackSliderProps &)props
 {
   _sliderView.minimumValue = props.minimumValue;
   _sliderView.maximumValue = props.maximumValue;
@@ -80,64 +80,64 @@ using namespace facebook::react;
   _sliderView.step = props.step;
   _sliderView.lowerLimit = props.lowerLimit;
   _sliderView.upperLimit = props.upperLimit;
-  _sliderView.vertical = props.orientation == RNCSliderOrientation::Vertical;
+  _sliderView.vertical = props.orientation == CallstackSliderOrientation::Vertical;
   _sliderView.minimumTrackColor = RCTUIColorFromSharedColor(props.minimumTrackColor);
   _sliderView.middleRangeTrackColor = RCTUIColorFromSharedColor(props.middleRangeTrackColor);
   _sliderView.maximumTrackColor = RCTUIColorFromSharedColor(props.maximumTrackColor);
   _sliderView.customTrack = props.customTrack;
   _sliderView.customThumb = props.customThumb;
-  _sliderView.stepMarkers = props.stepMarkers != RNCSliderStepMarkers::None;
-  _sliderView.customStepMarkers = props.stepMarkers == RNCSliderStepMarkers::Custom;
+  _sliderView.stepMarkers = props.stepMarkers != CallstackSliderStepMarkers::None;
+  _sliderView.customStepMarkers = props.stepMarkers == CallstackSliderStepMarkers::Custom;
 }
 
 - (void)emitValueChange:(double)value
 {
-  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  const auto eventEmitter = std::static_pointer_cast<const CallstackSliderEventEmitter>(_eventEmitter);
   if (!eventEmitter) {
     return;
   }
 
-  eventEmitter->onValueChange(RNCSliderEventEmitter::OnValueChange{.value = value});
+  eventEmitter->onValueChange(CallstackSliderEventEmitter::OnValueChange{.value = value});
 }
 
 - (void)emitLeftValueChange:(double)value
 {
-  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  const auto eventEmitter = std::static_pointer_cast<const CallstackSliderEventEmitter>(_eventEmitter);
   if (!eventEmitter) {
     return;
   }
 
-  eventEmitter->onLeftValueChange(RNCSliderEventEmitter::OnLeftValueChange{.value = value});
+  eventEmitter->onLeftValueChange(CallstackSliderEventEmitter::OnLeftValueChange{.value = value});
 }
 
 - (void)emitRightValueChange:(double)value
 {
-  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  const auto eventEmitter = std::static_pointer_cast<const CallstackSliderEventEmitter>(_eventEmitter);
   if (!eventEmitter) {
     return;
   }
 
-  eventEmitter->onRightValueChange(RNCSliderEventEmitter::OnRightValueChange{.value = value});
+  eventEmitter->onRightValueChange(CallstackSliderEventEmitter::OnRightValueChange{.value = value});
 }
 
 - (void)emitSlidingStart
 {
-  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  const auto eventEmitter = std::static_pointer_cast<const CallstackSliderEventEmitter>(_eventEmitter);
   if (!eventEmitter) {
     return;
   }
 
-  eventEmitter->onSlidingStart(RNCSliderEventEmitter::OnSlidingStart{});
+  eventEmitter->onSlidingStart(CallstackSliderEventEmitter::OnSlidingStart{});
 }
 
 - (void)emitSlidingComplete
 {
-  const auto eventEmitter = std::static_pointer_cast<const RNCSliderEventEmitter>(_eventEmitter);
+  const auto eventEmitter = std::static_pointer_cast<const CallstackSliderEventEmitter>(_eventEmitter);
   if (!eventEmitter) {
     return;
   }
 
-  eventEmitter->onSlidingComplete(RNCSliderEventEmitter::OnSlidingComplete{});
+  eventEmitter->onSlidingComplete(CallstackSliderEventEmitter::OnSlidingComplete{});
 }
 
 #pragma mark - RCTComponentViewProtocol
@@ -158,8 +158,8 @@ using namespace facebook::react;
 
 - (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
 {
-  const auto &oldViewProps = *std::static_pointer_cast<const RNCSliderProps>(_props);
-  const auto &newViewProps = *std::static_pointer_cast<const RNCSliderProps>(props);
+  const auto &oldViewProps = *std::static_pointer_cast<const CallstackSliderProps>(_props);
+  const auto &newViewProps = *std::static_pointer_cast<const CallstackSliderProps>(props);
 
   if (oldViewProps.minimumValue != newViewProps.minimumValue) {
     _sliderView.minimumValue = newViewProps.minimumValue;
@@ -197,7 +197,7 @@ using namespace facebook::react;
     _sliderView.upperLimit = newViewProps.upperLimit;
   }
   if (oldViewProps.orientation != newViewProps.orientation) {
-    _sliderView.vertical = newViewProps.orientation == RNCSliderOrientation::Vertical;
+    _sliderView.vertical = newViewProps.orientation == CallstackSliderOrientation::Vertical;
   }
   if (oldViewProps.minimumTrackColor != newViewProps.minimumTrackColor) {
     _sliderView.minimumTrackColor = RCTUIColorFromSharedColor(newViewProps.minimumTrackColor);
@@ -215,8 +215,8 @@ using namespace facebook::react;
     _sliderView.customThumb = newViewProps.customThumb;
   }
   if (oldViewProps.stepMarkers != newViewProps.stepMarkers) {
-    _sliderView.stepMarkers = newViewProps.stepMarkers != RNCSliderStepMarkers::None;
-    _sliderView.customStepMarkers = newViewProps.stepMarkers == RNCSliderStepMarkers::Custom;
+    _sliderView.stepMarkers = newViewProps.stepMarkers != CallstackSliderStepMarkers::None;
+    _sliderView.customStepMarkers = newViewProps.stepMarkers == CallstackSliderStepMarkers::Custom;
   }
 
   [super updateProps:props oldProps:oldProps];
@@ -241,7 +241,7 @@ using namespace facebook::react;
 
   // `updateProps:` diffs against `_props`, so the props and the slider have to
   // be walked back to their defaults together.
-  static const auto defaultProps = std::make_shared<const RNCSliderProps>();
+  static const auto defaultProps = std::make_shared<const CallstackSliderProps>();
   _props = defaultProps;
 
   // A view retired mid-drag still believes it owns the thumb it was dragging,
@@ -252,7 +252,7 @@ using namespace facebook::react;
 
 @end
 
-Class<RCTComponentViewProtocol> RNCSliderCls(void)
+Class<RCTComponentViewProtocol> CallstackSliderCls(void)
 {
-  return RNCSliderComponentView.class;
+  return SliderComponentView.class;
 }

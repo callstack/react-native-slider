@@ -157,6 +157,6 @@ export interface NativeProps extends ViewProps {
   onSlidingComplete?: CodegenTypes.DirectEventHandler<null>;
 }
 
-export default codegenNativeComponent<NativeProps>("RNCSlider", {
+export default codegenNativeComponent<NativeProps>("CallstackSlider", {
   interfaceOnly: true,
 }) as HostComponent<NativeProps>;
