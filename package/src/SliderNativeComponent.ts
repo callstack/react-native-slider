@@ -28,11 +28,9 @@ export interface NativeProps extends ViewProps {
    * showing wherever they put its thumbs.
    *
    * Declared ahead of those values on purpose: a native side applies props in
-   * the order they are declared here, and a slider switched off and moved in
-   * the same commit has to be switched off first. Switching off is what ends
-   * the drag a slider believes it owns, and a value it still believes it owns
-   * is a value it keeps off the thumbs - so applied second, the move would be
-   * swallowed by the very rule switching off is there to lift.
+   * the order they are declared here, and switching off is what ends the drag a
+   * slider believes it owns - a value it still believes it owns is one it keeps
+   * off the thumbs, so a move applied first would be swallowed by that rule.
    */
   disabled?: CodegenTypes.WithDefault<boolean, false>;
 

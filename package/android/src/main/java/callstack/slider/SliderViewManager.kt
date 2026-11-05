@@ -178,17 +178,12 @@ class SliderViewManager :
 
   /**
    * Fabric asks for the intrinsic size once per surface and reuses the answer for
-   * every slider on it, so it must not depend on the incoming constraints. The
-   * width is only a hint - flexbox is what actually stretches the slider.
+   * every slider on it, so it must not depend on the incoming constraints. The width
+   * is only a hint - flexbox is what actually stretches the slider - and the answer
+   * describes a horizontal one, which its shadow node turns round for a vertical one.
    *
-   * The answer describes a horizontal slider, which is the only shape measured
-   * here: a vertical one is the same control on its side, and its shadow node
-   * turns this size round to match - see `SliderShadowNode::measureContent`.
-   *
-   * The one prop that bears on the size is whether the slider draws step markers
-   * of its own, which hang below the thumb and need it to be thick enough across to
-   * hold them - see [STEP_MARKED_HEIGHT_DIP]. The shadow node asks for that size
-   * apart from the other, and grows a slider measured any thinner to it.
+   * The one prop that bears on the size is whether the slider draws step markers of its
+   * own, which need it thick enough across to hold them - see [STEP_MARKED_HEIGHT_DIP].
    */
   override fun measure(
     context: Context,

@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 
   s.authors      = package['author']
   s.homepage     = package['homepage']
-  # SwiftUI needs iOS 13; 15.1 is the floor React Native itself supports.
+  # 15.1 is the floor React Native itself supports.
   s.platforms    = { :ios => "15.1", :visionos => "1.0" }
   s.swift_version = "5.0"
 

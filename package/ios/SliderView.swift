@@ -4,10 +4,8 @@ import UIKit
 
 /// Every prop coming from JS is kept here rather than on the SwiftUI view, so a
 /// prop update re-renders just the slider instead of rebuilding the hosted
-/// hierarchy.
-///
-/// The initial values only stand until the component view pushes the real props,
-/// which it does as soon as it creates the view.
+/// hierarchy. The literal defaults only stand until the component view pushes the
+/// real props, which it does as soon as it creates the view.
 final class SliderModel: ObservableObject {
   @Published var minimumValue: Double = 0
   @Published var maximumValue: Double = 1
@@ -30,16 +28,14 @@ final class SliderModel: ObservableObject {
   /// the bottom and the maximum at the top. Only the geometry changes with it.
   @Published var vertical: Bool = false
 
-  /// Which end of the track the minimum value sits at.
+  /// The one place the reading direction is kept: which end of the track the minimum
+  /// value sits at. `SliderComponentView` writes it from the layout direction React
+  /// Native resolved for the subtree the slider sits in, and both the hosted slider and
+  /// the `SliderGeometry` the custom elements follow read it back - so the two cannot
+  /// mirror one another and not the other.
   ///
-  /// The one place the reading direction is kept. `SliderComponentView` writes it from the
-  /// layout direction React Native resolved for the subtree the slider sits in, and both the
-  /// hosted slider and the `SliderGeometry` the custom elements follow read it back - so
-  /// the two cannot mirror one another and not the other.
-  ///
-  /// A vertical slider is unaffected by it either way: turning a slider a quarter turn takes
-  /// its reading direction along with it, so what read left-to-right now reads bottom-to-top,
-  /// and there is no second reversal left to apply.
+  /// A vertical slider is unaffected by it either way: turning a slider a quarter turn
+  /// takes its reading direction along with it.
   @Published var direction: Direction = .leftToRight
 
   /// Which end of a horizontal track the minimum value sits at.
@@ -49,8 +45,7 @@ final class SliderModel: ObservableObject {
   }
 
   /// Whether values run right-to-left across the view, so that everything laid out along the
-  /// track is measured from its trailing end instead. A vertical slider never reverses on this
-  /// account, whichever way it reads - see `Direction`.
+  /// track is measured from its trailing end instead. A vertical slider never reverses.
   var reversesAlongTrack: Bool { direction == .rightToLeft && !vertical }
 
   /// Whether the slider is switched off: washed out to the faintness of a control
@@ -152,17 +147,15 @@ final class SliderModel: ObservableObject {
   /// side of the other thumb, and reports it to JS. The two thumbs cannot swap places.
   ///
   /// A thumb held against a limit stops moving, and a value that has not moved is not
-  /// reported, so JS hears nothing of a drag carrying on beyond it.
+  /// reported, so JS hears nothing of a drag carrying on beyond it. Answers whether the
+  /// thumb moved.
   ///
-  /// Answers whether the thumb moved anywhere, which is what the thumb is worth
-  /// reporting for.
-  ///
-  /// Both the way a thumb is dragged and the way a thumb jumps to a tap on the track go
-  /// through here, so the two cannot disagree on where a value lands.
+  /// Both a drag of a thumb and a tap on the track go through here, so the two cannot
+  /// disagree on where a value lands.
   @discardableResult
   func set(_ newValue: Double, of thumb: Thumb) -> Bool {
-    // Asked for of the drags already in flight when the slider is switched off, whose
-    // gestures only stop carrying them once SwiftUI has been told.
+    // Drags already in flight when the slider is switched off keep carrying values
+    // until SwiftUI has been told to stop reading them.
     guard !disabled else { return false }
 
     let stepped = newValue.snapped(to: step)
@@ -227,11 +220,9 @@ final class SliderModel: ObservableObject {
   /// The thumb a hold on the track has picked up, and `nil` when the track is not held:
   /// one thumb at a time, for as long as the finger is down.
   ///
-  /// The thumbs' own drags report being pressed through `@GestureState` inside
-  /// `RNCRangedSliderContent`, which resets itself however a gesture ends. This is the
-  /// track's half of the same look, written by UIKit and so published here for the
-  /// hosted slider to draw - and read back by `SliderView` as the hold it has in
-  /// progress, there being no second place to keep it.
+  /// The thumbs' own drags report being pressed through `@GestureState`, which resets
+  /// itself however a gesture ends. This is the track's half of the same look, written
+  /// by UIKit and so published here for the hosted slider to draw.
   @Published var heldThumb: Thumb?
 
   /// Whether a hold on the track has a thumb in hand.
@@ -240,11 +231,9 @@ final class SliderModel: ObservableObject {
   /// Lets go of every thumb this holds, and answers a drag it was in the middle of with
   /// the completion JS was promised for it.
   ///
-  /// Switching a slider off takes the gestures driving its drag away mid-flight, which
-  /// leaves the drag with no end to be read out of it - and leaves the thumb marked as
-  /// held, which would keep every value pushed from JS off that thumb for good.
-  /// `SliderView.cancelSliding` abandons a drag instead, for the one case where the
-  /// JS that would hear about it is gone.
+  /// Switching a slider off takes the gestures driving its drag away mid-flight, leaving
+  /// the drag with no end to be read out of it, and leaves the thumb marked as held -
+  /// which would keep every value pushed from JS off that thumb for good.
   func releaseThumbs() {
     let wasSliding = isSliding || isHeld
     heldThumb = nil
@@ -293,15 +282,12 @@ final class SliderModel: ObservableObject {
 /// it, so both of them read the geometry from here to agree on where a thumb is.
 ///
 /// The geometry is written along two axes rather than across the view: values are
-/// spread along its *length*, and the thumbs are as thick as its *breadth* allows. A
-/// thumb has a length and a thickness of its own too, as the thumb `Slider` draws is
-/// not round everywhere - see `thumbLength`. Which of the view's two sides each of
-/// those is comes from `SliderModel.vertical`.
+/// spread along its *length*, and the thumbs are as thick as its *breadth* allows, with
+/// `SliderModel.vertical` deciding which of the view's sides each of those is.
 ///
 /// The *along* axis is read from the end of the track the minimum value sits at, which
-/// `reversed` says which end that is: everything here is measured and returned the same
-/// way round, whichever way the slider reads, so that a caller that only ever asks for
-/// distances along the track never has to know which way round it runs.
+/// `reversed` says which end that is, so that a caller that only ever asks for distances
+/// along the track never has to know which way round it runs.
 struct SliderGeometry {
   let size: CGSize
   let vertical: Bool
@@ -351,10 +337,9 @@ struct SliderGeometry {
   /// offset stands.
   ///
   /// The offsets place a thumb by its near edge, while a thumb covers the track around
-  /// its *centre* - so that is where the parts of the track have to be cut into, and not
-  /// at the near edge. Cutting at the near edge leaves the strip between the two on show,
-  /// which is only ever covered again by a thumb drawn of its own: a thumb JS replaces
-  /// draws no track, and leaves that strip as a gap of unfilled track beside it.
+  /// its *centre* - so that is where the parts of the track have to be cut into. Cutting
+  /// at the near edge leaves a strip of it on show beside a thumb JS replaces, which
+  /// draws none of its own.
   func thumbCenterOffset(at offset: CGFloat) -> CGFloat {
     offset + thumbLength / 2
   }
@@ -379,16 +364,13 @@ struct SliderGeometry {
   }
 
   /// The point the marker of the step at the given value hangs from: the middle of its
-  /// top edge, right under where the thumb stands on that step and clear of it, so
-  /// that the marker of the step a thumb is on stays in sight.
-  ///
-  /// A vertical slider has its markers to the right of the track instead, the point
-  /// being the middle of their left edge - they are not turned round with the slider,
-  /// which keeps whatever they read the right way up.
+  /// top edge, right under where the thumb stands on that step and clear of it. On a
+  /// vertical slider the markers sit to the right of the track instead, at the middle of
+  /// their left edge - they are not turned with the slider, which keeps whatever they
+  /// read the right way up.
   ///
   /// Where along the track a marker stands follows the reading direction, exactly as
-  /// `thumbCenter(atOffset:)` does for a thumb; how far across it hangs does not, so the
-  /// markers keep to the same side of the track whichever way the slider reads.
+  /// `thumbCenter(atOffset:)` does for a thumb; how far across it hangs does not.
   func stepMarkerAnchor(at value: Double) -> CGPoint {
     let nearEdge = CGFloat(Self.fraction(of: value, in: range)) * travel
     let along = thumbCenterOffset(at: nearEdge)
@@ -539,9 +521,9 @@ struct SliderGeometry {
 /// language the app runs in, and cannot turn the track round a second time.
 ///
 /// Nothing hosted loses out on that pinning: the track, the thumbs and the markers are
-/// capsules and a path, and the only text here is the percentage VoiceOver reads out, which
-/// is never laid out. What JS renders in place of those is hosted outside this view, by
-/// React Native, and keeps the direction React Native gives it.
+/// capsules and a path, and the only text here is the percentage VoiceOver reads out.
+/// What JS renders in place of those is hosted outside this view, by React Native, and
+/// keeps the direction React Native gives it.
 struct SliderContent: View {
   @ObservedObject var model: SliderModel
 
@@ -549,12 +531,11 @@ struct SliderContent: View {
     RNCRangedSliderContent(model: model)
       // A slider switched off is the same slider drawn faint, the way `UISlider` draws
       // itself once it is switched off - the track and the thumbs keeping their shapes
-      // and their places. The values stand wherever the props put them, so nothing here
-      // moves.
+      // and their places.
       //
-      // What is washed out here is only the slider this view draws: a track, a thumb or a
-      // step marker JS rendered is mounted over it, as a view of its own, and is dimmed
-      // to this same faintness there - see `SliderView.applyDisabledLook`.
+      // Only the slider this view draws is washed out here: what JS rendered is mounted
+      // over it as a view of its own, and is dimmed to this same faintness there - see
+      // `SliderView.applyDisabledLook`.
       .opacity(model.disabled ? Double(SliderModel.disabledAlpha) : 1)
       .environment(\.layoutDirection, .leftToRight)
   }
@@ -565,9 +546,6 @@ struct SliderContent: View {
 /// Only `measuredIntrinsicSize` builds this, to ask SwiftUI how tall its own slider wants
 /// to be, and it is thrown away once the answer comes back. Nothing ever shows it: a
 /// slider of one value is drawn by `RNCRangedSliderContent` too, holding a single thumb.
-///
-/// It is therefore not a second path a reading direction would have to be applied to -
-/// the sliders a user sees are all hosted by `SliderContent`, pinned there.
 struct RNCSingleSliderContent: View {
   @ObservedObject var model: SliderModel
 
@@ -621,10 +599,8 @@ struct RNCRangedSliderContent: View {
       let lowerColor = tint(model.minimumTrackColor, or: model.ranged ? Self.trackColor : .accentColor)
       let middleColor = tint(model.middleRangeTrackColor, or: .accentColor)
       let upperColor = tint(model.maximumTrackColor, or: Self.trackColor)
-      // The parts of the track are cut where the thumbs cover it, which is at their
-      // centre and not at the near edge the offsets give: cutting any earlier leaves a
-      // strip of the track left untinted beside a thumb - unmistakable once JS replaces
-      // the thumb with a view that draws none of its own.
+      // The parts of the track are cut at the centre of the thumbs, not at the near
+      // edge the offsets give - see `thumbCenterOffset(at:)`.
       let lowerEnd = geometry.thumbCenterOffset(at: geometry.leftOffset)
       let upperStart = geometry.thumbCenterOffset(
         at: model.ranged ? geometry.rightOffset : geometry.leftOffset
@@ -763,10 +739,6 @@ struct RNCRangedSliderContent: View {
       // range when the slider has none - which is what `UISlider` does.
       .accessibilityElement()
       .accessibilityValue(Text(percentage(of: model.value(of: thumb), in: range)))
-      // A slider switched off is switched off to VoiceOver as much as to a finger: read
-      // out as dimmed, and with no rotor to adjust it with. The thumb stays readable
-      // either way - a slider whose value nobody can reach is one most worth reading
-      // out, which is how `UISlider` leaves it too.
       .outOfReach(model.disabled)
       .accessibilityAdjustableAction { direction in
         // Guarded for its own sake as well, the rotor being left where it was put on a
@@ -848,12 +820,8 @@ struct RNCRangedSliderContent: View {
   /// by how far it travels, and tells JS that a drag has begun.
   ///
   /// Only the thumb grabbed first reports a start: a second finger landing on the other
-  /// thumb of a ranged slider joins the drag already in progress rather than beginning
-  /// one of its own, so that every start is answered by exactly one complete.
-  ///
-  /// A slider that is switched off begins nothing, and so has nothing to answer with a
-  /// completion either: a gesture already in flight when it was switched off keeps being
-  /// read until SwiftUI is told to stop reading it.
+  /// thumb of a ranged slider joins the drag already in progress, so that every start is
+  /// answered by exactly one complete. A slider that is switched off begins nothing.
   private func beginDrag(of thumb: Thumb) -> Double {
     let origin = model.value(of: thumb)
     guard !model.disabled else { return origin }
@@ -1003,8 +971,7 @@ public final class SliderView: UIView {
   /// to - the way `UISlider` behaves, which this slider is drawn to stand in for.
   ///
   /// It sits on this view rather than being a gesture of the hosted slider, as the
-  /// whole of the track has to answer it while the thumbs keep their own gestures: a
-  /// tap is a thing of the slider's, and a drag of a thumb is a thing of the thumb's.
+  /// whole of the track has to answer it while the thumbs keep their own gestures.
   ///
   /// The touches are left to carry on underneath it, so that the drags of the hosted
   /// slider go on seeing the whole of a touch even when a tap ends up being read out of
@@ -1018,21 +985,14 @@ public final class SliderView: UIView {
   }()
 
   /// Takes over a touch held on the track, after a moment, and drags the thumb nearest
-  /// the finger for as long as it is held.
+  /// the finger for as long as it is held. The same thing as the tap above done slowly,
+  /// so the two share `beginSeek(at:)`, `continueSeek(at:)` and `endSeek()`, and it sits
+  /// on the very same track for the very same reason.
   ///
-  /// The same thing as the tap above done slowly, so the two share `beginSeek(at:)`,
-  /// `continueSeek(at:)` and `endSeek()`, and it sits on the very same track for the
-  /// very same reason.
-  ///
-  /// The hold is short enough to feel immediate, which asks something of a finger that
-  /// means to scroll instead: `allowableMovement` is left at what UIKit asks for, so a
-  /// finger already sliding as it lands is left to whatever the slider sits in, and
-  /// only a finger that comes to rest on the track picks a thumb up. Once the hold has
-  /// begun the finger is free to travel the whole track.
-  ///
-  /// The touches are left to carry on underneath it, exactly as they are under the tap,
-  /// so that a finger which moved before the hold began is still handed to the hosted
-  /// slider.
+  /// `allowableMovement` is left at what UIKit asks for, so a finger already sliding as
+  /// it lands is left to whatever the slider sits in, and only a finger that comes to
+  /// rest on the track picks a thumb up. Once the hold has begun the finger is free to
+  /// travel the whole track.
   private lazy var holdToSeek: UILongPressGestureRecognizer = {
     let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(seekToHold(_:)))
     recognizer.minimumPressDuration = Self.seekHoldDuration
@@ -1045,11 +1005,10 @@ public final class SliderView: UIView {
   /// enough that picking one up this way feels like it begins at once.
   private static let seekHoldDuration: TimeInterval = 0.15
 
-  /// Installs the two reads of the track, and keeps them from answering the same touch
+  /// Installs the two reads of the track, keeping them from answering the same touch
   /// twice: a tap recognizes on release however long the finger was down, so without
   /// this a press held past the hold duration would be answered by the hold and then
-  /// again by the tap - a second start and complete carrying no value. A quick tap
-  /// fails the hold the moment it is released, which is too soon to be felt.
+  /// again by the tap.
   private func installSeekGestures() {
     tapToSeek.require(toFail: holdToSeek)
     addGestureRecognizer(tapToSeek)
@@ -1074,16 +1033,12 @@ public final class SliderView: UIView {
 
   /// Takes the thumb nearest a tap on the track to where the tap landed.
   ///
-  /// A tap landing on a thumb is left to the hosted slider, which reads it the same way
-  /// it reads a drag begun there: as a thumb being taken hold of. A tap arriving while a
-  /// thumb is already being dragged is left too, and a value pushed from JS in between
-  /// is held off the way one pushed mid-drag is.
+  /// A tap landing on a thumb, or arriving while a thumb is already being dragged, is
+  /// left to the hosted slider.
   ///
   /// A tap is reported the way a drag of the same distance would have been: a start,
   /// the value, and a complete.
   @objc private func seekToTap(_ recognizer: UITapGestureRecognizer) {
-    // The hosted slider is laid out to fill this view, so the tap is read in its own
-    // bounds - the same bounds `RNCRangedSliderContent` is drawn in.
     beginSeek(at: recognizer.location(in: hostingController.view))
     endSeek()
   }
@@ -1106,12 +1061,10 @@ public final class SliderView: UIView {
     let geometry = seekGeometry()
     guard let thumb = geometry.thumb(tappedAt: point) else { return false }
 
-    // The origin marks the thumb as held, so that a value pushed from JS is kept off it
-    // for as long as the finger is down. The seek never reads the value back, as it is
-    // the finger that decides where the thumb goes.
+    // Marks the thumb as held, so that a value pushed from JS is kept off it for as
+    // long as the finger is down. The seek never reads the value back, as it is the
+    // finger that decides where the thumb goes.
     model.setDragOrigin(model.value(of: thumb), of: thumb)
-    // Which also grows the thumb and turns it to glass, the way it does when it is taken
-    // hold of directly.
     model.heldThumb = thumb
     model.onSlidingStart?()
     continueSeek(at: point)
@@ -1177,7 +1130,6 @@ public final class SliderView: UIView {
     set {
       guard newValue != model.ranged else { return }
       model.ranged = newValue
-      // Which of the children are thumbs depends on how many thumbs there are.
       childViewsDidChange()
     }
   }
@@ -1232,12 +1184,7 @@ public final class SliderView: UIView {
   /// Whether the slider is switched off - see `SliderModel.disabled`.
   ///
   /// Touches are taken away from this whole view, which leaves the slider nothing to
-  /// report: the drags of the hosted thumbs, the tap and the hold on the track and
-  /// VoiceOver's adjustments all hang off it, and what it is drawn as comes from the
-  /// same flag.
-  ///
-  /// The views JS renders in place of the track, the thumbs and the step markers are
-  /// switched off along with the rest of the slider - see `applyDisabledLook`.
+  /// report, and what it is drawn as comes from the same flag.
   @objc public var disabled: Bool {
     get { model.disabled }
     set {
@@ -1258,15 +1205,9 @@ public final class SliderView: UIView {
   /// Draws the views JS rendered in place of the track, of a thumb and of the step
   /// markers at the faintness of a control nobody can reach.
   ///
-  /// The hosted slider is the one thing here that switches itself off to be drawn: it
-  /// washes out its own track and thumbs. A view JS renders is mounted over it as a view
-  /// of its own, outside that, and nothing reaches it as a state to draw itself by - so
-  /// the containers holding them are dimmed to the same faintness, and the whole of a
-  /// switched-off slider goes faint together, over whatever JS drew into them.
-  ///
-  /// Run over again whenever the children are handed out afresh: a container made or
-  /// remounted once the slider is already switched off would otherwise stay as bright as
-  /// the slider was before it was.
+  /// The hosted slider washes out its own track and thumbs, but a view JS renders is
+  /// mounted over it as a view of its own, outside that, and nothing reaches it as a
+  /// state to draw itself by - so the containers holding them are dimmed here instead.
   private func applyDisabledLook() {
     let alpha: CGFloat = model.disabled ? SliderModel.disabledAlpha : 1
 
@@ -1277,15 +1218,11 @@ public final class SliderView: UIView {
 
   /// Which end of the track the minimum value sits at, as React Native laid this slider
   /// out - written by `SliderComponentView` from the layout direction of the layout
-  /// metrics it is given, which is where React Native puts the answer for the subtree the
-  /// slider sits in: the app's own language, and any `direction` style partway down the
-  /// tree, both arrive here.
+  /// metrics it is given, which is where React Native puts the answer for the subtree
+  /// the slider sits in.
   ///
-  /// The views JS renders in place of the track, a thumb and a step marker are deliberately
-  /// left out of this: they are laid out by React Native wherever the track now puts them,
-  /// and read the app's direction for themselves, exactly as they did before the track
-  /// turned round. Taking the direction any further down into them would apply it a second
-  /// time to views whose layout React Native has already mirrored.
+  /// The views JS renders are deliberately left out of this: React Native has already
+  /// mirrored their layout, so taking the direction down into them would apply it twice.
   @objc public var laysOutRightToLeft: Bool {
     get { model.direction == .rightToLeft }
     set {
@@ -1416,9 +1353,7 @@ public final class SliderView: UIView {
   /// number written down here. The width is only a hint - a SwiftUI `Slider` has no
   /// width of its own to report, and flexbox is what actually stretches it.
   ///
-  /// A ranged slider is deliberately measured the same way, from the single thumb: it is
-  /// laid out inside whatever height it is given, and taking the platform's own slider
-  /// height keeps the two the same size. A vertical slider is too - it is the same
+  /// A ranged slider is measured the same way, and a vertical one too - it is the same
   /// control on its side, so its shadow node turns this size round rather than measuring
   /// a second one.
   ///
@@ -1495,8 +1430,7 @@ public final class SliderView: UIView {
       placements.append((trackView, trackContainer))
     }
 
-    // A view inserted ahead of another moves that one onto the next container, and one
-    // left without a container is not shown anywhere.
+    // A view left without a container is not shown anywhere.
     for view in childViews where !placements.contains(where: { $0.0 === view }) {
       view.removeFromSuperview()
     }
@@ -1510,8 +1444,7 @@ public final class SliderView: UIView {
   }
 
   /// Makes or drops step marker containers until there is one for each of the given
-  /// number of markers. A dropped container takes the marker it held with it, which
-  /// `childViewsDidChange` then hands to another one.
+  /// number of markers. A dropped container takes the marker it held with it.
   private func setStepMarkerContainerCount(_ count: Int) {
     while stepMarkerContainers.count > count {
       stepMarkerContainers.removeLast().removeFromSuperview()
@@ -1528,7 +1461,6 @@ public final class SliderView: UIView {
     super.layoutSubviews()
     hostingController.view.frame = bounds
 
-    // The hosted slider fills this view, so its geometry is this view's too.
     let geometry = SliderGeometry(model: model, size: bounds.size)
     thumbContainers[0].center = geometry.thumbCenter(atOffset: geometry.leftOffset)
     thumbContainers[1].center = geometry.thumbCenter(atOffset: geometry.rightOffset)

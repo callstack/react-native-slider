@@ -71,8 +71,8 @@ class SliderView(context: Context) : FrameLayout(context) {
 
   /**
    * The range exactly as JS gave it, for the steps to be worked out from - see
-   * [stepMarkerValues]. JS works out the same steps from the same doubles, and a
-   * range rounded to a [Float] could come to a different number of them.
+   * [stepMarkerValues], as a range rounded to a [Float] can come to a different
+   * number of them than JS came to.
    */
   private var exactMinimumValue by mutableDoubleStateOf(DEFAULT_MINIMUM_VALUE.toDouble())
   private var exactMaximumValue by mutableDoubleStateOf(DEFAULT_MAXIMUM_VALUE.toDouble())
@@ -87,8 +87,7 @@ class SliderView(context: Context) : FrameLayout(context) {
    *
    * Kept as a [Double] where the rest of the state is a [Float], because it is the
    * reported values that are snapped to it rather than the thumb position - see
-   * [snapped]. Named the way [sliderValue] is, because a property called `step` would
-   * come with a `setStep` of its own for [setStep] to clash with.
+   * [snapped]. Named as it is so that its setter does not clash with [setStep].
    */
   private var stepValue by mutableDoubleStateOf(DEFAULT_STEP)
 
@@ -96,19 +95,15 @@ class SliderView(context: Context) : FrameLayout(context) {
    * Bounds the thumbs can be dragged between. The track is drawn across the whole range
    * regardless: a limit takes away the values a thumb can reach, not the ones the slider
    * shows.
-   *
-   * Named the way [stepValue] is, and for the same reason.
    */
   private var lowerLimitValue by mutableFloatStateOf(DEFAULT_LOWER_LIMIT)
   private var upperLimitValue by mutableFloatStateOf(DEFAULT_UPPER_LIMIT)
 
   /**
-   * Whether the slider is laid out along the view's height rather than its width,
-   * with the larger values at the top - see [sliderAxis].
-   *
-   * Kept as the one thing the orientation actually decides, rather than as the
-   * string it arrives as, so that anything other than "vertical" reads as the
-   * horizontal slider it defaults to.
+   * Whether the slider is laid out along the view's height rather than its width, with
+   * the larger values at the top - see [sliderAxis]. Held as the one thing the
+   * orientation decides, so that anything other than "vertical" reads as the horizontal
+   * slider it defaults to.
    */
   private var isVertical by mutableStateOf(DEFAULT_VERTICAL)
 
@@ -118,11 +113,7 @@ class SliderView(context: Context) : FrameLayout(context) {
    * events of its own.
    *
    * The values the slider holds are no part of this - a slider switched off still shows
-   * wherever the props put its thumbs, which is why their setters keep taking values
-   * while this is on.
-   *
-   * Named the way [stepValue] is, and for the same reason: a property called `isDisabled`
-   * would come with a `setDisabled` of its own for [setDisabled] to clash with.
+   * wherever the props put its thumbs.
    */
   private var disabledValue by mutableStateOf(DEFAULT_DISABLED)
 
@@ -137,18 +128,14 @@ class SliderView(context: Context) : FrameLayout(context) {
   private var maximumTrackColor by mutableStateOf(Color.Unspecified)
 
   /**
-   * Whether the user has hold of the slider. It lasts from the touch going down
-   * to the last finger coming off, so it covers a drag that never moved a thumb
-   * as well as one that did - see [slidingGestures].
+   * Whether the user has hold of the slider, from the touch going down to the last
+   * finger coming off - so it covers a drag that never moved a thumb as well as one
+   * that did, see [slidingGestures].
    *
-   * While the user drags, the thumb position is owned by this view. Value updates
-   * coming from JS in the meantime would fight the gesture, so they are ignored -
-   * the slider is uncontrolled during a drag.
-   *
-   * A ranged slider stops listening for both of its values at once, even though
-   * only one thumb can be under the finger: Compose's `RangeSlider` is driven by
-   * the span as a whole, so a value pushed for the thumb standing still would
-   * disturb the one being dragged just the same.
+   * While the user drags, the thumb position is owned by this view and value updates
+   * from JS are ignored. A ranged slider stops listening for both of its values at
+   * once: Compose's `RangeSlider` is driven by the span as a whole, so a value pushed
+   * for the thumb standing still would disturb the one being dragged just the same.
    */
   private var isSliding = false
 
@@ -241,26 +228,20 @@ class SliderView(context: Context) : FrameLayout(context) {
    */
   private val stepMarkerContainers = mutableListOf<ChildContainer>()
 
-  /** Invoked continuously while the user drags the thumb. */
+  /**
+   * Invoked continuously while the user drags a thumb, and once each when the user
+   * takes hold of one and lets go of it - whether or not the drag in between moved it
+   * anywhere. A single slider reports through [onValueChange], a ranged one through
+   * its two sided handlers.
+   */
   var onValueChange: ((Double) -> Unit)? = null
-
   var onLeftValueChange: ((Double) -> Unit)? = null
   var onRightValueChange: ((Double) -> Unit)? = null
-
-  /**
-   * Invoked once the user takes hold of a thumb, and again once they let go of it -
-   * whether or not the drag in between moved it anywhere.
-   *
-   * The two always come in pairs: [isSliding] is what a drag is recognised by, so a
-   * thumb grabbed while another is already being dragged does not begin a second drag,
-   * and neither does a value pushed from JS end the one in progress.
-   */
   var onSlidingStart: (() -> Unit)? = null
   var onSlidingComplete: (() -> Unit)? = null
 
   private val composeView =
     ComposeView(context).apply {
-      // Compose is only created once attached, so this is safe to call up front.
       setViewCompositionStrategy(
         ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
       )
@@ -304,9 +285,9 @@ class SliderView(context: Context) : FrameLayout(context) {
 
   /**
    * Hands every child to the container it belongs in. Which one that is depends on
-   * whether there is a track ahead of the thumbs, which can change before or after
-   * the children it concerns are added - so it is worked out afresh whenever either
-   * does.
+   * which of the track, the thumbs and the step markers JS replaced, which can change
+   * before or after the children it concerns are added - so it is worked out afresh
+   * whenever either does.
    */
   private fun onChildViewsChanged() {
     val trackView = if (hasCustomTrack) childViews.firstOrNull() else null
@@ -322,8 +303,7 @@ class SliderView(context: Context) : FrameLayout(context) {
         stepMarkerViews.zip(stepMarkerContainers) +
         listOfNotNull(trackView?.let { it to trackContainer })
 
-    // A view inserted ahead of another moves that one onto the next container, and
-    // one left without a container is not shown anywhere.
+    // A view left without a container is not shown anywhere.
     childViews
       .filter { view -> placements.none { (placed, _) -> placed === view } }
       .forEach { view -> (view.parent as? ViewGroup)?.removeView(view) }
@@ -341,8 +321,7 @@ class SliderView(context: Context) : FrameLayout(context) {
 
   /**
    * Makes or drops step marker containers until there is one for each of the given
-   * number of markers. A dropped container takes the marker it held with it, which
-   * [onChildViewsChanged] then hands to another one.
+   * number of markers. A dropped container takes the marker it held with it.
    */
   private fun setStepMarkerContainerCount(count: Int) {
     while (stepMarkerContainers.size > count) {
@@ -440,7 +419,6 @@ class SliderView(context: Context) : FrameLayout(context) {
 
   fun setRanged(value: Boolean) {
     selectsRange = value
-    // Which of the children are thumbs depends on how many thumbs there are.
     onChildViewsChanged()
   }
 
@@ -456,19 +434,12 @@ class SliderView(context: Context) : FrameLayout(context) {
     }
   }
 
-  /**
-   * A value pushed from JS is taken as it comes, so only the values the slider
-   * arrives at itself are snapped to the step.
-   */
+  /** A value pushed from JS is taken as it comes, never snapped to the step. */
   fun setStep(value: Double) {
     stepValue = value
     placeStepMarkerContainers()
   }
 
-  /**
-   * A value pushed from JS is taken as it comes here too, so only the values the
-   * slider arrives at itself are held to the limits.
-   */
   fun setLowerLimit(value: Double) {
     lowerLimitValue = value.toFloat()
   }
@@ -488,11 +459,7 @@ class SliderView(context: Context) : FrameLayout(context) {
    * A drag in progress is answered the way a drag coming to an end is, rather than
    * abandoned along with the touches that were driving it: JS is promised one complete
    * for every start, and a drag left hanging would keep the values JS pushes from
-   * reaching the thumbs - see [isSliding]. The listener of [slidingGestures] is
-   * restarted by this same change, and finds nothing left for it to answer.
-   *
-   * The values themselves are no part of this, so their setters keep taking them while
-   * the slider is switched off - it only stops showing where they put its thumbs.
+   * reaching the thumbs - see [isSliding].
    *
    * The views JS renders in place of the track, the thumbs and the step markers are
    * switched off along with the rest of the slider - see [applyDisabledLook].
@@ -513,13 +480,9 @@ class SliderView(context: Context) : FrameLayout(context) {
    *
    * The slider draws itself in Material 3's own disabled colours once it is switched off,
    * but a view JS renders is JS's own drawing, mounted over it, and nothing here reaches
-   * it as a state to draw itself by. So the whole of a switched-off slider goes faint
-   * together, the views JS gave included - over whatever JS drew into them, which is why
-   * one that dims itself for being switched off ends up dimmed twice over.
-   *
-   * Run over again whenever the children are handed out afresh: a container made or
-   * remounted once the slider is already switched off would otherwise stay as bright as
-   * the slider was before it was.
+   * it as a state to draw itself by. So the views JS gave are dimmed here instead - over
+   * whatever JS drew into them, which is why one that dims itself for being switched off
+   * ends up dimmed twice over.
    */
   private fun applyDisabledLook() {
     val alpha = if (disabledValue) DISABLED_CHILD_ALPHA else 1f
@@ -752,16 +715,15 @@ class SliderView(context: Context) : FrameLayout(context) {
     // JS has given it rather than against one edge.
     //
     // A vertical slider is composed as if it read left-to-right, whatever way the app
-    // reads. Material 3 mirrors its slider whenever the direction asks for it, and a
-    // vertical one here is that horizontal slider turned a quarter turn - so the mirror
+    // reads: Material 3 mirrors its slider whenever the direction asks for it, and a
+    // vertical one here is that horizontal slider turned a quarter turn, so the mirror
     // would land inside the turn and carry the minimum up to the top, where the maximum
-    // belongs. The turn is what takes the reading direction along the slider's own axis
-    // and puts the minimum at the bottom, so it is the only turn a vertical slider needs.
+    // belongs. The turn is what puts the minimum at the bottom, so it is the only turn
+    // a vertical slider needs.
     //
-    // Held to the whole composed slider, track and thumbs included: the step markers hang
-    // off the track as Material 3 lays it out, inside the same turn, so they have to be
-    // measured against the same direction the track was drawn by - see
-    // [stepMarkerLayoutDirection].
+    // Held to the whole composed slider: the step markers hang off the track inside the
+    // same turn, so they have to be measured against the direction it was drawn by -
+    // see [stepMarkerLayoutDirection].
     val compositionDirection = if (isVertical) LayoutDirection.Ltr else LocalLayoutDirection.current
 
     CompositionLocalProvider(LocalLayoutDirection provides compositionDirection) {
@@ -805,14 +767,12 @@ class SliderView(context: Context) : FrameLayout(context) {
 
           // Turning anticlockwise about its top left corner carries the slider
           // straight up out of the view, so it is placed one width further down to
-          // come back into place - filling a box with its two sides swapped.
+          // come back into place.
           //
-          // The rotation is applied here, on the slider inside the box, rather than
-          // on the box itself: touches are hit-tested against the bounds of every node
-          // on their way in, with each one's rotation undone. Rotating the box would
-          // leave the slider laid out off to the side of it, outside the bounds the
-          // touch is checked against, and all but a sliver at the very edge of the box
-          // would miss the slider altogether.
+          // The rotation is applied here, on the slider inside the box, rather than on
+          // the box itself: touches are hit-tested against the bounds of every node,
+          // with each one's rotation undone. Rotating the box would leave the slider
+          // laid out off to the side of it, outside those bounds.
           layout(placeable.height, placeable.width) {
             placeable.placeWithLayer(0, placeable.width) {
               rotationZ = -90f
@@ -934,8 +894,6 @@ class SliderView(context: Context) : FrameLayout(context) {
       enabled = !disabledValue,
       modifier =
         measured.alpha(0f).onGloballyPositioned { coordinates ->
-          // The slider is hosted across the whole of this view, so the root of its
-          // composition is this view's own coordinate space.
           val center =
             coordinates.localToRoot(
               Offset(coordinates.size.width / 2f, coordinates.size.height / 2f)
@@ -984,15 +942,12 @@ class SliderView(context: Context) : FrameLayout(context) {
         beginSliding()
 
         try {
-          // The gesture is over once the last finger comes off: a second finger
-          // landing on the other thumb of a ranged slider joins the drag already in
-          // progress rather than starting one of its own.
+          // The gesture is over once the last finger comes off: a second finger landing
+          // on the other thumb of a ranged slider joins the drag already in progress.
           do {
             val event = awaitPointerEvent(PointerEventPass.Initial)
           } while (event.changes.any { it.pressed })
         } finally {
-          // Also reached when the gesture is cancelled out from under us, which would
-          // otherwise leave the slider deaf to values pushed from JS.
           finishSliding()
         }
       }
@@ -1091,9 +1046,7 @@ class SliderView(context: Context) : FrameLayout(context) {
    *
    * Material 3 tints the track itself once `enabled` is given to [SliderDefaults.Track],
    * but the markers are dots drawn here, so their colours are looked up by hand - from
-   * the same colours, and asked for the same state. A switched-off slider is drawn in
-   * Material 3's own greys either way, whatever tints JS gave the track, so the markers
-   * and the track they hang under go faint together.
+   * the same colours, and asked for the same state.
    */
   private fun stepMarkerColors(colors: SliderColors): Pair<Color, Color> =
     if (disabledValue) {
@@ -1151,10 +1104,6 @@ class SliderView(context: Context) : FrameLayout(context) {
    * Draws only the stretch of the track between the two given fractions of it,
    * counted from the end its minimum value is at - which is the right-hand one in a
    * right-to-left layout, the way Material 3 lays the track out too.
-   *
-   * The track spans the distance between the centres of the two thumbs at either
-   * end of the range, so a fraction of its width is exactly where a thumb at that
-   * fraction of the range is centred.
    */
   private fun Modifier.clipAlongTrack(from: Float, to: Float): Modifier = drawWithContent {
     val (left, right) =

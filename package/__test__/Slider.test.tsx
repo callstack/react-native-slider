@@ -10,7 +10,6 @@ const StepMarker = ({index, value, marked}: StepsProps) => (
   <Text>{`marker ${index}: ${value}${marked ? " marked" : ""}`}</Text>
 );
 
-/** The three custom elements, each saying out loud whether it was told off. */
 const TrackThatReports = ({disabled}: TrackProps) => (
   <Text>{`track${disabled ? " disabled" : ""}`}</Text>
 );
@@ -589,14 +588,9 @@ describe("Slider", () => {
     });
   });
 
-  // The reading direction is handled entirely on the native side, which takes it from
-  // React Native's own layout of the subtree rather than from a prop of its own. What JS
-  // has to keep holding true is the other half of that arrangement: that the direction
-  // reaches the native component at all, and that nothing JS sends is worth mirroring on
-  // the way down. A value reversed here would be reversed a second time by the native
-  // side, and would land the thumb back where it started.
+  // The direction is applied entirely on the native side. A value reversed here
+  // would be reversed a second time there, and land back where it started.
   describe("Reading direction", () => {
-    /** Everything a slider tells the native side about where its thumbs stand. */
     const VALUE_PROPS = [
       "minimumValue",
       "maximumValue",

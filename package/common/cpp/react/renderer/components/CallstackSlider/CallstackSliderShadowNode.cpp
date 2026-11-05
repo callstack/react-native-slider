@@ -36,9 +36,6 @@ namespace facebook {
             auto children = std::make_shared<std::vector<std::shared_ptr<const ShadowNode>>>();
             children->reserve(getChildren().size());
 
-            // The children come in a fixed order - the track, the thumbs, and
-            // then the step markers - and the props say how many of the first
-            // two there are.
             const auto trackCount = props.customTrack ? 1 : 0;
             const auto thumbCount = props.customThumb ? (props.ranged ? 2 : 1) : 0;
             const auto vertical = props.orientation == CallstackSliderOrientation::Vertical;

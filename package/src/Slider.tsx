@@ -11,9 +11,8 @@ type SliderValueChangeEvent = NativeSyntheticEvent<
 >;
 
 /**
- * Unwraps the value out of a native event, for a handler that only cares about
- * the value. A slider with no handler for an event must not pass one down
- * either, so that the native side can leave the event unsent.
+ * A slider with no handler for an event must not pass one down, so that the
+ * native side can leave the event unsent.
  */
 const valueHandler = (onChange?: (value: number) => void) =>
   onChange

@@ -85,19 +85,15 @@ const RCTSliderWebComponent = React.forwardRef(
       val: new Animated.Value(value),
       min: new Animated.Value(minimumValue),
       max: new Animated.Value(maximumValue),
-      // make sure we never divide by 0
       diff: new Animated.Value(maximumValue - minimumValue || 1),
     }).current;
 
-    // update minimumValue & maximumValue animations
     React.useEffect(() => {
       animationValues.min.setValue(minimumValue);
       animationValues.max.setValue(maximumValue);
-      // make sure we never divide by 0
       animationValues.diff.setValue(maximumValue - minimumValue || 1);
     }, [animationValues, minimumValue, maximumValue]);
 
-    // compute animated slider position based on animated value
     const minPercent = React.useRef(
       Animated.multiply(
         new Animated.Value(100),
@@ -133,17 +129,14 @@ const RCTSliderWebComponent = React.forwardRef(
       },
       [onSliderSlidingComplete],
     );
-    // Add a ref to track user interaction
     const isUserInteracting = React.useRef(false);
     const updateValue = useCallback(
       (newValue: number) => {
-        // Ensure that the value is correctly rounded
         const hardRounded =
           decimalPrecision.current < 20
             ? Number.parseFloat(newValue.toFixed(decimalPrecision.current))
             : newValue;
 
-        // Ensure that the new value is still between the bounds
         const withinBounds = Math.max(
           minimumValue,
           Math.min(hardRounded, maximumValue),
@@ -161,11 +154,8 @@ const RCTSliderWebComponent = React.forwardRef(
     );
 
     React.useLayoutEffect(() => {
-      // we have to do this check because `initialValue` gets default to `0` by
-      // Slider. If we don't this will get called every time `value` changes
-      // as `updateValue` is mutated when value changes. The result of not
-      // checking this is that the value constantly gets reset to `0` in
-      // contexts where `value` is not managed externally.
+      // Without this the effect re-runs on every `value` change, since
+      // `updateValue` is rebuilt with it, resetting an unmanaged value to `0`.
       if (initialValue !== lastInitialValue.current) {
         lastInitialValue.current = initialValue;
         const newValue = updateValue(initialValue);
@@ -354,8 +344,7 @@ const RCTSliderWebComponent = React.forwardRef(
         accessibilityRole={"adjustable"}
         style={containerStyle}
         {...others}
-        // NOTE: gesture responders should all fall _after_ the {...others}
-        // spread operator, or they may not work appropriately.
+        // Gesture responders have to fall after the {...others} spread.
         onStartShouldSetResponder={() => !disabled}
         onMoveShouldSetResponder={() => !disabled}
         onResponderGrant={() => onSlidingStart(value)}
@@ -376,7 +365,7 @@ const RCTSliderWebComponent = React.forwardRef(
   },
 );
 
-// We should round number with the same precision as the min, max or step values if provided
+// Rounds with the same precision as the min, max or step values, if provided.
 function calculatePrecision(
   minimumValue: number,
   maximumValue: number,
@@ -385,7 +374,6 @@ function calculatePrecision(
   if (!step) {
     return Infinity;
   } else {
-    // Calculate the number of decimals we can encounter in the results
     const decimals = [minimumValue, maximumValue, step].map(
       (value) => ((value + "").split(".").pop() || "").length,
     );

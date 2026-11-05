@@ -138,8 +138,7 @@ namespace facebook {
 #pragma mark - LayoutableShadowNode
 
             /*
-             * Implemented in `ios/CallstackSliderShadowNode.mm` - the answer comes from
-             * SwiftUI, which C++ cannot ask on its own.
+             * The answer comes from SwiftUI, which C++ cannot ask on its own.
              */
             Size measureContent(
                     const LayoutContext &layoutContext,

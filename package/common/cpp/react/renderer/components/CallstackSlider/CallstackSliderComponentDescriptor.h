@@ -18,12 +18,9 @@ namespace facebook {
             void adopt(ShadowNode &shadowNode) const override {
                 ConcreteComponentDescriptor::adopt(shadowNode);
 
-
                 auto &sliderShadowNode =
                         static_cast<CallstackSliderShadowNode &>(shadowNode);
 
-                // `CallstackSliderShadowNode` uses `CallstackSliderMeasurementsManager` to provide measurements to Yoga.
-                // It is a measured leaf by its own traits. see `CallstackSliderShadowNode::BaseTraits`.
                 sliderShadowNode.setSliderMeasurementsManager(
                         measurementsManager_);
             }

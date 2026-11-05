@@ -143,11 +143,9 @@ using namespace facebook::react;
 #pragma mark - RCTComponentViewProtocol
 
 // The reading direction comes from the layout metrics rather than from a prop: React
-// Native resolves it for the subtree the slider sits in - the app's own language and any
-// `direction` style partway down the tree - and hands the answer to every component view
-// it lays out. The base implementation turns it into `semanticContentAttribute` on this
-// view; the slider's own drawing is a hosted SwiftUI view, which reads nothing from that,
-// so the direction is handed to it directly as well.
+// Native resolves it for the subtree and hands the answer to every component view it lays
+// out. The base implementation turns it into `semanticContentAttribute`, which a hosted
+// SwiftUI view reads nothing from, so it is handed to the slider directly as well.
 - (void)updateLayoutMetrics:(const LayoutMetrics &)layoutMetrics
            oldLayoutMetrics:(const LayoutMetrics &)oldLayoutMetrics
 {
@@ -168,10 +166,8 @@ using namespace facebook::react;
     _sliderView.maximumValue = newViewProps.maximumValue;
   }
   // Applied ahead of the values, as it is in `applySliderProps` and in the spec the
-  // Android delegate is generated from. Switching off ends the drag a slider believes
-  // it owns, and a value it still believes it owns is one it keeps off the thumbs - so
-  // a value applied first would be swallowed by that very rule, on a commit that both
-  // switches the slider off and moves it.
+  // Android delegate is generated from: switching off ends the drag a slider believes it
+  // owns, so a value applied first would be kept off the thumbs by that very rule.
   if (oldViewProps.disabled != newViewProps.disabled) {
     _sliderView.disabled = newViewProps.disabled;
   }
