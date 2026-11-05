@@ -1221,6 +1221,8 @@ private class ChildContainer(context: Context) : ViewGroup(context) {
   }
 
   override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) = Unit
+
+  override fun hasOverlappingRendering(): Boolean = false
 }
 
 /** A colour coming from JS, where `null` means JS gave none. */
