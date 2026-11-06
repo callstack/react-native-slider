@@ -84,5 +84,8 @@
         "CallstackSlider": "SliderComponentView"
       }
     }
+  },
+  "swiftpmConfig": {
+    "name": "ReactNativeSlider"
   }
 }

@@ -1,0 +1,1 @@
+#import <React/RCTFabricComponentsPlugins.h>
