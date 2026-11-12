@@ -53,6 +53,16 @@ import Slider from '@callstack/slider';
 
 Check out the [example project](example) for more examples.
 
+### Compatibility
+
+To use this component you need to ensure you are using:
+
+| React Native version |                  for                  |
+| :------------------: | :-----------------------------------: |
+|       >=0.85.        |        @callstack/slider v6.0.0.      |
+|       >=0.76.        | @react-native-community/slider v5.0.0 |
+|       >=0.69.        | @react-native-community/slider v4.5.1 |
+
 ### Reach out on Discord
 
 If you have any questions, issues or any other topic that you need an advise in, reach out to us on our channel on Discord under this 👉 [link](https://discord.com/channels/426714625279524876/1339942689524678737).
