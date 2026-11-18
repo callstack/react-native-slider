@@ -392,6 +392,10 @@ using namespace facebook::react;
     CGFloat sliderWidth = slider.bounds.size.width;
     CGFloat percentage = point.x / sliderWidth;
     percentage = MIN(1.0, MAX(0.0, percentage));
+
+    if ([UIView userInterfaceLayoutDirectionForSemanticContentAttribute:slider.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft) {
+        percentage = 1.0 - percentage;
+    }
     
     CGFloat range = slider.maximumValue - slider.minimumValue;
     float newValue = slider.minimumValue + (percentage * range);
