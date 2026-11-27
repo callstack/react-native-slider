@@ -57,11 +57,11 @@ Check out the [example project](example) for more examples.
 
 To use this component you need to ensure you are using:
 
-| React Native version | for |
-| :------------------: | :--- |
-|       >=0.85.        | @callstack/slider v6.0.0. |
-|       >=0.76.        | @react-native-community/slider v5.x (New Architecture only) |
-|       >=0.69.        | @react-native-community/slider v4.5.1 |
+|       React Native version       |                  for                  |
+| :------------------------------: | :-----------------------------------: |
+|       >=0.85.                    |        @callstack/slider v6.0.0.      |
+|       >=0.76. (New Architecture) | @react-native-community/slider v5.0.0 |
+|       >=0.69.                    | @react-native-community/slider v4.5.1 |
 
 ### Reach out on Discord
 
