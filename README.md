@@ -63,11 +63,6 @@ To use this component you need to ensure you are using:
 |       >=0.76.        | @react-native-community/slider v5.x (New Architecture only) |
 |       >=0.69.        | @react-native-community/slider v4.5.1 |
 
-> [!IMPORTANT]
-> `@react-native-community/slider` v5.x supports the New Architecture (Fabric) only.
-> If your app still uses the legacy architecture (Paper), use `@react-native-community/slider@4.x`.
-> See the [v5.0.0 release notes](https://github.com/callstack/react-native-slider/releases/tag/v5.0.0).
-
 ### Reach out on Discord
 
 If you have any questions, issues or any other topic that you need an advise in, reach out to us on our channel on Discord under this 👉 [link](https://discord.com/channels/426714625279524876/1339942689524678737).
